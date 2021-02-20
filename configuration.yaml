@@ -1,0 +1,116 @@
+# Configure a default setup of Home Assistant (frontend, api, etc)
+default_config:
+
+homeassistant:
+  customize: !include customize.yaml
+  auth_providers:
+  - type: homeassistant
+  - type: trusted_networks
+    trusted_networks:
+      - 192.168.1.0/24
+    trusted_users:
+      192.168.1.174: !secret user1
+      192.168.1.151: !secret user1
+      192.168.1.0/24: !secret user2 
+    allow_bypass_login: true
+
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 127.0.0.1
+    - 172.16.0.0/12
+
+history: !include history.yaml
+frontend: !include themes.yaml
+group: !include groups.yaml
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+alexa: !include alexa.yaml
+camera: !include camera.yaml
+switch: !include switch.yaml
+light: !include light.yaml
+wake_on_lan:
+
+hacs:
+  token: !secret github
+
+logbook:
+  exclude:
+    domains:
+      - input_number
+      - binary_sensor
+      - input_boolean
+
+system_log:
+  fire_event: true
+
+spotify:
+  client_id: !secret spotify_id
+  client_secret: !secret spotify_secret
+      
+#weather:
+#  - platform: darksky
+#    api_key: !secret darksky_api
+
+binary_sensor:
+  - platform: dlink_hnap
+    name: Bedroom Motion Sensor
+    host: 192.168.1.183
+    type: motion
+    password: !secret motion_sensor_pin
+  - platform: dlink_hnap
+    name: Bedroom Motion Sensor 2
+    host: 192.168.1.184
+    type: motion
+    password: !secret motion_sensor_2_pin
+  - platform: wyzesense
+    device: auto
+
+coinbase:
+  api_key: !secret coinbase_api
+  api_secret: !secret coinbase_secret
+  account_balance_currencies:
+    - BTC
+  exchange_rate_currencies:
+    - BTC
+
+sensor:
+#  - platform: steam_online
+#    api_key: !secret steamapi
+#    accounts:
+#      - !secret steam
+#      - !secret steam3
+ # - platform: broadlink
+ #   host: 192.168.1.193
+ #   mac: !secret rm4_mac
+ #   type: rm4_mini
+ #   monitored_conditions:
+ #     - temperature
+ #     - humidity
+ # - platform: rest
+ #   resource: "https://maioranihome.duckdns.org/hassio/addon/44c60309_ringlivestream/info"
+ #   headers:
+ #     Authorization: !secret ring_llat
+ #     Content-Type: application/json
+ #   name: ring_addon_state
+ #   value_template: "{{value_json['data']['state']}}" 
+  - platform: template
+    sensors:
+      coinbasebalance:
+        friendly_name: "Coinbase Balance"
+        value_template: "{{ state_attr('sensor.coinbase_btc_wallet', 'Balance in native currency') }}"
+#  - platform: scrape
+#    resource: http://192.168.1.1/cgi-bin/diag.ha
+#    name: Router Download
+#    select: '#content-sub > div.section-content > form > div.table-responsive > table > tbody > tr:nth-child(1) > td:nth-child(2)'
+#    index: 0
+#    unit_of_measurement: Mbit/s
+#    value_template: '{{value[:-3]|int}}'
+#  - platform: scrape
+#    resource: http://192.168.1.1/cgi-bin/diag.ha
+#    name: Router Upload
+#    select: '#content-sub > div.section-content > form > div.table-responsive > table > tbody > tr:nth-child(1) > td:nth-child(4)'
+#    index: 0
+#    unit_of_measurement: Mbit/s
+#    value_template: '{{value[:-3]|int}}'

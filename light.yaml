@@ -1,0 +1,29 @@
+- platform: group
+  name: Bedroom Lights
+  entities:
+    - light.bed_lights
+    - light.smart_bulb_1
+    - light.smart_bulb_2
+    - light.smart_bulb_3
+    - light.desk_lights
+    - light.closet_lights
+    - light.rgb_light_switch
+- platform: group
+  name: LED Strips
+  entities:
+    - light.bed_lights
+    - light.desk_lights
+    - light.closet_lights
+- platform: group
+  name: Fan Lights
+  entities:
+    - light.smart_bulb_1
+    - light.smart_bulb_2
+    - light.smart_bulb_3
+- platform: mqtt
+  name: "Chroma"
+  brightness_scale: 255
+  state_topic: "MQTChroma/status"
+  command_topic: "MQTChroma/status"
+  rgb_state_topic: "MQTChroma/RGB"
+  rgb_command_topic: "MQTChroma/RGB"

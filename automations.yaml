@@ -1,0 +1,24 @@
+- id: '1546210609741'
+  alias: Morning Automation
+  trigger:
+  - at: '8:45'
+    platform: time
+  condition: []
+  action:
+  - data: {}
+    service: script.white
+  - data: {}
+    entity_id: input_boolean.awake
+    service: input_boolean.turn_on
+  initial_state: false
+  mode: single
+- id: 43a25b65afed4a4680f5ec81172f11e8
+  alias: Set iOS Theme At Startup
+  trigger:
+  - event: start
+    platform: homeassistant
+  action:
+  - data:
+      name: ios-dark-mode
+    service: frontend.set_theme
+  initial_state: true

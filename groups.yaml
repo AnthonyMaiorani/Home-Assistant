@@ -1,0 +1,22 @@
+bedroom_motion:
+  name: Bedroom Motion
+  entities:
+    - binary_sensor.bedroom_motion_sensor
+    - binary_sensor.bedroom_motion_sensor_2
+    - binary_sensor.bedroom_door
+#elis_room:
+#  name: Eli's Room
+#  entities: 
+#    - scene.nkvzbhtwlafbs7pk
+#    - scene.zxnasbcnyruzxrqv
+room:
+  name: Anthony's Room
+  entities: 
+    - script.stuff_on
+    - script.stuff_off
+    - script.white
+    - script.fan_off
+    - script.color_loop
+    - script.1576649794372
+    - script.1590389690297
+    - script.1574728463699

@@ -1,0 +1,151 @@
+stuff_on:
+  sequence:
+  - data: {}
+    entity_id: script.white, switch.vizio_tv, switch.windows
+    service: homeassistant.turn_on
+  - data:
+      mac: 2C:F0:5D:92:88:1F
+    service: wake_on_lan.send_magic_packet
+  - data:
+      option: Home
+    entity_id: input_select.anthony
+    service: input_select.select_option
+  alias: Morning
+  mode: single
+stuff_off:
+  sequence:
+  - data: {}
+    entity_id: switch.vizio_tv, switch.windows, switch.light_switch, switch.clock
+    service: homeassistant.turn_off
+  alias: Night
+  mode: single
+fan_off:
+  alias: Lights Off
+  sequence:
+  - data: {}
+    entity_id: input_boolean.automating, script.1591907627081, switch.light_switch
+    service: homeassistant.turn_on
+  - data: {}
+    entity_id: light.fan_lights
+    service: light.turn_off
+  mode: single
+color_loop:
+  alias: Color Loop
+  sequence:
+  - entity_id: input_boolean.automating, input_boolean.lightson, switch.clock, switch.light_switch
+    service: homeassistant.turn_on
+  - data:
+      brightness: 255
+      effect: Color Loop
+      white_value: 0
+    entity_id: light.bedroom_lights
+    service: light.turn_on
+  mode: single
+white:
+  alias: White
+  sequence:
+  - data:
+      brightness: 255
+      effect: None
+      rgb_color:
+      - 255
+      - 126
+      - 0
+      white_value: 255
+    entity_id: light.fan_lights
+    service: light.turn_on
+  - data: {}
+    entity_id: input_boolean.lightson, switch.clock, script.1591907627081, switch.light_switch
+    service: homeassistant.turn_on
+  mode: single
+'1574728463699':
+  alias: Music
+  sequence:
+  - data: {}
+    entity_id: input_boolean.automating, switch.clock, switch.light_switch
+    service: homeassistant.turn_on
+  - data:
+      effect: Music
+      white_value: 0
+    entity_id: light.bedroom_lights
+    service: light.turn_on
+  mode: single
+'1576649794372':
+  alias: Bed
+  sequence:
+  - data: {}
+    entity_id: input_boolean.automating, script.fan_off, switch.vizio_tv, switch.windows,
+      switch.clock
+    service: homeassistant.turn_on
+  - data:
+      mac: 2C:F0:5D:92:88:1F
+    service: wake_on_lan.send_magic_packet
+  mode: single
+'1590389690297':
+  alias: Toggle AC
+  sequence:
+  - data:
+      command: power
+      device: ac
+    entity_id: remote.bedroom_rm4_remote
+    service: remote.send_command
+  mode: single
+  icon: mdi:air-conditioner
+'1591567135401':
+  alias: Fan Speed
+  sequence:
+  - data:
+      command: fan_up
+      device: ac
+    entity_id: remote.bedroom_rm4_remote
+    service: remote.send_command
+  mode: single
+  icon: mdi:fan-chevron-up
+'1591907627081':
+  alias: LED Strips
+  sequence:
+  - data:
+      brightness: 255
+      effect: Color Loop
+    entity_id: light.closet_lights, light.bed_lights, light.desk_lights, light.rgb_light_switch
+    service: light.turn_on
+ac_mode:
+  alias: AC Mode
+  sequence:
+  - service: remote.send_command
+    data:
+      command: mode
+      device: ac
+    entity_id: remote.bedroom_rm4_remote
+  mode: single
+  icon: mdi:hvac
+fan_speed_down:
+  alias: Fan Speed Down
+  sequence:
+  - data:
+      command: fan_down
+      device: ac
+    entity_id: remote.bedroom_rm4_remote
+    service: remote.send_command
+  mode: single
+  icon: mdi:fan-chevron-down
+temp_up:
+  alias: Increase Temperature
+  sequence:
+  - data:
+      command: temp_up
+      device: ac
+    entity_id: remote.bedroom_rm4_remote
+    service: remote.send_command
+  mode: single
+  icon: mdi:thermometer-plus
+temp_down:
+  alias: Decrease Temperature
+  sequence:
+  - data:
+      command: temp_down
+      device: ac
+    entity_id: remote.bedroom_rm4_remote
+    service: remote.send_command
+  mode: single
+  icon: mdi:thermometer-minus
