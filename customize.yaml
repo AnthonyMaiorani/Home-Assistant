@@ -1,33 +1,18 @@
-switch.03200121dc4f221a5232_5:
-  friendly_name: Echo Dot
 script.fan_off:
   icon: mdi:ceiling-light
-switch.02200506600194945f42:
-  icon: mdi:clock
 switch.vizio:
   friendly_name: Vizio TV
   icon: mdi:television
 switch.windows:
   icon: mdi:microsoft-windows
-sensor.speedtest_download:
-  icon: mdi:arrow-down-bold
-sensor.speedtest_upload:
-  icon: mdi:arrow-up-bold
 switch.morning_automations:
   icon: mdi:home-automation
 script.color_loop:
   icon: mdi:lightbulb-on
 script.white:
   icon: mdi:white-balance-sunny
-device_tracker.life360_anthony:
-  entity_picture: /local/anthony.png
-  friendly_name: Anthony
-device_tracker.life360_dana:
-  friendly_name: Dana
 script.1574728463699:
   icon: mdi:party-popper
-script.1575240386086:
-  icon: mdi:camera-retake
 script.1576649794372:
   icon: mdi:bed-empty
 script.stuff_off:
@@ -38,22 +23,12 @@ scene.iuuondmamth4iwq4:
   icon: mdi:fan-off
 switch.clock:
   icon: mdi:clock
-script.1590389690297: {}
 switch.light_switch:
   icon: mdi:light-switch
-light.0118715884f3eb25fbce:
-  icon: mdi:wardrobe
-light.002006125ccf7fb6d0b0:
-  icon: mdi:desk
 light.rgb_light_switch:
   icon: mdi:light-switch
-light.002006125ccf7fb6cc88:
-  icon: mdi:bed-queen
 light.bedroom_lights:
   icon: mdi:lightbulb-group
-script.1591567135401: {}
-light.closet_light:
-  icon: mdi:wardrobe
 light.bed_lights:
   icon: mdi:bed-queen
 light.desk_lights:
@@ -89,27 +64,8 @@ group.bedroom_motion:
 person.anthony:
   entity_picture: /local/anthony.png
   icon: /local/anthony.png
-sensor.broadlink_temperature:
-  friendly_name: Bedroom Temperature
-sensor.broadlink_humidity:
-  friendly_name: Bedroom Humidity
-  icon: mdi:water-percent
 binary_sensor.window:
   device_class: window
-sensor.router_download:
-  icon: mdi:arrow-down-bold
-sensor.router_upload:
-  icon: mdi:arrow-up-bold
-device_tracker.life360_eli:
-  entity_picture: /local/eli.png
-light.04460364cc50e3efafa0:
-  supported_features: 63
-light.74572610cc50e3f5833f:
-  supported_features: 63
-light.0446036468c63aec9f1d:
-  supported_features: 63
-light.0446036468c63aeca024:
-  supported_features: 63
 switch.vizio_tv:
   icon: mdi:television
 media_player.50_tcl_roku_tv:
