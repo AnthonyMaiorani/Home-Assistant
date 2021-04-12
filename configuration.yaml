@@ -32,8 +32,8 @@ switch: !include switch.yaml
 light: !include light.yaml
 wake_on_lan:
 
-hacs:
-  token: !secret github
+#hacs:
+#  token: !secret github
 
 logbook:
   exclude:
