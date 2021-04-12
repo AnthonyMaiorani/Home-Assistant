@@ -1,10 +1,14 @@
 stuff_on:
   sequence:
   - data: {}
-    entity_id: script.white, switch.vizio_tv, switch.windows
     service: homeassistant.turn_on
+    target:
+      entity_id:
+      - script.white
+      - switch.vizio_tv
+      - switch.windows
   - data:
-      mac: 2C:F0:5D:92:88:1F
+      mac: !secret pc
     service: wake_on_lan.send_magic_packet
   - data:
       option: Home
@@ -15,16 +19,26 @@ stuff_on:
 stuff_off:
   sequence:
   - data: {}
-    entity_id: switch.vizio_tv, switch.windows, switch.light_switch, switch.clock
     service: homeassistant.turn_off
+    target:
+      entity_id:
+      - switch.vizio_tv
+      - switch.windows
+      - switch.light_switch
+      - switch.clock
   alias: Night
   mode: single
 fan_off:
   alias: Lights Off
   sequence:
   - data: {}
-    entity_id: input_boolean.automating, script.1591907627081, switch.light_switch
     service: homeassistant.turn_on
+    target:
+      entity_id:
+      - input_boolean.automating
+      - script.1591907627081
+      - switch.light_switch
+      - switch.clock
   - data: {}
     entity_id: light.fan_lights
     service: light.turn_off
@@ -32,14 +46,21 @@ fan_off:
 color_loop:
   alias: Color Loop
   sequence:
-  - entity_id: input_boolean.automating, input_boolean.lightson, switch.clock, switch.light_switch
-    service: homeassistant.turn_on
+  - service: homeassistant.turn_on
+    data: {}
+    target:
+      entity_id:
+      - input_boolean.automating
+      - input_boolean.lightson
+      - switch.clock
+      - switch.light_switch
   - data:
       brightness: 255
       effect: Color Loop
       white_value: 0
-    entity_id: light.bedroom_lights
     service: light.turn_on
+    target:
+      entity_id: light.bedroom_lights
   mode: single
 white:
   alias: White
@@ -52,33 +73,49 @@ white:
       - 126
       - 0
       white_value: 255
-    entity_id: light.fan_lights
     service: light.turn_on
+    target:
+      entity_id: light.fan_lights
   - data: {}
-    entity_id: input_boolean.lightson, switch.clock, script.1591907627081, switch.light_switch
     service: homeassistant.turn_on
+    target:
+      entity_id:
+      - input_boolean.lightson
+      - switch.clock
+      - script.1591907627081
+      - switch.light_switch
   mode: single
 '1574728463699':
   alias: Music
   sequence:
   - data: {}
-    entity_id: input_boolean.automating, switch.clock, switch.light_switch
     service: homeassistant.turn_on
+    target:
+      entity_id:
+      - input_boolean.automating
+      - switch.clock
+      - switch.light_switch
   - data:
       effect: Music
       white_value: 0
-    entity_id: light.bedroom_lights
     service: light.turn_on
+    target:
+      entity_id: light.bedroom_lights
   mode: single
 '1576649794372':
   alias: Bed
   sequence:
   - data: {}
-    entity_id: input_boolean.automating, script.fan_off, switch.vizio_tv, switch.windows,
-      switch.clock
     service: homeassistant.turn_on
+    target:
+      entity_id:
+      - input_boolean.automating
+      - script.fan_off
+      - switch.vizio_tv
+      - switch.windows
+      - switch.clock
   - data:
-      mac: 2C:F0:5D:92:88:1F
+      mac: !secret pc
     service: wake_on_lan.send_magic_packet
   mode: single
 '1590389690297':
@@ -107,8 +144,14 @@ white:
   - data:
       brightness: 255
       effect: Color Loop
-    entity_id: light.closet_lights, light.bed_lights, light.desk_lights, light.rgb_light_switch
     service: light.turn_on
+    target:
+      entity_id:
+      - light.closet_lights
+      - light.bed_lights
+      - light.desk_lights
+      - light.rgb_light_switch
+  mode: single
 ac_mode:
   alias: AC Mode
   sequence:

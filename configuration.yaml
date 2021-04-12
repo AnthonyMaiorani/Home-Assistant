@@ -5,14 +5,14 @@ homeassistant:
   customize: !include customize.yaml
   auth_providers:
   - type: homeassistant
-  - type: trusted_networks
-    trusted_networks:
-      - 192.168.1.0/24
-    trusted_users:
-      192.168.1.174: !secret user1
-      192.168.1.151: !secret user1
-      192.168.1.0/24: !secret user2 
-    allow_bypass_login: true
+#  - type: trusted_networks
+#    trusted_networks:
+#      - 192.168.1.0/24
+#    trusted_users:
+#      192.168.1.174: !secret user1
+#      192.168.1.151: !secret user1
+#      192.168.1.0/24: !secret user2 
+#    allow_bypass_login: true
 
 http:
   use_x_forwarded_for: true
@@ -26,7 +26,7 @@ group: !include groups.yaml
 automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
-alexa: !include alexa.yaml
+#alexa: !include alexa.yaml
 camera: !include camera.yaml
 switch: !include switch.yaml
 light: !include light.yaml
@@ -52,6 +52,12 @@ spotify:
 #weather:
 #  - platform: darksky
 #    api_key: !secret darksky_api
+
+#media_player:
+  # Use the Python ADB implementation
+#  - platform: androidtv
+#    name: Fire TV Stick Lite
+#    host: 192.168.1.228
 
 binary_sensor:
   - platform: dlink_hnap
@@ -99,6 +105,7 @@ sensor:
     sensors:
       coinbasebalance:
         friendly_name: "Coinbase Balance"
+        unit_of_measurement: "USD"
         value_template: "{{ state_attr('sensor.coinbase_btc_wallet', 'Balance in native currency') }}"
 #  - platform: scrape
 #    resource: http://192.168.1.1/cgi-bin/diag.ha

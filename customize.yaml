@@ -112,3 +112,11 @@ light.0446036468c63aeca024:
   supported_features: 63
 switch.vizio_tv:
   icon: mdi:television
+media_player.50_tcl_roku_tv:
+  icon: mdi:youtube-tv
+remote.50_tcl_roku_tv:
+  icon: mdi:youtube-tv
+media_player.living_room_denon:
+  icon: mdi:audio-video
+media_player.living_room:
+  icon: mdi:youtube-tv

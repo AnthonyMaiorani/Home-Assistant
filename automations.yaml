@@ -22,3 +22,18 @@
       name: ios-dark-mode
     service: frontend.set_theme
   initial_state: true
+- id: '1617634628204'
+  alias: Automating
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: input_boolean.automating
+    to: 'on'
+  condition: []
+  action:
+  - wait_template: ''
+    timeout: '1.8'
+  - service: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.automating
+  mode: single
