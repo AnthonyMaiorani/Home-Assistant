@@ -14,6 +14,7 @@ homeassistant:
 #      192.168.1.0/24: !secret user2 
 #    allow_bypass_login: true
 
+# reduce login failure messages
 http:
   use_x_forwarded_for: true
   trusted_proxies:
@@ -32,9 +33,7 @@ switch: !include switch.yaml
 light: !include light.yaml
 wake_on_lan:
 
-#hacs:
-#  token: !secret github
-
+# prevent lag
 logbook:
   exclude:
     domains:
@@ -42,16 +41,13 @@ logbook:
       - binary_sensor
       - input_boolean
 
+# to track dlink errors
 system_log:
   fire_event: true
 
-spotify:
+spotify: # still required for ui integration
   client_id: !secret spotify_id
   client_secret: !secret spotify_secret
-      
-#weather:
-#  - platform: darksky
-#    api_key: !secret darksky_api
 
 #media_player:
   # Use the Python ADB implementation
@@ -87,13 +83,6 @@ sensor:
 #    accounts:
 #      - !secret steam
 #      - !secret steam3
- # - platform: broadlink
- #   host: 192.168.1.193
- #   mac: !secret rm4_mac
- #   type: rm4_mini
- #   monitored_conditions:
- #     - temperature
- #     - humidity
  # - platform: rest
  #   resource: "https://maioranihome.duckdns.org/hassio/addon/44c60309_ringlivestream/info"
  #   headers:
@@ -121,3 +110,15 @@ sensor:
 #    index: 0
 #    unit_of_measurement: Mbit/s
 #    value_template: '{{value[:-3]|int}}'
+
+#smartir:
+
+#climate:
+#  - platform: smartir
+#    name: Bedroom AC
+#    unique_id: bedroom_ac
+#    device_code: 2240
+#    controller_data: remote.bedroom_rm4_remote
+#    temperature_sensor: sensor.bedroom_rm4_temperature
+#    humidity_sensor: sensor.bedroom_rm4_humidity
+#    power_sensor: binary_sensor.ac_power

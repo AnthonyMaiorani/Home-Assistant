@@ -8,7 +8,7 @@ stuff_on:
       - switch.vizio_tv
       - switch.windows
   - data:
-      mac: !secret pc
+      mac: 2C:F0:5D:9D:87:CE
     service: wake_on_lan.send_magic_packet
   - data:
       option: Home
@@ -37,8 +37,8 @@ fan_off:
       entity_id:
       - input_boolean.automating
       - script.1591907627081
-      - switch.light_switch
       - switch.clock
+      - switch.light_switch
   - data: {}
     entity_id: light.fan_lights
     service: light.turn_off
@@ -115,7 +115,7 @@ white:
       - switch.windows
       - switch.clock
   - data:
-      mac: !secret pc
+      mac: 2C:F0:5D:9D:87:CE
     service: wake_on_lan.send_magic_packet
   mode: single
 '1590389690297':

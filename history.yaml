@@ -19,9 +19,6 @@ exclude:
     - switch.zone_4
     - switch.zone_5
     - switch.zone_1
-    - device_tracker.life360_eli
-    - device_tracker.soundbuds_slim
-    - alarm_control_panel.alexa_guard_96f86
     - sensor.epson_wf_2760_series
     - sensor.hacs
     - binary_sensor.bedroom_motion_sensor
@@ -29,8 +26,6 @@ exclude:
     - binary_sensor.wyzemotion
     - group.bedroom_motion
     - switch.bedroomtoggle
-    - switch.rachio_in_standby_mode
-    - switch.rachio_rain_delay
     - switch.light_switch_corner_light_blue
     - switch.light_switch_corner_light_green
     - switch.light_switch_corner_light_red
