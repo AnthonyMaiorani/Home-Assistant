@@ -7,6 +7,22 @@
         - service: script.stuff_on
       turn_off:
         - service: script.stuff_off
+    vizio_tv:
+      friendly_name: Bedroom TV
+#     value_template: '{{ states('sensor.tv_plug_wattage')|float > 10 }}'
+      turn_on:
+        - service: remote.send_command
+          data:
+            entity_id: remote.bedroom_rm4_remote
+            command: turn on
+            device: vizio
+      turn_off:
+        - service: remote.send_command
+          data:
+            entity_id: remote.bedroom_rm4_remote
+            command: turn off
+            device: vizio
+
 #    ring_live_stream:
 #      value_template: "{{ is_state('sensor.ring_addon_state', 'started') }}"
 #      turn_on:
@@ -17,12 +33,12 @@
 #        service: hassio.addon_stop
 #        data:
 #          addon: 44c60309_ringlivestream
-- platform: broadlink
-  mac: !secret rm4_mac
-  switches: 
-    - name: Vizio TV
-      command_on: 'JgBIAAABJpITEhMSEzYUEhITEhITEhMSEzYTNhQSEzYUNhM2FDYUNhMSEzYUEhM2ExITNhQSExITNhQREzYUEhM2ExMSNhQ2EwANBQAAAAAAAAAAAAAAAAAA'
-      command_off: 'JgAMAgQAAnoJAAJ7BgACfAgAAnsJAAJ6BwACfAcABP8GAAJ8BwACfAUACggFAAT/BwAFAAYAB4IFAAJ+BQACfgYAAn8EAAUBBgACfQUAAn4GAAUABgAFAAUAAn4GAAUABAACfwcAAnwFAAJ+BgACfQYAAn0GAAeDBQACfgYAAnwHAAJ8BwACfQUAAn4EAAeFBgACfQYAAn0FAAyLBgACfQcABP8GAAJ9BgACfQYAAn0EAAJ/BgACfAcAAnwGAAJ9BgACfQYAAn4GAAMZAAEmkxMTERMSNxMTEhMSExISEhMSNxM3ExITNhM3EzYUNhM3EzYUEhI3ExMSExI2ExMSExITEjYUEhI3EzcTEhM2EzcTAAk7BAACfQYAAn4EAAJ/BgAFAAYAAn4GAAUBBQAFAAYAAn0GAAJ+BQACfgUAAn4GAAUBBQACfgUAAn4GAAUABgAFAAYAAn4FAAJ9BwAE/wYAAn4GAAJ+BQAE/wUAAn4GAAJ9BwACfQUABQAHAAJ9BgACfQQAAn8GAAeDBgACfQcAAn0FAAJ+BgACfQYAAn0GAAJ9BQACfgYAAn4FAAKABAACfwYAB4MGAAJ+BQACfgYABQAHAAJ9BgAFAAYAAn0GAAJ9BQACfgcABP8HAAJ8BgAFAAYAAn4GAAT/BgAHgwYAAn0FAAUBBQACfwYAAn4EAAUCBAAFAgcAAnwGAA0FAAAAAAAAAAAAAA=='
+#-  platform: broadlink
+#  mac: !secret rm4_mac
+#  switches: 
+#    - name: Vizio TV
+#      command_on: 'JgBIAAABJpITEhMSEzYUEhITEhITEhMSEzYTNhQSEzYUNhM2FDYUNhMSEzYUEhM2ExITNhQSExITNhQREzYUEhM2ExMSNhQ2EwANBQAAAAAAAAAAAAAAAAAA'
+#      command_off: 'JgAMAgQAAnoJAAJ7BgACfAgAAnsJAAJ6BwACfAcABP8GAAJ8BwACfAUACggFAAT/BwAFAAYAB4IFAAJ+BQACfgYAAn8EAAUBBgACfQUAAn4GAAUABgAFAAUAAn4GAAUABAACfwcAAnwFAAJ+BgACfQYAAn0GAAeDBQACfgYAAnwHAAJ8BwACfQUAAn4EAAeFBgACfQYAAn0FAAyLBgACfQcABP8GAAJ9BgACfQYAAn0EAAJ/BgACfAcAAnwGAAJ9BgACfQYAAn4GAAMZAAEmkxMTERMSNxMTEhMSExISEhMSNxM3ExITNhM3EzYUNhM3EzYUEhI3ExMSExI2ExMSExITEjYUEhI3EzcTEhM2EzcTAAk7BAACfQYAAn4EAAJ/BgAFAAYAAn4GAAUBBQAFAAYAAn0GAAJ+BQACfgUAAn4GAAUBBQACfgUAAn4GAAUABgAFAAYAAn4FAAJ9BwAE/wYAAn4GAAJ+BQAE/wUAAn4GAAJ9BwACfQUABQAHAAJ9BgACfQQAAn8GAAeDBgACfQcAAn0FAAJ+BgACfQYAAn0GAAJ9BQACfgYAAn4FAAKABAACfwYAB4MGAAJ+BQACfgYABQAHAAJ9BgAFAAYAAn0GAAJ9BQACfgcABP8HAAJ8BgAFAAYAAn4GAAT/BgAHgwYAAn0FAAUBBQACfwYAAn4EAAUCBAAFAgcAAnwGAA0FAAAAAAAAAAAAAA=='
 - platform: broadlink
   mac: !secret broadlink_mac
   switches: 
@@ -35,6 +51,7 @@
       command_on: !secret windows_on
       command_off: !secret windows_off
       friendly_name: Windows
+#     value_template: '{{ states('sensor.monitor_plug_wattage')|float > 10 }}'
     bass:
       command_on: "curl -s -o nul 'http://192.168.1.249/SETUP/AUDIO/SUBWOOFERLEVEL/s_audio.asp' --data-raw 'setPureDirectOn=OFF&setSetupLock=OFF&radioSw=ON&listSWLevel=-4.0' "
       command_off: "curl -s -o nul 'http://192.168.1.249/SETUP/AUDIO/SUBWOOFERLEVEL/s_audio.asp' --data-raw 'setPureDirectOn=OFF&setSetupLock=OFF&radioSw=ON&listSWLevel=-12.0' "
