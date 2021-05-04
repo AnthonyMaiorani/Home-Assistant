@@ -118,16 +118,6 @@ white:
       mac: 2C:F0:5D:9D:87:CE
     service: wake_on_lan.send_magic_packet
   mode: single
-'1590389690297':
-  alias: Toggle AC
-  sequence:
-  - data:
-      command: power
-      device: ac
-    entity_id: remote.bedroom_rm4_remote
-    service: remote.send_command
-  mode: single
-  icon: mdi:air-conditioner
 '1591567135401':
   alias: Fan Speed
   sequence:

@@ -76,3 +76,5 @@ media_player.living_room_denon:
   icon: mdi:audio-video
 media_player.living_room:
   icon: mdi:youtube-tv
+switch.ac:
+  icon: mdi:air-conditioner

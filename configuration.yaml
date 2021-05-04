@@ -69,6 +69,10 @@ binary_sensor:
   - platform: wyzesense
     device: auto
 
+shell_command:
+  pc_on: !secret windows_on
+  pc_off: !secret windows_off
+
 coinbase:
   api_key: !secret coinbase_api
   api_secret: !secret coinbase_secret
