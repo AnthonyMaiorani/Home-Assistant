@@ -182,3 +182,13 @@ temp_down:
     service: remote.send_command
   mode: single
   icon: mdi:thermometer-minus
+'1620182520614':
+  alias: Toggle AC
+  sequence:
+  - service: remote.send_command
+    data:
+      entity_id: remote.bedroom_rm4_remote
+      device: ac
+      command: power
+  mode: single
+  icon: mdi:air-conditioner

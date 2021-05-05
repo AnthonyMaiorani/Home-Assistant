@@ -13,5 +13,5 @@ room: # used for ha menu
     - script.fan_off
     - script.color_loop
     - script.1576649794372
-    - switch.ac
+    - script.1620182520614
     - script.1574728463699
