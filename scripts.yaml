@@ -44,7 +44,7 @@ fan_off:
     service: light.turn_off
   mode: single
 color_loop:
-  alias: Color Loop
+  alias: Color
   sequence:
   - service: homeassistant.turn_on
     data: {}
