@@ -40,7 +40,6 @@ logbook:
       - input_number
       - binary_sensor
       - input_boolean
-      - group
 
 # to track dlink errors
 system_log:
