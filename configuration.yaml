@@ -49,11 +49,17 @@ spotify: # still required for ui integration
   client_id: !secret spotify_id
   client_secret: !secret spotify_secret
 
-#media_player:
-  # Use the Python ADB implementation
-#  - platform: androidtv
-#    name: Fire TV Stick Lite
-#    host: 192.168.1.228
+media_player:
+  - platform: androidtv
+    name: Bedroom Fire TV Stick
+    host: 192.168.1.228
+    apps:
+      "com.stealth.stealthiptvbox": "Stealth"
+  - platform: androidtv
+    name: Living Room Fire TV Stick
+    host: 192.168.1.233
+    apps:
+      "com.stealth.stealthiptvbox": "Stealth"
 
 binary_sensor:
   - platform: dlink_hnap

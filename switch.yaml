@@ -81,6 +81,6 @@
 - platform: command_line
   switches:
     bass:
-      command_on: "curl -s -o nul 'http://192.168.1.249/SETUP/AUDIO/SUBWOOFERLEVEL/s_audio.asp' --data-raw 'setPureDirectOn=OFF&setSetupLock=OFF&radioSw=ON&listSWLevel=-4.0' "
-      command_off: "curl -s -o nul 'http://192.168.1.249/SETUP/AUDIO/SUBWOOFERLEVEL/s_audio.asp' --data-raw 'setPureDirectOn=OFF&setSetupLock=OFF&radioSw=ON&listSWLevel=-12.0' "
+      command_on: "curl -s -o nul 'http://192.168.1.208/SETUP/AUDIO/SUBWOOFERLEVEL/s_audio.asp' --data-raw 'setPureDirectOn=OFF&setSetupLock=OFF&radioSw=ON&listSWLevel=-4.0' "
+      command_off: "curl -s -o nul 'http://192.168.1.208/SETUP/AUDIO/SUBWOOFERLEVEL/s_audio.asp' --data-raw 'setPureDirectOn=OFF&setSetupLock=OFF&radioSw=ON&listSWLevel=-12.0' "
       friendly_name: Living Room Bass
