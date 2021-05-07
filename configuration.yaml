@@ -3,8 +3,8 @@ default_config:
 
 homeassistant:
   customize: !include customize.yaml
-  auth_providers:
-  - type: homeassistant
+#  auth_providers:
+#  - type: homeassistant
 #  - type: trusted_networks
 #    trusted_networks:
 #      - 192.168.1.0/24
@@ -40,6 +40,7 @@ logbook:
       - input_number
       - binary_sensor
       - input_boolean
+      - group
 
 # to track dlink errors
 system_log:
@@ -79,15 +80,15 @@ shell_command:
   pc_on: !secret windows_on
   pc_off: !secret windows_off
 
-coinbase:
-  api_key: !secret coinbase_api
-  api_secret: !secret coinbase_secret
-  account_balance_currencies:
-    - BTC
-  exchange_rate_currencies:
-    - BTC
+#coinbase:
+#  api_key: !secret coinbase_api
+#  api_secret: !secret coinbase_secret
+#  account_balance_currencies:
+#    - BTC
+#  exchange_rate_currencies:
+#    - BTC
 
-sensor:
+#sensor:
 #  - platform: steam_online
 #    api_key: !secret steamapi
 #    accounts:
@@ -100,12 +101,12 @@ sensor:
  #     Content-Type: application/json
  #   name: ring_addon_state
  #   value_template: "{{value_json['data']['state']}}" 
-  - platform: template
-    sensors:
-      coinbasebalance:
-        friendly_name: "Coinbase Balance"
-        unit_of_measurement: "USD"
-        value_template: "{{ state_attr('sensor.coinbase_btc_wallet', 'Balance in native currency') }}"
+#  - platform: template
+#    sensors:
+#      coinbasebalance:
+#        friendly_name: "Coinbase Balance"
+#        unit_of_measurement: "USD"
+#        value_template: "{{ state_attr('sensor.coinbase_btc_wallet', 'Balance in native currency') }}"
 #  - platform: scrape
 #    resource: http://192.168.1.1/cgi-bin/diag.ha
 #    name: Router Download
