@@ -10,10 +10,3 @@
 - platform: mjpeg
   mjpeg_url: http://192.168.1.88:81/mjpg/garage/video.mjpg
   name: Garage
-#- platform: generic
-#  name: Ring Livestream
-#  stream_source: http://maioranihome.duckdns.org:3000/public/stream.m3u8
-#  still_image_url: http://maioranihome.duckdns.org:3000/public/stream.m3u8
-#- platform: ffmpeg
-#  name: Ring Livestream
-#  input: http://maioranihome.duckdns.org:3000/public/stream.m3u8

@@ -3,16 +3,6 @@ default_config:
 
 homeassistant:
   customize: !include customize.yaml
-#  auth_providers:
-#  - type: homeassistant
-#  - type: trusted_networks
-#    trusted_networks:
-#      - 192.168.1.0/24
-#    trusted_users:
-#      192.168.1.174: !secret user1
-#      192.168.1.151: !secret user1
-#      192.168.1.0/24: !secret user2 
-#    allow_bypass_login: true
 
 # reduce login failure messages
 http:
@@ -88,18 +78,6 @@ shell_command:
 #    - BTC
 
 #sensor:
-#  - platform: steam_online
-#    api_key: !secret steamapi
-#    accounts:
-#      - !secret steam
-#      - !secret steam3
- # - platform: rest
- #   resource: "https://maioranihome.duckdns.org/hassio/addon/44c60309_ringlivestream/info"
- #   headers:
- #     Authorization: !secret ring_llat
- #     Content-Type: application/json
- #   name: ring_addon_state
- #   value_template: "{{value_json['data']['state']}}" 
 #  - platform: template
 #    sensors:
 #      coinbasebalance:
@@ -120,15 +98,3 @@ shell_command:
 #    index: 0
 #    unit_of_measurement: Mbit/s
 #    value_template: '{{value[:-3]|int}}'
-
-#smartir:
-
-#climate:
-#  - platform: smartir
-#    name: Bedroom AC
-#    unique_id: bedroom_ac
-#    device_code: 2240
-#    controller_data: remote.bedroom_rm4_remote
-#    temperature_sensor: sensor.bedroom_rm4_temperature
-#    humidity_sensor: sensor.bedroom_rm4_humidity
-#    power_sensor: binary_sensor.ac_power
