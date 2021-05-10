@@ -51,7 +51,6 @@ color_loop:
     target:
       entity_id:
       - input_boolean.automating
-      - input_boolean.lightson
       - switch.clock
       - switch.light_switch
   - data:

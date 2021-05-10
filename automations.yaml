@@ -24,7 +24,7 @@
   initial_state: true
 - id: '1617634628204'
   alias: Automating
-  description: ''
+  description: Reset automating bool used for light switch
   trigger:
   - platform: state
     entity_id: input_boolean.automating
@@ -36,4 +36,111 @@
   - service: input_boolean.turn_off
     target:
       entity_id: input_boolean.automating
+  mode: single
+- id: '1620642299524'
+  alias: Motion Bypass
+  description: Turn lights on if bed motion sensing bypass is enabled
+  trigger:
+  - platform: state
+    entity_id: input_boolean.bedmotion
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: light.fan_lights
+    state: 'off'
+  action:
+  - service: script.white
+  mode: single
+- id: '1620642346363'
+  alias: Ensure Stuff Off
+  description: Turn off room at 7 AM
+  trigger:
+  - platform: time
+    at: '7:00'
+  condition: []
+  action:
+  - service: script.stuff_off
+  - service: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.awake
+  mode: single
+- id: '1620642580296'
+  alias: Bed Motion
+  description: If motion detected in bed under certain circumstances, turn off overhead
+    lights.
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.wyzemotion
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: light.fan_lights
+    state: 'on'
+  - condition: state
+    entity_id: binary_sensor.bedroom_door
+    state: 'off'
+  - condition: state
+    entity_id: input_boolean.bedmotion
+    state: 'off'
+  action:
+  - service: script.fan_off
+  mode: single
+- id: '1620643134568'
+  alias: Wyze Power
+  description: Control power to Bedroom Wyze camera based on home presence
+  trigger:
+  - platform: time_pattern
+    minutes: /1
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: person.anthony
+        state: home
+      sequence:
+      - condition: state
+        entity_id: switch.power_strip_outlet_2
+        state: 'on'
+      - service: switch.turn_off
+        target:
+          entity_id: switch.power_strip_outlet_2
+    default:
+    - condition: state
+      entity_id: switch.power_strip_outlet_2
+      state: 'off'
+    - service: switch.turn_on
+      target:
+        entity_id: switch.power_strip_outlet_2
+  mode: single
+- id: '1620643727969'
+  alias: Left Home
+  description: ''
+  trigger:
+  - platform: zone
+    entity_id: person.anthony
+    zone: zone.home
+    event: leave
+  condition: []
+  action:
+  - service: homeassistant.turn_on
+    target:
+      entity_id:
+      - script.stuff_off
+      - switch.power_strip_outlet_2
+      - input_boolean.awake
+  mode: single
+- id: '1620643762790'
+  alias: Arrive Home
+  description: ''
+  trigger:
+  - platform: zone
+    entity_id: person.anthony
+    zone: zone.home
+    event: enter
+  condition: []
+  action:
+  - service: switch.turn_off
+    target:
+      entity_id: switch.power_strip_outlet_2
   mode: single
