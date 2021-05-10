@@ -1,0 +1,156 @@
+esphome:
+  name: lightswitch
+  platform: ESP8266
+  board: esp01_1m
+
+wifi:
+  ssid: !secret ssid
+  password: !secret password
+  fast_connect: on
+  manual_ip:
+    static_ip: 192.168.1.161
+    gateway: !secret gateway
+    subnet: !secret subnet
+  ap:
+    ssid: "${name} Fallback Hotspot"
+    password: ""
+
+captive_portal:
+logger:
+api:
+ota:
+
+substitutions:
+  name: "Light Switch"
+
+sensor:
+  - platform: homeassistant
+    entity_id: input_number.colorloopstate
+    id: hassstate
+
+binary_sensor:
+  - platform: homeassistant
+    entity_id: input_boolean.automating
+    id: automating
+  - platform: gpio
+    pin:
+      number: GPIO13
+      mode: INPUT_PULLUP
+      inverted: True
+    id: lightswitch
+    on_multi_click:
+    - timing:
+        - ON for at most .3s
+        - OFF for at least .4s
+      then:
+        - switch.toggle: relay1
+    - timing:
+        - ON for at most .3s
+        - OFF for at most .3s
+        - ON for at most .3s
+        - OFF for at least .1s
+      then:
+      - homeassistant.service:
+          service: switch.toggle
+          data:
+            entity_id: switch.bedroomtoggle
+    - timing:
+        - ON for at least .4s
+      then:
+      - homeassistant.service:
+          service: script.white
+          
+light:
+  - platform: rgb
+    id: rgb_light_switch
+    name: "RGB ${name}"
+    red: output_red
+    green: output_green
+    blue: output_blue
+    restore_mode: RESTORE_DEFAULT_OFF
+    effects:
+      - random:
+          name: Music
+          transition_length: .1s
+          update_interval: .2s
+      - lambda:
+          name: Color Loop
+          lambda: |-
+            static float state = 0;
+            if (state != id(hassstate).state) {
+              state = id(hassstate).state;
+              auto call = id(rgb_light_switch).turn_on();
+              call.set_transition_length(3000);
+              if (state == 0) {
+                call.set_rgb(0.45, 0.98, 0.39);
+              } else if (state == 1) {
+                call.set_rgb(0.45, 0.98, 0.93);
+              } else if (state == 2) {
+                call.set_rgb(0.38, 0.15, 0.96);
+              } else if (state == 3) {
+                call.set_rgb(0.5, 0.17, 0.96);
+              } else {
+                call.set_rgb(0.92, 0.2, 0.27);
+              }
+              call.perform();
+            }
+
+switch:
+  - platform: gpio
+    name: "${name}"
+    pin: GPIO15
+    id: 'relay1'
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_on: 
+      then:
+        - delay: .1s
+        - if:
+            condition:
+              binary_sensor.is_off: automating
+            then:
+              - homeassistant.service:
+                  service: script.white
+        - light.turn_on: rgb_light_switch
+    on_turn_off: 
+      then:
+        - light.turn_off: rgb_light_switch
+        - homeassistant.service:
+            service: switch.turn_off
+            data:
+              entity_id: switch.clock
+        - homeassistant.service:
+            service: light.turn_off
+            data:
+              entity_id: light.bedroom_lights
+  - platform: gpio
+    name: "${name} Corner Light Red"
+    pin: GPIO0
+    internal: true
+    id: 'relay2'
+    inverted: yes
+    restore_mode: ALWAYS_ON
+  - platform: gpio
+    name: "${name} Corner Light Green"
+    pin: GPIO12
+    internal: true
+    id: 'relay3'
+    inverted: yes
+    restore_mode: ALWAYS_OFF
+  - platform: gpio
+    name: "${name} Corner Light Blue"
+    pin: GPIO2
+    internal: true
+    inverted: yes
+    id: 'relay4'
+    restore_mode: ALWAYS_ON
+
+output:
+  - platform: esp8266_pwm
+    id: output_green
+    pin: GPIO5
+  - platform: esp8266_pwm
+    id: output_red
+    pin: GPIO14
+  - platform: esp8266_pwm
+    id: output_blue
+    pin: GPIO4

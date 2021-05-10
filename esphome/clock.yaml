@@ -1,0 +1,41 @@
+esphome:
+  name: smartplug
+  platform: ESP8266
+  board: esp01_1m
+
+  wifi:
+  ssid: !secret ssid
+  password: !secret password
+  fast_connect: on
+  manual_ip:
+    static_ip: 192.168.1.34
+    gateway: !secret gateway
+    subnet: !secret subnet
+  ap:
+    ssid: "${name} Fallback Hotspot"
+    password: ""
+
+captive_portal:
+logger:
+api:
+ota:
+
+substitutions:
+  name: "Smart Plug"
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO13
+      mode: INPUT_PULLUP
+      inverted: True
+    id: button
+    on_release:
+      - switch.toggle: relay
+
+switch:
+  - platform: gpio
+    name: "${name}"
+    pin: GPIO12
+    id: relay
+    restore_mode: RESTORE_DEFAULT_ON

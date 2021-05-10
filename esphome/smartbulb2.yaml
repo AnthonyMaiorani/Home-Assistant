@@ -1,0 +1,141 @@
+esphome:
+  name: smartbulb2
+  platform: ESP8266
+  board: esp01_1m
+  includes:
+    - copychan3.h
+
+wifi:
+  ssid: !secret ssid
+  password: !secret password
+  fast_connect: on
+  manual_ip:
+    static_ip: 192.168.1.36
+    gateway: !secret gateway
+    subnet: !secret subnet
+  ap:
+    ssid: "${name} Fallback Hotspot"
+    password: ""
+
+captive_portal:
+logger:
+api:
+ota:
+
+substitutions:
+  name: "Smart Bulb 2"
+
+my9231:
+ data_pin: GPIO13  # GPIO13 for AiLight
+ clock_pin: GPIO15  # GPIO15 for AiLight
+ num_channels: 6
+ num_chips: 2 
+
+output:
+  - platform: my9231
+    id: output_blue
+    channel: 3
+    max_power: 0.85
+  - platform: my9231
+    id: output_red
+    channel: 5
+    max_power: 0.85
+  - platform: my9231
+    id: output_green
+    channel: 4
+    max_power: 0.85
+  - platform: my9231
+    id: output_cw0
+    channel: 0
+  - platform: my9231
+    id: output_cw1
+    channel: 1
+  - platform: my9231
+    id: output_cw2
+    channel: 2
+  - platform: custom
+    type: float
+    lambda: |-
+      auto *copy = new CopyOutput();
+      copy->channel_a = id(output_cw0);
+      copy->channel_b = id(output_cw1);
+      copy->channel_c = id(output_cw2);
+      return {copy}; 
+    outputs:
+    - id: cw
+
+sensor:
+  - platform: homeassistant
+    entity_id: input_number.colorloopstate
+    id: hassstate
+
+light:
+  - platform: rgbw
+    id: smartbulb2
+    name: "${name}"
+    default_transition_length: 1s
+    restore_mode: RESTORE_DEFAULT_ON #Start with light on after reboot/power-loss event, so that it works from a dumb lightswitch
+    red: output_red
+    green: output_green
+    blue: output_blue
+    white: cw
+    effects:
+      - strobe:
+          name: Music
+          colors:
+            - state: True
+              brightness: 100%
+              red: 0%
+              green: 0%
+              blue: 100%
+              white: 0%
+              duration: 100ms
+            - state: True
+              brightness: 100%
+              red: 0%
+              green: 100%
+              blue: 100%
+              white: 0%
+              duration: 100ms
+            - state: True
+              brightness: 100%
+              red: 100%
+              green: 0%
+              blue: 100%
+              white: 0%
+              duration: 100ms
+            - state: True
+              brightness: 100%
+              red: 0%
+              green: 100%
+              blue: 0%
+              white: 0%
+              duration: 100ms
+            - state: True
+              brightness: 100%
+              red: 100%
+              green: 0%
+              blue: 0%
+              white: 0%
+              duration: 100ms
+      - lambda:
+          name: Color Loop
+          lambda: |-
+            static float state = 0;
+            if (state != id(hassstate).state) {
+              state = id(hassstate).state;
+              auto call = id(smartbulb2).turn_on();
+              call.set_transition_length(3000);
+              if (state == 0) {
+                call.set_rgb(0.45, 0.98, 0.39);
+              } else if (state == 1) {
+                call.set_rgb(0.45, 0.98, 0.93);
+              } else if (state == 2) {
+                call.set_rgb(0.38, 0.15, 0.96);
+              } else if (state == 3) {
+                call.set_rgb(0.5, 0.17, 0.96);
+              } else {
+                call.set_rgb(0.92, 0.2, 0.27);
+              }
+              call.perform();
+            }

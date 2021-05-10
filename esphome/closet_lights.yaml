@@ -1,0 +1,74 @@
+esphome:
+  name: closet_lights
+  platform: ESP8266
+  board: esp01_1m
+  
+wifi:
+  ssid: !secret ssid
+  password: !secret password
+  fast_connect: on
+  manual_ip:
+    static_ip: 192.168.1.223
+    gateway: !secret gateway
+    subnet: !secret subnet
+  ap:
+    ssid: "${name} Fallback Hotspot"
+    password: ""
+
+captive_portal:
+logger:
+api:
+ota:
+
+substitutions:
+  name: "Closet Lights"
+
+sensor:
+  - platform: homeassistant
+    entity_id: input_number.colorloopstate
+    id: hassstate
+
+light:
+  - platform: rgb
+    id: closet_lights
+    name: "${name}"
+    red: output_red
+    green: output_green
+    blue: output_blue
+    restore_mode: RESTORE_DEFAULT_OFF
+    effects:
+      - random:
+          name: Music
+          transition_length: .1s
+          update_interval: .2s
+      - lambda:
+          name: Color Loop
+          lambda: |-
+            static float state = 0;
+            if (state != id(hassstate).state) {
+              state = id(hassstate).state;
+              auto call = id(closet_lights).turn_on();
+              call.set_transition_length(3000);
+              if (state == 0) {
+                call.set_rgb(0.45, 0.98, 0.39);
+              } else if (state == 1) {
+                call.set_rgb(0.45, 0.98, 0.93);
+              } else if (state == 2) {
+                call.set_rgb(0.38, 0.15, 0.96);
+              } else if (state == 3) {
+                call.set_rgb(0.5, 0.17, 0.96);
+              } else {
+                call.set_rgb(0.92, 0.2, 0.27);
+              }
+              call.perform();
+            }
+output:
+  - platform: esp8266_pwm
+    id: output_red
+    pin: GPIO5
+  - platform: esp8266_pwm
+    id: output_green
+    pin: GPIO14
+  - platform: esp8266_pwm
+    id: output_blue
+    pin: GPIO12
