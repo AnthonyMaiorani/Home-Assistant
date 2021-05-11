@@ -1,35 +1,16 @@
 smart_home:
   filter:
-    include_domains:
-      - switch
-      - light
-      - automation
-      - script
-      - cover
-    exclude_entities:
-      - switch.bedroomtoggle
-      - script.1590389690297
-      - switch.lr_vizio
-      - switch.power_strip_outlet_1
-      - switch.power_strip_outlet_2
-      - switch.power_strip_outlet_3
-      - switch.power_strip_outlet_4
-      - switch.power_strip_usbs
-      - switch.rachio_in_standby_mode
-      - switch.rachio_rain_delay
-      - switch.zone_1
-      - switch.zone_2
-      - switch.zone_3
-      - switch.zone_4
-      - switch.zone_5
-      - switch.light_switch_corner_light_red
-      - switch.light_switch_corner_light_green
-      - switch.light_switch_corner_light_blue
-      - switch.macmini
-      - light.smart_bulb_1
-      - light.smart_bulb_2
-      - light.smart_bulb_3
-      - automation.set_dark_theme_at_startup
-      - switch.bedroom_dot_do_not_disturb_switch
-      - switch.bedroom_dot_repeat_switch
-      - switch.bedroom_dot_shuffle_switch
+    include_entities:
+      - switch.windows
+      - script.stuff_on
+      - script.stuff_off
+      - script.white
+      - script.color_loop
+      - script.fan_off
+      - script.1574728463699
+      - switch.clock
+      - light.bedroom_lights
+      - light.fan_lights
+      - switch.ac
+      - cover.garage_door
+#     - media_player.living_room_denon this breaks alexa discovery

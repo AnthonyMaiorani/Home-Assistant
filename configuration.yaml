@@ -17,7 +17,7 @@ group: !include groups.yaml
 automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
-#alexa: !include alexa.yaml
+alexa: !include alexa.yaml
 camera: !include camera.yaml
 switch: !include switch.yaml
 light: !include light.yaml
@@ -42,24 +42,24 @@ spotify: # still required for ui integration
 media_player:
   - platform: androidtv
     name: Bedroom Fire TV Stick
-    host: 192.168.1.228
+    host: !secret bedroom_fire_tv
     apps:
       "com.stealth.stealthiptvbox": "Stealth"
   - platform: androidtv
     name: Living Room Fire TV Stick
-    host: 192.168.1.233
+    host: !secret living_room_fire_tv
     apps:
       "com.stealth.stealthiptvbox": "Stealth"
 
 binary_sensor:
   - platform: dlink_hnap
     name: Bedroom Motion Sensor
-    host: 192.168.1.183
+    host: !secret bedroom_motion_sensor
     type: motion
     password: !secret motion_sensor_pin
   - platform: dlink_hnap
     name: Bedroom Motion Sensor 2
-    host: 192.168.1.184
+    host: !secret bedroom_motion_sensor_2
     type: motion
     password: !secret motion_sensor_2_pin
   - platform: wyzesense
