@@ -5,7 +5,6 @@ stuff_on:
     target:
       entity_id:
       - script.white
-      - switch.vizio_tv
       - switch.windows
   - data:
       mac: 2C:F0:5D:9D:87:CE

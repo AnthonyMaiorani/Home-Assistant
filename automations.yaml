@@ -144,3 +144,27 @@
     target:
       entity_id: switch.power_strip_outlet_2
   mode: single
+- id: '1620710706685'
+  alias: Color Loop
+  description: Adjust color loop state
+  trigger:
+  - platform: time_pattern
+    seconds: /3
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_number.colorloopstate
+        state: '4.0'
+      sequence:
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.colorloopstate
+        data:
+          value: 0
+    default:
+    - service: input_number.increment
+      target:
+        entity_id: input_number.colorloopstate
+  mode: single

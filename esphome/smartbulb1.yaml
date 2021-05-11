@@ -35,15 +35,15 @@ output:
   - platform: my9231
     id: output_blue
     channel: 3
-    max_power: 0.85
+    max_power: 0.4
   - platform: my9231
     id: output_red
     channel: 5
-    max_power: 0.85
+    max_power: 0.4
   - platform: my9231
     id: output_green
     channel: 4
-    max_power: 0.85
+    max_power: 0.4
   - platform: my9231
     id: output_cw0
     channel: 0
