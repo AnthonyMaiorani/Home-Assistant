@@ -18,7 +18,7 @@ automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
 alexa: !include alexa.yaml
-camera: !include camera.yaml
+#camera: !include camera.yaml
 switch: !include switch.yaml
 light: !include light.yaml
 wake_on_lan:
@@ -30,6 +30,7 @@ logbook:
       - input_number
       - binary_sensor
       - input_boolean
+      - automation
 
 # to track dlink errors
 system_log:
