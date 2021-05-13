@@ -1,0 +1,12 @@
+- platform: mjpeg
+  mjpeg_url: http://elitedesk.local:81/mjpg/LR
+  name: Living Room
+- platform: mjpeg
+  mjpeg_url: http://elitedesk.local:81/mjpg/FP
+  name: Front Porch
+- platform: mjpeg
+  mjpeg_url: http://elitedesk.local:81/mjpg/BR
+  name: Bedroom
+- platform: mjpeg
+  mjpeg_url: http://elitedesk.local:81/mjpg/garage
+  name: Garage 
