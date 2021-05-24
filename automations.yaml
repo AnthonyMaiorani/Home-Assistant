@@ -121,23 +121,6 @@
       target:
         entity_id: switch.power_strip_outlet_2
   mode: single
-- id: '1620643727969'
-  alias: Left Home
-  description: ''
-  trigger:
-  - platform: zone
-    entity_id: person.anthony
-    zone: zone.home
-    event: leave
-  condition: []
-  action:
-  - service: homeassistant.turn_on
-    target:
-      entity_id:
-      - script.stuff_off
-      - switch.power_strip_outlet_2
-      - input_boolean.awake
-  mode: single
 - id: '1620710706685'
   alias: Color Loop
   description: Adjust color loop state
@@ -194,39 +177,15 @@
     for: 00:01:00
     from: 'off'
     to: 'on'
+  - platform: zone
+    entity_id: person.anthony
+    zone: zone.home
+    event: leave
   condition:
   - condition: template
     value_template: '{{states(''person.anthony'') != ''home''}}'
   action:
   - service: script.stuff_off
-  mode: single
-- id: '1621815815802'
-  alias: Taylor Left Home
-  description: ''
-  trigger:
-  - platform: zone
-    entity_id: person.taylor
-    zone: zone.taylor_s_home
-    event: leave
-  condition: []
-  action:
-  - service: homeassistant.turn_on
-    target:
-      entity_id: group.apartment
-  mode: single
-- id: '1621815867664'
-  alias: Taylor Arrive Home
-  description: ''
-  trigger:
-  - platform: zone
-    entity_id: person.taylor
-    zone: zone.taylor_s_home
-    event: enter
-  condition: []
-  action:
-  - service: homeassistant.turn_off
-    target:
-      entity_id: group.apartment
   mode: single
 - id: '1621816232606'
   alias: Taylor Wyze Power
