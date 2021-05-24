@@ -91,6 +91,14 @@
   trigger:
   - platform: time_pattern
     minutes: /1
+  - platform: zone
+    entity_id: person.anthony
+    zone: zone.home
+    event: enter
+  - platform: zone
+    entity_id: person.anthony
+    zone: zone.home
+    event: leave
   condition: []
   action:
   - choose:
@@ -130,20 +138,6 @@
       - switch.power_strip_outlet_2
       - input_boolean.awake
   mode: single
-- id: '1620643762790'
-  alias: Arrive Home
-  description: ''
-  trigger:
-  - platform: zone
-    entity_id: person.anthony
-    zone: zone.home
-    event: enter
-  condition: []
-  action:
-  - service: switch.turn_off
-    target:
-      entity_id: switch.power_strip_outlet_2
-  mode: single
 - id: '1620710706685'
   alias: Color Loop
   description: Adjust color loop state
@@ -167,4 +161,106 @@
     - service: input_number.increment
       target:
         entity_id: input_number.colorloopstate
+  mode: single
+- id: '1620906849721'
+  alias: Motion alert
+  description: ''
+  use_blueprint:
+    path: vorion/send-camera-snapshot-notification-on-motion.yaml
+    input:
+      notification_message: Movement was detected in bedroom
+      motion_sensor: group.bedroom_motion
+      camera: camera.bedroom
+      notify_device: 0429e9d5aa6e19cfa793f8db0a8586a6
+      is_ios: true
+      notification_title: Motion detected in bedroom.
+      delay: 1
+- id: '1621577255605'
+  alias: Keep Off
+  description: Keeps stuff off if not home
+  trigger:
+  - platform: state
+    entity_id: light.desk_lights
+    from: 'off'
+    to: 'on'
+    for: 00:05:00
+  - platform: state
+    entity_id: light.fan_lights
+    from: 'off'
+    to: 'on'
+    for: 00:05:00
+  - platform: state
+    entity_id: switch.windows
+    for: 00:01:00
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: template
+    value_template: '{{states(''person.anthony'') != ''home''}}'
+  action:
+  - service: script.stuff_off
+  mode: single
+- id: '1621815815802'
+  alias: Taylor Left Home
+  description: ''
+  trigger:
+  - platform: zone
+    entity_id: person.taylor
+    zone: zone.taylor_s_home
+    event: leave
+  condition: []
+  action:
+  - service: homeassistant.turn_on
+    target:
+      entity_id: group.apartment
+  mode: single
+- id: '1621815867664'
+  alias: Taylor Arrive Home
+  description: ''
+  trigger:
+  - platform: zone
+    entity_id: person.taylor
+    zone: zone.taylor_s_home
+    event: enter
+  condition: []
+  action:
+  - service: homeassistant.turn_off
+    target:
+      entity_id: group.apartment
+  mode: single
+- id: '1621816232606'
+  alias: Taylor Wyze Power
+  description: Control power to Apartment Wyze cameras based on home presence
+  trigger:
+  - platform: time_pattern
+    minutes: /1
+  - platform: zone
+    entity_id: person.taylor
+    zone: zone.taylor_s_home
+    event: enter
+  - platform: zone
+    entity_id: person.taylor
+    zone: zone.taylor_s_home
+    event: leave
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: person.anthony
+        state: Taylor's Home
+      sequence:
+      - condition: state
+        entity_id: group.apartment
+        state: 'on'
+      - service: homeassistant.turn_off
+        target:
+          entity_id: group.apartment
+    default:
+    - condition: state
+      entity_id: group.apartment
+      state: 'off'
+    - service: homeassistant.turn_on
+      target:
+        entity_id: group.apartment
   mode: single

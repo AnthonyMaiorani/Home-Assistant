@@ -15,3 +15,9 @@ room: # used for ha menu
     - script.1576649794372
     - script.1620182520614
     - script.1574728463699
+apartment:
+  name: Apartment Cameras
+  entities:
+    - switch.apartment_cam
+    - switch.bedroom_cam
+    - switch.kitchen_cam_2
