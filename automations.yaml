@@ -206,7 +206,7 @@
   - choose:
     - conditions:
       - condition: state
-        entity_id: person.anthony
+        entity_id: person.taylor
         state: Taylor's Home
       sequence:
       - condition: state

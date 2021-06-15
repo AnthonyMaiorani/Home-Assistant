@@ -13,4 +13,4 @@ smart_home:
       - light.fan_lights
       - switch.ac
       - cover.garage_door
-#     - media_player.living_room_denon this breaks alexa discovery
+      - media_player.living_room_denon

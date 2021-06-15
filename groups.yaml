@@ -3,7 +3,7 @@ bedroom_motion:
   entities:
     - binary_sensor.bedroom_motion_sensor
     - binary_sensor.bedroom_motion_sensor_2
-    - binary_sensor.bedroom_door
+    #- binary_sensor.bedroom_door
 room: # used for ha menu
   name: Anthony's Room
   entities: 
@@ -20,4 +20,11 @@ apartment:
   entities:
     - switch.apartment_cam
     - switch.bedroom_cam
-    - switch.kitchen_cam_2
+#    - switch.kitchen_cam
+#    - switch.litter_cam
+apartment_lights:
+  name: Taylor's Lights
+  entities:
+    - scene.o0u9ghkpeg4jka94
+    - scene.gvdg676o2yl1egnn
+    - scene.hdgpa2ibqav792wl
