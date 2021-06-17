@@ -23,7 +23,7 @@ switch: !include switch.yaml
 light: !include light.yaml
 wake_on_lan:
 
-# prevent lag
+# prevent lag and spam
 logbook:
   exclude:
     domains:
@@ -31,6 +31,8 @@ logbook:
       - binary_sensor
       - input_boolean
       - automation
+      - media_player
+      - group
 
 # to track dlink errors
 system_log:
@@ -44,11 +46,13 @@ media_player:
   - platform: androidtv
     name: Bedroom Fire TV Stick
     host: !secret bedroom_fire_tv
+    screencap: false
     apps:
       "com.stealth.stealthiptvbox": "Stealth"
   - platform: androidtv
     name: Living Room Fire TV Stick
     host: !secret living_room_fire_tv
+    screencap: false
     apps:
       "com.stealth.stealthiptvbox": "Stealth"
 
