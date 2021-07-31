@@ -13,4 +13,5 @@ smart_home:
       - light.fan_lights
       - switch.ac
       - cover.garage_door
+      - cover.bedroom_blinds
       - media_player.living_room_denon

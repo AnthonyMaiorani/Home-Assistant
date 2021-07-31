@@ -17,6 +17,9 @@ stuff_on:
   mode: single
 stuff_off:
   sequence:
+  - service: cover.close_cover
+    target:
+      entity_id: cover.bedroom_blinds
   - data: {}
     service: homeassistant.turn_off
     target:
@@ -118,6 +121,9 @@ white:
   - data:
       mac: 2C:F0:5D:9D:87:CE
     service: wake_on_lan.send_magic_packet
+  - service: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.bedmotion
   mode: single
 '1591567135401':
   alias: Fan Speed

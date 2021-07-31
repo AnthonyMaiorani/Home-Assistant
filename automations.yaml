@@ -146,7 +146,7 @@
         entity_id: input_number.colorloopstate
   mode: single
 - id: '1620906849721'
-  alias: Motion alert
+  alias: Motion Alert
   description: ''
   use_blueprint:
     path: vorion/send-camera-snapshot-notification-on-motion.yaml
@@ -186,6 +186,9 @@
     value_template: '{{states(''person.anthony'') != ''home''}}'
   action:
   - service: script.stuff_off
+  - service: cover.close_cover
+    target:
+      entity_id: cover.bedroom_blinds
   mode: single
 - id: '1621816232606'
   alias: Taylor Wyze Power
@@ -222,4 +225,154 @@
     - service: homeassistant.turn_on
       target:
         entity_id: group.apartment
+  mode: single
+- id: '1627401846713'
+  alias: Arrived home in bedroom
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.bedroom_door
+    to: 'on'
+    from: 'off'
+  condition:
+  - condition: state
+    entity_id: input_select.anthony
+    state: Just Arrived
+  action:
+  - service: script.stuff_on
+  - condition: sun
+    after: sunset
+  - service: cover.open_cover
+    target:
+      entity_id: cover.bedroom_blinds
+  mode: single
+- id: '1627443167507'
+  alias: Window Alert
+  description: Alert if Window Opened while Away
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.window
+    from: closed
+    to: open
+  condition:
+  - condition: template
+    value_template: '{{states(''person.anthony'') != ''home''}}'
+  action:
+  - service: notify.mobile_app_iphone
+    data:
+      message: Bedroom Window has been opened
+      title: Window Opened
+  mode: single
+- id: '1627443803522'
+  alias: AC Auto Off When Leaving
+  description: ''
+  trigger:
+  - platform: zone
+    entity_id: person.anthony
+    zone: zone.home
+    event: leave
+  condition:
+  - condition: state
+    entity_id: switch.ac
+    state: 'on'
+  action:
+  - service: script.1620182520614
+  mode: single
+- id: '1627447111302'
+  alias: Set Correct Location on Startup
+  description: ''
+  trigger:
+  - platform: homeassistant
+    event: start
+  condition:
+  - condition: zone
+    entity_id: person.anthony
+    zone: zone.home
+  action:
+  - service: input_select.select_option
+    target:
+      entity_id: input_select.anthony
+    data:
+      option: Home
+  mode: single
+- id: '1627448446635'
+  alias: Update Fyrtur State
+  description: ''
+  trigger:
+  - platform: time_pattern
+    seconds: /8
+  condition: []
+  action:
+  - service: homeassistant.update_entity
+    target:
+      entity_id: cover.bedroom_blinds
+  mode: single
+- id: '1627534142796'
+  alias: Auto Open Blinds Past Sunset if Home
+  description: ''
+  trigger:
+  - platform: sun
+    event: sunset
+  condition:
+  - condition: zone
+    entity_id: person.anthony
+    zone: zone.home
+  action:
+  - service: cover.open_cover
+    target:
+      entity_id: cover.bedroom_blinds
+  mode: single
+- id: '1627702427940'
+  alias: Dlink Error Count
+  description: ''
+  trigger:
+  - platform: event
+    event_type: system_log_event
+    event_data:
+      name: custom_components.dlink_hnap.binary_sensor
+  - platform: event
+    event_type: system_log_event
+    event_data:
+      name: custom_components.dlink_hnap.dlink
+  condition: []
+  action:
+  - service: input_number.increment
+    target:
+      entity_id: input_number.d_link_errors
+  mode: parallel
+  max: 10
+- id: '1627702938295'
+  alias: Dlink Reset
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: automation.dlink_error_count
+    to: '40'
+  condition: []
+  action:
+  - service: switch.turn_off
+    target:
+      entity_id:
+      - switch.d_link_plug
+      - switch.power_strip_outlet_4
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 0
+      milliseconds: 500
+  - service: switch.turn_on
+    target:
+      entity_id:
+      - switch.d_link_plug
+      - switch.power_strip_outlet_4
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 38
+      milliseconds: 0
+  - service: input_number.set_value
+    target:
+      entity_id: input_number.d_link_errors
+    data:
+      value: 0
   mode: single
