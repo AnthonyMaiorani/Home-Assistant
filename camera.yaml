@@ -7,9 +7,9 @@
   name: Front Porch
   still_image_url: !secret front_porch_camera_image
 - platform: mjpeg
-  mjpeg_url: !secret bedroom_camera
-  name: Bedroom
-  still_image_url: !secret bedroom_camera_image
+  mjpeg_url: !secret car_camera
+  name: Car
+  still_image_url: !secret car_camera_image
 - platform: mjpeg
   mjpeg_url: !secret garage_camera
   name: Garage 

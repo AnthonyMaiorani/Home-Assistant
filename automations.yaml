@@ -95,42 +95,6 @@
   action:
   - service: script.fan_off
   mode: single
-- id: '1620643134568'
-  alias: Wyze Power
-  description: Control power to Bedroom Wyze camera based on home presence
-  trigger:
-  - platform: time_pattern
-    minutes: /1
-  - platform: zone
-    entity_id: person.anthony
-    zone: zone.home
-    event: enter
-  - platform: zone
-    entity_id: person.anthony
-    zone: zone.home
-    event: leave
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: person.anthony
-        state: home
-      sequence:
-      - condition: state
-        entity_id: switch.power_strip_outlet_2
-        state: 'on'
-      - service: switch.turn_off
-        target:
-          entity_id: switch.power_strip_outlet_2
-    default:
-    - condition: state
-      entity_id: switch.power_strip_outlet_2
-      state: 'off'
-    - service: switch.turn_on
-      target:
-        entity_id: switch.power_strip_outlet_2
-  mode: single
 - id: '1620710706685'
   alias: Color Loop
   description: Adjust color loop state
@@ -155,19 +119,6 @@
       target:
         entity_id: input_number.colorloopstate
   mode: single
-- id: '1620906849721'
-  alias: Motion Alert
-  description: ''
-  use_blueprint:
-    path: vorion/send-camera-snapshot-notification-on-motion.yaml
-    input:
-      notification_message: Movement was detected in bedroom
-      motion_sensor: group.bedroom_motion
-      camera: camera.bedroom
-      notify_device: 0429e9d5aa6e19cfa793f8db0a8586a6
-      is_ios: true
-      notification_title: Motion detected in bedroom.
-      delay: 1
 - id: '1621577255605'
   alias: Left Home
   description: Turns bedroom off when leaving home, and ensures bedroom stays off
@@ -218,6 +169,8 @@
     entity_id: person.taylor
     zone: zone.taylor_s_home
     event: leave
+  - platform: homeassistant
+    event: start
   condition: []
   action:
   - choose:
@@ -277,13 +230,18 @@
         option: Home
   mode: single
 - id: '1627443167507'
-  alias: Window Alert
-  description: Alert if Window Opened while Away
+  alias: Bedroom Alerts
+  description: ''
   trigger:
   - platform: state
     entity_id: binary_sensor.window
     from: closed
     to: open
+    id: Window
+  - platform: state
+    entity_id: group.bedroom_motion
+    to: 'on'
+    id: Motion
   condition:
   - condition: template
     value_template: '{{states(''person.anthony'') != ''home''}}'
@@ -292,6 +250,24 @@
     data:
       message: Bedroom Window has been opened
       title: Window Opened
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: Window
+      sequence:
+      - service: notify.mobile_app_iphone
+        data:
+          message: Bedroom Window has been opened
+          title: Window Opened
+    - conditions:
+      - condition: trigger
+        id: Motion
+      sequence:
+      - service: notify.mobile_app_iphone
+        data:
+          message: Movement was detected in bedroom
+          title: Motion detected in bedroom
+    default: []
   mode: single
 - id: '1627448446635'
   alias: Update Fyrtur State
@@ -376,71 +352,70 @@
       value: 0
   mode: single
   max: 10
-- id: '1627726771287'
-  alias: Mark Anthony as Just Arrived
-  description: ''
-  trigger:
-  - platform: zone
-    entity_id: person.anthony
-    zone: zone.home
-    event: enter
-  condition: []
-  action:
-  - service: input_select.select_option
-    target:
-      entity_id: input_select.anthony
-    data:
-      option: Just Arrived
-  mode: parallel
-  max: 10
-- id: '1627727014507'
-  alias: Mark Anthony as Just Left
-  description: ''
-  trigger:
-  - platform: zone
-    entity_id: person.anthony
-    zone: zone.home
-    event: leave
-  condition: []
-  action:
-  - service: input_select.select_option
-    target:
-      entity_id: input_select.anthony
-    data:
-      option: Just Left
-  mode: parallel
-  max: 10
 - id: '1627778209718'
-  alias: Mark Anthony as Home
+  alias: Presence Detection
   description: ''
   trigger:
   - platform: state
     entity_id: input_select.anthony
     to: Just Arrived
     for: 00:10:00
-  condition: []
-  action:
-  - service: input_select.select_option
-    target:
-      entity_id: input_select.anthony
-    data:
-      option: Home
-  mode: single
-- id: '1627778293785'
-  alias: Mark Anthony as Away
-  description: ''
-  trigger:
+    id: Home
   - platform: state
     entity_id: input_select.anthony
+    id: Away
     to: Just Left
     for: 00:10:00
+  - platform: zone
+    entity_id: person.anthony
+    zone: zone.home
+    event: enter
+    id: Just Arrived
+  - platform: zone
+    entity_id: person.anthony
+    zone: zone.home
+    event: leave
+    id: Just Left
   condition: []
   action:
-  - service: input_select.select_option
-    target:
-      entity_id: input_select.anthony
-    data:
-      option: Away
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: Home
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.anthony
+        data:
+          option: Home
+    - conditions:
+      - condition: trigger
+        id: Away
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.anthony
+        data:
+          option: Away
+    - conditions:
+      - condition: trigger
+        id: Just Arrived
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.anthony
+        data:
+          option: Just Arrived
+    - conditions:
+      - condition: trigger
+        id: Just Left
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.anthony
+        data:
+          option: Just Left
+    default: []
   mode: single
 - id: '1627779396737'
   alias: Door Opened
@@ -513,6 +488,38 @@
       transition: 1
       rgb_color: 255,255,255
       brightness_pct: 45
+  - wait_for_trigger:
+    - platform: state
+      entity_id: group.bedroom_motion
+      to: 'off'
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 4
+      milliseconds: 0
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: group.bedroom_motion
+        state: 'off'
+      - condition: state
+        entity_id: light.desk_lights
+        state: 'off'
+      sequence:
+      - service: light.turn_off
+        target:
+          entity_id: light.bed_lights
+    - conditions:
+      - condition: state
+        entity_id: group.bedroom_motion
+        state: 'on'
+      sequence:
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 4
+          milliseconds: 0
+    default: []
   mode: single
 - id: '1627790661607'
   alias: Low battery level detection & notification for all battery sensors
