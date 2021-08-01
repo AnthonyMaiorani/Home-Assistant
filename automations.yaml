@@ -253,18 +253,28 @@
     entity_id: input_select.anthony
     state: Just Arrived
   action:
-  - service: script.stuff_on
-  - condition: sun
-    after: sunset
-    before_offset: 01:00:00
-  - service: cover.open_cover
-    target:
-      entity_id: cover.bedroom_blinds
-  - service: input_select.select_option
-    target:
-      entity_id: input_select.anthony
-    data:
-      option: Home
+  - choose:
+    - conditions:
+      - condition: sun
+        after: sunset
+        after_offset: -01:00:00
+      sequence:
+      - service: cover.open_cover
+        target:
+          entity_id: cover.bedroom_blinds
+      - service: script.stuff_on
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.anthony
+        data:
+          option: Home
+    default:
+    - service: script.stuff_on
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.anthony
+      data:
+        option: Home
   mode: single
 - id: '1627443167507'
   alias: Window Alert
@@ -432,3 +442,91 @@
     data:
       option: Away
   mode: single
+- id: '1627779396737'
+  alias: Door Opened
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.bedroom_door
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: input_select.anthony
+    state: Home
+  - condition: state
+    entity_id: light.fan_lights
+    state: 'off'
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: light.desk_lights
+        state: 'on'
+      - condition: time
+        after: 07:00:00
+        before: 01:00:00
+      sequence:
+      - service: script.color_loop
+    - conditions:
+      - condition: state
+        entity_id: light.desk_lights
+        state: 'off'
+      - condition: state
+        entity_id: automation.morning_lights_on
+        state: 'on'
+      - condition: state
+        entity_id: input_boolean.awake
+        state: 'off'
+      - condition: time
+        after: 07:01
+        before: '16:00'
+      sequence:
+      - service: homeassistant.turn_on
+        target:
+          entity_id:
+          - script.stuff_on
+          - input_boolean.awake
+    default: []
+  mode: single
+- id: '1627779717449'
+  alias: Night Light
+  description: WIP
+  trigger:
+  - platform: state
+    entity_id: group.bedroom_motion
+    to: 'on'
+  condition:
+  - condition: zone
+    entity_id: person.anthony
+    zone: zone.home
+  - condition: time
+    after: '17:00:00'
+    before: 09:00:00
+  - condition: state
+    entity_id: light.bed_lights
+    state: 'off'
+  action:
+  - service: light.turn_on
+    target:
+      entity_id: light.bed_lights
+    data:
+      transition: 1
+      rgb_color: 255,255,255
+      brightness_pct: 45
+  mode: single
+- id: '1627790661607'
+  alias: Low battery level detection & notification for all battery sensors
+  description: ''
+  use_blueprint:
+    path: sbyx/low-battery-level-detection-notification-for-all-battery-sensors.yaml
+    input:
+      time: '17:00:00'
+      exclude:
+        entity_id:
+        - sensor.iphone_battery_level
+        - sensor.ipad_battery_level
+      actions:
+      - service: notify.mobile_app_iphone
+        data:
+          title: Sensor Battery Low
+          message: '{{sensors}} is low. Replace soon.'
