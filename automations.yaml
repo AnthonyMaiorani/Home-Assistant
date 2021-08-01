@@ -13,7 +13,8 @@
   initial_state: false
   mode: single
 - id: 43a25b65afed4a4680f5ec81172f11e8
-  alias: Set iOS Theme At Startup
+  alias: Startup Actions
+  description: Set Theme, Ensure Location Input Select is Updated
   trigger:
   - event: start
     platform: homeassistant
@@ -21,7 +22,16 @@
   - data:
       name: ios-dark-mode
     service: frontend.set_theme
+  - condition: zone
+    entity_id: person.anthony
+    zone: zone.home
+  - service: input_select.select_option
+    target:
+      entity_id: input_select.anthony
+    data:
+      option: Home
   initial_state: true
+  mode: single
 - id: '1617634628204'
   alias: Automating
   description: Reset automating bool used for light switch
@@ -159,8 +169,8 @@
       notification_title: Motion detected in bedroom.
       delay: 1
 - id: '1621577255605'
-  alias: Keep Off
-  description: Keeps stuff off if not home
+  alias: Left Home
+  description: Turns bedroom off when leaving home, and ensures bedroom stays off
   trigger:
   - platform: state
     entity_id: light.desk_lights
@@ -189,6 +199,10 @@
   - service: cover.close_cover
     target:
       entity_id: cover.bedroom_blinds
+  - condition: state
+    entity_id: switch.ac
+    state: 'on'
+  - service: script.1620182520614
   mode: single
 - id: '1621816232606'
   alias: Taylor Wyze Power
@@ -227,7 +241,7 @@
         entity_id: group.apartment
   mode: single
 - id: '1627401846713'
-  alias: Arrived home in bedroom
+  alias: Arrived Home
   description: ''
   trigger:
   - platform: state
@@ -242,9 +256,15 @@
   - service: script.stuff_on
   - condition: sun
     after: sunset
+    before_offset: 01:00:00
   - service: cover.open_cover
     target:
       entity_id: cover.bedroom_blinds
+  - service: input_select.select_option
+    target:
+      entity_id: input_select.anthony
+    data:
+      option: Home
   mode: single
 - id: '1627443167507'
   alias: Window Alert
@@ -262,38 +282,6 @@
     data:
       message: Bedroom Window has been opened
       title: Window Opened
-  mode: single
-- id: '1627443803522'
-  alias: AC Auto Off When Leaving
-  description: ''
-  trigger:
-  - platform: zone
-    entity_id: person.anthony
-    zone: zone.home
-    event: leave
-  condition:
-  - condition: state
-    entity_id: switch.ac
-    state: 'on'
-  action:
-  - service: script.1620182520614
-  mode: single
-- id: '1627447111302'
-  alias: Set Correct Location on Startup
-  description: ''
-  trigger:
-  - platform: homeassistant
-    event: start
-  condition:
-  - condition: zone
-    entity_id: person.anthony
-    zone: zone.home
-  action:
-  - service: input_select.select_option
-    target:
-      entity_id: input_select.anthony
-    data:
-      option: Home
   mode: single
 - id: '1627448446635'
   alias: Update Fyrtur State
@@ -313,18 +301,24 @@
   trigger:
   - platform: sun
     event: sunset
+    offset: -01:00:00
   condition:
   - condition: zone
     entity_id: person.anthony
     zone: zone.home
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: input_select.anthony
+      state: Just Arrived
   action:
   - service: cover.open_cover
     target:
       entity_id: cover.bedroom_blinds
   mode: single
 - id: '1627702427940'
-  alias: Dlink Error Count
-  description: ''
+  alias: D-Link Motion Sensor Reset
+  description: Resets D-Link motion sensors when connection is lost
   trigger:
   - platform: event
     event_type: system_log_event
@@ -334,22 +328,17 @@
     event_type: system_log_event
     event_data:
       name: custom_components.dlink_hnap.dlink
+  - platform: numeric_state
+    entity_id: input_number.d_link_errors
+    above: '20'
   condition: []
   action:
   - service: input_number.increment
     target:
       entity_id: input_number.d_link_errors
-  mode: parallel
-  max: 10
-- id: '1627702938295'
-  alias: Dlink Reset
-  description: ''
-  trigger:
-  - platform: state
-    entity_id: automation.dlink_error_count
-    to: '40'
-  condition: []
-  action:
+  - condition: numeric_state
+    entity_id: input_number.d_link_errors
+    above: '20'
   - service: switch.turn_off
     target:
       entity_id:
@@ -375,4 +364,71 @@
       entity_id: input_number.d_link_errors
     data:
       value: 0
+  mode: single
+  max: 10
+- id: '1627726771287'
+  alias: Mark Anthony as Just Arrived
+  description: ''
+  trigger:
+  - platform: zone
+    entity_id: person.anthony
+    zone: zone.home
+    event: enter
+  condition: []
+  action:
+  - service: input_select.select_option
+    target:
+      entity_id: input_select.anthony
+    data:
+      option: Just Arrived
+  mode: parallel
+  max: 10
+- id: '1627727014507'
+  alias: Mark Anthony as Just Left
+  description: ''
+  trigger:
+  - platform: zone
+    entity_id: person.anthony
+    zone: zone.home
+    event: leave
+  condition: []
+  action:
+  - service: input_select.select_option
+    target:
+      entity_id: input_select.anthony
+    data:
+      option: Just Left
+  mode: parallel
+  max: 10
+- id: '1627778209718'
+  alias: Mark Anthony as Home
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: input_select.anthony
+    to: Just Arrived
+    for: 00:10:00
+  condition: []
+  action:
+  - service: input_select.select_option
+    target:
+      entity_id: input_select.anthony
+    data:
+      option: Home
+  mode: single
+- id: '1627778293785'
+  alias: Mark Anthony as Away
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: input_select.anthony
+    to: Just Left
+    for: 00:10:00
+  condition: []
+  action:
+  - service: input_select.select_option
+    target:
+      entity_id: input_select.anthony
+    data:
+      option: Away
   mode: single
