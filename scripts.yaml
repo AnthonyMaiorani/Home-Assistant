@@ -7,7 +7,7 @@ stuff_on:
       - script.white
       - switch.windows
   - data:
-      mac: 2C:F0:5D:9D:87:CE
+      mac: !secret pc
     service: wake_on_lan.send_magic_packet
   - data:
       option: Home
@@ -119,7 +119,7 @@ white:
       - switch.windows
       - switch.clock
   - data:
-      mac: 2C:F0:5D:9D:87:CE
+      mac: !secret pc
     service: wake_on_lan.send_magic_packet
   - service: input_boolean.turn_off
     target:
