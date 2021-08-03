@@ -208,21 +208,25 @@
   action:
   - choose:
     - conditions:
-      - condition: sun
-        after: sunset
-        after_offset: -01:00:00
+      - condition: state
+        entity_id: sensor.dark_outside
+        state: 'False'
       sequence:
+      - service: script.turn_on
+        target:
+          entity_id: script.stuff_on
       - service: cover.open_cover
         target:
           entity_id: cover.bedroom_blinds
-      - service: script.stuff_on
       - service: input_select.select_option
         target:
           entity_id: input_select.anthony
         data:
           option: Home
     default:
-    - service: script.stuff_on
+    - service: script.turn_on
+      target:
+        entity_id: script.stuff_on
     - service: input_select.select_option
       target:
         entity_id: input_select.anthony
@@ -270,11 +274,12 @@
     default: []
   mode: single
 - id: '1627448446635'
+  max_exceeded: silent
   alias: Update Fyrtur State
   description: ''
   trigger:
   - platform: time_pattern
-    seconds: /8
+    seconds: /2
   condition: []
   action:
   - service: homeassistant.update_entity
@@ -305,6 +310,7 @@
 - id: '1627702427940'
   alias: D-Link Motion Sensor Reset
   description: Resets D-Link motion sensors when connection is lost
+  max_exceeded: silent
   trigger:
   - platform: event
     event_type: system_log_event
@@ -486,40 +492,40 @@
       entity_id: light.bed_lights
     data:
       transition: 1
-      rgb_color: 255,255,255
-      brightness_pct: 45
+      rgb_color:
+      - 255
+      - 255
+      - 255
+      brightness_pct: 30
   - wait_for_trigger:
     - platform: state
       entity_id: group.bedroom_motion
       to: 'off'
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 4
-      milliseconds: 0
+      for: 00:00:05
+    continue_on_timeout: true
   - choose:
     - conditions:
       - condition: state
-        entity_id: group.bedroom_motion
-        state: 'off'
-      - condition: state
-        entity_id: light.desk_lights
+        entity_id: binary_sensor.wyzemotion
         state: 'off'
       sequence:
-      - service: light.turn_off
-        target:
-          entity_id: light.bed_lights
-    - conditions:
-      - condition: state
-        entity_id: group.bedroom_motion
-        state: 'on'
-      sequence:
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 4
-          milliseconds: 0
+      - wait_for_trigger:
+        - platform: state
+          entity_id: binary_sensor.wyzemotion
+          to: 'on'
+        timeout: '30'
     default: []
+  - condition: state
+    entity_id: light.desk_lights
+    state: 'off'
+  - service: light.turn_off
+    target:
+      entity_id: light.bed_lights
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
   mode: single
 - id: '1627790661607'
   alias: Low battery level detection & notification for all battery sensors
@@ -537,3 +543,19 @@
         data:
           title: Sensor Battery Low
           message: '{{sensors}} is low. Replace soon.'
+- id: '1627966300438'
+  alias: Close Blinds When Dark
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: sensor.dark_outside
+    to: 'True'
+  condition:
+  - condition: state
+    entity_id: cover.bedroom_blinds
+    state: Open
+  action:
+  - service: cover.close_cover
+    target:
+      entity_id: cover.bedroom_blinds
+  mode: single

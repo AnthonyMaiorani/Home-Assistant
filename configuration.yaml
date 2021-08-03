@@ -34,6 +34,10 @@ logbook:
       - media_player
       - group
 
+#reduce db size
+recorder:
+  purge_keep_days: 3
+
 # to track dlink errors
 system_log:
   fire_event: true
@@ -88,6 +92,13 @@ sensor:
         value_template: '{{ state_attr("binary_sensor.window","battery_level") }}'
         unit_of_measurement: '%'
         device_class: battery
+      dark_outside:
+        friendly_name: "Dark Outside"
+        value_template: >
+          {{ state_attr("sun.sun","elevation")|float < 3
+          or (state_attr("sun.sun","elevation")|float < 4.5 and states("sensor.home_cloud_cover")|float > 80)
+          or (state_attr("sun.sun","elevation")|float < 6.5 and states("sensor.home_cloud_cover")|float > 85)
+          or (states("sensor.home_cloud_cover")|float > 90) }}
 
 shell_command:
   pc_on: !secret windows_on
