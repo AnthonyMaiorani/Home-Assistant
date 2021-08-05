@@ -6,6 +6,7 @@
 !.gitignore
 !*.md
 !esphome
+!.travis.yml
 
 # Ignore folders.
 .storage
@@ -18,4 +19,3 @@ tts
 ip_bans.yaml
 secrets.yaml
 known_devices.yaml
-travis_secrets.yaml
