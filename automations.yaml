@@ -22,6 +22,7 @@
   - data:
       name: ios-dark-mode
     service: frontend.set_theme
+  - service: browser_mod.lovelace_reload
   - condition: zone
     entity_id: person.anthony
     zone: zone.home

@@ -22,6 +22,7 @@ camera: !include camera.yaml
 switch: !include switch.yaml
 light: !include light.yaml
 wake_on_lan:
+browser_mod:
 
 # prevent lag and spam
 logbook:
