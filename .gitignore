@@ -7,6 +7,8 @@
 !*.md
 !esphome
 !.travis.yml
+!blueprints/**
+!blueprints/
 
 # Ignore folders.
 .storage
