@@ -9,6 +9,8 @@
 !.travis.yml
 !blueprints/**
 !blueprints/
+!custom_components/
+!custom_components/**
 
 # Ignore folders.
 .storage
