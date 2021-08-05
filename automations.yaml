@@ -1,7 +1,7 @@
 - id: '1546210609741'
   alias: Morning Automation
   trigger:
-  - at: '08:45:00'
+  - at: 08:45:00
     platform: time
   condition: []
   action:
@@ -66,7 +66,7 @@
   description: Turn off room at 7 AM
   trigger:
   - platform: time
-    at: '07:00:00'
+    at: 07:00:00
   condition: []
   action:
   - service: script.stuff_off
@@ -250,10 +250,6 @@
   - condition: template
     value_template: '{{states(''person.anthony'') != ''home''}}'
   action:
-  - service: notify.mobile_app_iphone
-    data:
-      message: Bedroom Window has been opened
-      title: Window Opened
   - choose:
     - conditions:
       - condition: trigger
