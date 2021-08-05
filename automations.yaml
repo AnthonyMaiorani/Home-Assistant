@@ -23,6 +23,8 @@
       name: ios-dark-mode
     service: frontend.set_theme
   - service: browser_mod.lovelace_reload
+    data:
+      deviceID: 545ddc5f-8ec53414
   - condition: zone
     entity_id: person.anthony
     zone: zone.home
