@@ -1,0 +1,94 @@
+esphome:
+  name: dlinkplug
+  platform: ESP8266
+  board: esp01_1m
+
+wifi:
+  ssid: !secret ssid
+  password: !secret password
+  fast_connect: on
+  manual_ip:
+    static_ip: 192.168.1.232
+    gateway: !secret gateway
+    subnet: !secret subnet
+  ap:
+    ssid: "${name} Fallback Hotspot"
+    password: ""
+
+captive_portal:
+logger:
+api:
+ota:
+
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+
+substitutions:
+  name: "D-Link Plug"
+  restore_mode: ALWAYS_ON
+  current_res: "0.0019"
+  voltage_div: "2150"
+    
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO3
+      inverted: True
+    name: "${name} Button"
+    internal: true
+    on_press:
+      then:
+        - switch.toggle: "relay"
+        # Note that blue LED appears to be tied to relay state internally (i.e. electrically)
+    
+switch:
+  # Main plug control relay
+  - platform: gpio
+    name: "${name}"
+    id: "relay"
+    pin: GPIO14
+    restore_mode: ${restore_mode}
+  
+status_led:
+  # Use Green LED as ESPHome's built-in status indicator
+  pin:
+    number: GPIO13
+    inverted: False
+
+sensor:
+  - platform: total_daily_energy
+    name: "${name} Total Daily Energy"
+    power_id: "wattage"
+    filters:
+        # Multiplication factor from W to kW is 0.001
+        - multiply: 0.001
+    unit_of_measurement: kWh
+  - platform: hlw8012
+    sel_pin:
+      number: GPIO12
+      inverted: True
+    cf_pin: GPIO04
+    cf1_pin: GPIO5
+    current_resistor: ${current_res}
+    voltage_divider: ${voltage_div}
+#    current:
+#      name: "${name} Amperage"
+#      internal: true
+#      unit_of_measurement: A
+#      filters:
+#    voltage:
+#      name: "${name} Voltage"
+#      internal: true
+#      unit_of_measurement: V
+#      filters:
+    power:
+      id: "wattage"
+#      name: "${name} Wattage"
+      unit_of_measurement: W
+      filters:
+        - sliding_window_moving_average:
+            window_size: 2
+            send_every: 1
+    change_mode_every: 8
+    update_interval: 3s # Longer interval gives better accuracy
