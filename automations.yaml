@@ -286,27 +286,6 @@
     target:
       entity_id: cover.bedroom_blinds
   mode: single
-- id: '1627534142796'
-  alias: Auto Open Blinds Past Sunset if Home
-  description: ''
-  trigger:
-  - platform: sun
-    event: sunset
-    offset: -01:00:00
-  condition:
-  - condition: zone
-    entity_id: person.anthony
-    zone: zone.home
-  - condition: not
-    conditions:
-    - condition: state
-      entity_id: input_select.anthony
-      state: Just Arrived
-  action:
-  - service: cover.open_cover
-    target:
-      entity_id: cover.bedroom_blinds
-  mode: single
 - id: '1627702427940'
   alias: D-Link Motion Sensor Reset
   description: Resets D-Link motion sensors when connection is lost
@@ -365,7 +344,7 @@
   - platform: state
     entity_id: input_select.anthony
     to: Just Arrived
-    for: 00:10:00
+    for: 00:20:00
     id: Home
   - platform: state
     entity_id: input_select.anthony
@@ -471,7 +450,7 @@
   mode: single
 - id: '1627779717449'
   alias: Night Light
-  description: WIP
+  description: ''
   trigger:
   - platform: state
     entity_id: group.bedroom_motion
@@ -484,7 +463,7 @@
     after: '17:00:00'
     before: 09:00:00
   - condition: state
-    entity_id: light.bed_lights
+    entity_id: light.desk_lights
     state: 'off'
   action:
   - service: light.turn_on
@@ -501,7 +480,7 @@
     - platform: state
       entity_id: group.bedroom_motion
       to: 'off'
-      for: 00:00:05
+      for: 00:00:07
     continue_on_timeout: true
   - choose:
     - conditions:
@@ -521,11 +500,6 @@
   - service: light.turn_off
     target:
       entity_id: light.bed_lights
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 5
-      milliseconds: 0
   mode: single
 - id: '1627790661607'
   alias: Low battery level detection & notification for all battery sensors
@@ -547,9 +521,9 @@
   alias: Close Blinds When Dark
   description: ''
   trigger:
-  - platform: state
-    entity_id: sensor.dark_outside
-    to: 'True'
+  - platform: sun
+    event: sunset
+    offset: '1:20:00'
   condition:
   - condition: state
     entity_id: cover.bedroom_blinds

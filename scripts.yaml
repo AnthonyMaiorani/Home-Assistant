@@ -1,14 +1,21 @@
 stuff_on:
   sequence:
+  - choose:
+    - conditions:
+      - condition: sun
+        before: sunset
+        before_offset: 01:20:00
+      sequence:
+      - service: cover.open_cover
+        target:
+          entity_id: cover.bedroom_blinds
+    default: []
   - data: {}
     service: homeassistant.turn_on
     target:
       entity_id:
       - script.white
       - switch.windows
-  - data:
-      mac: !secret pc
-    service: wake_on_lan.send_magic_packet
   - data:
       option: Home
     entity_id: input_select.anthony
@@ -118,9 +125,6 @@ white:
       - switch.vizio_tv
       - switch.windows
       - switch.clock
-  - data:
-      mac: !secret pc
-    service: wake_on_lan.send_magic_packet
   - service: input_boolean.turn_off
     target:
       entity_id: input_boolean.bedmotion

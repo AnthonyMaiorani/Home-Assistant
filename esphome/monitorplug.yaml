@@ -20,6 +20,10 @@ logger:
 api:
 ota:
 
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+
 substitutions:
   name: "Monitor Plug"
   restore_mode: ALWAYS_ON
@@ -53,6 +57,13 @@ status_led:
     inverted: False
 
 sensor:
+  - platform: total_daily_energy
+    name: "${name} Total Daily Energy"
+    power_id: "wattage"
+    filters:
+        # Multiplication factor from W to kW is 0.001
+        - multiply: 0.001
+    unit_of_measurement: kWh
   - platform: hlw8012
     sel_pin:
       number: GPIO12
