@@ -22,7 +22,17 @@ camera: !include camera.yaml
 switch: !include switch.yaml
 light: !include light.yaml
 wake_on_lan:
+
 browser_mod:
+  devices:
+    545ddc5f-8ec53414:
+      name: iPad
+      disable:
+        - light
+        - media_player
+        - sensor
+  disable:
+    - all
 
 # prevent lag and spam
 logbook:

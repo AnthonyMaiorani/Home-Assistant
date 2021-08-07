@@ -156,7 +156,9 @@
   - condition: state
     entity_id: switch.ac
     state: 'on'
-  - service: script.1620182520614
+  - service: switch.turn_off
+    target:
+      entity_id: switch.ac
   mode: single
 - id: '1621816232606'
   alias: Taylor Wyze Power

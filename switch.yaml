@@ -1,8 +1,7 @@
 - platform: template
   switches:
     bedroomtoggle:
-      value_template: >
-        {{ is_state('light.desk_lights', 'on') }}
+      value_template: "{{ is_state('light.desk_lights', 'on') }}"
       turn_on:
         - service: script.stuff_on
       turn_off:
@@ -62,17 +61,24 @@
         - delay: 18
         - service: homeassistant.update_entity
           entity_id: sensor.monitor_plug_wattage
-    living_room_vizio:
-      friendly_name: Living Room Vizio
+    living_room_tv:
+      friendly_name: Living Room TV
+      value_template: "{{ is_state('media_player.living_room_denon', 'on') }}"
       turn_on:
         - service: remote.send_command
           data:
             entity_id: remote.living_room_remote
             command: turn on
             device: vizio
+        - service: media_player.turn_on
+          data:
+            entity_id: media_player.living_room_denon
       turn_off:
         - service: remote.send_command
           data:
             entity_id: remote.living_room_remote
             command: turn off
             device: vizio
+        - service: media_player.turn_off
+          data:
+            entity_id: media_player.living_room_denon

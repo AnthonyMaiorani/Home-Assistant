@@ -13,9 +13,7 @@ wifi:
     static_ip: 192.168.1.37
     gateway: !secret gateway
     subnet: !secret subnet
-  ap:
-    ssid: "${name} Fallback Hotspot"
-    password: ""
+  ap: {}
 
 captive_portal:
 logger:
