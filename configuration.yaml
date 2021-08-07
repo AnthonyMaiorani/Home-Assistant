@@ -4,6 +4,14 @@ default_config:
 homeassistant:
   customize: !include customize.yaml
 
+#reduce db size
+recorder:
+  purge_keep_days: 3
+
+# to track dlink errors
+system_log:
+  fire_event: true
+
 # reduce login failure messages
 http:
   use_x_forwarded_for: true
@@ -21,6 +29,9 @@ alexa: !include alexa.yaml
 camera: !include camera.yaml
 switch: !include switch.yaml
 light: !include light.yaml
+sensor: !include sensor.yaml
+binary_sensor: !include binary_sensor.yaml
+media_player: !include media_player.yaml
 wake_on_lan:
 
 browser_mod:
@@ -45,64 +56,9 @@ logbook:
       - media_player
       - group
 
-#reduce db size
-recorder:
-  purge_keep_days: 3
-
-# to track dlink errors
-system_log:
-  fire_event: true
-
 spotify: # still required for ui integration
   client_id: !secret spotify_id
   client_secret: !secret spotify_secret
-
-media_player:
-  - platform: androidtv
-    name: Bedroom Fire TV Stick
-    host: !secret bedroom_fire_tv
-    screencap: false
-    apps:
-      "com.stealth.stealthiptvbox": "Stealth"
-  - platform: androidtv
-    name: Living Room Fire TV Stick
-    host: !secret living_room_fire_tv
-    screencap: false
-    apps:
-      "com.stealth.stealthiptvbox": "Stealth"
-
-binary_sensor:
-  - platform: dlink_hnap
-    name: Bedroom Motion Sensor
-    host: !secret bedroom_motion_sensor
-    type: motion
-    password: !secret motion_sensor_pin
-  - platform: dlink_hnap
-    name: Bedroom Motion Sensor 2
-    host: !secret bedroom_motion_sensor_2
-    type: motion
-    password: !secret motion_sensor_2_pin
-  - platform: wyzesense
-    device: auto
-
-sensor:
-  - platform: template
-    sensors:
-      bed_motion_battery:
-        friendly_name: 'Bed Motion Battery'
-        value_template: '{{ state_attr("binary_sensor.wyzemotion","battery_level") }}'
-        unit_of_measurement: '%'
-        device_class: battery
-      bedroom_door_battery:
-        friendly_name: 'Bedroom Door Sensor Battery'
-        value_template: '{{ state_attr("binary_sensor.bedroom_door","battery_level") }}'
-        unit_of_measurement: '%'
-        device_class: battery
-      window_sensor_battery:
-        friendly_name: 'Window Sensor Battery'
-        value_template: '{{ state_attr("binary_sensor.window","battery_level") }}'
-        unit_of_measurement: '%'
-        device_class: battery
 
 shell_command:
   pc_on: !secret windows_on
