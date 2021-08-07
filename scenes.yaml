@@ -1,1 +1,555 @@
-[]
+- id: '1628360415670'
+  name: Color
+  entities:
+    light.closet_lights:
+      effect_list:
+      - None
+      - Music
+      - Color Loop
+      supported_color_modes:
+      - rgb
+      color_mode: rgb
+      brightness: 255
+      hs_color:
+      - 265.143
+      - 82.353
+      rgb_color:
+      - 133
+      - 45
+      - 255
+      xy_color:
+      - 0.223
+      - 0.091
+      effect: Color Loop
+      friendly_name: Closet Lights
+      supported_features: 44
+      icon: mdi:wardrobe
+      state: 'on'
+    light.bed_lights:
+      effect_list:
+      - None
+      - Music
+      - Color Loop
+      supported_color_modes:
+      - rgb
+      color_mode: rgb
+      brightness: 255
+      hs_color:
+      - 265.143
+      - 82.353
+      rgb_color:
+      - 133
+      - 45
+      - 255
+      xy_color:
+      - 0.223
+      - 0.091
+      effect: Color Loop
+      friendly_name: Bed Lights
+      supported_features: 44
+      icon: mdi:bed-queen
+      state: 'on'
+    light.desk_lights:
+      effect_list:
+      - None
+      - Music
+      - Color Loop
+      supported_color_modes:
+      - rgb
+      color_mode: rgb
+      brightness: 255
+      hs_color:
+      - 265.143
+      - 82.353
+      rgb_color:
+      - 133
+      - 45
+      - 255
+      xy_color:
+      - 0.223
+      - 0.091
+      effect: Color Loop
+      friendly_name: Desk Lights
+      supported_features: 44
+      icon: mdi:desk
+      state: 'on'
+    light.smart_bulb_1:
+      effect_list:
+      - None
+      - Music
+      - Color Loop
+      supported_color_modes:
+      - rgbw
+      color_mode: rgbw
+      brightness: 255
+      hs_color:
+      - 265.143
+      - 82.353
+      rgb_color:
+      - 133
+      - 45
+      - 255
+      rgbw_color:
+      - 133
+      - 45
+      - 255
+      - 0
+      xy_color:
+      - 0.223
+      - 0.091
+      effect: Color Loop
+      friendly_name: Smart Bulb 1
+      supported_features: 44
+      state: 'on'
+    light.smart_bulb_2:
+      effect_list:
+      - None
+      - Music
+      - Color Loop
+      supported_color_modes:
+      - rgbw
+      color_mode: rgbw
+      brightness: 255
+      hs_color:
+      - 265.143
+      - 82.353
+      rgb_color:
+      - 133
+      - 45
+      - 255
+      rgbw_color:
+      - 133
+      - 45
+      - 255
+      - 0
+      xy_color:
+      - 0.223
+      - 0.091
+      effect: Color Loop
+      friendly_name: Smart Bulb 2
+      supported_features: 44
+      state: 'on'
+    light.smart_bulb_3:
+      effect_list:
+      - None
+      - Music
+      - Color Loop
+      supported_color_modes:
+      - rgbw
+      color_mode: rgbw
+      brightness: 255
+      hs_color:
+      - 265.143
+      - 82.353
+      rgb_color:
+      - 133
+      - 45
+      - 255
+      rgbw_color:
+      - 133
+      - 45
+      - 255
+      - 0
+      xy_color:
+      - 0.223
+      - 0.091
+      effect: Color Loop
+      friendly_name: Smart Bulb 3
+      supported_features: 44
+      state: 'on'
+    light.rgb_light_switch:
+      effect_list:
+      - None
+      - Music
+      - Color Loop
+      supported_color_modes:
+      - rgb
+      color_mode: rgb
+      brightness: 255
+      hs_color:
+      - 265.143
+      - 82.353
+      rgb_color:
+      - 133
+      - 45
+      - 255
+      xy_color:
+      - 0.223
+      - 0.091
+      effect: Color Loop
+      friendly_name: RGB Light Switch
+      supported_features: 44
+      icon: mdi:light-switch
+      state: 'on'
+    switch.light_switch:
+      friendly_name: Light Switch
+      icon: mdi:light-switch
+      state: 'on'
+    switch.smart_outlet_top:
+      friendly_name: Smart Outlet Top
+      icon: ''
+      state: 'on'
+    switch.smart_outlet_usb:
+      friendly_name: Smart Outlet USB
+      icon: ''
+      state: 'off'
+    switch.clock:
+      friendly_name: Clock
+      icon: mdi:clock
+      state: 'on'
+    input_boolean.automating:
+      editable: true
+      friendly_name: automating
+      state: 'off'
+- id: '1628361724606'
+  name: Lights Off
+  entities:
+    light.closet_lights:
+      effect_list:
+      - None
+      - Music
+      - Color Loop
+      supported_color_modes:
+      - rgb
+      color_mode: rgb
+      brightness: 255
+      hs_color:
+      - 257.023
+      - 84.314
+      rgb_color:
+      - 101
+      - 40
+      - 255
+      xy_color:
+      - 0.188
+      - 0.074
+      effect: Color Loop
+      friendly_name: Closet Lights
+      supported_features: 44
+      icon: mdi:wardrobe
+      state: 'on'
+    light.bed_lights:
+      effect_list:
+      - None
+      - Music
+      - Color Loop
+      supported_color_modes:
+      - rgb
+      color_mode: rgb
+      brightness: 255
+      hs_color:
+      - 257.023
+      - 84.314
+      rgb_color:
+      - 101
+      - 40
+      - 255
+      xy_color:
+      - 0.188
+      - 0.074
+      effect: Color Loop
+      friendly_name: Bed Lights
+      supported_features: 44
+      icon: mdi:bed-queen
+      state: 'on'
+    light.desk_lights:
+      effect_list:
+      - None
+      - Music
+      - Color Loop
+      supported_color_modes:
+      - rgb
+      color_mode: rgb
+      brightness: 255
+      hs_color:
+      - 257.023
+      - 84.314
+      rgb_color:
+      - 101
+      - 40
+      - 255
+      xy_color:
+      - 0.188
+      - 0.074
+      effect: Color Loop
+      friendly_name: Desk Lights
+      supported_features: 44
+      icon: mdi:desk
+      state: 'on'
+    light.smart_bulb_1:
+      effect_list:
+      - None
+      - Music
+      - Color Loop
+      supported_color_modes:
+      - rgbw
+      friendly_name: Smart Bulb 1
+      supported_features: 44
+      state: 'off'
+    light.smart_bulb_2:
+      effect_list:
+      - None
+      - Music
+      - Color Loop
+      supported_color_modes:
+      - rgbw
+      friendly_name: Smart Bulb 2
+      supported_features: 44
+      state: 'off'
+    light.smart_bulb_3:
+      effect_list:
+      - None
+      - Music
+      - Color Loop
+      supported_color_modes:
+      - rgbw
+      friendly_name: Smart Bulb 3
+      supported_features: 44
+      state: 'off'
+    light.rgb_light_switch:
+      effect_list:
+      - None
+      - Music
+      - Color Loop
+      supported_color_modes:
+      - rgb
+      color_mode: rgb
+      brightness: 255
+      hs_color:
+      - 257.023
+      - 84.314
+      rgb_color:
+      - 101
+      - 40
+      - 255
+      xy_color:
+      - 0.188
+      - 0.074
+      effect: Color Loop
+      friendly_name: RGB Light Switch
+      supported_features: 44
+      icon: mdi:light-switch
+      state: 'on'
+    switch.light_switch:
+      friendly_name: Light Switch
+      icon: mdi:light-switch
+      state: 'on'
+    switch.smart_outlet_top:
+      friendly_name: Smart Outlet Top
+      icon: ''
+      state: 'on'
+    switch.smart_outlet_usb:
+      friendly_name: Smart Outlet USB
+      icon: ''
+      state: 'off'
+    switch.clock:
+      friendly_name: Clock
+      icon: mdi:clock
+      state: 'on'
+    input_boolean.automating:
+      editable: true
+      friendly_name: automating
+      state: 'off'
+- id: '1628361937694'
+  name: White
+  entities:
+    light.smart_bulb_1:
+      effect_list:
+      - None
+      - Music
+      - Color Loop
+      supported_color_modes:
+      - rgbw
+      color_mode: rgbw
+      brightness: 255
+      hs_color:
+      - 29.291
+      - 49.804
+      rgb_color:
+      - 255
+      - 190
+      - 128
+      rgbw_color:
+      - 255
+      - 126
+      - 0
+      - 255
+      xy_color:
+      - 0.467
+      - 0.383
+      effect: None
+      friendly_name: Smart Bulb 1
+      supported_features: 44
+      state: 'on'
+    light.smart_bulb_2:
+      effect_list:
+      - None
+      - Music
+      - Color Loop
+      supported_color_modes:
+      - rgbw
+      color_mode: rgbw
+      brightness: 255
+      hs_color:
+      - 29.291
+      - 49.804
+      rgb_color:
+      - 255
+      - 190
+      - 128
+      rgbw_color:
+      - 255
+      - 126
+      - 0
+      - 255
+      xy_color:
+      - 0.467
+      - 0.383
+      effect: None
+      friendly_name: Smart Bulb 2
+      supported_features: 44
+      state: 'on'
+    light.smart_bulb_3:
+      effect_list:
+      - None
+      - Music
+      - Color Loop
+      supported_color_modes:
+      - rgbw
+      color_mode: rgbw
+      brightness: 255
+      hs_color:
+      - 29.291
+      - 49.804
+      rgb_color:
+      - 255
+      - 190
+      - 128
+      rgbw_color:
+      - 255
+      - 126
+      - 0
+      - 255
+      xy_color:
+      - 0.467
+      - 0.383
+      effect: None
+      friendly_name: Smart Bulb 3
+      supported_features: 44
+      state: 'on'
+    light.desk_lights:
+      effect_list:
+      - None
+      - Music
+      - Color Loop
+      supported_color_modes:
+      - rgb
+      color_mode: rgb
+      brightness: 255
+      hs_color:
+      - 354
+      - 78.431
+      rgb_color:
+      - 255
+      - 55
+      - 75
+      xy_color:
+      - 0.639
+      - 0.293
+      effect: Color Loop
+      friendly_name: Desk Lights
+      supported_features: 44
+      icon: mdi:desk
+      state: 'on'
+    light.bed_lights:
+      effect_list:
+      - None
+      - Music
+      - Color Loop
+      supported_color_modes:
+      - rgb
+      color_mode: rgb
+      brightness: 255
+      hs_color:
+      - 354
+      - 78.431
+      rgb_color:
+      - 255
+      - 55
+      - 75
+      xy_color:
+      - 0.639
+      - 0.293
+      effect: Color Loop
+      friendly_name: Bed Lights
+      supported_features: 44
+      icon: mdi:bed-queen
+      state: 'on'
+    light.closet_lights:
+      effect_list:
+      - None
+      - Music
+      - Color Loop
+      supported_color_modes:
+      - rgb
+      color_mode: rgb
+      brightness: 255
+      hs_color:
+      - 354
+      - 78.431
+      rgb_color:
+      - 255
+      - 55
+      - 75
+      xy_color:
+      - 0.639
+      - 0.293
+      effect: Color Loop
+      friendly_name: Closet Lights
+      supported_features: 44
+      icon: mdi:wardrobe
+      state: 'on'
+    light.rgb_light_switch:
+      effect_list:
+      - None
+      - Music
+      - Color Loop
+      supported_color_modes:
+      - rgb
+      color_mode: rgb
+      brightness: 255
+      hs_color:
+      - 354
+      - 78.431
+      rgb_color:
+      - 255
+      - 55
+      - 75
+      xy_color:
+      - 0.639
+      - 0.293
+      effect: Color Loop
+      friendly_name: RGB Light Switch
+      supported_features: 44
+      icon: mdi:light-switch
+      state: 'on'
+    switch.light_switch:
+      friendly_name: Light Switch
+      icon: mdi:light-switch
+      state: 'on'
+    switch.smart_outlet_top:
+      friendly_name: Smart Outlet Top
+      icon: ''
+      state: 'on'
+    switch.smart_outlet_usb:
+      friendly_name: Smart Outlet USB
+      icon: ''
+      state: 'off'
+    switch.clock:
+      friendly_name: Clock
+      icon: mdi:clock
+      state: 'on'
+    input_boolean.automating:
+      editable: true
+      friendly_name: automating
+      state: 'off'
