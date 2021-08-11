@@ -2,11 +2,13 @@
   name: Bedroom Fire TV Stick
   host: !secret bedroom_fire_tv
   screencap: false
+  get_sources: false
   apps:
     "com.stealth.stealthiptvbox": "Stealth"
 - platform: androidtv
   name: Living Room Fire TV Stick
   host: !secret living_room_fire_tv
+  get_sources: false
   screencap: false
   apps:
       "com.stealth.stealthiptvbox": "Stealth"

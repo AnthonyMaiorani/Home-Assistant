@@ -5,6 +5,7 @@ stuff_on:
       - condition: sun
         before: sunset
         after: sunrise
+        after_offset: +01:00:00
       sequence:
       - service: cover.open_cover
         target:
