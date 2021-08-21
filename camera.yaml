@@ -14,3 +14,15 @@
   mjpeg_url: !secret garage_camera
   name: Garage 
   still_image_url: !secret garage_camera_image
+- platform: ffmpeg
+  name: Living Room FFMPEG
+  input: !secret living_room_camera_ffmpeg
+- platform: ffmpeg
+  name: Front Porch FFMPEG
+  input: !secret front_porch_camera_ffmpeg
+- platform: ffmpeg
+  name: Car FFMPEG
+  input: !secret car_camera_ffmpeg
+- platform: ffmpeg
+  name: Garage FFMPEG
+  input: !secret garage_camera_ffmpeg
