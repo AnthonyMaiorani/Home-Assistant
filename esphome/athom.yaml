@@ -1,0 +1,52 @@
+esphome:
+  name: athom
+  platform: ESP8266
+  board: esp01_1m
+  includes:
+    - athom_15w.h
+
+wifi:
+  ssid: !secret ssid
+  password: !secret password
+  fast_connect: on
+  manual_ip:
+    static_ip: 192.168.1.188
+    gateway: !secret gateway
+    subnet: !secret subnet
+  ap: {}
+  
+web_server:
+captive_portal:
+logger:
+api:
+ota:
+
+substitutions:
+  name: "Athom Smart Bulb"
+
+output:
+  - platform: esp8266_pwm
+    pin: GPIO13
+    id: out_ct
+  - platform: esp8266_pwm
+    pin: GPIO5
+    id: out_ctbrightness
+  - platform: esp8266_pwm
+    pin: GPIO4
+    id: out_red
+  - platform: esp8266_pwm
+    pin: GPIO12
+    id: out_green
+  - platform: esp8266_pwm
+    pin: GPIO14
+    id: out_blue
+
+light:
+  - platform: custom 
+    lambda: |- 
+      auto light_out = new RGBWCT(id(out_ct),id(out_ctbrightness),id(out_red),id(out_green),id(out_blue)); 
+      return {light_out}; 
+    lights: 
+      - name: "${name}"
+        gamma_correct: 0
+        

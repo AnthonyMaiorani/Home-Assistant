@@ -195,3 +195,46 @@ temp_down:
     service: remote.send_command
   mode: single
   icon: mdi:thermometer-minus
+call:
+  alias: Call
+  sequence:
+  - service: light.turn_on
+    target:
+      entity_id:
+      - light.bed_lights
+    data:
+      effect: None
+      rgb_color:
+      - 0
+      - 255
+      - 255
+  - service: cover.close_cover
+    target:
+      entity_id: cover.bedroom_blinds
+  - service: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.automating
+  - data: {}
+    service: homeassistant.turn_off
+    target:
+      entity_id:
+      - switch.vizio_tv
+      - switch.windows
+      - switch.clock
+      - light.fan_lights
+      - light.closet_lights
+      - light.desk_lights
+      - automation.ensure_stuff_off
+      - light.rgb_light_switch
+  mode: single
+  icon: mdi:phone
+ac_off:
+  alias: AC Off
+  sequence:
+  - condition: state
+    entity_id: switch.ac
+    state: 'on'
+  - service: switch.turn_off
+    target:
+      entity_id: switch.ac
+  mode: single

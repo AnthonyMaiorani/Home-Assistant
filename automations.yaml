@@ -506,11 +506,11 @@
   trigger:
   - platform: sun
     event: sunset
-    offset: +01:00:00
+    offset: +00:40:00
   condition:
   - condition: state
     entity_id: cover.bedroom_blinds
-    state: Open
+    state: open
   action:
   - service: cover.close_cover
     target:

@@ -6,6 +6,7 @@
         - service: script.stuff_on
       turn_off:
         - service: script.stuff_off
+        - service: script.ac_off
     vizio_tv:
       friendly_name: Bedroom TV
       value_template: "{{ states('sensor.tv_plug_wattage')|float > 10 }}"
@@ -63,7 +64,7 @@
           entity_id: sensor.monitor_plug_wattage
     living_room_tv:
       friendly_name: Living Room TV
-      value_template: "{{ is_state('media_player.living_room_denon', 'on') }}"
+      value_template: "{{ is_state('media_player.living_room_denon', 'playing') }}"
       turn_on:
         - service: remote.send_command
           data:

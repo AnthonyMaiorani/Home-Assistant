@@ -3,7 +3,7 @@ default_config:
 
 homeassistant:
   customize: !include customize.yaml
-  packages: !include_dir_named packages
+#  packages: !include_dir_named packages
 
 #reduce db size
 recorder:

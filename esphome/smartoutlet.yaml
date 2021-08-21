@@ -62,10 +62,10 @@ switch:
     id: topLed
     pin:
       number: GPIO4
-      inverted: true
+      inverted: false
   - platform: gpio
     restore_mode: RESTORE_DEFAULT_OFF
     id: bottomLed
     pin:
       number: GPIO14
-      inverted: true
+      inverted: false
