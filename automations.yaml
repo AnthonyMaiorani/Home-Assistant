@@ -145,6 +145,11 @@
     entity_id: person.anthony
     zone: zone.home
     event: leave
+  - platform: state
+    entity_id: cover.bedroom_blinds
+    from: closed
+    to: open
+    for: 00:01:00
   condition:
   - condition: template
     value_template: '{{states(''person.anthony'') != ''home''}}'
@@ -224,11 +229,6 @@
   alias: Bedroom Alerts
   description: ''
   trigger:
-  - platform: state
-    entity_id: binary_sensor.window
-    from: closed
-    to: open
-    id: Window
   - platform: state
     entity_id: group.bedroom_motion
     to: 'on'
@@ -515,4 +515,113 @@
   - service: cover.close_cover
     target:
       entity_id: cover.bedroom_blinds
+  mode: single
+- id: '1629524719390'
+  alias: Closet Lights
+  description: ''
+  trigger:
+  - platform: homeassistant
+    event: start
+    id: startup
+  - platform: state
+    entity_id: binary_sensor.closet
+    to: 'on'
+    id: 'on'
+  - platform: state
+    entity_id: binary_sensor.closet
+    id: 'off'
+    to: 'off'
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: 'on'
+      - condition: state
+        entity_id: light.desk_lights
+        state: 'on'
+      sequence:
+      - service: light.turn_on
+        target:
+          entity_id: light.closet_lights
+        data:
+          effect: Color Loop
+          rgb_color:
+          - 0
+          - 0
+          - 0
+          transition: 1
+    - conditions:
+      - condition: trigger
+        id: 'on'
+      - condition: state
+        entity_id: light.desk_lights
+        state: 'off'
+      sequence:
+      - service: light.turn_on
+        target:
+          entity_id: light.closet_lights
+        data:
+          rgb_color:
+          - 255
+          - 255
+          - 255
+          effect: None
+    - conditions:
+      - condition: trigger
+        id: 'off'
+      sequence:
+      - service: light.turn_off
+        target:
+          entity_id: light.closet_lights
+    - conditions:
+      - condition: trigger
+        id: startup
+      sequence:
+      - choose:
+        - conditions:
+          - condition: state
+            entity_id: binary_sensor.closet
+            state: 'on'
+          - condition: state
+            entity_id: light.desk_lights
+            state: 'on'
+          sequence:
+          - service: light.turn_on
+            target:
+              entity_id: light.closet_lights
+            data:
+              effect: Color Loop
+              rgb_color:
+              - 0
+              - 0
+              - 0
+              transition: 1
+        - conditions:
+          - condition: state
+            entity_id: binary_sensor.closet
+            state: 'on'
+          - condition: state
+            entity_id: light.desk_lights
+            state: 'off'
+          sequence:
+          - service: light.turn_on
+            target:
+              entity_id: light.closet_lights
+            data:
+              rgb_color:
+              - 255
+              - 255
+              - 255
+              effect: None
+        - conditions:
+          - condition: state
+            entity_id: binary_sensor.closet
+            state: 'off'
+          sequence:
+          - service: light.turn_off
+            target:
+              entity_id: light.closet_lights
+        default: []
+    default: []
   mode: single

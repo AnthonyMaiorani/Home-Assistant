@@ -26,6 +26,12 @@ sensor:
     entity_id: input_number.colorloopstate
     id: hassstate
 
+binary_sensor:
+  - platform: homeassistant
+    entity_id: binary_sensor.closet
+    id: closetstate
+    internal: true
+    
 light:
   - platform: rgb
     id: closet_lights
