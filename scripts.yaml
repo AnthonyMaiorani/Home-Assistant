@@ -12,6 +12,9 @@ stuff_on:
           position: 100
         target:
           entity_id: cover.bedroom_blinds
+      - service: cover.open_cover
+        target:
+          entity_id: cover.bedroom_blinds
     default: []
   - data: {}
     service: homeassistant.turn_on
@@ -40,6 +43,9 @@ stuff_off:
       - switch.clock
       - light.bedroom_lights
       - light.closet_lights
+  - service: cover.close_cover
+    target:
+      entity_id: cover.bedroom_blinds
   alias: Night
   mode: single
 fan_off:

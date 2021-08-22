@@ -178,6 +178,9 @@
   - service: switch.turn_off
     target:
       entity_id: switch.ac
+  - service: cover.close_cover
+    target:
+      entity_id: cover.bedroom_blinds
   mode: single
 - id: '1621816232606'
   alias: Taylor Wyze Power
