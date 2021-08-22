@@ -247,9 +247,19 @@
   description: ''
   trigger:
   - platform: state
-    entity_id: group.bedroom_motion
+    entity_id: binary_sensor.bedroom_door
     to: 'on'
     id: Motion
+  - platform: state
+    entity_id: binary_sensor.closet
+    from: 'off'
+    to: 'on'
+    id: closetopen
+  - platform: state
+    entity_id: binary_sensor.closet
+    from: 'on'
+    to: 'off'
+    id: closetclosed
   condition:
   - condition: template
     value_template: '{{states(''person.anthony'') != ''home''}}'
@@ -257,19 +267,27 @@
   - choose:
     - conditions:
       - condition: trigger
-        id: Window
+        id: closetopen
       sequence:
       - service: notify.mobile_app_iphone
         data:
-          message: Bedroom Window has been opened
-          title: Window Opened
+          message: Bedroom closet has been opened
+          title: Motion detected in bedroom
     - conditions:
       - condition: trigger
         id: Motion
       sequence:
       - service: notify.mobile_app_iphone
         data:
-          message: Movement was detected in bedroom
+          message: Bedroom door has been opened
+          title: Motion detected in bedroom
+    - conditions:
+      - condition: trigger
+        id: closetclosed
+      sequence:
+      - service: notify.mobile_app_iphone
+        data:
+          message: Bedroom closet has been closed
           title: Motion detected in bedroom
     default: []
   mode: single
