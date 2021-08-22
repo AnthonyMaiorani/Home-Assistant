@@ -1,7 +1,7 @@
 - id: '1546210609741'
   alias: Morning Automation
   trigger:
-  - at: 08:45:00
+  - at: 08:30:00
     platform: time
   condition: []
   action:
@@ -10,6 +10,23 @@
   - data: {}
     entity_id: input_boolean.awake
     service: input_boolean.turn_on
+  - service: cover.open_cover
+    target:
+      entity_id: cover.bedroom_blinds
+  - service: cover.open_cover
+    target:
+      entity_id: cover.bedroom_blinds
+  - service: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.bedmotion
+  - delay:
+      hours: 0
+      minutes: 5
+      seconds: 0
+      milliseconds: 0
+  - service: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.bedmotion
   initial_state: false
   mode: single
 - id: 43a25b65afed4a4680f5ec81172f11e8
@@ -145,19 +162,16 @@
     entity_id: person.anthony
     zone: zone.home
     event: leave
-  - platform: state
-    entity_id: cover.bedroom_blinds
-    from: closed
-    to: open
-    for: 00:01:00
   condition:
   - condition: template
     value_template: '{{states(''person.anthony'') != ''home''}}'
   action:
   - service: script.stuff_off
-  - service: cover.close_cover
+  - service: cover.set_cover_position
     target:
       entity_id: cover.bedroom_blinds
+    data:
+      position: 0
   - condition: state
     entity_id: switch.ac
     state: 'on'
@@ -257,17 +271,17 @@
     default: []
   mode: single
 - id: '1627448446635'
-  max_exceeded: silent
   alias: Update Fyrtur State
   description: ''
   trigger:
   - platform: time_pattern
-    seconds: /2
+    seconds: /3
   condition: []
   action:
   - service: homeassistant.update_entity
     target:
       entity_id: cover.bedroom_blinds
+  max_exceeded: silent
   mode: single
 - id: '1627702427940'
   alias: D-Link Motion Sensor Reset
@@ -506,7 +520,7 @@
   trigger:
   - platform: sun
     event: sunset
-    offset: +00:40:00
+    offset: +00:30:00
   condition:
   - condition: state
     entity_id: cover.bedroom_blinds
