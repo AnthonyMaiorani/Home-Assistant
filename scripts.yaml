@@ -1,5 +1,11 @@
 stuff_on:
   sequence:
+  - data: {}
+    service: homeassistant.turn_on
+    target:
+      entity_id:
+      - script.white
+      - switch.windows
   - choose:
     - conditions:
       - condition: sun
@@ -7,21 +13,10 @@ stuff_on:
         after: sunrise
         before_offset: +01:00:00
       sequence:
-      - service: cover.set_cover_position
-        data:
-          position: 100
-        target:
-          entity_id: cover.bedroom_blinds
       - service: cover.open_cover
         target:
           entity_id: cover.bedroom_blinds
     default: []
-  - data: {}
-    service: homeassistant.turn_on
-    target:
-      entity_id:
-      - script.white
-      - switch.windows
   - data:
       option: Home
     entity_id: input_select.anthony
@@ -30,9 +25,6 @@ stuff_on:
   mode: single
 stuff_off:
   sequence:
-  - service: cover.close_cover
-    target:
-      entity_id: cover.bedroom_blinds
   - data: {}
     service: homeassistant.turn_off
     target:
