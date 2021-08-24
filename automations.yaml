@@ -513,15 +513,15 @@
     path: sbyx/low-battery-level-detection-notification-for-all-battery-sensors.yaml
     input:
       time: '17:00:00'
-      exclude:
-        entity_id:
-        - sensor.iphone_battery_level
-        - sensor.ipad_battery_level
       actions:
       - service: notify.mobile_app_iphone
         data:
           title: Sensor Battery Low
           message: '{{sensors}} is low. Replace soon.'
+      exclude:
+        entity_id:
+        - sensor.anthonys_iphone_battery_level
+        - sensor.ipad_battery_level
 - id: '1627966300438'
   alias: Close Blinds When Dark
   description: ''
