@@ -291,19 +291,6 @@
           title: Motion detected in bedroom
     default: []
   mode: single
-- id: '1627448446635'
-  alias: Update Fyrtur State
-  description: ''
-  trigger:
-  - platform: time_pattern
-    seconds: /3
-  condition: []
-  action:
-  - service: homeassistant.update_entity
-    target:
-      entity_id: cover.bedroom_blinds
-  max_exceeded: silent
-  mode: single
 - id: '1627702427940'
   alias: D-Link Motion Sensor Reset
   description: Resets D-Link motion sensors when connection is lost
