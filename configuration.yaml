@@ -33,7 +33,7 @@ light: !include light.yaml
 #sensor: !include sensor.yaml
 binary_sensor: !include binary_sensor.yaml
 media_player: !include media_player.yaml
-wake_on_lan:
+#wake_on_lan:
 
 browser_mod:
   devices:
