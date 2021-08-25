@@ -505,22 +505,6 @@
     target:
       entity_id: light.bed_lights
   mode: single
-- id: '1627790661607'
-  alias: Low battery level detection & notification for all battery sensors
-  description: ''
-  use_blueprint:
-    path: sbyx/low-battery-level-detection-notification-for-all-battery-sensors.yaml
-    input:
-      time: '17:00:00'
-      actions:
-      - service: notify.mobile_app_iphone
-        data:
-          title: Sensor Battery Low
-          message: '{{sensors}} is low. Replace soon.'
-      exclude:
-        entity_id:
-        - sensor.anthonys_iphone_battery_level
-        - sensor.ipad_battery_level
 - id: '1627966300438'
   alias: Close Blinds When Dark
   description: ''
