@@ -53,12 +53,18 @@
       friendly_name: Desktop
       value_template: "{{ states('sensor.monitor_plug_wattage')|float > 6 }}"
       turn_on:
-        - service: shell_command.pc_on
+        - service: mqtt.publish
+          data:
+            topic: "iotlink/workgroup/desktop-pc/commands/run"
+            payload: '{"command": "C:\\Windows\\explorer.exe", "path": "C:\\Windows\\", "args": "C:\\Homebridge\\stuffonsilent.lnk", "user": "", "visible": "false", "fallback": "true"}'
         - delay: 11
         - service: homeassistant.update_entity
           entity_id: sensor.monitor_plug_wattage
       turn_off:
-        - service: shell_command.pc_off
+        - service: mqtt.publish
+          data:
+            topic: "iotlink/workgroup/desktop-pc/commands/run"
+            payload: '{"command": "C:\\Windows\\explorer.exe", "path": "C:\\Windows\\", "args": "C:\\Homebridge\\offsilent.lnk", "user": "", "visible": "false", "fallback": "true"}'
         - delay: 18
         - service: homeassistant.update_entity
           entity_id: sensor.monitor_plug_wattage

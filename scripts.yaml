@@ -13,7 +13,9 @@ stuff_on:
         after: sunrise
         before_offset: +01:00:00
       sequence:
-      - service: cover.open_cover
+      - service: cover.set_cover_position
+        data:
+          position: 100
         target:
           entity_id: cover.bedroom_blinds
     default: []
@@ -35,7 +37,9 @@ stuff_off:
       - switch.clock
       - light.bedroom_lights
       - light.closet_lights
-  - service: cover.close_cover
+  - service: cover.set_cover_position
+    data:
+      position: 0
     target:
       entity_id: cover.bedroom_blinds
   alias: Night

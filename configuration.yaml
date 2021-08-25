@@ -60,7 +60,3 @@ logbook:
 spotify: # still required for ui integration
   client_id: !secret spotify_id
   client_secret: !secret spotify_secret
-
-shell_command:
-  pc_on: !secret windows_on
-  pc_off: !secret windows_off
