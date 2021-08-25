@@ -5,8 +5,11 @@
       turn_on:
         - service: script.stuff_on
       turn_off:
-        - service: script.stuff_off
-        - service: script.ac_off
+        - service: script.turn_on
+          target:
+            entity_id:
+              - script.stuff_off
+              - script.ac_off
     vizio_tv:
       friendly_name: Bedroom TV
       value_template: "{{ states('sensor.tv_plug_wattage')|float > 10 }}"
