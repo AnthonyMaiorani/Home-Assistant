@@ -73,9 +73,9 @@ color_loop:
       brightness: 255
       effect: Color Loop
       rgbw_color:
-      - 255
-      - 255
       - 0
+      - 255
+      - 255
       - 0
     service: light.turn_on
     target:
