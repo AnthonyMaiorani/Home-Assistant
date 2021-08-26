@@ -632,3 +632,18 @@
         default: []
     default: []
   mode: single
+- id: '1629947581379'
+  alias: Detect Wyze Sensor Issue
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.wyzemotion
+    to: 'on'
+    for: 00:05:00
+  condition: []
+  action:
+  - service: notify.mobile_app_iphone
+    data:
+      message: Wyze sensors have stopped responding
+      title: Issue Detected
+  mode: single
