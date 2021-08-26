@@ -58,6 +58,10 @@
       turn_on:
         - service: mqtt.publish
           data:
+            topic: "iotlink/workgroup/desktop-pc/commands/displays/on"
+            payload: ""  
+        - service: mqtt.publish
+          data:
             topic: "iotlink/workgroup/desktop-pc/commands/run"
             payload: '{"command": "C:\\Windows\\explorer.exe", "path": "C:\\Windows\\", "args": "C:\\Homebridge\\stuffonsilent.lnk", "user": "", "visible": "false", "fallback": "true"}'
         - delay: 11
