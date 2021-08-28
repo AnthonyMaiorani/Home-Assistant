@@ -330,57 +330,6 @@
           title: Motion detected in bedroom
     default: []
   mode: single
-- id: '1627702427940'
-  alias: D-Link Motion Sensor Reset
-  description: Resets D-Link motion sensors when connection is lost
-  max_exceeded: silent
-  trigger:
-  - platform: event
-    event_type: system_log_event
-    event_data:
-      name: custom_components.dlink_hnap.binary_sensor
-  - platform: event
-    event_type: system_log_event
-    event_data:
-      name: custom_components.dlink_hnap.dlink
-  - platform: numeric_state
-    entity_id: input_number.d_link_errors
-    above: '20'
-  condition: []
-  action:
-  - service: input_number.increment
-    target:
-      entity_id: input_number.d_link_errors
-  - condition: numeric_state
-    entity_id: input_number.d_link_errors
-    above: '20'
-  - service: switch.turn_off
-    target:
-      entity_id:
-      - switch.d_link_plug
-      - switch.power_strip_outlet_4
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 0
-      milliseconds: 500
-  - service: switch.turn_on
-    target:
-      entity_id:
-      - switch.d_link_plug
-      - switch.power_strip_outlet_4
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 38
-      milliseconds: 0
-  - service: input_number.set_value
-    target:
-      entity_id: input_number.d_link_errors
-    data:
-      value: 0
-  mode: single
-  max: 10
 - id: '1627778209718'
   alias: Presence Detection
   description: ''
