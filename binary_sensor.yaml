@@ -1,12 +1,2 @@
-#- platform: dlink_hnap
-#  name: Bedroom Motion Sensor
-#  host: !secret bedroom_motion_sensor
-#  type: motion
-#  password: !secret motion_sensor_pin
-#- platform: dlink_hnap
-#  name: Bedroom Motion Sensor 2
-#  host: !secret bedroom_motion_sensor_2
-#  type: motion
-#  password: !secret motion_sensor_2_pin
 - platform: wyzesense
   device: auto
