@@ -6,7 +6,6 @@
     - light.smart_bulb_2
     - light.smart_bulb_3
     - light.desk_lights
-    - light.closet_lights
     - light.rgb_light_switch
 - platform: group
   name: LED Strips
