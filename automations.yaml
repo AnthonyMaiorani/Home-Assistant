@@ -1,31 +1,71 @@
 - id: '1546210609741'
   alias: Morning Automation
   trigger:
-  - at: '12:00:00'
+  - at: '10:00:00'
     platform: time
-  condition: []
+    id: thursday/friday wakeup time
+  - platform: time
+    at: '11:30:00'
+    id: tuesday wakeup time
+  condition:
+  - condition: time
+    weekday:
+    - tue
+    - thu
   action:
-  - data: {}
-    service: script.white
-  - data: {}
-    entity_id: input_boolean.awake
-    service: input_boolean.turn_on
-  - service: cover.set_cover_position
-    target:
-      entity_id: cover.bedroom_blinds
-    data:
-      position: 100
-  - service: input_boolean.turn_on
-    target:
-      entity_id: input_boolean.bedmotion
-  - delay:
-      hours: 0
-      minutes: 5
-      seconds: 0
-      milliseconds: 0
-  - service: input_boolean.turn_off
-    target:
-      entity_id: input_boolean.bedmotion
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: thursday/friday wakeup time
+      - condition: time
+        weekday:
+        - thu
+        - fri
+      sequence:
+      - service: homeassistant.turn_on
+        target:
+          entity_id:
+          - script.white
+          - input_boolean.bedmotion
+      - service: cover.set_cover_position
+        target:
+          entity_id: cover.bedroom_blinds
+        data:
+          position: 100
+      - delay:
+          hours: 0
+          minutes: 5
+          seconds: 0
+          milliseconds: 0
+      - service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.bedmotion
+    - conditions:
+      - condition: trigger
+        id: tuesday wakeup time
+      - condition: time
+        weekday:
+        - tue
+      sequence:
+      - service: homeassistant.turn_on
+        target:
+          entity_id:
+          - script.white
+          - input_boolean.bedmotion
+      - service: cover.set_cover_position
+        target:
+          entity_id: cover.bedroom_blinds
+        data:
+          position: 100
+      - delay:
+          hours: 0
+          minutes: 5
+          seconds: 0
+          milliseconds: 0
+      - service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.bedmotion
+    default: []
   initial_state: false
   mode: single
 - id: 43a25b65afed4a4680f5ec81172f11e8
