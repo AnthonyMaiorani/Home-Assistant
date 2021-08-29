@@ -21,7 +21,7 @@ ota:
 
 substitutions:
   device_name: "athombulb1"
-  friendly_name: "Athom Bulb 1"
+  friendly_name: "Smart Bulb 1"
   color_interlock: "true"
 
 output:
