@@ -1,52 +1,122 @@
 esphome:
-  name: athom
+  name: "${device_name}"
+  name_add_mac_suffix: true
   platform: ESP8266
-  board: esp01_1m
-  includes:
-    - athom_15w.h
+  board: esp8285
 
 wifi:
   ssid: !secret ssid
   password: !secret password
   fast_connect: on
   manual_ip:
-    static_ip: 192.168.1.188
+    static_ip: 192.168.1.229
     gateway: !secret gateway
     subnet: !secret subnet
   ap: {}
-  
-web_server:
+
 captive_portal:
 logger:
 api:
 ota:
 
 substitutions:
-  name: "Athom Smart Bulb"
+  device_name: "athombulb1"
+  friendly_name: "Athom Bulb 1"
+  color_interlock: "true"
 
 output:
   - platform: esp8266_pwm
-    pin: GPIO13
-    id: out_ct
-  - platform: esp8266_pwm
-    pin: GPIO5
-    id: out_ctbrightness
-  - platform: esp8266_pwm
+    id: red_output
     pin: GPIO4
-    id: out_red
   - platform: esp8266_pwm
+    id: green_output
     pin: GPIO12
-    id: out_green
   - platform: esp8266_pwm
+    id: blue_output
     pin: GPIO14
-    id: out_blue
+  - platform: esp8266_pwm
+    id: white_output
+    pin: GPIO5
+  - platform: esp8266_pwm
+    id: ct_output
+    inverted: true
+    pin: GPIO13
+
+sensor:
+  - platform: homeassistant
+    entity_id: input_number.colorloopstate
+    id: hassstate
 
 light:
-  - platform: custom 
-    lambda: |- 
-      auto light_out = new RGBWCT(id(out_ct),id(out_ctbrightness),id(out_red),id(out_green),id(out_blue)); 
-      return {light_out}; 
-    lights: 
-      - name: "${name}"
-        gamma_correct: 0
-        
+  - platform: rgbct
+    id: "${device_name}"
+    restore_mode: RESTORE_DEFAULT_ON
+    name: "${friendly_name}"
+    red: red_output
+    green: green_output
+    blue: blue_output
+    white_brightness: white_output
+    color_temperature: ct_output
+    cold_white_color_temperature: 153 mireds
+    warm_white_color_temperature: 500 mireds
+    color_interlock: "${color_interlock}"
+    effects:
+      - strobe:
+          name: Music
+          colors:
+            - state: True
+              brightness: 100%
+              red: 0%
+              green: 0%
+              blue: 100%
+              white: 0%
+              duration: 100ms
+            - state: True
+              brightness: 100%
+              red: 0%
+              green: 100%
+              blue: 100%
+              white: 0%
+              duration: 100ms
+            - state: True
+              brightness: 100%
+              red: 100%
+              green: 0%
+              blue: 100%
+              white: 0%
+              duration: 100ms
+            - state: True
+              brightness: 100%
+              red: 0%
+              green: 100%
+              blue: 0%
+              white: 0%
+              duration: 100ms
+            - state: True
+              brightness: 100%
+              red: 100%
+              green: 0%
+              blue: 0%
+              white: 0%
+              duration: 100ms
+      - lambda:
+          name: Color Loop
+          lambda: |-
+            static float state = 0;
+            if (state != id(hassstate).state) {
+              state = id(hassstate).state;
+              auto call = id(athombulb1).turn_on();
+              call.set_transition_length(3000);
+              if (state == 0) {
+                call.set_rgb(0.45, 0.98, 0.39);
+              } else if (state == 1) {
+                call.set_rgb(0.45, 0.98, 0.93);
+              } else if (state == 2) {
+                call.set_rgb(0.38, 0.15, 0.96);
+              } else if (state == 3) {
+                call.set_rgb(0.5, 0.17, 0.96);
+              } else {
+                call.set_rgb(0.92, 0.2, 0.27);
+              }
+              call.perform();
+            }
