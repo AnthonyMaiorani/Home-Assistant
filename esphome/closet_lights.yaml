@@ -1,5 +1,5 @@
 esphome:
-  name: closet_lights
+  name: closetlights
   platform: ESP8266
   board: esp01_1m
   
@@ -8,7 +8,7 @@ wifi:
   password: !secret password
   fast_connect: on
   manual_ip:
-    static_ip: 192.168.1.223
+    static_ip: 192.168.1.210
     gateway: !secret gateway
     subnet: !secret subnet
   ap: {}
@@ -34,7 +34,7 @@ binary_sensor:
     
 light:
   - platform: rgb
-    id: closet_lights
+    id: closetlights
     name: "${name}"
     red: output_red
     green: output_green
@@ -51,7 +51,7 @@ light:
             static float state = 0;
             if (state != id(hassstate).state) {
               state = id(hassstate).state;
-              auto call = id(closet_lights).turn_on();
+              auto call = id(closetlights).turn_on();
               call.set_transition_length(3000);
               if (state == 0) {
                 call.set_rgb(0.45, 0.98, 0.39);

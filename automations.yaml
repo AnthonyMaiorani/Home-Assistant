@@ -420,25 +420,6 @@
         before: 01:00:00
       sequence:
       - service: script.color_loop
-    - conditions:
-      - condition: state
-        entity_id: light.desk_lights
-        state: 'off'
-      - condition: state
-        entity_id: automation.morning_lights_on
-        state: 'on'
-      - condition: state
-        entity_id: input_boolean.awake
-        state: 'off'
-      - condition: time
-        after: 07:01
-        before: '16:00'
-      sequence:
-      - service: homeassistant.turn_on
-        target:
-          entity_id:
-          - script.stuff_on
-          - input_boolean.awake
     default: []
   mode: single
 - id: '1627966300438'

@@ -1,5 +1,5 @@
 esphome:
-  name: desk_lights
+  name: desklights
   platform: ESP8266
   board: esp01_1m
 
@@ -28,7 +28,7 @@ sensor:
 
 light:
   - platform: rgb
-    id: desk_lights
+    id: desklights
     name: "Desk Lights"
     red: output_red
     green: output_green
@@ -45,7 +45,7 @@ light:
             static float state = 0;
             if (state != id(hassstate).state) {
               state = id(hassstate).state;
-              auto call = id(desk_lights).turn_on();
+              auto call = id(desklights).turn_on();
               call.set_transition_length(3000);
               if (state == 0) {
                 call.set_rgb(0.45, 0.98, 0.39);
