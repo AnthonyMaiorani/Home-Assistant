@@ -77,7 +77,7 @@
           entity_id: sensor.monitor_plug_wattage
     living_room_tv:
       friendly_name: Living Room TV
-      value_template: "{{ is_state('media_player.living_room_denon', 'playing') }}"
+      value_template: "{{ is_state('media_player.living_room_denon', 'playing') or is_state('media_player.living_room_denon', 'on')}}"
       turn_on:
         - service: remote.send_command
           data:
