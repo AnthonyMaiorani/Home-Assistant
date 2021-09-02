@@ -66,7 +66,6 @@
         target:
           entity_id: input_boolean.bedmotion
     default: []
-  initial_state: false
   mode: single
 - id: 43a25b65afed4a4680f5ec81172f11e8
   alias: Startup Actions
