@@ -2,14 +2,14 @@
   name: Living Room Fire TV Stick
   host: !secret living_room_fire_tv
 #  get_sources: false
-#  apps: 
-#    "com.wolf.firelauncher": "Home"
-#    "com.hulu.plus": "Hulu"
-#    "com.stealth.stealthiptvbox": "Stealth"
-#    "com.netflix.ninja": "Netflix"
-#    "com.google.android.youtube.tv": "YouTube"
-#    "com.amazon.avod": "Prime Video"
-#    "com.disney.disneyplus": "Disney+"
+  apps: 
+    "com.wolf.firelauncher": "Home"
+    "com.hulu.plus": "Hulu"
+    "com.stealth.stealthiptvbox": "Stealth"
+    "com.netflix.ninja": "Netflix"
+    "com.google.android.youtube.tv": "YouTube"
+    "com.amazon.avod": "Prime Video"
+    "com.disney.disneyplus": "Disney+"
 - platform: universal
   name: Living Room TV
   children:

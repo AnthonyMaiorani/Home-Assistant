@@ -7,10 +7,6 @@ wifi:
   ssid: !secret ssid
   password: !secret password
   fast_connect: on
-  manual_ip:
-    static_ip: 192.168.1.243
-    gateway: !secret gateway
-    subnet: !secret subnet
   ap: {}
 
 captive_portal:
