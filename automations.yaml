@@ -584,3 +584,103 @@
       message: Wyze sensors have stopped responding
       title: Issue Detected
   mode: single
+- id: '1630720815230'
+  alias: Living Room TV Remote
+  description: Make Control Center Remote work for Living Room TV
+  trigger:
+  - platform: event
+    event_type: homekit_tv_remote_key_pressed
+    id: up
+    event_data:
+      key_name: arrow_up
+  - platform: event
+    event_type: homekit_tv_remote_key_pressed
+    id: down
+    event_data:
+      key_name: arrow_down
+  - platform: event
+    event_type: homekit_tv_remote_key_pressed
+    id: left
+    event_data:
+      key_name: arrow_left
+  - platform: event
+    event_type: homekit_tv_remote_key_pressed
+    id: right
+    event_data:
+      key_name: arrow_right
+  - platform: event
+    event_type: homekit_tv_remote_key_pressed
+    id: select
+    event_data:
+      key_name: select
+  - platform: event
+    event_type: homekit_tv_remote_key_pressed
+    id: information
+    event_data:
+      key_name: information
+  - platform: event
+    event_type: homekit_tv_remote_key_pressed
+    id: back
+    event_data:
+      key_name: back
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: up
+      sequence:
+      - service: androidtv.adb_command
+        data:
+          entity_id: media_player.living_room_fire_tv_stick
+          command: UP
+    - conditions:
+      - condition: trigger
+        id: down
+      sequence:
+      - service: androidtv.adb_command
+        data:
+          command: DOWN
+          entity_id: media_player.living_room_fire_tv_stick
+    - conditions:
+      - condition: trigger
+        id: left
+      sequence:
+      - service: androidtv.adb_command
+        data:
+          entity_id: media_player.living_room_fire_tv_stick
+          command: LEFT
+    - conditions:
+      - condition: trigger
+        id: right
+      sequence:
+      - service: androidtv.adb_command
+        data:
+          entity_id: media_player.living_room_fire_tv_stick
+          command: RIGHT
+    - conditions:
+      - condition: trigger
+        id: select
+      sequence:
+      - service: androidtv.adb_command
+        data:
+          command: '"input keyevent 23"'
+          entity_id: media_player.living_room_fire_tv_stick
+    - conditions:
+      - condition: trigger
+        id: information
+      sequence:
+      - service: androidtv.adb_command
+        data:
+          entity_id: media_player.living_room_fire_tv_stick
+          command: MENU
+    - conditions:
+      - condition: trigger
+        id: back
+      sequence:
+      - service: androidtv.adb_command
+        data:
+          entity_id: media_player.living_room_fire_tv_stick
+          command: BACK
+    default: []
+  mode: single
