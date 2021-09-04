@@ -1,8 +1,17 @@
 - platform: androidtv
   name: Living Room Fire TV Stick
   host: !secret living_room_fire_tv
+#  get_sources: false
+#  apps: 
+#    "com.wolf.firelauncher": "Home"
+#    "com.hulu.plus": "Hulu"
+#    "com.stealth.stealthiptvbox": "Stealth"
+#    "com.netflix.ninja": "Netflix"
+#    "com.google.android.youtube.tv": "YouTube"
+#    "com.amazon.avod": "Prime Video"
+#    "com.disney.disneyplus": "Disney+"
 - platform: universal
-  name: Living Room TV Control
+  name: Living Room TV
   children:
     - media_player.living_room_fire_tv_stick
     - media_player.living_room_denon
@@ -44,11 +53,10 @@
       target:
         entity_id: media_player.living_room_fire_tv_stick
     select_source:
-      service: media_player.select_source
-      target:
-        entity_id: media_player.living_room_fire_tv_stick
-      data:
-        source: "{{ source }}"
+      service: input_select.select_option
+      data_template:
+        entity_id: input_select.living_room_tv_sources
+        option: '{{ source }}'
     volume_set:
       service: media_player.volume_set
       target:
@@ -60,5 +68,5 @@
     state: switch.living_room_tv
     volume_level: media_player.living_room_denon|volume_level
     source: media_player.living_room_fire_tv_stick|source
-    source_list: media_player.living_room_fire_tv_stick|source_list
+    source_list: input_select.living_room_tv_sources|options
   device_class: tv
