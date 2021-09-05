@@ -1,6 +1,51 @@
-# Configure a default setup of Home Assistant (frontend, api, etc)
-default_config:
+# default config parted out
+automation: !include automations.yaml
+config:
+counter:
+dhcp:
+energy:
+frontend: !include themes.yaml
+history: !include history.yaml
+image:
+input_boolean:
+input_datetime:
+input_number:
+input_select:
+input_text:
+logbook:
+  exclude:
+    domains:
+      - input_number
+      - binary_sensor
+      - input_boolean
+      - automation
+      - media_player
+      - group
+map:
+#media_source:
+mobile_app:
+my:
+person:
+scene: !include scenes.yaml
+script: !include scripts.yaml
+ssdp:
+stream:
+sun:
+system_health:
+timer:
+updater:
+usb:
+webhook:
+zeroconf:
+zone:
 
+group: !include groups.yaml
+alexa: !include alexa.yaml
+camera: !include camera.yaml
+switch: !include switch.yaml
+light: !include light.yaml
+binary_sensor: !include binary_sensor.yaml
+media_player: !include media_player.yaml
 homeassistant:
   customize: !include customize.yaml
 
@@ -19,19 +64,6 @@ http:
     - 127.0.0.1
     - 172.16.0.0/12
 
-history: !include history.yaml
-frontend: !include themes.yaml
-group: !include groups.yaml
-automation: !include automations.yaml
-script: !include scripts.yaml
-scene: !include scenes.yaml
-alexa: !include alexa.yaml
-camera: !include camera.yaml
-switch: !include switch.yaml
-light: !include light.yaml
-binary_sensor: !include binary_sensor.yaml
-media_player: !include media_player.yaml
-
 browser_mod:
   devices:
     545ddc5f-8ec53414:
@@ -42,17 +74,6 @@ browser_mod:
         - sensor
   disable:
     - all
-
-# prevent lag and spam
-logbook:
-  exclude:
-    domains:
-      - input_number
-      - binary_sensor
-      - input_boolean
-      - automation
-      - media_player
-      - group
 
 spotify: # still required for ui integration
   client_id: !secret spotify_id
