@@ -14,7 +14,6 @@
   name: Living Room TV
   children:
     - media_player.living_room_fire_tv_stick
-    - media_player.living_room_denon
   commands:
     turn_on:
       service: switch.turn_on
@@ -25,11 +24,15 @@
       target:
         entity_id: switch.living_room_tv
     volume_up:
-      service: media_player.volume_up
+      service: media_player.volume_set
+      data:
+        volume_level: "{{ states.media_player.living_room_denon.attributes.volume_level + 0.01}}"
       target:
         entity_id: media_player.living_room_denon
     volume_down:
-      service: media_player.volume_down
+      service: media_player.volume_set
+      data:
+        volume_level: "{{ states.media_player.living_room_denon.attributes.volume_level - 0.01}}"
       target:
         entity_id: media_player.living_room_denon
     volume_mute:
