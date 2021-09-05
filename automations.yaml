@@ -77,9 +77,7 @@
   - data:
       name: ios-dark-mode
     service: frontend.set_theme
-  - service: browser_mod.lovelace_reload
-    data:
-      deviceID: 545ddc5f-8ec53414
+  - service: browser_mod.window_reload
   - condition: zone
     entity_id: person.anthony
     zone: zone.home
@@ -797,3 +795,34 @@
     default: []
   mode: parallel
   max: 50
+- id: '1630813491059'
+  alias: Fire Stick Notifications
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: cover.garage_door
+    id: garage
+    to: opening
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 9
+      milliseconds: 0
+  condition:
+  - condition: state
+    entity_id: switch.living_room_tv
+    state: 'on'
+  action:
+  - service: camera.snapshot
+    target:
+      entity_id: camera.garage
+    data:
+      filename: /config/www/tmp/snapshot_garage.jpg
+  - service: notify.fire_tv
+    data:
+      message: ​
+      title: Garage Door Opened
+      data:
+        file:
+          path: /config/www/tmp/snapshot_garage.jpg
+  mode: single
