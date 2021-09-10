@@ -1,5 +1,5 @@
 esphome:
-  name: smartbulb2
+  name: rgbbulb2
   platform: ESP8266
   board: esp01_1m
   includes:
@@ -17,7 +17,7 @@ api:
 ota:
 
 substitutions:
-  name: "Smart Bulb 2"
+  name: "RGB Bulb 2"
 
 my9231:
  data_pin: GPIO13  # GPIO13 for AiLight
@@ -65,7 +65,7 @@ sensor:
 
 light:
   - platform: rgbw
-    id: smartbulb2
+    id: rgbbulb2
     name: "${name}"
     default_transition_length: 1s
     restore_mode: RESTORE_DEFAULT_ON #Start with light on after reboot/power-loss event, so that it works from a dumb lightswitch
@@ -118,7 +118,7 @@ light:
             static float state = 0;
             if (state != id(hassstate).state) {
               state = id(hassstate).state;
-              auto call = id(smartbulb2).turn_on();
+              auto call = id(rgbbulb2).turn_on();
               call.set_transition_length(3000);
               if (state == 0) {
                 call.set_rgb(0.45, 0.98, 0.39);

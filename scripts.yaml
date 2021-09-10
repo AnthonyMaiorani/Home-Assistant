@@ -254,3 +254,13 @@ ac_off:
     target:
       entity_id: switch.ac
   mode: single
+'1631175520487':
+  alias: AC Timer
+  sequence:
+  - delay:
+      hours: 0
+      minutes: 25
+      seconds: 0
+      milliseconds: 0
+  - service: script.ac_off
+  mode: single

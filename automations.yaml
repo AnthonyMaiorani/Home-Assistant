@@ -806,7 +806,7 @@
     for:
       hours: 0
       minutes: 0
-      seconds: 9
+      seconds: 8
       milliseconds: 0
   condition:
   - condition: state

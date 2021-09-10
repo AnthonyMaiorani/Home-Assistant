@@ -1,14 +1,14 @@
 esphome:
-  name: rgbbulb3
+  name: athombulb3
+  name_add_mac_suffix: true
   platform: ESP8266
-  board: esp01_1m
-  includes:
-    - copychan3.h
+  board: esp8285
 
 wifi:
   ssid: !secret ssid
   password: !secret password
   fast_connect: on
+  domain: .home
   ap: {}
 
 captive_portal:
@@ -17,46 +17,26 @@ api:
 ota:
 
 substitutions:
-  name: "RGB Bulb 3"
-
-my9231:
- data_pin: GPIO13  # GPIO13 for AiLight
- clock_pin: GPIO15  # GPIO15 for AiLight
- num_channels: 6
- num_chips: 2 
+  friendly_name: "Smart Bulb 3"
+  color_interlock: "true"
 
 output:
-  - platform: my9231
-    id: output_blue
-    channel: 3
-    max_power: 0.80
-  - platform: my9231
-    id: output_red
-    channel: 5
-    max_power: 0.85
-  - platform: my9231
-    id: output_green
-    channel: 4
-    max_power: 0.80
-  - platform: my9231
-    id: output_cw0
-    channel: 0
-  - platform: my9231
-    id: output_cw1
-    channel: 1
-  - platform: my9231
-    id: output_cw2
-    channel: 2
-  - platform: custom
-    type: float
-    lambda: |-
-      auto *copy = new CopyOutput();
-      copy->channel_a = id(output_cw0);
-      copy->channel_b = id(output_cw1);
-      copy->channel_c = id(output_cw2);
-      return {copy}; 
-    outputs:
-    - id: cw
+  - platform: esp8266_pwm
+    id: red_output
+    pin: GPIO4
+  - platform: esp8266_pwm
+    id: green_output
+    pin: GPIO12
+  - platform: esp8266_pwm
+    id: blue_output
+    pin: GPIO14
+  - platform: esp8266_pwm
+    id: white_output
+    pin: GPIO5
+  - platform: esp8266_pwm
+    id: ct_output
+    inverted: true
+    pin: GPIO13
 
 sensor:
   - platform: homeassistant
@@ -64,15 +44,18 @@ sensor:
     id: hassstate
 
 light:
-  - platform: rgbw
-    id: rgbbulb3
-    name: "${name}"
-    default_transition_length: 1s
-    restore_mode: RESTORE_DEFAULT_OFF #Start with light on after reboot/power-loss event, so that it works from a dumb lightswitch
-    red: output_red
-    green: output_green
-    blue: output_blue
-    white: cw
+  - platform: rgbct
+    id: athombulb3
+    restore_mode: RESTORE_DEFAULT_ON
+    name: "${friendly_name}"
+    red: red_output
+    green: green_output
+    blue: blue_output
+    white_brightness: white_output
+    color_temperature: ct_output
+    cold_white_color_temperature: 153 mireds
+    warm_white_color_temperature: 500 mireds
+    color_interlock: "${color_interlock}"
     effects:
       - strobe:
           name: Music
@@ -118,7 +101,7 @@ light:
             static float state = 0;
             if (state != id(hassstate).state) {
               state = id(hassstate).state;
-              auto call = id(rgbbulb3).turn_on();
+              auto call = id(athombulb3).turn_on();
               call.set_transition_length(3000);
               if (state == 0) {
                 call.set_rgb(0.45, 0.98, 0.39);
