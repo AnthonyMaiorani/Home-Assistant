@@ -226,12 +226,6 @@ call:
       - 0
       - 255
       - 255
-  - service: cover.close_cover
-    target:
-      entity_id: cover.bedroom_blinds
-  - service: input_boolean.turn_on
-    target:
-      entity_id: input_boolean.automating
   - data: {}
     service: homeassistant.turn_off
     target:
@@ -242,6 +236,12 @@ call:
       - light.fan_lights
       - light.desk_lights
       - automation.ensure_stuff_off
+  - service: cover.close_cover
+    target:
+      entity_id: cover.bedroom_blinds
+  - service: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.automating
   mode: single
   icon: mdi:phone
 ac_off:
