@@ -826,3 +826,26 @@
         file:
           path: /config/www/tmp/snapshot_garage.jpg
   mode: single
+- id: '1631390082028'
+  alias: Garage Notifications
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: cover.garage_door
+    to: open
+    from: closed
+    for:
+      hours: 0
+      minutes: 15
+      seconds: 0
+      milliseconds: 0
+  condition:
+  - condition: zone
+    entity_id: person.anthony
+    zone: zone.home
+  action:
+  - service: notify.mobile_app_iphone
+    data:
+      message: Garage left open for 15 minutes
+      title: Garage left open
+  mode: single

@@ -8,7 +8,6 @@ wifi:
   ssid: !secret ssid
   password: !secret password
   fast_connect: on
-  domain: .home
   ap: {}
 
 captive_portal:

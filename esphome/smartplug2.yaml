@@ -3,14 +3,10 @@ esphome:
   platform: ESP8266
   board: esp01_1m
 
-  wifi:
+wifi:
   ssid: !secret ssid
   password: !secret password
   fast_connect: on
-  manual_ip:
-    static_ip: 192.168.1.241
-    gateway: !secret gateway
-    subnet: !secret subnet
   ap:
     ssid: "${name} Fallback Hotspot"
     password: ""
