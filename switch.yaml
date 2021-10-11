@@ -2,8 +2,8 @@
   switches:
     ap_led:
       friendly_name: "U6-Lite LED"
-      command_on: "ssh -i /config/yes -o StrictHostKeyChecking=no -q maiorania@192.168.1.122 'echo '1' >/proc/gpio/led_pattern && sed -i '/mgmt.led_pattern_override/d' /var/etc/persistent/cfg/mgmt && echo 'mgmt.led_pattern_override=1' >> /var/etc/persistent/cfg/mgmt'"
-      command_off: "ssh -i /config/yes -o StrictHostKeyChecking=no -q maiorania@192.168.1.122 'echo '0' >/proc/gpio/led_pattern && sed -i '/mgmt.led_pattern_override/d' /var/etc/persistent/cfg/mgmt && echo 'mgmt.led_pattern_override=0' >> /var/etc/persistent/cfg/mgmt'"
+      command_on: !secret u6_on
+      command_off: !secret u6_off
 - platform: template
   switches:
     bedroomtoggle:
