@@ -574,7 +574,11 @@
   - platform: state
     entity_id: binary_sensor.wyzemotion
     to: 'on'
-    for: 00:05:00
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+      milliseconds: 0
   condition: []
   action:
   - service: notify.mobile_app_iphone

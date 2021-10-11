@@ -13,7 +13,7 @@ from homeassistant.components.switch import (
     SwitchEntity)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_ATTRIBUTION
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from wyzeapy import Wyzeapy, CameraService, SwitchService
 from wyzeapy.services.camera_service import Camera
 from wyzeapy.services.switch_service import Switch
@@ -101,19 +101,21 @@ class WyzeNotifications(SwitchEntity):
 
     @property
     def should_poll(self) -> bool:
-        return True
+        return False
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         await self._client.enable_notifications()
 
         self._is_on = True
         self._just_updated = True
+        self.async_schedule_update_ha_state()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         await self._client.disable_notifications()
 
         self._is_on = False
         self._just_updated = True
+        self.async_schedule_update_ha_state()
 
     @property
     def name(self):
@@ -182,7 +184,7 @@ class WyzeSwitch(SwitchEntity):
 
     @property
     def should_poll(self) -> bool:
-        return True
+        return False
 
     @token_exception_handler
     async def async_turn_on(self, **kwargs: Any) -> None:
@@ -220,13 +222,24 @@ class WyzeSwitch(SwitchEntity):
     @property
     def device_state_attributes(self):
         """Return device attributes of the entity."""
-        return {
+        dev_info = {
             ATTR_ATTRIBUTION: ATTRIBUTION,
             "state": self.is_on,
             "available": self.available,
             "device model": self._device.product_model,
             "mac": self.unique_id
         }
+
+        if self._device.device_params.get("electricity"):
+            dev_info["Battery"] = str(self._device.device_params.get("electricity") + "%")
+        if self._device.device_params.get("ip"):
+            dev_info["IP"] = str(self._device.device_params.get("ip"))
+        if self._device.device_params.get("rssi"):
+            dev_info["RSSI"] = str(self._device.device_params.get("rssi"))
+        if self._device.device_params.get("ssid"):
+            dev_info["SSID"] = str(self._device.device_params.get("ssid"))
+
+        return dev_info
 
     @token_exception_handler
     async def async_update(self):
@@ -238,3 +251,19 @@ class WyzeSwitch(SwitchEntity):
             self._device = await self._service.update(self._device)
         else:
             self._just_updated = False
+
+    @callback
+    def async_update_callback(self, switch: Switch):
+        """Update the switch's state."""
+        self._device = switch
+        self.async_schedule_update_ha_state()
+
+    async def async_added_to_hass(self) -> None:
+        """Subscribe to update events."""
+        self._device.callback_function = self.async_update_callback
+        self._service.register_updater(self._device, 30)
+        await self._service.start_update_manager()
+        return await super().async_added_to_hass()
+
+    async def async_will_remove_from_hass(self) -> None:
+        self._service.unregister_updater()

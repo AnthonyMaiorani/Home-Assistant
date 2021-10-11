@@ -42,6 +42,7 @@ stuff_off:
       - switch.clock
       - light.bedroom_lights
       - light.closet_lights
+      - switch.ap_led
   alias: Night
   mode: single
 fan_off:
@@ -69,6 +70,7 @@ color_loop:
       - input_boolean.automating
       - switch.clock
       - switch.light_switch
+      - switch.ap_led
   - data:
       brightness: 255
       effect: Color Loop
@@ -107,6 +109,7 @@ white:
       - switch.clock
       - script.1591907627081
       - switch.light_switch
+      - switch.ap_led
   mode: single
 '1574728463699':
   alias: Music
@@ -118,6 +121,7 @@ white:
       - input_boolean.automating
       - switch.clock
       - switch.light_switch
+      - switch.ap_led
   - data:
       effect: Music
       white_value: 0
@@ -137,6 +141,7 @@ white:
       - switch.vizio_tv
       - switch.windows
       - switch.clock
+      - switch.ap_led
   - service: input_boolean.turn_off
     target:
       entity_id: input_boolean.bedmotion
@@ -236,6 +241,7 @@ call:
       - light.fan_lights
       - light.desk_lights
       - automation.ensure_stuff_off
+      - switch.ap_led
   - service: cover.close_cover
     target:
       entity_id: cover.bedroom_blinds
