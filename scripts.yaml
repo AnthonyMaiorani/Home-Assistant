@@ -279,4 +279,4 @@ ac_off:
       seconds: 0
       milliseconds: 0
   - service: script.ac_off
-  mode: single
+  mode: restart
