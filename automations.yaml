@@ -853,3 +853,37 @@
       message: Garage left open for 15 minutes
       title: Garage left open
   mode: single
+- id: '1635059149844'
+  alias: Front Porch Camera Notification
+  description: ''
+  use_blueprint:
+    path: vorion/send-camera-snapshot-notification-on-motion.yaml
+    input:
+      notification_message: Person Detected at Front Porch
+      motion_sensor: binary_sensor.front_porch_motion
+      camera: camera.front_porch
+      notify_device: d808e448ce5e3a3ffab0ff802e6ea0e7
+      is_ios: true
+      notification_title: Home Assistant
+      delay: 0
+- id: '1635104348023'
+  alias: Front Porch Camera Notification
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.front_porch_motion
+    to: 'on'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 1
+      milliseconds: 0
+    from: 'off'
+  condition: []
+  action:
+  - service: notify.mobile_app_iphone
+    data:
+      message: Person detected at Front Porch
+      data:
+        image: /local/FP.jpg
+  mode: single

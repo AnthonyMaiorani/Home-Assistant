@@ -1,0 +1,7 @@
+- platform: mqtt
+  name: "Front Porch Motion"
+  state_topic: "FP"
+  payload_on: "on"
+  payload_off: "off"
+  off_delay: 30
+  device_class: motion

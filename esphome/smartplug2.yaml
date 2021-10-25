@@ -1,5 +1,5 @@
 esphome:
-  name: smartplug2
+  name: mixerplug
   platform: ESP8266
   board: esp01_1m
 
@@ -17,7 +17,7 @@ api:
 ota:
 
 substitutions:
-  name: "Smart Plug 2"
+  name: "Mixer Plug"
 
 binary_sensor:
   - platform: gpio

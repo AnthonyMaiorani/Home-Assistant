@@ -43,6 +43,7 @@ stuff_off:
       - light.bedroom_lights
       - light.closet_lights
       - switch.ap_led
+      - switch.mixer_plug
   alias: Night
   mode: single
 fan_off:
@@ -56,6 +57,8 @@ fan_off:
       - script.1591907627081
       - switch.clock
       - switch.light_switch
+      - switch.ap_led
+      - switch.mixer_plug
   - data: {}
     entity_id: light.fan_lights
     service: light.turn_off
@@ -71,6 +74,7 @@ color_loop:
       - switch.clock
       - switch.light_switch
       - switch.ap_led
+      - switch.mixer_plug
   - data:
       brightness: 255
       effect: Color Loop
@@ -110,6 +114,7 @@ white:
       - script.1591907627081
       - switch.light_switch
       - switch.ap_led
+      - switch.mixer_plug
   mode: single
 '1574728463699':
   alias: Music
@@ -122,6 +127,7 @@ white:
       - switch.clock
       - switch.light_switch
       - switch.ap_led
+      - switch.mixer_plug
   - data:
       effect: Music
       white_value: 0
@@ -142,6 +148,7 @@ white:
       - switch.windows
       - switch.clock
       - switch.ap_led
+      - switch.mixer_plug
   - service: input_boolean.turn_off
     target:
       entity_id: input_boolean.bedmotion
@@ -242,6 +249,7 @@ call:
       - light.desk_lights
       - automation.ensure_stuff_off
       - switch.ap_led
+      - switch.mixer_plug
   - service: cover.close_cover
     target:
       entity_id: cover.bedroom_blinds
