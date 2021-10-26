@@ -5,3 +5,10 @@
   payload_off: "off"
   off_delay: 30
   device_class: motion
+- platform: mqtt
+  name: "Car Motion"
+  state_topic: "car"
+  payload_on: "on"
+  payload_off: "off"
+  off_delay: 30
+  device_class: motion
