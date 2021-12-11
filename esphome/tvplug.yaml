@@ -19,8 +19,8 @@ time:
     id: homeassistant_time
 
 substitutions:
-  name: "TV Plug"
-  restore_mode: ALWAYS_ON
+  name: "Christmas Lights"
+  restore_mode: ALWAYS_OFF
   current_res: "0.0019"
   voltage_div: "2150"
     

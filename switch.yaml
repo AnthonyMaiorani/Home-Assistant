@@ -1,9 +1,13 @@
 - platform: command_line
   switches:
-    ap_led:
+    u6_lite_led:
       friendly_name: "U6-Lite LED"
       command_on: !secret u6_on
       command_off: !secret u6_off
+    u6_pro_led:
+      friendly_name: "U6-Pro LED"
+      command_on: !secret u6_pro_on
+      command_off: !secret u6_pro_off
 - platform: template
   switches:
     bedroomtoggle:
@@ -16,30 +20,30 @@
             entity_id:
               - script.stuff_off
               - script.ac_off
-    vizio_tv:
-      friendly_name: Bedroom TV
-      value_template: "{{ states('sensor.tv_plug_wattage')|float > 10 }}"
-      turn_on:
-        - service: switch.turn_on
-          data:
-            entity_id: switch.tv_plug
-        - service: remote.send_command
-          data:
-            entity_id: remote.bedroom_rm4_remote
-            command: turn on
-            device: vizio
-        - delay: 8
-        - service: homeassistant.update_entity
-          entity_id: sensor.tv_plug_wattage
-      turn_off:
-        - service: remote.send_command
-          data:
-            entity_id: remote.bedroom_rm4_remote
-            command: turn off
-            device: vizio
-        - delay: 8
-        - service: homeassistant.update_entity
-          entity_id: sensor.tv_plug_wattage
+#    vizio_tv:
+#      friendly_name: Bedroom TV
+#      value_template: "{{ states('sensor.tv_plug_wattage')|float > 10 }}"
+#      turn_on:
+#        - service: switch.turn_on
+#          data:
+#            entity_id: switch.tv_plug
+#        - service: remote.send_command
+#          data:
+#            entity_id: remote.bedroom_rm4_remote
+#            command: turn on
+#            device: vizio
+#        - delay: 8
+#        - service: homeassistant.update_entity
+#          entity_id: sensor.tv_plug_wattage
+#      turn_off:
+#        - service: remote.send_command
+#          data:
+#            entity_id: remote.bedroom_rm4_remote
+#            command: turn off
+#            device: vizio
+#        - delay: 8
+#        - service: homeassistant.update_entity
+#          entity_id: sensor.tv_plug_wattage
     ac:
       friendly_name: Air Conditioner
       value_template: "{{ states('sensor.ac_plug_wattage')|float > 7 }}"

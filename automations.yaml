@@ -242,9 +242,6 @@
         entity_id: person.taylor
         state: Taylor's Home
       sequence:
-      - condition: state
-        entity_id: group.apartment
-        state: 'on'
       - service: homeassistant.turn_off
         target:
           entity_id: group.apartment
@@ -894,4 +891,34 @@
       message: Person detected at Car
       data:
         image: /local/car.jpg
+  mode: single
+- id: '1638935019248'
+  alias: Christmas Lights
+  description: ''
+  trigger:
+  - platform: sun
+    event: sunset
+    offset: '0'
+    id: set
+  - platform: time
+    at: '23:00:00'
+    id: 'off'
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: set
+      sequence:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.christmas_lights
+    - conditions:
+      - condition: trigger
+        id: 'off'
+      sequence:
+      - service: switch.turn_off
+        target:
+          entity_id: switch.christmas_lights
+    default: []
   mode: single

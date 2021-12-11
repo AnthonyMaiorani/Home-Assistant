@@ -36,19 +36,24 @@ stuff_off:
     service: homeassistant.turn_off
     target:
       entity_id:
-      - switch.vizio_tv
       - switch.windows
       - switch.light_switch
       - switch.clock
       - light.bedroom_lights
       - light.closet_lights
-      - switch.ap_led
+      - switch.u6_pro_led
       - switch.mixer_plug
+      - light.shapes_007f
   alias: Night
   mode: single
 fan_off:
   alias: Lights Off
   sequence:
+  - service: light.turn_on
+    target:
+      entity_id: light.shapes_007f
+    data:
+      brightness_pct: 40
   - data: {}
     service: homeassistant.turn_on
     target:
@@ -57,7 +62,7 @@ fan_off:
       - script.1591907627081
       - switch.clock
       - switch.light_switch
-      - switch.ap_led
+      - switch.u6_pro_led
       - switch.mixer_plug
   - data: {}
     entity_id: light.fan_lights
@@ -73,7 +78,7 @@ color_loop:
       - input_boolean.automating
       - switch.clock
       - switch.light_switch
-      - switch.ap_led
+      - switch.u6_pro_led
       - switch.mixer_plug
   - data:
       brightness: 255
@@ -87,6 +92,11 @@ color_loop:
     target:
       entity_id:
       - light.bedroom_lights
+  - service: light.turn_on
+    target:
+      entity_id: light.shapes_007f
+    data:
+      brightness_pct: 100
   - condition: state
     entity_id: binary_sensor.closet
     state: 'on'
@@ -106,6 +116,11 @@ white:
     service: light.turn_on
     target:
       entity_id: light.fan_lights
+  - service: light.turn_on
+    target:
+      entity_id: light.shapes_007f
+    data:
+      brightness_pct: 100
   - data: {}
     service: homeassistant.turn_on
     target:
@@ -113,7 +128,7 @@ white:
       - switch.clock
       - script.1591907627081
       - switch.light_switch
-      - switch.ap_led
+      - switch.u6_pro_led
       - switch.mixer_plug
   mode: single
 '1574728463699':
@@ -126,8 +141,9 @@ white:
       - input_boolean.automating
       - switch.clock
       - switch.light_switch
-      - switch.ap_led
+      - switch.u6_pro_led
       - switch.mixer_plug
+      - light.shapes_007f
   - data:
       effect: Music
       white_value: 0
@@ -144,11 +160,11 @@ white:
       entity_id:
       - input_boolean.automating
       - script.fan_off
-      - switch.vizio_tv
       - switch.windows
       - switch.clock
-      - switch.ap_led
+      - switch.u6_pro_led
       - switch.mixer_plug
+      - light.shapes_007f
   - service: input_boolean.turn_off
     target:
       entity_id: input_boolean.bedmotion
@@ -238,18 +254,23 @@ call:
       - 0
       - 255
       - 255
+  - service: light.turn_on
+    target:
+      entity_id: light.shapes_007f
+    data:
+      brightness_pct: 10
   - data: {}
     service: homeassistant.turn_off
     target:
       entity_id:
-      - switch.vizio_tv
       - switch.windows
       - switch.clock
       - light.fan_lights
       - light.desk_lights
       - automation.ensure_stuff_off
-      - switch.ap_led
+      - switch.u6_pro_led
       - switch.mixer_plug
+      - light.closet_lights
   - service: cover.close_cover
     target:
       entity_id: cover.bedroom_blinds
