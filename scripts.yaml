@@ -309,3 +309,66 @@ ac_off:
       milliseconds: 0
   - service: script.ac_off
   mode: restart
+color_desktop:
+  alias: Color Desktop
+  sequence:
+  - service: homeassistant.turn_on
+    data: {}
+    target:
+      entity_id:
+      - input_boolean.automating
+      - switch.clock
+      - switch.light_switch
+      - switch.u6_pro_led
+      - switch.mixer_plug
+  - data:
+      brightness: 255
+      effect: Color Loop
+      rgbw_color:
+      - 0
+      - 255
+      - 255
+      - 0
+    service: light.turn_on
+    target:
+      entity_id:
+      - light.bedroom_lights
+  - service: light.turn_on
+    target:
+      entity_id: light.shapes_007f
+    data:
+      brightness_pct: 70
+  - condition: state
+    entity_id: binary_sensor.closet
+    state: 'on'
+  - service: light.turn_on
+    target:
+      entity_id: light.closet_lights
+    data:
+      effect: Color Loop
+  mode: single
+white_desktop:
+  alias: White Desktop
+  sequence:
+  - data:
+      brightness: 255
+      effect: None
+      color_temp: 330
+    service: light.turn_on
+    target:
+      entity_id: light.fan_lights
+  - service: light.turn_on
+    target:
+      entity_id: light.shapes_007f
+    data:
+      brightness_pct: 70
+  - data: {}
+    service: homeassistant.turn_on
+    target:
+      entity_id:
+      - switch.clock
+      - script.1591907627081
+      - switch.light_switch
+      - switch.u6_pro_led
+      - switch.mixer_plug
+  mode: single

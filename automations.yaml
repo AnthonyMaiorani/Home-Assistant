@@ -400,9 +400,6 @@
   - condition: state
     entity_id: input_select.anthony
     state: Home
-  - condition: state
-    entity_id: light.fan_lights
-    state: 'off'
   action:
   - choose:
     - conditions:
@@ -412,8 +409,26 @@
       - condition: time
         after: 07:00:00
         before: 01:00:00
+      - condition: state
+        entity_id: light.fan_lights
+        state: ''
       sequence:
       - service: script.color_loop
+      - service: light.turn_on
+        target:
+          entity_id: light.shapes_007f
+        data:
+          brightness_pct: 100
+    - conditions:
+      - condition: state
+        entity_id: light.shapes_007f
+        state: 'on'
+      sequence:
+      - service: light.turn_on
+        target:
+          entity_id: light.shapes_007f
+        data:
+          brightness_pct: 100
     default: []
   mode: single
 - id: '1627966300438'
@@ -921,4 +936,48 @@
         target:
           entity_id: switch.christmas_lights
     default: []
+  mode: single
+- id: '1639191711934'
+  alias: Dim Nanoleaf when using computer
+  description: ''
+  trigger:
+  - platform: template
+    value_template: '{{ states(''sensor.desktop_idle_time'')|float < 10 }}'
+  condition:
+  - condition: template
+    value_template: '{{ state_attr(''light.shapes_007f'',''brightness'') | float >
+      175 }}'
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: light.fan_lights
+        state: 'on'
+      sequence:
+      - service: light.turn_on
+        target:
+          entity_id: light.shapes_007f
+        data:
+          brightness_pct: 70
+    default:
+    - service: light.turn_on
+      target:
+        entity_id: light.shapes_007f
+      data:
+        brightness_pct: 40
+  mode: single
+- id: '1639192672045'
+  alias: Nanoleaf Scene Changer
+  description: Cycle Favorite Nanoleaf Scenes
+  trigger:
+  - platform: time_pattern
+    minutes: /30
+  condition: []
+  action:
+  - service: input_select.select_option
+    target:
+      entity_id: input_select.nanoleaf_scenes
+    data:
+      option: "{{ state_attr('input_select.nanoleaf_scenes', 'options')\n    | reject('in',\
+        \ [states('input_select.nanoleaf_scenes')])\n    | list | random }}\n"
   mode: single
