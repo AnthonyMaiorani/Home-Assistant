@@ -12,3 +12,7 @@
   payload_off: "off"
   off_delay: 30
   device_class: motion
+- platform: ping
+  name: "Master Bedroom G1100"
+  host: 192.168.1.254
+  scan_interval: 5

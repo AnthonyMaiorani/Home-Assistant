@@ -400,18 +400,18 @@
   - condition: state
     entity_id: input_select.anthony
     state: Home
+  - condition: time
+    after: 07:00:00
+    before: 01:00:00
+  - condition: state
+    entity_id: light.desk_lights
+    state: 'on'
   action:
   - choose:
     - conditions:
       - condition: state
-        entity_id: light.desk_lights
-        state: 'on'
-      - condition: time
-        after: 07:00:00
-        before: 01:00:00
-      - condition: state
         entity_id: light.fan_lights
-        state: ''
+        state: 'off'
       sequence:
       - service: script.color_loop
       - service: light.turn_on
@@ -980,4 +980,30 @@
     data:
       option: "{{ state_attr('input_select.nanoleaf_scenes', 'options')\n    | reject('in',\
         \ [states('input_select.nanoleaf_scenes')])\n    | list | random }}\n"
+  mode: single
+- id: '1639270466354'
+  alias: Restart MoCA
+  description: Restart MoCA network when frozen
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.master_bedroom_g1100
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 15
+      milliseconds: 0
+  condition: []
+  action:
+  - service: switch.turn_off
+    target:
+      entity_id: switch.moca_plug
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: switch.turn_on
+    target:
+      entity_id: switch.moca_plug
   mode: single
