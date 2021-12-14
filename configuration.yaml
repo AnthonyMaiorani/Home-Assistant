@@ -73,7 +73,6 @@ http:
     - 192.168.1.0/24
     - ::1
 
-
 browser_mod:
   devices:
     545ddc5f-8ec53414:

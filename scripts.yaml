@@ -259,6 +259,7 @@ call:
       entity_id: light.shapes_007f
     data:
       brightness_pct: 10
+      effect: '{{ states(''input_select.nanoleaf_scenes'') }}'
   - data: {}
     service: homeassistant.turn_off
     target:

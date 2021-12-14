@@ -944,6 +944,9 @@
   - platform: template
     value_template: '{{ states(''sensor.desktop_idle_time'')|float < 10 }}'
   condition:
+  - condition: state
+    entity_id: light.shapes_007f
+    state: 'on'
   - condition: template
     value_template: '{{ state_attr(''light.shapes_007f'',''brightness'') | float >
       175 }}'
@@ -972,7 +975,12 @@
   trigger:
   - platform: time_pattern
     minutes: /30
-  condition: []
+  condition:
+  - condition: state
+    entity_id: light.shapes_007f
+    state: 'on'
+  - condition: template
+    value_template: '{{ state_attr(''light.shapes_007f'', ''effect'') != none }}'
   action:
   - service: input_select.select_option
     target:
@@ -980,6 +988,11 @@
     data:
       option: "{{ state_attr('input_select.nanoleaf_scenes', 'options')\n    | reject('in',\
         \ [states('input_select.nanoleaf_scenes')])\n    | list | random }}\n"
+  - service: light.turn_on
+    target:
+      entity_id: light.shapes_007f
+    data:
+      effect: '{{ states(''input_select.nanoleaf_scenes'') }}'
   mode: single
 - id: '1639270466354'
   alias: Restart MoCA
