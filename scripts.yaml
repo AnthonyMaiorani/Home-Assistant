@@ -44,6 +44,8 @@ stuff_off:
       - switch.u6_pro_led
       - switch.mixer_plug
       - light.shapes_007f
+      - light.lamp
+      - light.glide
   alias: Night
   mode: single
 fan_off:
@@ -64,6 +66,8 @@ fan_off:
       - switch.light_switch
       - switch.u6_pro_led
       - switch.mixer_plug
+      - light.lamp
+      - light.glide
   - data: {}
     entity_id: light.fan_lights
     service: light.turn_off
@@ -71,6 +75,9 @@ fan_off:
 color_loop:
   alias: Color
   sequence:
+  - service: script.turn_on
+    target:
+      entity_id: script.rainbow
   - service: homeassistant.turn_on
     data: {}
     target:
@@ -109,6 +116,7 @@ color_loop:
 white:
   alias: White
   sequence:
+  - service: script.rainbow
   - data:
       brightness: 255
       effect: None
@@ -121,6 +129,9 @@ white:
       entity_id: light.shapes_007f
     data:
       brightness_pct: 100
+  - service: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.automating
   - data: {}
     service: homeassistant.turn_on
     target:
@@ -130,6 +141,9 @@ white:
       - switch.light_switch
       - switch.u6_pro_led
       - switch.mixer_plug
+  - service: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.automating
   mode: single
 '1574728463699':
   alias: Music
@@ -144,9 +158,14 @@ white:
       - switch.u6_pro_led
       - switch.mixer_plug
       - light.shapes_007f
+  - service: media_player.play_media
+    target:
+      entity_id: media_player.bedroom_dot
+    data:
+      media_content_type: routine
+      media_content_id: Rainbow
   - data:
       effect: Music
-      white_value: 0
     service: light.turn_on
     target:
       entity_id: light.bedroom_lights
@@ -260,6 +279,9 @@ call:
     data:
       brightness_pct: 10
       effect: '{{ states(''input_select.nanoleaf_scenes'') }}'
+  - service: script.turn_on
+    target:
+      entity_id: script.cyan
   - data: {}
     service: homeassistant.turn_off
     target:
@@ -313,63 +335,49 @@ ac_off:
 color_desktop:
   alias: Color Desktop
   sequence:
-  - service: homeassistant.turn_on
-    data: {}
+  - service: script.turn_on
     target:
-      entity_id:
-      - input_boolean.automating
-      - switch.clock
-      - switch.light_switch
-      - switch.u6_pro_led
-      - switch.mixer_plug
-  - data:
-      brightness: 255
-      effect: Color Loop
-      rgbw_color:
-      - 0
-      - 255
-      - 255
-      - 0
-    service: light.turn_on
-    target:
-      entity_id:
-      - light.bedroom_lights
+      entity_id: script.color_loop
   - service: light.turn_on
     target:
       entity_id: light.shapes_007f
     data:
       brightness_pct: 70
-  - condition: state
-    entity_id: binary_sensor.closet
-    state: 'on'
-  - service: light.turn_on
-    target:
-      entity_id: light.closet_lights
-    data:
-      effect: Color Loop
   mode: single
 white_desktop:
   alias: White Desktop
   sequence:
-  - data:
-      brightness: 255
-      effect: None
-      color_temp: 330
-    service: light.turn_on
+  - service: script.turn_on
     target:
-      entity_id: light.fan_lights
+      entity_id: script.white
   - service: light.turn_on
     target:
       entity_id: light.shapes_007f
     data:
       brightness_pct: 70
-  - data: {}
-    service: homeassistant.turn_on
+  mode: single
+cyan:
+  alias: Cyan
+  sequence:
+  - service: light.turn_on
     target:
       entity_id:
-      - switch.clock
-      - script.1591907627081
-      - switch.light_switch
-      - switch.u6_pro_led
-      - switch.mixer_plug
+      - light.glide
+      - light.lamp
+    data:
+      rgb_color:
+      - 0
+      - 126
+      - 255
+      brightness_pct: 1
+  mode: single
+rainbow:
+  alias: Rainbow
+  sequence:
+  - service: media_player.play_media
+    target:
+      entity_id: media_player.bedroom_dot
+    data:
+      media_content_type: routine
+      media_content_id: rainbow
   mode: single

@@ -223,7 +223,7 @@
   description: Control power to Apartment Wyze cameras based on home presence
   trigger:
   - platform: time_pattern
-    minutes: /1
+    minutes: /2
   - platform: zone
     entity_id: person.taylor
     zone: zone.taylor_s_home
@@ -823,7 +823,6 @@
       hours: 0
       minutes: 0
       seconds: 8
-      milliseconds: 0
   condition:
   - condition: state
     entity_id: switch.living_room_tv
@@ -834,7 +833,7 @@
       entity_id: camera.garage
     data:
       filename: /config/www/tmp/snapshot_garage.jpg
-  - service: notify.fire_tv
+  - service: notify.android_tv_fire_tv
     data:
       message: ​
       title: Garage Door Opened
@@ -942,7 +941,8 @@
   description: ''
   trigger:
   - platform: template
-    value_template: '{{ states(''sensor.desktop_idle_time'')|float < 10 }}'
+    value_template: '{{ states(''sensor.desktop_idle_time'')|float(default=15) < 10
+      }}'
   condition:
   - condition: state
     entity_id: light.shapes_007f
@@ -1004,8 +1004,7 @@
     for:
       hours: 0
       minutes: 0
-      seconds: 15
-      milliseconds: 0
+      seconds: 50
   condition: []
   action:
   - service: switch.turn_off
@@ -1019,4 +1018,8 @@
   - service: switch.turn_on
     target:
       entity_id: switch.moca_plug
+  - service: notify.persistent_notification
+    data:
+      message: Restarting MoCA Network
+      title: MoCA Network Down
   mode: single

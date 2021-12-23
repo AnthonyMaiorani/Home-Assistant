@@ -46,7 +46,7 @@
 #          entity_id: sensor.tv_plug_wattage
     ac:
       friendly_name: Air Conditioner
-      value_template: "{{ states('sensor.ac_plug_wattage')|float > 7 }}"
+      value_template: "{{ states('sensor.ac_plug_wattage')|float(default=0) > 7 }}"
       turn_on:
         - service: remote.send_command
           data:
@@ -67,7 +67,7 @@
           entity_id: sensor.ac_plug_wattage
     windows:
       friendly_name: Desktop
-      value_template: "{{ states('sensor.monitor_plug_wattage')|float > 6 }}"
+      value_template: "{{ states('sensor.monitor_plug_wattage')|float(default=0) > 6 }}"
       turn_on:
         - service: mqtt.publish
           data:
