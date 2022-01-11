@@ -42,9 +42,7 @@ stuff_off:
       - light.bedroom_lights
       - light.closet_lights
       - switch.u6_pro_led
-      - switch.mixer_plug
       - light.shapes_007f
-      - light.lamp
       - light.glide
   alias: Night
   mode: single
@@ -56,6 +54,9 @@ fan_off:
       entity_id: light.shapes_007f
     data:
       brightness_pct: 40
+  - service: script.turn_on
+    target:
+      entity_id: script.rainbow
   - data: {}
     service: homeassistant.turn_on
     target:
@@ -65,9 +66,6 @@ fan_off:
       - switch.clock
       - switch.light_switch
       - switch.u6_pro_led
-      - switch.mixer_plug
-      - light.lamp
-      - light.glide
   - data: {}
     entity_id: light.fan_lights
     service: light.turn_off
@@ -86,7 +84,6 @@ color_loop:
       - switch.clock
       - switch.light_switch
       - switch.u6_pro_led
-      - switch.mixer_plug
   - data:
       brightness: 255
       effect: Color Loop
@@ -140,10 +137,10 @@ white:
       - script.1591907627081
       - switch.light_switch
       - switch.u6_pro_led
-      - switch.mixer_plug
   - service: input_boolean.turn_off
     target:
-      entity_id: input_boolean.automating
+      entity_id:
+      - input_boolean.automating
   mode: single
 '1574728463699':
   alias: Music
@@ -156,7 +153,6 @@ white:
       - switch.clock
       - switch.light_switch
       - switch.u6_pro_led
-      - switch.mixer_plug
       - light.shapes_007f
   - service: media_player.play_media
     target:
@@ -182,7 +178,6 @@ white:
       - switch.windows
       - switch.clock
       - switch.u6_pro_led
-      - switch.mixer_plug
       - light.shapes_007f
   - service: input_boolean.turn_off
     target:
@@ -262,6 +257,9 @@ temp_down:
 call:
   alias: Call
   sequence:
+  - service: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.govee_cyan
   - service: light.turn_on
     target:
       entity_id:
@@ -292,14 +290,14 @@ call:
       - light.desk_lights
       - automation.ensure_stuff_off
       - switch.u6_pro_led
-      - switch.mixer_plug
       - light.closet_lights
   - service: cover.close_cover
     target:
       entity_id: cover.bedroom_blinds
   - service: input_boolean.turn_on
     target:
-      entity_id: input_boolean.automating
+      entity_id:
+      - input_boolean.automating
   mode: single
   icon: mdi:phone
 ac_off:
@@ -342,7 +340,42 @@ color_desktop:
     target:
       entity_id: light.shapes_007f
     data:
-      brightness_pct: 70
+      brightness_pct: 60
+  - service: mqtt.publish
+    data:
+      topic: iotlink/workgroup/desktop-pc/commands/run
+      payload: '{"command": "C:\\Homebridge\\open-cue-cli-windows-x64\\open-cue-cli.bat",
+        "path": "C:\\Homebridge\\open-cue-cli-windows-x64\\", "args": "profile activate
+        rainbow", "user": "", "visible": "false", "fallback": "true"}'
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 1
+      milliseconds: 0
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.webcam
+        state: 'on'
+      sequence:
+      - service: light.turn_on
+        target:
+          entity_id: light.shapes_007f
+        data:
+          brightness_pct: 50
+          color_temp: 178
+      - service: mqtt.publish
+        data:
+          topic: iotlink/workgroup/desktop-pc/commands/run
+          payload: '{"command": "C:\\Homebridge\\razer\\WebCameraConfig.exe", "path":
+            "C:\\Homebridge\\razer\\", "args": "--profile color", "user": "", "visible":
+            "false", "fallback": "true"}'
+    default:
+    - service: light.turn_on
+      target:
+        entity_id: light.shapes_007f
+      data:
+        brightness_pct: 60
   mode: single
 white_desktop:
   alias: White Desktop
@@ -350,11 +383,41 @@ white_desktop:
   - service: script.turn_on
     target:
       entity_id: script.white
-  - service: light.turn_on
-    target:
-      entity_id: light.shapes_007f
+  - service: mqtt.publish
     data:
-      brightness_pct: 70
+      topic: iotlink/workgroup/desktop-pc/commands/run
+      payload: '{"command": "C:\\Homebridge\\open-cue-cli-windows-x64\\open-cue-cli.bat",
+        "path": "C:\\Homebridge\\open-cue-cli-windows-x64\\", "args": "profile activate
+        rainbow", "user": "", "visible": "false", "fallback": "true"}'
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 1
+      milliseconds: 0
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.webcam
+        state: 'on'
+      sequence:
+      - service: light.turn_on
+        target:
+          entity_id: light.shapes_007f
+        data:
+          brightness_pct: 50
+          color_temp: 178
+      - service: mqtt.publish
+        data:
+          topic: iotlink/workgroup/desktop-pc/commands/run
+          payload: '{"command": "C:\\Homebridge\\razer\\WebCameraConfig.exe", "path":
+            "C:\\Homebridge\\razer\\", "args": "--profile color", "user": "", "visible":
+            "false", "fallback": "true"}'
+    default:
+    - service: light.turn_on
+      target:
+        entity_id: light.shapes_007f
+      data:
+        brightness_pct: 70
   mode: single
 cyan:
   alias: Cyan
@@ -363,7 +426,6 @@ cyan:
     target:
       entity_id:
       - light.glide
-      - light.lamp
     data:
       rgb_color:
       - 0
@@ -374,10 +436,24 @@ cyan:
 rainbow:
   alias: Rainbow
   sequence:
-  - service: media_player.play_media
-    target:
-      entity_id: media_player.bedroom_dot
-    data:
-      media_content_type: routine
-      media_content_id: rainbow
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_boolean.govee_cyan
+        state: 'on'
+      sequence:
+      - service: media_player.play_media
+        target:
+          entity_id: media_player.bedroom_dot
+        data:
+          media_content_type: routine
+          media_content_id: rainbow
+      - service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.govee_cyan
+    default:
+    - service: light.turn_on
+      target:
+        entity_id:
+        - light.glide
   mode: single

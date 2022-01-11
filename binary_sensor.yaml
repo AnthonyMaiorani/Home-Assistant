@@ -12,7 +12,6 @@
   payload_off: "off"
   off_delay: 30
   device_class: motion
-- platform: ping
-  name: "Master Bedroom G1100"
-  host: 192.168.1.254
-  scan_interval: 6
+- platform: mqtt
+  name: "Desktop Idle Time"
+  state_topic: "homeassistant/sensor/desktop-pc/Webcam/state"

@@ -127,10 +127,6 @@ switch:
         - homeassistant.service:
             service: light.turn_off
             data:
-              entity_id: light.lamp
-        - homeassistant.service:
-            service: light.turn_off
-            data:
               entity_id: light.glide
         - homeassistant.service:
             service: light.turn_off
