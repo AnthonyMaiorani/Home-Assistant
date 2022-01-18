@@ -20,6 +20,17 @@
             entity_id:
               - script.stuff_off
               - script.ac_off
+    lock:
+      friendly_name: Front Door Lock
+      value_template: "{{ is_state('lock.front_door', 'locked') }}"
+      turn_on:
+        - service: lock.lock
+          entity_id:
+            - lock.front_door
+      turn_off:
+        - service: lock.unlock
+          entity_id:
+            - lock.front_door
     ac:
       friendly_name: Air Conditioner
       value_template: "{{ states('sensor.ac_plug_wattage')|float(default=0) > 7 }}"

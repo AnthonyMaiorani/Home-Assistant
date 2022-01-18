@@ -53,10 +53,11 @@ fan_off:
     target:
       entity_id: light.shapes_007f
     data:
-      brightness_pct: 40
+      brightness_pct: 30
   - service: script.turn_on
     target:
-      entity_id: script.rainbow
+      entity_id:
+      - script.cyan
   - data: {}
     service: homeassistant.turn_on
     target:
@@ -66,6 +67,7 @@ fan_off:
       - switch.clock
       - switch.light_switch
       - switch.u6_pro_led
+      - input_boolean.govee_cyan
   - data: {}
     entity_id: light.fan_lights
     service: light.turn_off
@@ -117,7 +119,7 @@ white:
   - data:
       brightness: 255
       effect: None
-      color_temp: 330
+      color_temp: 400
     service: light.turn_on
     target:
       entity_id: light.fan_lights
@@ -145,26 +147,17 @@ white:
 '1574728463699':
   alias: Music
   sequence:
-  - data: {}
-    service: homeassistant.turn_on
-    target:
-      entity_id:
-      - input_boolean.automating
-      - switch.clock
-      - switch.light_switch
-      - switch.u6_pro_led
-      - light.shapes_007f
-  - service: media_player.play_media
-    target:
-      entity_id: media_player.bedroom_dot
-    data:
-      media_content_type: routine
-      media_content_id: Rainbow
+  - service: script.color_loop
   - data:
       effect: Music
     service: light.turn_on
     target:
       entity_id: light.bedroom_lights
+  - service: light.turn_on
+    target:
+      entity_id: light.desk_lights
+    data:
+      brightness_pct: 90
   mode: single
 '1576649794372':
   alias: Bed
@@ -199,6 +192,7 @@ white:
   - data:
       brightness: 255
       effect: Color Loop
+      color_name: cyan
     service: light.turn_on
     target:
       entity_id:
@@ -336,11 +330,6 @@ color_desktop:
   - service: script.turn_on
     target:
       entity_id: script.color_loop
-  - service: light.turn_on
-    target:
-      entity_id: light.shapes_007f
-    data:
-      brightness_pct: 60
   - service: mqtt.publish
     data:
       topic: iotlink/workgroup/desktop-pc/commands/run
@@ -350,7 +339,7 @@ color_desktop:
   - delay:
       hours: 0
       minutes: 0
-      seconds: 1
+      seconds: 2
       milliseconds: 0
   - choose:
     - conditions:
@@ -392,7 +381,7 @@ white_desktop:
   - delay:
       hours: 0
       minutes: 0
-      seconds: 1
+      seconds: 2
       milliseconds: 0
   - choose:
     - conditions:

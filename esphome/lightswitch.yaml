@@ -117,10 +117,6 @@ switch:
             data:
               entity_id: switch.u6_pro_led
         - homeassistant.service:
-            service: switch.turn_off
-            data:
-              entity_id: switch.mixer_plug
-        - homeassistant.service:
             service: light.turn_off
             data:
               entity_id: light.shapes_007f

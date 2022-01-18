@@ -453,9 +453,6 @@
   alias: Closet Lights
   description: ''
   trigger:
-  - platform: homeassistant
-    event: start
-    id: startup
   - platform: state
     entity_id: binary_sensor.closet
     to: 'on'
@@ -695,6 +692,28 @@
         entity_id: light.shapes_007f
       data:
         brightness_pct: 40
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: light.fan_lights
+        state: 'off'
+      - condition: state
+        entity_id: light.desk_lights
+        state: 'on'
+      sequence:
+      - data:
+          brightness: 255
+          effect: Color Loop
+          rgbw_color:
+          - 0
+          - 255
+          - 255
+          - 0
+        service: light.turn_on
+        target:
+          entity_id:
+          - light.bedroom_lights
+    default: []
   mode: single
 - id: '1639192672045'
   alias: Nanoleaf Scene Changer
@@ -792,6 +811,9 @@
     - conditions:
       - condition: trigger
         id: 'off'
+      - condition: state
+        entity_id: light.desk_lights
+        state: 'on'
       sequence:
       - service: light.turn_on
         target:
@@ -825,4 +847,48 @@
       entity_id:
       - input_boolean.cotton_candy_trigger
       - input_boolean.blue_vibes_trigger
+  mode: single
+- id: '1642463769779'
+  alias: Color Loop
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: light.fan_lights
+    attribute: effect
+    to: Color Loop
+    id: 'on'
+  - platform: state
+    entity_id: light.fan_lights
+    id: 'off'
+    to: None
+    attribute: effect
+  - platform: state
+    entity_id: light.fan_lights
+    to: 'off'
+    id: off 2
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: 'on'
+      sequence:
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.color_loop
+    - conditions:
+      - condition: trigger
+        id: 'off'
+      sequence:
+      - service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.color_loop
+    - conditions:
+      - condition: trigger
+        id: off 2
+      sequence:
+      - service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.color_loop
+    default: []
   mode: single
