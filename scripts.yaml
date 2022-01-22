@@ -53,7 +53,7 @@ fan_off:
     target:
       entity_id: light.shapes_007f
     data:
-      brightness_pct: 30
+      brightness_pct: 31
   - service: script.turn_on
     target:
       entity_id:
@@ -393,13 +393,13 @@ white_desktop:
         target:
           entity_id: light.shapes_007f
         data:
-          brightness_pct: 50
+          brightness_pct: 60
           color_temp: 178
       - service: mqtt.publish
         data:
           topic: iotlink/workgroup/desktop-pc/commands/run
           payload: '{"command": "C:\\Homebridge\\razer\\WebCameraConfig.exe", "path":
-            "C:\\Homebridge\\razer\\", "args": "--profile color", "user": "", "visible":
+            "C:\\Homebridge\\razer\\", "args": "--profile white", "user": "", "visible":
             "false", "fallback": "true"}'
     default:
     - service: light.turn_on

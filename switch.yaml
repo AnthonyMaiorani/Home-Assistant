@@ -72,7 +72,7 @@
           data:
             topic: "iotlink/workgroup/desktop-pc/commands/run"
             payload: '{"command": "C:\\Windows\\explorer.exe", "path": "C:\\Windows\\", "args": "C:\\Homebridge\\offsilent.lnk", "user": "", "visible": "false", "fallback": "true"}'
-        - delay: 18
+        - delay: 20
         - service: homeassistant.update_entity
           entity_id: sensor.monitor_plug_wattage
     living_room_tv:
