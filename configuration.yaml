@@ -84,11 +84,6 @@ browser_mod:
   disable:
     - all
 
-withings:
-  client_id: !secret withings_id
-  client_secret: !secret withings_secret
-  use_webhook: true
-
 spotify: # still required for ui integration
   client_id: !secret spotify_id
   client_secret: !secret spotify_secret
