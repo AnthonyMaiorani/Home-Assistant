@@ -51,6 +51,11 @@
         - service: remote.send_command
           data:
             entity_id: remote.bedroom_rm4_remote
+            command: 'off'
+            device: case
+        - service: remote.send_command
+          data:
+            entity_id: remote.bedroom_rm4_remote
             command: 'on'
             device: case
       turn_off:
