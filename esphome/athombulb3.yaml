@@ -8,6 +8,7 @@ wifi:
   ssid: !secret ssid
   password: !secret password
   fast_connect: on
+  use_address: !secret athombulb3
   ap: {}
 
 captive_portal:

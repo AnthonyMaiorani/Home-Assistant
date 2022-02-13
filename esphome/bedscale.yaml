@@ -1,0 +1,44 @@
+esphome:
+  name: bedscale
+  platform: ESP8266
+  board: d1_mini
+
+wifi:
+  ssid: !secret ssid
+  password: !secret password
+  fast_connect: on
+  ap: {}
+  power_save_mode: none
+
+captive_portal:
+logger:
+api:
+ota:
+
+sensor:
+  - platform: hx711
+    name: "Bed Weight"
+    id: bed_weight
+    dout_pin: D4
+    clk_pin: RX
+    filters:
+      - calibrate_linear:
+          - 336700 -> 0
+          - 130000 -> 300
+      - sliding_window_moving_average:
+          window_size: 5
+          send_every: 5
+    update_interval: .5s
+    unit_of_measurement: lbs
+    accuracy_decimals: 2
+    
+binary_sensor:
+  - platform: template
+    name: "Bed Occupancy"
+    device_class: occupancy
+    lambda: |-
+      if (id(bed_weight).state > 10) {
+        return true;
+      } else {
+        return false;
+      }      

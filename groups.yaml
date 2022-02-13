@@ -10,6 +10,7 @@ room: # used for ha menu
     - switch.ac
     - script.1574728463699
     - script.call
+    - script.1631175520487
 apartment:
   name: Apartment Cameras
   entities:

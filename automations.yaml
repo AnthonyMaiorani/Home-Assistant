@@ -747,43 +747,6 @@
     data:
       effect: '{{ states(''input_select.nanoleaf_scenes'') }}'
   mode: single
-- id: '1640976624514'
-  alias: Mousepad
-  description: ''
-  trigger:
-  - platform: state
-    entity_id: switch.windows
-    to: 'on'
-    id: 'on'
-  - platform: state
-    entity_id: switch.windows
-    to: 'off'
-    id: 'off'
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: 'on'
-      sequence:
-      - service: mqtt.publish
-        data:
-          topic: iotlink/workgroup/desktop-pc/commands/run
-          payload: '{"command": "C:\\Homebridge\\open-cue-cli-windows-x64\\open-cue-cli.bat",
-            "path": "C:\\Homebridge\\open-cue-cli-windows-x64\\", "args": "profile
-            activate rainbow", "user": "", "visible": "false", "fallback": "true"}'
-    - conditions:
-      - condition: trigger
-        id: 'off'
-      sequence:
-      - service: mqtt.publish
-        data:
-          topic: iotlink/workgroup/desktop-pc/commands/run
-          payload: '{"command": "C:\\Homebridge\\open-cue-cli-windows-x64\\open-cue-cli.bat",
-            "path": "C:\\Homebridge\\open-cue-cli-windows-x64\\", "args": "profile
-            deactivate rainbow", "user": "", "visible": "false", "fallback": "true"}'
-    default: []
-  mode: single
 - id: '1641384613637'
   alias: Webcam Lighting
   description: ''
@@ -918,4 +881,38 @@
         target:
           entity_id: input_boolean.color_loop
     default: []
+  mode: single
+- id: '1644476253725'
+  alias: Bed Motion withings
+  description: If motion detected in bed under certain circumstances, turn off overhead
+    lights.
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.withings_in_bed_anthony_m
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: light.fan_lights
+    state: 'on'
+  - condition: state
+    entity_id: binary_sensor.bedroom_door
+    state: 'off'
+  - condition: state
+    entity_id: input_boolean.bedmotion
+    state: 'off'
+  action:
+  - service: script.fan_off
+    data: {}
+  mode: single
+- id: '1644477640914'
+  alias: New Automation
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.withings_in_bed_anthony_m
+    to: 'off'
+  condition: []
+  action:
+  - service: script.color_loop
+    data: {}
   mode: single
