@@ -53,6 +53,8 @@
             entity_id: remote.bedroom_rm4_remote
             command: 'off'
             device: case
+            num_repeats: 5
+            delay_secs: 0.4
         - service: remote.send_command
           data:
             entity_id: remote.bedroom_rm4_remote

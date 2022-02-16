@@ -130,27 +130,6 @@
     target:
       entity_id: input_boolean.awake
   mode: single
-- id: '1620642580296'
-  alias: Bed Motion
-  description: If motion detected in bed under certain circumstances, turn off overhead
-    lights.
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.wyzemotion
-    to: 'on'
-  condition:
-  - condition: state
-    entity_id: light.fan_lights
-    state: 'on'
-  - condition: state
-    entity_id: binary_sensor.bedroom_door
-    state: 'off'
-  - condition: state
-    entity_id: input_boolean.bedmotion
-    state: 'off'
-  action:
-  - service: script.fan_off
-  mode: single
 - id: '1620710706685'
   alias: Color Loop
   description: Adjust color loop state
@@ -883,12 +862,12 @@
     default: []
   mode: single
 - id: '1644476253725'
-  alias: Bed Motion withings
+  alias: Bed Scale Motion
   description: If motion detected in bed under certain circumstances, turn off overhead
     lights.
   trigger:
   - platform: state
-    entity_id: binary_sensor.withings_in_bed_anthony_m
+    entity_id: binary_sensor.bed_occupancy
     to: 'on'
   condition:
   - condition: state
@@ -904,15 +883,25 @@
   - service: script.fan_off
     data: {}
   mode: single
-- id: '1644477640914'
+- id: '1644995135915'
   alias: New Automation
   description: ''
   trigger:
   - platform: state
-    entity_id: binary_sensor.withings_in_bed_anthony_m
+    entity_id: binary_sensor.bed_occupancy
     to: 'off'
-  condition: []
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 1.5
+  condition:
+  - condition: time
+    after: 07:00:00
+    before: 01:00:00
+  - condition: state
+    entity_id: light.desk_lights
+    state: 'on'
   action:
-  - service: script.color_loop
+  - service: script.white
     data: {}
   mode: single

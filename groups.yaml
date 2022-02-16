@@ -11,6 +11,14 @@ room: # used for ha menu
     - script.1574728463699
     - script.call
     - script.1631175520487
+misc_leds:
+  name: Other Room Lights
+  entities: 
+    - switch.light_switch
+    - switch.mousepad
+    - switch.u6_pro_led
+    - switch.clock
+    - switch.case_lights
 apartment:
   name: Apartment Cameras
   entities:

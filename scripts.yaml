@@ -1,5 +1,9 @@
 stuff_on:
   sequence:
+  - service: script.turn_on
+    data: {}
+    target:
+      entity_id: script.white
   - choose:
     - conditions:
       - condition: sun
@@ -13,12 +17,10 @@ stuff_on:
         target:
           entity_id: cover.bedroom_blinds
     default: []
-  - data: {}
-    service: homeassistant.turn_on
+  - service: switch.turn_on
+    data: {}
     target:
-      entity_id:
-      - script.white
-      - switch.windows
+      entity_id: switch.windows
   - data:
       option: Home
     entity_id: input_select.anthony
@@ -37,44 +39,37 @@ stuff_off:
     target:
       entity_id:
       - switch.windows
-      - switch.light_switch
-      - switch.clock
       - light.bedroom_lights
       - light.closet_lights
-      - switch.u6_pro_led
       - light.shapes_007f
       - light.glide
-      - switch.mousepad
+      - group.misc_leds
   alias: Night
   mode: single
 fan_off:
   alias: Lights Off
   sequence:
-  - service: light.turn_on
-    target:
-      entity_id: light.shapes_007f
-    data:
-      brightness_pct: 25
   - service: script.turn_on
     target:
       entity_id:
       - script.cyan
     data: {}
   - data: {}
+    entity_id: light.fan_lights
+    service: light.turn_off
+  - service: light.turn_on
+    target:
+      entity_id: light.shapes_007f
+    data:
+      brightness_pct: 25
+  - data: {}
     service: homeassistant.turn_on
     target:
       entity_id:
       - input_boolean.automating
       - script.1591907627081
-      - switch.clock
-      - switch.light_switch
-      - switch.u6_pro_led
       - input_boolean.govee_cyan
-      - switch.mousepad
-      - switch.case_lights
-  - data: {}
-    entity_id: light.fan_lights
-    service: light.turn_off
+      - group.misc_leds
   mode: single
 color_loop:
   alias: Color
@@ -88,11 +83,7 @@ color_loop:
     target:
       entity_id:
       - input_boolean.automating
-      - switch.clock
-      - switch.light_switch
-      - switch.u6_pro_led
-      - switch.mousepad
-      - switch.case_lights
+      - group.misc_leds
   - data:
       brightness: 255
       effect: Color Loop
@@ -128,8 +119,10 @@ color_loop:
 white:
   alias: White
   sequence:
-  - service: script.rainbow
+  - service: script.turn_on
     data: {}
+    target:
+      entity_id: script.rainbow
   - data:
       brightness: 255
       effect: None
@@ -142,30 +135,21 @@ white:
       entity_id: light.shapes_007f
     data:
       brightness_pct: 100
-  - service: input_boolean.turn_on
-    target:
-      entity_id: input_boolean.automating
-    data: {}
   - data: {}
     service: homeassistant.turn_on
     target:
       entity_id:
-      - switch.clock
       - script.1591907627081
-      - switch.light_switch
-      - switch.u6_pro_led
-      - switch.mousepad
-      - switch.case_lights
-  - service: input_boolean.turn_off
-    target:
-      entity_id:
+      - group.misc_leds
       - input_boolean.automating
-    data: {}
   mode: single
 '1574728463699':
   alias: Music
   sequence:
-  - service: script.color_loop
+  - service: script.turn_on
+    data: {}
+    target:
+      entity_id: script.color_loop
   - data:
       effect: Music
     service: light.turn_on
@@ -184,14 +168,8 @@ white:
     service: homeassistant.turn_on
     target:
       entity_id:
-      - input_boolean.automating
       - script.fan_off
       - switch.windows
-      - switch.clock
-      - switch.u6_pro_led
-      - light.shapes_007f
-      - switch.mousepad
-      - switch.case_lights
   - service: input_boolean.turn_off
     target:
       entity_id: input_boolean.bedmotion
@@ -274,7 +252,13 @@ call:
   sequence:
   - service: input_boolean.turn_on
     target:
-      entity_id: input_boolean.govee_cyan
+      entity_id:
+      - input_boolean.govee_cyan
+      - input_boolean.automating
+    data: {}
+  - service: script.turn_on
+    target:
+      entity_id: script.cyan
     data: {}
   - service: light.turn_on
     target:
@@ -289,14 +273,20 @@ call:
       - 255
   - service: light.turn_on
     target:
+      entity_id:
+      - light.bed_lights
+    data:
+      effect: None
+      rgb_color:
+      - 0
+      - 255
+      - 255
+  - service: light.turn_on
+    target:
       entity_id: light.shapes_007f
     data:
       brightness_pct: 10
       effect: '{{ states(''input_select.nanoleaf_scenes'') }}'
-  - service: script.turn_on
-    target:
-      entity_id: script.cyan
-    data: {}
   - data: {}
     service: homeassistant.turn_off
     target:
@@ -309,15 +299,6 @@ call:
       - switch.u6_pro_led
       - light.closet_lights
       - switch.case_lights
-  - service: cover.close_cover
-    target:
-      entity_id: cover.bedroom_blinds
-    data: {}
-  - service: input_boolean.turn_on
-    target:
-      entity_id:
-      - input_boolean.automating
-    data: {}
   mode: single
   icon: mdi:phone
 ac_off:
