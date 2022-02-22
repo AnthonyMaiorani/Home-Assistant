@@ -30,11 +30,11 @@ light:
     green: output_green
     blue: output_blue
     restore_mode: RESTORE_DEFAULT_OFF
-    on_turn_on:
-      - light.turn_on: 
-          id: bedlights
-          blue: 1.0
-          effect: "Color Loop"
+#    on_turn_on:
+#      - light.turn_on: 
+#          id: bedlights
+#          blue: 1.0
+#          effect: "Color Loop"
     effects:
       - random:
           name: Music

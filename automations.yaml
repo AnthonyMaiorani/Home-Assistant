@@ -869,22 +869,46 @@
   - platform: state
     entity_id: binary_sensor.bed_occupancy
     to: 'on'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0.6
   condition:
-  - condition: state
-    entity_id: light.fan_lights
-    state: 'on'
-  - condition: state
-    entity_id: binary_sensor.bedroom_door
-    state: 'off'
   - condition: state
     entity_id: input_boolean.bedmotion
     state: 'off'
   action:
-  - service: script.fan_off
-    data: {}
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: light.fan_lights
+        state: 'on'
+      sequence:
+      - service: scene.create
+        data:
+          scene_id: before
+          snapshot_entities:
+          - light.fan_lights
+      - service: script.turn_on
+        data: {}
+        target:
+          entity_id: script.fan_off
+    - conditions:
+      - condition: state
+        entity_id: light.bed_lights
+        state: 'on'
+      - condition: state
+        entity_id: light.shapes_007f
+        state: 'off'
+      sequence:
+      - service: light.turn_off
+        data: {}
+        target:
+          entity_id: light.bed_lights
+    default: []
   mode: single
 - id: '1644995135915'
-  alias: New Automation
+  alias: bed got up
   description: ''
   trigger:
   - platform: state
@@ -893,15 +917,112 @@
     for:
       hours: 0
       minutes: 0
-      seconds: 1.5
-  condition:
-  - condition: time
-    after: 07:00:00
-    before: 01:00:00
-  - condition: state
-    entity_id: light.desk_lights
-    state: 'on'
+      seconds: 3
+  condition: []
   action:
-  - service: script.white
-    data: {}
+  - choose:
+    - conditions:
+      - condition: time
+        after: 07:00:00
+        before: '22:00:00'
+      - condition: state
+        entity_id: light.bed_lights
+        state: 'on'
+      sequence:
+      - service: script.turn_on
+        data: {}
+        target:
+          entity_id: script.rainbow
+      - service: scene.turn_on
+        target:
+          entity_id: scene.before
+        data: {}
+      - choose:
+        - conditions:
+          - condition: state
+            entity_id: light.desk_lights
+            state: 'on'
+          sequence:
+          - service: light.turn_on
+            data:
+              brightness_pct: 100
+            target:
+              entity_id: light.shapes_007f
+        default: []
+    - conditions:
+      - condition: state
+        entity_id: light.bed_lights
+        state: 'off'
+      sequence:
+      - service: light.turn_on
+        data:
+          rgb_color:
+          - 255
+          - 255
+          - 255
+          brightness_pct: 20
+          effect: None
+          transition: 2
+        target:
+          entity_id: light.bed_lights
+      - wait_for_trigger:
+        - platform: state
+          entity_id: binary_sensor.bed_occupancy
+          to: 'on'
+      - condition: state
+        entity_id: light.shapes_007f
+        state: 'off'
+      - service: light.turn_off
+        data:
+          transition: 2
+        target:
+          entity_id: light.bed_lights
+    default: []
+  mode: single
+- id: '1645309609782'
+  alias: night light
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.bed_occupancy
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 3
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: light.bed_lights
+        state: 'off'
+      - condition: sun
+        before: sunrise
+        after: sunset
+      sequence:
+      - service: light.turn_on
+        data:
+          rgb_color:
+          - 255
+          - 255
+          - 255
+          brightness_pct: 20
+          effect: None
+          transition: 2
+        target:
+          entity_id: light.bed_lights
+      - wait_for_trigger:
+        - platform: state
+          entity_id: binary_sensor.bed_occupancy
+          to: 'on'
+      - condition: state
+        entity_id: light.shapes_007f
+        state: 'off'
+      - service: light.turn_off
+        data:
+          transition: 2
+        target:
+          entity_id: light.bed_lights
+    default: []
   mode: single

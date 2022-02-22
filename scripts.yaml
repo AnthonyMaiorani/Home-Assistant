@@ -29,11 +29,6 @@ stuff_on:
   mode: single
 stuff_off:
   sequence:
-  - service: cover.set_cover_position
-    data:
-      position: 0
-    target:
-      entity_id: cover.bedroom_blinds
   - data: {}
     service: homeassistant.turn_off
     target:
@@ -44,6 +39,10 @@ stuff_off:
       - light.shapes_007f
       - light.glide
       - group.misc_leds
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id: cover.bedroom_blinds
   alias: Night
   mode: single
 fan_off:
@@ -271,6 +270,7 @@ call:
       - 0
       - 255
       - 255
+      brightness_pct: 100
   - service: light.turn_on
     target:
       entity_id:

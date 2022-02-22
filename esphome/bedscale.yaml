@@ -17,15 +17,16 @@ ota:
 
 sensor:
   - platform: hx711
-    name: "Bed Weight"
+    gain: 128
+#    name: "Bed Weight"
     id: bed_weight
     dout_pin: D4
     clk_pin: RX
     filters:
-      - delta: 1500
+#      - delta: 3000
       - calibrate_linear:
-          - 350000 -> 0
-          - 470000 -> 300
+          - 450000 -> 0
+          - 580000 -> 300
 #      - sliding_window_moving_average:
 #          window_size: 5
 #          send_every: 3
@@ -35,7 +36,7 @@ sensor:
       - lambda: |-
           if (x <= 500) return x;
           else return {};
-    update_interval: .5s
+    update_interval: 350ms
     unit_of_measurement: lbs
     accuracy_decimals: 0
     
@@ -44,7 +45,7 @@ binary_sensor:
     name: "Bed Occupancy"
     device_class: occupancy
     lambda: |-
-      if (id(bed_weight).state > 120) {
+      if (id(bed_weight).state > 180) {
         return true;
       } else {
         return false;
