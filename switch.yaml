@@ -34,6 +34,15 @@
             entity_id:
               - script.stuff_off
               - script.ac_off
+    blinds:
+      turn_on:
+        service: cover.open_cover
+        target:
+          entity_id: cover.bedroom_blinds
+      turn_off:
+        service: cover.close_cover
+        target:
+          entity_id: cover.bedroom_blinds
     lock:
       friendly_name: Front Door Lock
       value_template: "{{ is_state('lock.front_door', 'locked') }}"
@@ -97,6 +106,9 @@
           data:
             topic: "iotlink/workgroup/desktop-pc/commands/run"
             payload: '{"command": "C:\\Windows\\explorer.exe", "path": "C:\\Windows\\", "args": "C:\\Homebridge\\stuffonsilent.lnk", "user": "", "visible": "false", "fallback": "true"}'
+        - service: switch.turn_on
+          target:
+            entity_id: switch.mousepad
         - delay: 13
         - service: homeassistant.update_entity
           entity_id: sensor.monitor_plug_wattage
@@ -105,6 +117,9 @@
           data:
             topic: "iotlink/workgroup/desktop-pc/commands/run"
             payload: '{"command": "C:\\Windows\\explorer.exe", "path": "C:\\Windows\\", "args": "C:\\Homebridge\\offsilent.lnk", "user": "", "visible": "false", "fallback": "true"}'
+        - service: switch.turn_off
+          target:
+            entity_id: switch.mousepad
         - delay: 20
         - service: homeassistant.update_entity
           entity_id: sensor.monitor_plug_wattage

@@ -1,72 +1,36 @@
 - id: '1546210609741'
   alias: Morning Automation
   trigger:
-  - at: '10:00:00'
-    platform: time
-    id: thursday/friday wakeup time
-  - platform: time
-    at: '11:30:00'
-    id: tuesday wakeup time
-  condition:
-  - condition: time
-    weekday:
-    - tue
-    - thu
+  - platform: template
+    value_template: '{% set alarm_time = as_timestamp(states(''sensor.bedroom_dot_next_alarm''))
+      %} {% set current_time = as_timestamp(states(''sensor.date_time'').replace('','',
+      '''')) %} {% set pre_time = 2 %} {{ current_time >= alarm_time - pre_time }}
+
+      '
+  condition: []
   action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: thursday/friday wakeup time
-      - condition: time
-        weekday:
-        - thu
-        - fri
-      sequence:
-      - service: homeassistant.turn_on
-        target:
-          entity_id:
-          - script.white
-          - input_boolean.bedmotion
-      - service: cover.set_cover_position
-        target:
-          entity_id: cover.bedroom_blinds
-        data:
-          position: 100
-      - delay:
-          hours: 0
-          minutes: 5
-          seconds: 0
-          milliseconds: 0
-      - service: input_boolean.turn_off
-        target:
-          entity_id: input_boolean.bedmotion
-    - conditions:
-      - condition: trigger
-        id: tuesday wakeup time
-      - condition: time
-        weekday:
-        - tue
-      sequence:
-      - service: homeassistant.turn_on
-        target:
-          entity_id:
-          - script.white
-          - input_boolean.bedmotion
-      - service: cover.set_cover_position
-        target:
-          entity_id: cover.bedroom_blinds
-        data:
-          position: 100
-      - delay:
-          hours: 0
-          minutes: 5
-          seconds: 0
-          milliseconds: 0
-      - service: input_boolean.turn_off
-        target:
-          entity_id: input_boolean.bedmotion
-    default: []
-  mode: single
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: homeassistant.turn_on
+    target:
+      entity_id:
+      - script.white
+      - input_boolean.bedmotion
+      - switch.blinds
+    data: {}
+  - wait_for_trigger:
+    - platform: state
+      entity_id: binary_sensor.bed_occupancy
+      to: 'off'
+      for:
+        hours: 0
+        minutes: 0
+        seconds: 4
+    continue_on_timeout: false
+  mode: restart
 - id: 43a25b65afed4a4680f5ec81172f11e8
   alias: Startup Actions
   description: Set Theme, Ensure Location Input Select is Updated
@@ -182,20 +146,14 @@
     value_template: '{{states(''person.anthony'') != ''home''}}'
   action:
   - service: script.stuff_off
-  - service: cover.set_cover_position
-    target:
-      entity_id: cover.bedroom_blinds
-    data:
-      position: 0
+    data: {}
   - condition: state
     entity_id: switch.ac
     state: 'on'
   - service: switch.turn_off
     target:
       entity_id: switch.ac
-  - service: cover.close_cover
-    target:
-      entity_id: cover.bedroom_blinds
+    data: {}
   mode: single
 - id: '1621816232606'
   alias: Taylor Wyze Power
@@ -429,11 +387,10 @@
     entity_id: cover.bedroom_blinds
     state: open
   action:
-  - service: cover.set_cover_position
+  - service: switch.turn_off
+    data: {}
     target:
-      entity_id: cover.bedroom_blinds
-    data:
-      position: 0
+      entity_id: switch.blinds
   mode: single
 - id: '1629524719390'
   alias: Closet Lights
@@ -708,18 +665,34 @@
   - platform: time_pattern
     minutes: /30
   condition:
-  - condition: state
-    entity_id: light.shapes_007f
-    state: 'on'
   - condition: template
     value_template: '{{ state_attr(''light.shapes_007f'', ''effect'') != none }}'
   action:
-  - service: input_select.select_option
-    target:
-      entity_id: input_select.nanoleaf_scenes
-    data:
-      option: "{{ state_attr('input_select.nanoleaf_scenes', 'options')\n    | reject('in',\
-        \ [states('input_select.nanoleaf_scenes')])\n    | list | random }}\n"
+  - choose:
+    - conditions:
+      - condition: time
+        after: 09:59:00
+        before: '23:59:00'
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.nanoleaf_scenes
+        data:
+          option: "{{ state_attr('input_select.nanoleaf_scenes', 'options')\n    |\
+            \ reject('in', [states('input_select.nanoleaf_scenes')])\n    | reject('in',\
+            \ [states('light.light.shapes_007f')])\n    | reject('in', 'moonlight')\n\
+            \    | reject('in', 'Lightscape')\n    | reject('in', 'Night light')\n\
+            \    | reject('in', 'Tron Legacy')\n    | list | random }}\n"
+    default:
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.nanoleaf_scenes
+      data:
+        option: "{{ state_attr('input_select.nanoleaf_scenes', 'options')\n    | reject('in',\
+          \ [states('input_select.nanoleaf_scenes')])\n    | list | random }}\n"
+  - condition: state
+    entity_id: light.shapes_007f
+    state: 'on'
   - service: light.turn_on
     target:
       entity_id: light.shapes_007f
@@ -1026,3 +999,41 @@
           entity_id: light.bed_lights
     default: []
   mode: single
+- id: '1645695901319'
+  alias: Enable Morning Automation
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: sensor.bedroom_dot_next_alarm
+    to: unavailable
+    id: no alarm
+  - platform: state
+    entity_id: sensor.bedroom_dot_next_alarm
+    from: unavailable
+    id: alarm
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: alarm
+      sequence:
+      - service: automation.turn_on
+        data: {}
+        target:
+          entity_id: automation.morning_lights_on
+    - conditions:
+      - condition: trigger
+        id: no alarm
+      sequence:
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 5
+          milliseconds: 0
+      - service: automation.turn_off
+        data: {}
+        target:
+          entity_id: automation.morning_lights_on
+    default: []
+  mode: restart

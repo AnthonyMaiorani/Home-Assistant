@@ -33,7 +33,6 @@ stream:
 sun:
 system_health:
 timer:
-updater:
 usb:
 webhook:
 zeroconf:
@@ -41,7 +40,7 @@ zone:
 
 group: !include groups.yaml
 alexa: !include alexa.yaml
-camera: !include camera.yaml
+#camera: !include camera.yaml
 switch: !include switch.yaml
 light: !include light.yaml
 sensor: !include sensor.yaml
