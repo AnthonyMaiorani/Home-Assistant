@@ -572,8 +572,6 @@
       hours: 0
       minutes: 0
       seconds: 1
-      milliseconds: 0
-    from: 'off'
   condition: []
   action:
   - service: notify.mobile_app_iphone
@@ -583,7 +581,7 @@
         image: /local/FP.jpg
   mode: single
 - id: '1635205275088'
-  alias: Car Porch Camera Notification
+  alias: Backyard Camera Notification
   description: ''
   trigger:
   - platform: state
@@ -593,13 +591,11 @@
       hours: 0
       minutes: 0
       seconds: 1
-      milliseconds: 0
-    from: 'off'
   condition: []
   action:
   - service: notify.mobile_app_iphone
     data:
-      message: Person detected at Car
+      message: Person detected at Backyard
       data:
         image: /local/car.jpg
   mode: single
