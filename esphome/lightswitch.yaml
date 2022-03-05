@@ -116,8 +116,12 @@ switch:
 #              - homeassistant.service:
 #                  service: script.white
         - light.turn_on: rgb_light_switch
+        - switch.turn_on: relay2
+        - switch.turn_on: relay4
     on_turn_off: 
         - light.turn_off: rgb_light_switch
+        - switch.turn_off: relay2
+        - switch.turn_off: relay4
 #      then:
 #        - light.turn_off: rgb_light_switch
 #        - homeassistant.service:
@@ -154,7 +158,7 @@ switch:
     internal: true
     id: 'relay2'
     inverted: yes
-    restore_mode: ALWAYS_ON
+    restore_mode: ALWAYS_OFF
   - platform: gpio
     name: "${name} Corner Light Green"
     pin: GPIO12
@@ -168,7 +172,7 @@ switch:
     internal: true
     inverted: yes
     id: 'relay4'
-    restore_mode: ALWAYS_ON
+    restore_mode: ALWAYS_OFF
 
 output:
   - platform: esp8266_pwm
