@@ -51,17 +51,6 @@ http:
     - 192.168.1.0/24
     - ::1
 
-browser_mod:
-  devices:
-    4d4ef3f0-39fcd4ff:
-      name: iPad
-      disable:
-        - light
-        - media_player
-        - sensor
-  disable:
-    - all
-
 spotify: # still required for ui integration
   client_id: !secret spotify_id
   client_secret: !secret spotify_secret
