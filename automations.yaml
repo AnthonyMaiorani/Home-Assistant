@@ -1066,3 +1066,15 @@
           entity_id: automation.morning_lights_on
     default: []
   mode: restart
+- id: '1646818571544'
+  alias: Set Theme
+  description: ''
+  trigger:
+  - platform: homeassistant
+    event: start
+  condition: []
+  action:
+  - service: frontend.set_theme
+    data:
+      name: ios-dark-mode-dark-blue
+  mode: single
