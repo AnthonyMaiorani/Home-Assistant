@@ -49,10 +49,6 @@
       entity_id: input_select.anthony
     data:
       option: Home
-  - service: browser_mod.window_reload
-    data:
-      deviceID:
-      - iPad
   initial_state: true
   mode: single
 - id: '1617634628204'
