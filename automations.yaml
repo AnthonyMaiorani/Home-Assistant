@@ -39,9 +39,8 @@
     platform: homeassistant
   action:
   - data:
-      name: ios-dark-mode
+      name: ios-dark-mode-dark-blue
     service: frontend.set_theme
-  - service: browser_mod.window_reload
   - condition: zone
     entity_id: person.anthony
     zone: zone.home
@@ -50,6 +49,8 @@
       entity_id: input_select.anthony
     data:
       option: Home
+  - service: browser_mod.window_reload
+    data: {}
   initial_state: true
   mode: single
 - id: '1617634628204'
@@ -1066,15 +1067,3 @@
           entity_id: automation.morning_lights_on
     default: []
   mode: restart
-- id: '1646818571544'
-  alias: Set Theme
-  description: ''
-  trigger:
-  - platform: homeassistant
-    event: start
-  condition: []
-  action:
-  - service: frontend.set_theme
-    data:
-      name: ios-dark-mode-dark-blue
-  mode: single
