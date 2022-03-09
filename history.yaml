@@ -10,35 +10,30 @@ exclude:
     - weather
     - person
     - remote
+    - button
+    - group
     - persistent_notification
+  entity_globs:
+    - sensor.home_*
+    - sensor.date*
+    - sensor.time*
+    - switch.power_strip_*
+    - sensor.zone*
+    - sensor.iphone*
+    - sensor.master_*
+    - sensor.guest_*
   entities:
     - switch.lr_vizio
-    - switch.zone_1
-    - switch.zone_2
-    - switch.zone_3
-    - switch.zone_4
-    - switch.zone_5
-    - switch.zone_1
-    - sensor.epson_wf_2760_series
+    - sensor.desktop_idle_time
     - sensor.hacs
-    - binary_sensor.bedroom_motion_sensor
-    - binary_sensor.bedroom_motion_sensor_2
+    - switch.blinds
+    - switch.litter_cam
     - binary_sensor.wyzemotion
     - group.bedroom_motion
     - switch.bedroomtoggle
-    - switch.light_switch_corner_light_blue
-    - switch.light_switch_corner_light_green
-    - switch.light_switch_corner_light_red
     - sun.sun
-    - sensor.iphone_battery_level
-    - sensor.iphone_battery_state
-    - sensor.iphone_bssid
-    - sensor.iphone_connection_type
-    - sensor.iphone_geocoded_location
-    - sensor.iphone_last_update_trigger
-    - sensor.iphone_ssid
-    - sensor.iphone_storage
-    - sensor.steam_76561198069805211
-    - sensor.anthony_s_2nd_echo_dot_next_alarm
-    - sensor.anthony_s_echo_dot_next_alarm
-    - switch.bass
+    - sensor.internet_time
+    - govee.state
+    - sensor.bedroom_dot_next_alarm
+    - switch.bedroom_cam
+    - switch.kitchen_cam_2

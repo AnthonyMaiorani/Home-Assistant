@@ -9,7 +9,6 @@ stuff_on:
       - condition: sun
         before: sunset
         after: sunrise
-        before_offset: +01:00:00
       sequence:
       - service: switch.turn_on
         data: {}
@@ -147,17 +146,31 @@ white:
   - service: script.turn_on
     data: {}
     target:
-      entity_id: script.color_loop
-  - data:
-      effect: Music
-    service: light.turn_on
-    target:
-      entity_id: light.bedroom_lights
+      entity_id: script.govee_music
   - service: light.turn_on
     target:
       entity_id: light.desk_lights
     data:
       brightness_pct: 90
+  - service: light.turn_on
+    data:
+      effect: Music
+    target:
+      entity_id:
+      - light.bedroom_lights
+      - light.closet_lights
+  - service: input_select.select_option
+    target:
+      entity_id: input_select.nanoleaf_music
+    data:
+      option: "{{ state_attr('input_select.nanoleaf_music', 'options')\n    | reject('in',\
+        \ [states('input_select.nanoleaf_music')])\n    | list | random }}\n"
+  - service: light.turn_on
+    target:
+      entity_id: light.shapes_007f
+    data:
+      brightness_pct: 100
+      effect: '{{ states(''input_select.nanoleaf_music'') }}'
   mode: single
 '1576649794372':
   alias: Bed
@@ -451,4 +464,12 @@ rainbow:
       target:
         entity_id:
         - light.glide
+  mode: single
+govee_music:
+  alias: Govee Music
+  sequence:
+  - service: input_boolean.toggle
+    data: {}
+    target:
+      entity_id: input_boolean.music_trigger
   mode: single

@@ -660,15 +660,25 @@
   trigger:
   - platform: time_pattern
     minutes: /30
-  condition:
-  - condition: template
-    value_template: '{{ state_attr(''light.shapes_007f'', ''effect'') != none }}'
+    id: normal
+  - platform: state
+    entity_id: light.smart_bulb_1
+    attribute: effect
+    id: music
+    from: Music
+  condition: []
   action:
   - choose:
     - conditions:
       - condition: time
         after: 09:59:00
         before: '23:59:00'
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: light.smart_bulb_1
+          attribute: Effect
+          state: Music
       sequence:
       - service: input_select.select_option
         target:
@@ -679,6 +689,27 @@
             \ [states('light.light.shapes_007f')])\n    | reject('in', 'moonlight')\n\
             \    | reject('in', 'Lightscape')\n    | reject('in', 'Night light')\n\
             \    | reject('in', 'Tron Legacy')\n    | list | random }}\n"
+      - condition: template
+        value_template: '{{ state_attr(''light.shapes_007f'', ''effect'') != none
+          }}'
+      - service: light.turn_on
+        target:
+          entity_id: light.shapes_007f
+        data:
+          effect: '{{ states(''input_select.nanoleaf_scenes'') }}'
+    - conditions:
+      - condition: state
+        entity_id: light.smart_bulb_1
+        attribute: Effect
+        state: Music
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.nanoleaf_music
+        data:
+          option: "{{ state_attr('input_select.nanoleaf_music', 'options')\n    |\
+            \ reject('in', [states('input_select.nanoleaf_music')])\n    | list |\
+            \ random }}\n"
     default:
     - service: input_select.select_option
       target:
@@ -686,9 +717,15 @@
       data:
         option: "{{ state_attr('input_select.nanoleaf_scenes', 'options')\n    | reject('in',\
           \ [states('input_select.nanoleaf_scenes')])\n    | list | random }}\n"
-  - condition: state
-    entity_id: light.shapes_007f
-    state: 'on'
+    - condition: template
+      value_template: '{{ state_attr(''light.shapes_007f'', ''effect'') != none }}'
+    - service: light.turn_on
+      target:
+        entity_id: light.shapes_007f
+      data:
+        effect: '{{ states(''input_select.nanoleaf_scenes'') }}'
+  - condition: template
+    value_template: '{{ state_attr(''light.shapes_007f'', ''effect'') != none }}'
   - service: light.turn_on
     target:
       entity_id: light.shapes_007f
@@ -959,41 +996,37 @@
       hours: 0
       minutes: 0
       seconds: 3
-  condition: []
+  condition:
+  - condition: state
+    entity_id: light.bed_lights
+    state: 'off'
+  - condition: sun
+    before: sunrise
+    after: sunset
   action:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: light.bed_lights
-        state: 'off'
-      - condition: sun
-        before: sunrise
-        after: sunset
-      sequence:
-      - service: light.turn_on
-        data:
-          rgb_color:
-          - 255
-          - 255
-          - 255
-          brightness_pct: 20
-          effect: None
-          transition: 2
-        target:
-          entity_id: light.bed_lights
-      - wait_for_trigger:
-        - platform: state
-          entity_id: binary_sensor.bed_occupancy
-          to: 'on'
-      - condition: state
-        entity_id: light.shapes_007f
-        state: 'off'
-      - service: light.turn_off
-        data:
-          transition: 2
-        target:
-          entity_id: light.bed_lights
-    default: []
+  - service: light.turn_on
+    data:
+      rgb_color:
+      - 255
+      - 255
+      - 255
+      brightness_pct: 20
+      effect: None
+      transition: 2
+    target:
+      entity_id: light.bed_lights
+  - wait_for_trigger:
+    - platform: state
+      entity_id: binary_sensor.bed_occupancy
+      to: 'on'
+  - condition: state
+    entity_id: light.shapes_007f
+    state: 'off'
+  - service: light.turn_off
+    data:
+      transition: 2
+    target:
+      entity_id: light.bed_lights
   mode: single
 - id: '1645695901319'
   alias: Enable Morning Automation
