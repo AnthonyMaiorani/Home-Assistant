@@ -1,45 +1,18 @@
 # default config parted out
-automation: !include automations.yaml
 config:
 counter:
 dhcp:
 energy:
-history: !include history.yaml
 image:
 input_boolean:
 input_datetime:
 input_number:
 input_select:
 input_text:
-frontend: !include themes.yaml
-logbook:
-  exclude:
-    domains:
-      - input_number
-      - binary_sensor
-      - input_boolean
-      - automation
-      - media_player
-      - group
-      - weather
-      - button
-    entity_globs:
-      - sensor.home_*
-      - sensor.date_*
-      - sensor.time*
-      - sensor.power_strip*
-    entities:
-      - sensor.internet_time
-      - govee.state
-      - sensor.bedroom_dot_next_alarm
-
 map:
-#media_source:
 mobile_app:
 my:
 person:
-scene: !include scenes.yaml
-script: !include scripts.yaml
 ssdp:
 stream:
 sun:
@@ -49,31 +22,25 @@ usb:
 webhook:
 zeroconf:
 zone:
-
+logbook:
+automation: !include automations.yaml
+history: !include history.yaml
+frontend: !include themes.yaml
+scene: !include scenes.yaml
+script: !include scripts.yaml
 group: !include groups.yaml
 alexa: !include alexa.yaml
-#camera: !include camera.yaml
 switch: !include switch.yaml
 light: !include light.yaml
 sensor: !include sensor.yaml
 binary_sensor: !include binary_sensor.yaml
-#media_player: !include media_player.yaml
 
 homeassistant:
-#  auth_providers:
-#    - type: trusted_networks
-#      trusted_networks:
-#        - 192.168.1.1/24
-#      allow_bypass_login: true
   customize: !include customize.yaml
 
 #reduce db size
 recorder:
   purge_keep_days: 3
-
-# to track dlink errors
-system_log:
-  fire_event: true
 
 # reduce login failure messages
 http:
@@ -86,7 +53,7 @@ http:
 
 browser_mod:
   devices:
-    545ddc5f-8ec53414:
+    4d4ef3f0-39fcd4ff:
       name: iPad
       disable:
         - light
