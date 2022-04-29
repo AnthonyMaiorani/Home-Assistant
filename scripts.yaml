@@ -4,17 +4,6 @@ stuff_on:
     data: {}
     target:
       entity_id: script.white
-  - choose:
-    - conditions:
-      - condition: sun
-        before: sunset
-        after: sunrise
-      sequence:
-      - service: switch.turn_on
-        data: {}
-        target:
-          entity_id: switch.blinds
-    default: []
   - service: switch.turn_on
     data: {}
     target:

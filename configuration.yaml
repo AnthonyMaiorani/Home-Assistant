@@ -34,6 +34,7 @@ switch: !include switch.yaml
 light: !include light.yaml
 sensor: !include sensor.yaml
 binary_sensor: !include binary_sensor.yaml
+wake_on_lan:
 
 homeassistant:
   customize: !include customize.yaml
@@ -54,3 +55,7 @@ http:
 spotify: # still required for ui integration
   client_id: !secret spotify_id
   client_secret: !secret spotify_secret
+
+weather:
+  - platform: darksky
+    api_key: !secret darksky

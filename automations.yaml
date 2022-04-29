@@ -19,7 +19,6 @@
       entity_id:
       - script.white
       - input_boolean.bedmotion
-      - switch.blinds
     data: {}
   - wait_for_trigger:
     - platform: state
@@ -146,6 +145,10 @@
   action:
   - service: script.stuff_off
     data: {}
+  - service: input_boolean.turn_off
+    data: {}
+    target:
+      entity_id: input_boolean.bedmotion
   - condition: state
     entity_id: switch.ac
     state: 'on'
@@ -994,14 +997,14 @@
     for:
       hours: 0
       minutes: 0
-      seconds: 3
+      seconds: 4
   condition:
   - condition: state
     entity_id: light.bed_lights
     state: 'off'
-  - condition: sun
-    before: sunrise
-    after: sunset
+  - condition: state
+    entity_id: sun.sun
+    state: below_horizon
   action:
   - service: light.turn_on
     data:
@@ -1026,6 +1029,11 @@
       transition: 2
     target:
       entity_id: light.bed_lights
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
   mode: single
 - id: '1645695901319'
   alias: Enable Morning Automation
@@ -1065,3 +1073,18 @@
           entity_id: automation.morning_lights_on
     default: []
   mode: restart
+- id: '1651174227299'
+  alias: New Automation
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.bedroom_door
+    from: 'off'
+    to: 'on'
+  condition: []
+  action:
+  - service: input_boolean.turn_off
+    data: {}
+    target:
+      entity_id: input_boolean.bedmotion
+  mode: single

@@ -94,6 +94,9 @@
       friendly_name: Desktop
       value_template: "{{ states('sensor.monitor_plug_wattage')|float(default=0) > 6 }}"
       turn_on:
+        - service: wake_on_lan.send_magic_packet
+          data:
+            mac: !secret desktop
         - service: mqtt.publish
           data:
             topic: "iotlink/workgroup/desktop-pc/commands/displays/on"
