@@ -264,7 +264,6 @@ call:
     target:
       entity_id:
       - light.bed_lights
-      - light.rgb_light_switch
     data:
       effect: None
       rgb_color:
@@ -272,6 +271,17 @@ call:
       - 255
       - 255
       brightness_pct: 100
+  - service: light.turn_on
+    target:
+      entity_id:
+      - light.rgb_light_switch
+    data:
+      effect: None
+      rgb_color:
+      - 0
+      - 255
+      - 255
+      brightness_pct: 50
   - service: light.turn_on
     target:
       entity_id:
