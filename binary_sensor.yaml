@@ -2,15 +2,15 @@
   name: "Front Porch Motion"
   state_topic: "FP"
   payload_on: "on"
-  payload_off: "off"
-  off_delay: 30
+  #payload_off: "off"
+  off_delay: 600000
   device_class: motion
 - platform: mqtt
-  name: "Car Motion"
-  state_topic: "car"
+  name: "Backyard Motion"
+  state_topic: "backyard"
   payload_on: "on"
-  payload_off: "off"
-  off_delay: 30
+  #payload_off: "off"
+  off_delay: 600000
   device_class: motion
 - platform: mqtt
   name: "Desktop Idle Time"

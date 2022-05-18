@@ -526,14 +526,17 @@
   description: ''
   trigger:
   - platform: state
-    entity_id: binary_sensor.wyzemotion
-    to: 'on'
+    entity_id:
+    - binary_sensor.bedroom_door
+    to: 'off'
     for:
-      hours: 0
-      minutes: 10
+      hours: 24
+      minutes: 0
       seconds: 0
-      milliseconds: 0
-  condition: []
+  condition:
+  - condition: zone
+    entity_id: device_tracker.iphone
+    zone: zone.home
   action:
   - service: notify.mobile_app_iphone
     data:
@@ -574,38 +577,39 @@
       hours: 0
       minutes: 0
       seconds: 1
-  condition: []
+  condition:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: input_select.riana
+      state: Just Arrived
   action:
   - service: notify.mobile_app_iphone
     data:
       message: Person detected at Front Porch
       data:
         image: /local/FP.jpg
-        url: entityId:camera.front_porch
-  - delay:
-      hours: 0
-      minutes: 10
-      seconds: 0
-      milliseconds: 0
   mode: single
 - id: '1635205275088'
   alias: Backyard Camera Notification
   description: ''
   trigger:
   - platform: state
-    entity_id: binary_sensor.car_motion
+    entity_id: binary_sensor.backyard_motion
     to: 'on'
     for:
       hours: 0
       minutes: 0
       seconds: 1
-  condition: []
+  condition:
+  - condition: template
+    value_template: '{{states(''person.riana'') != ''home''}}'
   action:
   - service: notify.mobile_app_iphone
     data:
       message: Person detected at Backyard
       data:
-        image: /local/car.jpg
+        image: /local/backyard.jpg
   mode: single
 - id: '1639191711934'
   alias: Dim Nanoleaf when using computer
@@ -831,50 +835,6 @@
       - input_boolean.cotton_candy_trigger
       - input_boolean.blue_vibes_trigger
   mode: single
-- id: '1642463769779'
-  alias: Color Loop
-  description: ''
-  trigger:
-  - platform: state
-    entity_id: light.fan_lights
-    attribute: effect
-    to: Color Loop
-    id: 'on'
-  - platform: state
-    entity_id: light.fan_lights
-    id: 'off'
-    to: None
-    attribute: effect
-  - platform: state
-    entity_id: light.fan_lights
-    to: 'off'
-    id: off 2
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: 'on'
-      sequence:
-      - service: input_boolean.turn_on
-        target:
-          entity_id: input_boolean.color_loop
-    - conditions:
-      - condition: trigger
-        id: 'off'
-      sequence:
-      - service: input_boolean.turn_off
-        target:
-          entity_id: input_boolean.color_loop
-    - conditions:
-      - condition: trigger
-        id: off 2
-      sequence:
-      - service: input_boolean.turn_off
-        target:
-          entity_id: input_boolean.color_loop
-    default: []
-  mode: single
 - id: '1644476253725'
   alias: Bed Scale Motion
   description: If motion detected in bed under certain circumstances, turn off overhead
@@ -1093,4 +1053,73 @@
     data: {}
     target:
       entity_id: input_boolean.bedmotion
+  mode: single
+- id: '1652125399924'
+  alias: Riana Presence Detection
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: input_select.riana
+    to: Just Arrived
+    for: 00:20:00
+    id: Home
+  - platform: state
+    entity_id:
+    - device_tracker.life360_riana
+    id: Away
+    to: Just Left
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+  - platform: zone
+    entity_id: device_tracker.life360_riana
+    zone: zone.home
+    event: enter
+    id: Just Arrived
+  - platform: zone
+    entity_id: device_tracker.life360_riana
+    zone: zone.home
+    event: leave
+    id: Just Left
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: Home
+      sequence:
+      - service: input_select.select_option
+        data:
+          option: Home
+        target:
+          entity_id: input_select.riana
+    - conditions:
+      - condition: trigger
+        id: Away
+      sequence:
+      - service: input_select.select_option
+        data:
+          option: Away
+        target:
+          entity_id: input_select.riana
+    - conditions:
+      - condition: trigger
+        id: Just Arrived
+      sequence:
+      - service: input_select.select_option
+        data:
+          option: Just Arrived
+        target:
+          entity_id: input_select.riana
+    - conditions:
+      - condition: trigger
+        id: Just Left
+      sequence:
+      - service: input_select.select_option
+        data:
+          option: Just Left
+        target:
+          entity_id: input_select.riana
+    default: []
   mode: single
