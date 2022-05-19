@@ -69,6 +69,7 @@
             entity_id: remote.bedroom_rm4_remote
             command: 'off'
             device: case
+            num_repeats: 6
     ac:
       friendly_name: Air Conditioner
       value_template: "{{ states('sensor.ac_plug_wattage')|float(default=0) > 6 }}"
