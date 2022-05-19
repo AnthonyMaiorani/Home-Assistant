@@ -1,17 +1,18 @@
 stuff_on:
   sequence:
-  - service: script.turn_on
-    data: {}
-    target:
-      entity_id: script.white
-  - service: switch.turn_on
-    data: {}
-    target:
-      entity_id: switch.windows
-  - data:
-      option: Home
-    entity_id: input_select.anthony
-    service: input_select.select_option
+    parallel:
+    - service: script.turn_on
+      data: {}
+      target:
+        entity_id: script.white
+    - service: switch.turn_on
+      data: {}
+      target:
+        entity_id: switch.windows
+    - data:
+        option: Home
+      entity_id: input_select.anthony
+      service: input_select.select_option
   alias: Morning
   mode: single
 stuff_off:
@@ -32,102 +33,107 @@ stuff_off:
 fan_off:
   alias: Lights Off
   sequence:
-  - service: script.turn_on
-    target:
-      entity_id:
-      - script.cyan
-    data: {}
-  - service: homeassistant.turn_off
-    data: {}
-    target:
-      entity_id:
-      - light.fan_lights
-      - input_boolean.bedmotion
-  - service: light.turn_on
-    target:
-      entity_id: light.shapes_007f
-    data:
-      brightness_pct: 25
-  - data: {}
-    service: homeassistant.turn_on
-    target:
-      entity_id:
-      - input_boolean.automating
-      - script.1591907627081
-      - input_boolean.govee_cyan
-      - group.misc_leds
+    parallel:
+    - service: script.turn_on
+      target:
+        entity_id:
+        - script.cyan
+      data: {}
+    - service: homeassistant.turn_off
+      data: {}
+      target:
+        entity_id:
+        - light.fan_lights
+        - input_boolean.bedmotion
+    - service: light.turn_on
+      target:
+        entity_id: light.shapes_007f
+      data:
+        brightness_pct: 25
+    - data: {}
+      service: homeassistant.turn_on
+      target:
+        entity_id:
+        - input_boolean.automating
+        - script.1591907627081
+        - input_boolean.govee_cyan
+        - group.misc_leds
   mode: single
 color_loop:
   alias: Color
   sequence:
-  - service: script.turn_on
-    target:
-      entity_id: script.rainbow
-    data: {}
-  - service: homeassistant.turn_on
-    data: {}
-    target:
-      entity_id:
-      - input_boolean.automating
-      - group.misc_leds
-  - data:
-      brightness: 255
-      effect: Color Loop
-      rgbw_color:
-      - 0
-      - 255
-      - 255
-      - 0
-    service: light.turn_on
-    target:
-      entity_id:
-      - light.bedroom_lights
-  - service: mqtt.publish
-    data:
-      topic: iotlink/workgroup/desktop-pc/commands/run
-      payload: '{"command": "C:\\Homebridge\\open-cue-cli-windows-x64\\open-cue-cli.bat",
-        "path": "C:\\Homebridge\\open-cue-cli-windows-x64\\", "args": "profile activate
-        rainbow", "user": "", "visible": "false", "fallback": "true"}'
-  - service: light.turn_on
-    target:
-      entity_id: light.shapes_007f
-    data:
-      brightness_pct: 100
-  - condition: state
-    entity_id: binary_sensor.closet
-    state: 'on'
-  - service: light.turn_on
-    target:
-      entity_id: light.closet_lights
-    data:
-      effect: Color Loop
+  - parallel:
+    - service: script.turn_on
+      target:
+        entity_id: script.rainbow
+      data: {}
+    - service: homeassistant.turn_on
+      data: {}
+      target:
+        entity_id:
+        - input_boolean.automating
+        - group.misc_leds
+    - data:
+        brightness: 255
+        effect: Color Loop
+        rgbw_color:
+        - 0
+        - 255
+        - 255
+        - 0
+      service: light.turn_on
+      target:
+        entity_id:
+        - light.bedroom_lights
+    - service: mqtt.publish
+      data:
+        topic: iotlink/workgroup/desktop-pc/commands/run
+        payload: '{"command": "C:\\Homebridge\\open-cue-cli-windows-x64\\open-cue-cli.bat",
+          "path": "C:\\Homebridge\\open-cue-cli-windows-x64\\", "args": "profile activate
+          rainbow", "user": "", "visible": "false", "fallback": "true"}'
+    - service: light.turn_on
+      target:
+        entity_id: light.shapes_007f
+      data:
+        brightness_pct: 100
+    - if:
+      - condition: state
+        entity_id: binary_sensor.closet
+        state: 'on'
+      then:
+      - service: light.turn_on
+        target:
+          entity_id: light.closet_lights
+        data:
+          effect: Color Loop
   mode: single
 white:
   alias: White
   sequence:
-  - service: script.turn_on
-    data: {}
-    target:
-      entity_id: script.rainbow
-  - data:
-      brightness: 255
-      effect: None
-      color_temp: 400
-    service: light.turn_on
-    target:
-      entity_id: light.fan_lights
-  - service: light.turn_on
-    target:
-      entity_id: light.shapes_007f
-    data:
-      brightness_pct: 100
-  - data: {}
-    service: homeassistant.turn_on
-    target:
-      entity_id:
-      - script.1591907627081
-      - group.misc_leds
-      - input_boolean.automating
+    parallel:
+    - service: script.turn_on
+      data: {}
+      target:
+        entity_id: script.rainbow
+    - data:
+        brightness: 255
+        effect: None
+        color_temp: 400
+      service: light.turn_on
+      target:
+        entity_id: light.fan_lights
+    - service: light.turn_on
+      target:
+        entity_id: light.shapes_007f
+      data:
+        brightness_pct: 100
+    - data: {}
+      service: homeassistant.turn_on
+      target:
+        entity_id:
+        - script.1591907627081
+        - group.misc_leds
+        - input_boolean.automating
   mode: single
 '1574728463699':
   alias: Music
@@ -164,16 +170,17 @@ white:
 '1576649794372':
   alias: Bed
   sequence:
-  - data: {}
-    service: homeassistant.turn_on
-    target:
-      entity_id:
-      - script.fan_off
-      - switch.windows
-  - service: input_boolean.turn_off
-    target:
-      entity_id: input_boolean.bedmotion
-    data: {}
+  - parallel:
+    - data: {}
+      service: homeassistant.turn_on
+      target:
+        entity_id:
+        - script.fan_off
+        - switch.windows
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.bedmotion
+      data: {}
   mode: single
 '1591567135401':
   alias: Fan Speed
@@ -188,24 +195,27 @@ white:
 '1591907627081':
   alias: LED Strips
   sequence:
-  - data:
-      brightness: 255
-      effect: Color Loop
-      color_name: cyan
-    service: light.turn_on
-    target:
-      entity_id:
-      - light.bed_lights
-      - light.desk_lights
-      - light.rgb_light_switch
-  - condition: state
-    entity_id: binary_sensor.closet
-    state: 'on'
-  - service: light.turn_on
-    target:
-      entity_id: light.closet_lights
-    data:
-      effect: Color Loop
+    parallel:
+    - data:
+        brightness: 255
+        effect: Color Loop
+        color_name: cyan
+      service: light.turn_on
+      target:
+        entity_id:
+        - light.bed_lights
+        - light.desk_lights
+        - light.rgb_light_switch
+    - if:
+      - condition: state
+        entity_id: binary_sensor.closet
+        state: 'on'
+      then:
+      - service: light.turn_on
+        target:
+          entity_id: light.closet_lights
+        data:
+          effect: Color Loop
   mode: single
 ac_mode:
   alias: AC Mode
@@ -250,16 +260,57 @@ temp_down:
 call:
   alias: Call
   sequence:
-  - service: input_boolean.turn_on
-    target:
-      entity_id:
-      - input_boolean.govee_cyan
-      - input_boolean.automating
-    data: {}
-  - service: script.turn_on
-    target:
-      entity_id: script.cyan
-    data: {}
+  - parallel:
+    - service: input_boolean.turn_on
+      target:
+        entity_id:
+        - input_boolean.govee_cyan
+        - input_boolean.automating
+      data: {}
+    - service: script.turn_on
+      target:
+        entity_id: script.cyan
+      data: {}
+    - service: light.turn_on
+      target:
+        entity_id:
+        - light.bed_lights
+      data:
+        effect: None
+        rgb_color:
+        - 0
+        - 255
+        - 255
+        brightness_pct: 100
+    - service: light.turn_on
+      target:
+        entity_id:
+        - light.rgb_light_switch
+      data:
+        effect: None
+        rgb_color:
+        - 0
+        - 255
+        - 255
+        brightness_pct: 50
+    - service: light.turn_on
+      target:
+        entity_id: light.shapes_007f
+      data:
+        brightness_pct: 10
+        effect: '{{ states(''input_select.nanoleaf_scenes'') }}'
+    - data: {}
+      service: homeassistant.turn_off
+      target:
+        entity_id:
+        - switch.windows
+        - switch.clock
+        - light.fan_lights
+        - light.desk_lights
+        - automation.ensure_stuff_off
+        - switch.u6_pro_led
+        - light.closet_lights
+        - switch.case_lights
   - service: light.turn_on
     target:
       entity_id:
@@ -270,46 +321,6 @@ call:
       - 0
       - 255
       - 255
-      brightness_pct: 100
-  - service: light.turn_on
-    target:
-      entity_id:
-      - light.rgb_light_switch
-    data:
-      effect: None
-      rgb_color:
-      - 0
-      - 255
-      - 255
-      brightness_pct: 50
-  - service: light.turn_on
-    target:
-      entity_id:
-      - light.bed_lights
-    data:
-      effect: None
-      rgb_color:
-      - 0
-      - 255
-      - 255
-  - service: light.turn_on
-    target:
-      entity_id: light.shapes_007f
-    data:
-      brightness_pct: 10
-      effect: '{{ states(''input_select.nanoleaf_scenes'') }}'
-  - data: {}
-    service: homeassistant.turn_off
-    target:
-      entity_id:
-      - switch.windows
-      - switch.clock
-      - light.fan_lights
-      - light.desk_lights
-      - automation.ensure_stuff_off
-      - switch.u6_pro_led
-      - light.closet_lights
-      - switch.case_lights
   mode: single
   icon: mdi:phone
 ac_off:
@@ -348,6 +359,7 @@ color_desktop:
   - service: script.turn_on
     target:
       entity_id: script.color_loop
+    data: {}
   - service: mqtt.publish
     data:
       topic: iotlink/workgroup/desktop-pc/commands/run
@@ -357,7 +369,7 @@ color_desktop:
   - delay:
       hours: 0
       minutes: 0
-      seconds: 2
+      seconds: 1
       milliseconds: 0
   - choose:
     - conditions:
@@ -365,18 +377,19 @@ color_desktop:
         entity_id: binary_sensor.webcam
         state: 'on'
       sequence:
-      - service: light.turn_on
-        target:
-          entity_id: light.shapes_007f
-        data:
-          brightness_pct: 50
-          color_temp: 178
-      - service: mqtt.publish
-        data:
-          topic: iotlink/workgroup/desktop-pc/commands/run
-          payload: '{"command": "C:\\Homebridge\\razer\\WebCameraConfig.exe", "path":
-            "C:\\Homebridge\\razer\\", "args": "--profile color", "user": "", "visible":
-            "false", "fallback": "true"}'
+        parallel:
+        - service: light.turn_on
+          target:
+            entity_id: light.shapes_007f
+          data:
+            brightness_pct: 50
+            color_temp: 178
+        - service: mqtt.publish
+          data:
+            topic: iotlink/workgroup/desktop-pc/commands/run
+            payload: '{"command": "C:\\Homebridge\\razer\\WebCameraConfig.exe", "path":
+              "C:\\Homebridge\\razer\\", "args": "--profile color", "user": "", "visible":
+              "false", "fallback": "true"}'
     default:
     - service: light.turn_on
       target:
@@ -387,15 +400,17 @@ color_desktop:
 white_desktop:
   alias: White Desktop
   sequence:
-  - service: script.turn_on
-    target:
-      entity_id: script.white
-  - service: mqtt.publish
-    data:
-      topic: iotlink/workgroup/desktop-pc/commands/run
-      payload: '{"command": "C:\\Homebridge\\open-cue-cli-windows-x64\\open-cue-cli.bat",
-        "path": "C:\\Homebridge\\open-cue-cli-windows-x64\\", "args": "profile activate
-        rainbow", "user": "", "visible": "false", "fallback": "true"}'
+  - parallel:
+    - service: script.turn_on
+      target:
+        entity_id: script.white
+      data: {}
+    - service: mqtt.publish
+      data:
+        topic: iotlink/workgroup/desktop-pc/commands/run
+        payload: '{"command": "C:\\Homebridge\\open-cue-cli-windows-x64\\open-cue-cli.bat",
+          "path": "C:\\Homebridge\\open-cue-cli-windows-x64\\", "args": "profile activate
+          rainbow", "user": "", "visible": "false", "fallback": "true"}'
   - delay:
       hours: 0
       minutes: 0
@@ -407,18 +422,19 @@ white_desktop:
         entity_id: binary_sensor.webcam
         state: 'on'
       sequence:
-      - service: light.turn_on
-        target:
-          entity_id: light.shapes_007f
-        data:
-          brightness_pct: 60
-          color_temp: 178
-      - service: mqtt.publish
-        data:
-          topic: iotlink/workgroup/desktop-pc/commands/run
-          payload: '{"command": "C:\\Homebridge\\razer\\WebCameraConfig.exe", "path":
-            "C:\\Homebridge\\razer\\", "args": "--profile white", "user": "", "visible":
-            "false", "fallback": "true"}'
+        parallel:
+        - service: light.turn_on
+          target:
+            entity_id: light.shapes_007f
+          data:
+            brightness_pct: 60
+            color_temp: 178
+        - service: mqtt.publish
+          data:
+            topic: iotlink/workgroup/desktop-pc/commands/run
+            payload: '{"command": "C:\\Homebridge\\razer\\WebCameraConfig.exe", "path":
+              "C:\\Homebridge\\razer\\", "args": "--profile white", "user": "", "visible":
+              "false", "fallback": "true"}'
     default:
     - service: light.turn_on
       target:

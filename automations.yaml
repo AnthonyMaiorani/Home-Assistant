@@ -37,17 +37,18 @@
   - event: start
     platform: homeassistant
   action:
-  - data:
-      name: ios-dark-mode-dark-blue
-    service: frontend.set_theme
-  - condition: zone
-    entity_id: person.anthony
-    zone: zone.home
-  - service: input_select.select_option
-    target:
-      entity_id: input_select.anthony
-    data:
-      option: Home
+    parallel:
+    - data:
+        name: ios-dark-mode-dark-blue
+      service: frontend.set_theme
+    - condition: zone
+      entity_id: person.anthony
+      zone: zone.home
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.anthony
+      data:
+        option: Home
   initial_state: true
   mode: single
 - id: '1617634628204'
@@ -143,19 +144,22 @@
   - condition: template
     value_template: '{{states(''person.anthony'') != ''home''}}'
   action:
-  - service: script.stuff_off
-    data: {}
-  - service: input_boolean.turn_off
-    data: {}
-    target:
-      entity_id: input_boolean.bedmotion
-  - condition: state
-    entity_id: switch.ac
-    state: 'on'
-  - service: switch.turn_off
-    target:
-      entity_id: switch.ac
-    data: {}
+    parallel:
+    - service: script.stuff_off
+      data: {}
+    - service: input_boolean.turn_off
+      data: {}
+      target:
+        entity_id: input_boolean.bedmotion
+    - if:
+      - condition: state
+        entity_id: switch.ac
+        state: 'on'
+      then:
+      - service: switch.turn_off
+        target:
+          entity_id: switch.ac
+        data: {}
   mode: single
 - id: '1621816232606'
   alias: Taylor Wyze Power
@@ -205,14 +209,16 @@
     entity_id: input_select.anthony
     state: Just Arrived
   action:
-  - service: script.turn_on
-    target:
-      entity_id: script.stuff_on
-  - service: input_select.select_option
-    target:
-      entity_id: input_select.anthony
-    data:
-      option: Home
+    parallel:
+    - service: script.turn_on
+      target:
+        entity_id: script.stuff_on
+      data: {}
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.anthony
+      data:
+        option: Home
   mode: single
 - id: '1627443167507'
   alias: Bedroom Alerts
@@ -346,36 +352,42 @@
     entity_id: light.desk_lights
     state: 'on'
   action:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: light.fan_lights
-        state: 'off'
-      sequence:
-      - service: script.color_loop
-      - condition: state
-        entity_id: binary_sensor.webcam
-        attribute: friendly_name
-        state: 'off'
-      - service: light.turn_on
-        target:
+  - parallel:
+    - choose:
+      - conditions:
+        - condition: state
+          entity_id: light.fan_lights
+          state: 'off'
+        sequence:
+        - service: script.color_loop
+          data: {}
+        - condition: state
+          entity_id: binary_sensor.webcam
+          attribute: friendly_name
+          state: 'off'
+        - service: light.turn_on
+          target:
+            entity_id: light.shapes_007f
+          data:
+            brightness_pct: 100
+      - conditions:
+        - condition: state
           entity_id: light.shapes_007f
-        data:
-          brightness_pct: 100
-    - conditions:
-      - condition: state
-        entity_id: light.shapes_007f
-        state: 'on'
-      - condition: state
-        entity_id: binary_sensor.webcam
-        state: 'off'
-      sequence:
-      - service: light.turn_on
-        target:
-          entity_id: light.shapes_007f
-        data:
-          brightness_pct: 100
-    default: []
+          state: 'on'
+        - condition: state
+          entity_id: binary_sensor.webcam
+          state: 'off'
+        sequence:
+        - service: light.turn_on
+          target:
+            entity_id: light.shapes_007f
+          data:
+            brightness_pct: 100
+      default: []
+    - service: input_boolean.turn_off
+      data: {}
+      target:
+        entity_id: input_boolean.bedmotion
   mode: single
 - id: '1627966300438'
   alias: Close Blinds When Dark
@@ -770,31 +782,33 @@
             state: None
             attribute: effect
           sequence:
+            parallel:
+            - service: light.turn_on
+              target:
+                entity_id: light.shapes_007f
+              data:
+                brightness_pct: 60
+                color_temp: 178
+            - service: mqtt.publish
+              data:
+                topic: iotlink/workgroup/desktop-pc/commands/run
+                payload: '{"command": "C:\\Homebridge\\razer\\WebCameraConfig.exe",
+                  "path": "C:\\Homebridge\\razer\\", "args": "--profile white", "user":
+                  "", "visible": "false", "fallback": "true"}'
+        default:
+          parallel:
           - service: light.turn_on
             target:
               entity_id: light.shapes_007f
             data:
-              brightness_pct: 60
+              brightness_pct: 50
               color_temp: 178
           - service: mqtt.publish
             data:
               topic: iotlink/workgroup/desktop-pc/commands/run
               payload: '{"command": "C:\\Homebridge\\razer\\WebCameraConfig.exe",
-                "path": "C:\\Homebridge\\razer\\", "args": "--profile white", "user":
+                "path": "C:\\Homebridge\\razer\\", "args": "--profile color", "user":
                 "", "visible": "false", "fallback": "true"}'
-        default:
-        - service: light.turn_on
-          target:
-            entity_id: light.shapes_007f
-          data:
-            brightness_pct: 50
-            color_temp: 178
-        - service: mqtt.publish
-          data:
-            topic: iotlink/workgroup/desktop-pc/commands/run
-            payload: '{"command": "C:\\Homebridge\\razer\\WebCameraConfig.exe", "path":
-              "C:\\Homebridge\\razer\\", "args": "--profile color", "user": "", "visible":
-              "false", "fallback": "true"}'
     - conditions:
       - condition: trigger
         id: 'off'
@@ -858,11 +872,6 @@
         entity_id: light.fan_lights
         state: 'on'
       sequence:
-      - service: scene.create
-        data:
-          scene_id: before
-          snapshot_entities:
-          - light.fan_lights
       - service: script.turn_on
         data: {}
         target:
@@ -1039,21 +1048,6 @@
           entity_id: automation.morning_lights_on
     default: []
   mode: restart
-- id: '1651174227299'
-  alias: New Automation
-  description: ''
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.bedroom_door
-    from: 'off'
-    to: 'on'
-  condition: []
-  action:
-  - service: input_boolean.turn_off
-    data: {}
-    target:
-      entity_id: input_boolean.bedmotion
-  mode: single
 - id: '1652125399924'
   alias: Riana Presence Detection
   description: ''
