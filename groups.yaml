@@ -14,7 +14,6 @@ misc_leds:
   name: Other Room Lights
   entities: 
     - switch.light_switch
-    - switch.mousepad
     - switch.u6_pro_led
     - switch.clock
     - switch.case_lights
