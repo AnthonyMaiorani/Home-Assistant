@@ -64,4 +64,4 @@ template:
   - binary_sensor:
       - name: "Discord Active"
         state: >
-          {% if states.sensor.discord.state ==  '' %} off {% else %} on {% endif %}
+          {{ states('sensor.discord')|float(default=-1) > 0}}
