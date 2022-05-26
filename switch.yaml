@@ -84,18 +84,18 @@
         - service: wake_on_lan.send_magic_packet
           data:
             mac: !secret desktop
-        - service: switch.turn_on
+        - service: button.press
           target:
             entity_id:
-              - switch.on
+              - button.on
         - delay: 13
         - service: homeassistant.update_entity
           entity_id: sensor.monitor_plug_wattage
       turn_off:
-        - service: switch.turn_on
+        - service: button.press
           target:
             entity_id:
-              - switch.off
+              - button.off
         - delay: 20
         - service: homeassistant.update_entity
           entity_id: sensor.monitor_plug_wattage

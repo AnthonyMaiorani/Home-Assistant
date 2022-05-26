@@ -627,9 +627,9 @@
   alias: Dim Nanoleaf when using computer
   description: ''
   trigger:
-  - platform: template
-    value_template: '{{ states(''sensor.desktop_idle_time'')|float(default=15) < 10
-      }}'
+  - platform: state
+    entity_id:
+    - sensor.desktop_pc_lastactive
   condition:
   - condition: state
     entity_id: light.shapes_007f
@@ -637,6 +637,11 @@
   - condition: template
     value_template: '{{ state_attr(''light.shapes_007f'',''brightness'') | float >
       153 }}'
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: sensor.desktop_pc_lastactive
+      state: Unknown
   action:
   - choose:
     - conditions:
@@ -796,10 +801,10 @@
               data:
                 brightness_pct: 60
                 color_temp: 178
-            - service: switch.turn_on
+            - service: button.press
               target:
                 entity_id:
-                - switch.white
+                - button.white
         default:
           parallel:
           - service: light.turn_on
@@ -808,10 +813,10 @@
             data:
               brightness_pct: 50
               color_temp: 178
-          - service: switch.turn_on
+          - service: button.press
             target:
               entity_id:
-              - switch.color
+              - button.color
     - conditions:
       - condition: trigger
         id: 'off'
@@ -835,10 +840,10 @@
         state: 'on'
       sequence:
         parallel:
-        - service: switch.turn_on
+        - service: button.press
           target:
             entity_id:
-            - switch.deletereg
+            - button.deletereg
           data: {}
         - service: light.turn_on
           target:
