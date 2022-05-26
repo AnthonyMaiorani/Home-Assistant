@@ -80,5 +80,3 @@ switch.ap_led:
   icon: mdi:access-point
 switch.case_lights:
   icon: mdi:desktop-tower
-switch.mousepad:
-  icon: mdi:card-outline

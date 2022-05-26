@@ -22,7 +22,7 @@ usb:
 webhook:
 zeroconf:
 zone:
-logbook:
+logbook: !include logbook.yaml
 automation: !include automations.yaml
 history: !include history.yaml
 frontend: !include themes.yaml

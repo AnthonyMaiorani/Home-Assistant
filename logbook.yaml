@@ -1,0 +1,17 @@
+exclude:
+  domains:
+    - input_number
+    - input_boolean
+  entities:
+    - sensor.desktop_idle_time
+    - sensor.hacs
+    - switch.litter_cam
+    - binary_sensor.wyzemotion
+    - group.bedroom_motion
+    - switch.bedroomtoggle
+    - sun.sun
+    - sensor.internet_time
+    - govee.state
+    - sensor.bedroom_dot_next_alarm
+    - switch.bedroom_cam
+    - switch.kitchen_cam_2
