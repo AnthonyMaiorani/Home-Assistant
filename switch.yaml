@@ -96,10 +96,6 @@
         - service: wake_on_lan.send_magic_packet
           data:
             mac: !secret desktop
-        - service: mqtt.publish
-          data:
-            topic: "iotlink/workgroup/desktop-pc/commands/displays/on"
-            payload: ""  
         - service: switch.turn_on
           target:
             entity_id:
