@@ -59,3 +59,9 @@ spotify: # still required for ui integration
 weather:
   - platform: darksky
     api_key: !secret darksky
+
+template:
+  - binary_sensor:
+      - name: "Discord Active"
+        state: >
+          {% if states.sensor.discord.state ==  '' %} off {% else %} on {% endif %}
