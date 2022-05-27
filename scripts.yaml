@@ -86,9 +86,11 @@ color_loop:
         entity_id:
         - light.bedroom_lights
     - if:
-      - condition: state
-        entity_id: binary_sensor.webcam
-        state: 'off'
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: binary_sensor.webcam
+          state: 'on'
       then:
       - service: light.turn_on
         target:
@@ -122,9 +124,11 @@ white:
       target:
         entity_id: light.fan_lights
     - if:
-      - condition: state
-        entity_id: binary_sensor.webcam
-        state: 'off'
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: binary_sensor.webcam
+          state: 'on'
       then:
       - service: light.turn_on
         target:
@@ -337,26 +341,6 @@ ac_off:
     target:
       entity_id: switch.ac
   mode: single
-'1631175520487':
-  alias: AC Timer
-  sequence:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: switch.ac
-        state: 'off'
-      sequence:
-      - service: switch.turn_on
-        target:
-          entity_id: switch.ac
-    default: []
-  - delay:
-      hours: 0
-      minutes: 25
-      seconds: 0
-      milliseconds: 0
-  - service: script.ac_off
-  mode: restart
 color_desktop:
   alias: Color Desktop
   sequence:

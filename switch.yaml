@@ -74,6 +74,9 @@
             entity_id: remote.bedroom_rm4_remote
             command: power
             device: ac
+        - service: timer.cancel
+          target:
+            entity_id: timer.ac
         - delay: 8
         - service: homeassistant.update_entity
           entity_id: sensor.ac_plug_wattage

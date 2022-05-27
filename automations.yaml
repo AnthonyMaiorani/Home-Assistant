@@ -766,9 +766,14 @@
   description: ''
   trigger:
   - platform: state
-    entity_id: binary_sensor.webcam
+    entity_id:
+    - binary_sensor.webcam
     to: 'on'
     id: 'on'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 1
   - platform: state
     entity_id:
     - binary_sensor.webcam
@@ -1151,3 +1156,62 @@
           entity_id: input_select.riana
     default: []
   mode: single
+- id: '1653601692731'
+  alias: AC Sleep Timer
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_button.ac_timer_start
+    id: buttonpress
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.ac
+    id: timerfinished
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: buttonpress
+      sequence:
+      - if:
+        - condition: state
+          entity_id: switch.ac
+          state: 'off'
+        then:
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id: switch.ac
+      - parallel:
+        - service: remote.send_command
+          data:
+            device: ac
+            command: temp_down
+            num_repeats: 30
+            delay_secs: 0.1
+          target:
+            entity_id: remote.bedroom_rm4_remote
+        - service: timer.start
+          data:
+            duration: 0:25:00
+          target:
+            entity_id: timer.ac
+    - conditions:
+      - condition: trigger
+        id: timerfinished
+      sequence:
+      - if:
+        - condition: state
+          entity_id: switch.ac
+          state: 'on'
+        then:
+        - service: switch.turn_off
+          data: {}
+          target:
+            entity_id: switch.ac
+    default: []
+  mode: parallel
+  max: 2

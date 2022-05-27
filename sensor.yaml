@@ -1,13 +1,3 @@
-- platform: mqtt
-  name: "Desktop Idle Time"
-  state_topic: "iotlink/workgroup/desktop-pc/windows-monitor/stats/system/idle-time"
-  unit_of_measurement: 'seconds'
-  icon: mdi:timer
-  value_template: "{{ value }}"
-  availability_topic: "iotlink/workgroup/desktop-pc/lwt"
-  payload_available: "ON"
-  payload_not_available: "OFF"
-  qos: 1
 - platform: time_date
   display_options:
     - 'time'

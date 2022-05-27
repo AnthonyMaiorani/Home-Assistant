@@ -4,6 +4,7 @@ counter:
 dhcp:
 energy:
 image:
+input_button:
 input_boolean:
 input_datetime:
 input_number:
