@@ -443,3 +443,11 @@ govee_music:
     target:
       entity_id: input_boolean.music_trigger
   mode: single
+ac_timer:
+  alias: AC Timer
+  sequence:
+  - service: input_button.press
+    data: {}
+    target:
+      entity_id: input_button.ac_timer_start
+  mode: single

@@ -641,7 +641,7 @@
     conditions:
     - condition: state
       entity_id: sensor.desktop_pc_lastactive
-      state: Unknown
+      state: unknown
   action:
   - choose:
     - conditions:

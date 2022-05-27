@@ -9,7 +9,8 @@ room: # used for ha menu
     - switch.ac
     - script.1574728463699
     - script.call
-    - script.1631175520487
+    - script.ac_timer
+    #- input_button.ac_timer_start
     - switch.windows
 misc_leds:
   name: Other Room Lights
