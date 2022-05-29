@@ -757,7 +757,7 @@
       data:
         effect: '{{ states(''input_select.nanoleaf_scenes'') }}'
   - condition: template
-    value_template: '{{ state_attr(''light.shapes_007f'', ''effect'') != none }}'
+    value_template: '{{ state_attr(''light.shapes_007f'', ''effect'') != Webcam }}'
   - service: light.turn_on
     target:
       entity_id: light.shapes_007f
@@ -807,8 +807,8 @@
               target:
                 entity_id: light.shapes_007f
               data:
-                brightness_pct: 60
-                color_temp: 178
+                brightness_pct: 70
+                effect: Webcam
             - service: button.press
               target:
                 entity_id:
@@ -819,8 +819,8 @@
             target:
               entity_id: light.shapes_007f
             data:
-              brightness_pct: 50
-              color_temp: 178
+              brightness_pct: 55
+              effect: Webcam
           - service: button.press
             target:
               entity_id:

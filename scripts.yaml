@@ -344,7 +344,7 @@ ac_off:
 color_desktop:
   alias: Color Desktop
   sequence:
-    parallel:
+  - parallel:
     - service: script.turn_on
       target:
         entity_id: script.color_loop
@@ -359,8 +359,8 @@ color_desktop:
           target:
             entity_id: light.shapes_007f
           data:
-            brightness_pct: 50
-            color_temp: 178
+            brightness_pct: 55
+            effect: Webcam
       default:
       - service: light.turn_on
         target:
@@ -372,7 +372,7 @@ color_desktop:
 white_desktop:
   alias: White Desktop
   sequence:
-    parallel:
+  - parallel:
     - service: script.turn_on
       target:
         entity_id: script.white
@@ -387,8 +387,8 @@ white_desktop:
           target:
             entity_id: light.shapes_007f
           data:
-            brightness_pct: 60
-            color_temp: 178
+            brightness_pct: 70
+            effect: Webcam
       default:
       - service: light.turn_on
         target:
@@ -450,4 +450,33 @@ ac_timer:
     data: {}
     target:
       entity_id: input_button.ac_timer_start
+  mode: single
+set_ac_to_73ish:
+  alias: Set AC to 72
+  sequence:
+  - if:
+    - condition: state
+      entity_id: switch.ac
+      state: 'off'
+    then:
+    - service: switch.turn_on
+      data: {}
+      target:
+        entity_id: switch.ac
+  - service: remote.send_command
+    data:
+      device: ac
+      command: temp_down
+      num_repeats: 30
+      delay_secs: 0.1
+    target:
+      entity_id: remote.bedroom_rm4_remote
+  - service: remote.send_command
+    data:
+      device: ac
+      command: temp_up
+      num_repeats: 8
+      delay_secs: 0.1
+    target:
+      entity_id: remote.bedroom_rm4_remote
   mode: single
