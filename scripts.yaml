@@ -315,7 +315,6 @@ call:
         - switch.clock
         - light.fan_lights
         - light.desk_lights
-        - automation.ensure_stuff_off
         - switch.u6_pro_led
         - light.closet_lights
         - switch.case_lights

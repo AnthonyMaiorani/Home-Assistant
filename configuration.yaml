@@ -65,7 +65,7 @@ template:
   - binary_sensor:
       - name: "Discord Active"
         state: >
-          {{ states('sensor.discord')|float(default=-1) > 0}}
+          {{ states('sensor.discord')|float(-1) > 0}}
 
 life360: # location disabled
   members:

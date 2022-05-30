@@ -58,7 +58,7 @@
             num_repeats: 6
     ac:
       friendly_name: Air Conditioner
-      value_template: "{{ states('sensor.ac_plug_wattage')|float(default=0) > 6 }}"
+      value_template: "{{ states('sensor.ac_plug_wattage')|float(0) > 6 }}"
       turn_on:
         - service: remote.send_command
           data:
@@ -82,7 +82,7 @@
           entity_id: sensor.ac_plug_wattage
     windows:
       friendly_name: Desktop
-      value_template: "{{ states('sensor.monitor_plug_wattage')|float(default=0) > 6 }}"
+      value_template: "{{ states('sensor.monitor_plug_wattage')|float(0) > 6 }}"
       turn_on:
         - service: wake_on_lan.send_magic_packet
           data:
