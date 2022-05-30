@@ -9,9 +9,9 @@ room: # used for ha menu
     - switch.ac
     - script.1574728463699
     - script.call
-    - script.ac_timer
-    #- input_button.ac_timer_start
+    - input_button.ac_timer_start
     - switch.windows
+    - cover.bedroom_blinds
 misc_leds:
   name: Other Room Lights
   entities: 
