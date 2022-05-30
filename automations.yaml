@@ -706,7 +706,8 @@
         option: "{{ state_attr('input_select.nanoleaf_scenes', 'options')\n    | reject('in',\
           \ [states('input_select.nanoleaf_scenes')])\n    | list | random }}\n"
   - condition: template
-    value_template: '{{ state_attr("light.shapes_007f", "effect") != "Webcam" }}'
+    value_template: '{{ state_attr("light.shapes_007f", "effect") != "Webcam" and
+      states(''light.shapes_007f'') == ''on''}} '
   - service: light.turn_on
     target:
       entity_id: light.shapes_007f
