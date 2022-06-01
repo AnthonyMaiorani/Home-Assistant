@@ -2,9 +2,10 @@
   alias: Morning Automation
   trigger:
   - platform: template
-    value_template: '{% set alarm_time = as_timestamp(states(''sensor.bedroom_dot_next_alarm''), 1)
-      %} {% set current_time = as_timestamp(states(''sensor.date_time'').replace('','',
-      ''''), 0) %} {% set pre_time = 2 %} {{ current_time >= alarm_time - pre_time }}
+    value_template: '{% set alarm_time = as_timestamp(states(''sensor.bedroom_dot_next_alarm''),
+      1) %} {% set current_time = as_timestamp(states(''sensor.date_time'').replace('','',
+      ''''), 0) %} {% set pre_time = 2 %} {{ current_time >= alarm_time - pre_time
+      }}
 
       '
   condition: []
@@ -646,6 +647,10 @@
           entity_id:
           - light.bedroom_lights
     default: []
+  - service: button.press
+    data: {}
+    target:
+      entity_id: button.mousepad_on
   mode: single
 - id: '1639192672045'
   alias: Nanoleaf Scene Changer

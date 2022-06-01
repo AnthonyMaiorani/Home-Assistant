@@ -13,4 +13,4 @@ smart_home:
       - light.fan_lights
       - switch.ac
       - cover.garage_door
-      - cover.bedroom_blinds
+      - light.led_strips
