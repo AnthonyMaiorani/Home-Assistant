@@ -2,16 +2,11 @@
   name: "Front Porch Motion"
   state_topic: "FP"
   payload_on: "on"
-  #payload_off: "off"
   off_delay: 600000
   device_class: motion
 - platform: mqtt
   name: "Backyard Motion"
   state_topic: "backyard"
   payload_on: "on"
-  #payload_off: "off"
   off_delay: 600000
   device_class: motion
-- platform: mqtt
-  name: "Desktop Idle Time"
-  state_topic: "homeassistant/sensor/desktop-pc/Webcam/state"

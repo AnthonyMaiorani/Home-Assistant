@@ -34,7 +34,6 @@ alexa: !include alexa.yaml
 switch: !include switch.yaml
 light: !include light.yaml
 sensor: !include sensor.yaml
-binary_sensor: !include binary_sensor.yaml
 wake_on_lan:
 
 homeassistant:
@@ -66,3 +65,16 @@ template:
 life360: # location disabled
   members:
     exclude: Anthony Maiorani
+
+mqtt:
+  binary_sensor:
+    - state_topic: "FP"
+      name: "Front Porch Motion"
+      payload_on: "on"
+      off_delay: 600000
+      device_class: motion
+    - state_topic: "backyard"
+      name: "Backyard Motion"
+      payload_on: "on"
+      off_delay: 600000
+      device_class: motion
