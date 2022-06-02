@@ -1,28 +1,4 @@
-# default config parted out
-config:
-counter:
-dhcp:
-energy:
-image:
-input_button:
-input_boolean:
-input_datetime:
-input_number:
-input_select:
-input_text:
-map:
-mobile_app:
-my:
-person:
-ssdp:
-stream:
-sun:
-system_health:
-timer:
-usb:
-webhook:
-zeroconf:
-zone:
+default_config:
 logbook: !include logbook.yaml
 automation: !include automations.yaml
 history: !include history.yaml
