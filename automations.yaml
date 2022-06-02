@@ -735,7 +735,6 @@
   - platform: state
     entity_id:
     - binary_sensor.webcam
-    - binary_sensor.discord_active
     id: 'off'
     to: 'off'
   - platform: state
@@ -757,41 +756,29 @@
             state: None
             attribute: effect
           sequence:
-            parallel:
-            - service: light.turn_on
-              target:
-                entity_id: light.shapes_007f
-              data:
-                brightness_pct: 70
-                effect: Webcam
-            - service: button.press
-              target:
-                entity_id:
-                - button.white
-        default:
-          parallel:
+          - service: button.press
+            target:
+              entity_id:
+              - button.white
+            data: {}
           - service: light.turn_on
             target:
               entity_id: light.shapes_007f
             data:
-              brightness_pct: 55
+              brightness_pct: 70
               effect: Webcam
-          - service: button.press
-            target:
-              entity_id:
-              - button.color
-    - conditions:
-      - condition: trigger
-        id: 'off'
-      - condition: state
-        entity_id: light.bedroom_lights
-        state: 'on'
-      sequence:
-      - service: light.turn_on
-        target:
-          entity_id: light.shapes_007f
-        data:
-          effect: '{{ states(''input_select.nanoleaf_scenes'') }}'
+        default:
+        - service: button.press
+          target:
+            entity_id:
+            - button.color
+          data: {}
+        - service: light.turn_on
+          target:
+            entity_id: light.shapes_007f
+          data:
+            brightness_pct: 55
+            effect: Webcam
     - conditions:
       - condition: trigger
         id: discordquit
@@ -802,24 +789,23 @@
         entity_id: binary_sensor.webcam
         state: 'on'
       sequence:
-        parallel:
-        - service: button.press
-          target:
-            entity_id:
-            - button.deletereg
-          data: {}
-        - service: light.turn_on
-          target:
-            entity_id: light.shapes_007f
-          data:
-            effect: '{{ states(''input_select.nanoleaf_scenes'') }}'
+      - service: button.press
+        target:
+          entity_id:
+          - button.deletereg
+        data: {}
+    - conditions:
+      - condition: trigger
+        id: 'off'
+      sequence:
+      - service: light.turn_on
+        target:
+          entity_id: light.shapes_007f
+        data:
+          effect: '{{ states(''input_select.nanoleaf_scenes'') }}'
     default: []
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 3
-      milliseconds: 0
-  mode: single
+  mode: parallel
+  max: 2
 - id: '1641480765757'
   alias: Reset Triggers
   description: ''
