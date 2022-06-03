@@ -3,7 +3,6 @@ logbook: !include logbook.yaml
 automation: !include automations.yaml
 history: !include history.yaml
 frontend: !include themes.yaml
-scene: !include scenes.yaml
 script: !include scripts.yaml
 group: !include groups.yaml
 alexa: !include alexa.yaml

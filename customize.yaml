@@ -1,8 +1,5 @@
 script.fan_off:
   icon: mdi:ceiling-light
-switch.vizio:
-  friendly_name: Vizio TV
-  icon: mdi:television
 switch.windows:
   icon: mdi:microsoft-windows
 switch.morning_automations:
@@ -11,16 +8,12 @@ script.color_loop:
   icon: mdi:lightbulb-on
 script.white:
   icon: mdi:white-balance-sunny
-script.1574728463699:
+script.music:
   icon: mdi:party-popper
-script.1576649794372:
-  icon: mdi:bed-empty
 script.stuff_off:
   icon: mdi:weather-night
 script.stuff_on:
   icon: mdi:weather-sunset
-scene.iuuondmamth4iwq4:
-  icon: mdi:fan-off
 switch.clock:
   icon: mdi:clock
 switch.light_switch:
@@ -37,12 +30,6 @@ light.closet_lights:
   icon: mdi:wardrobe
 light.led_strips:
   icon: mdi:led-strip-variant
-switch.bass:
-  icon: mdi:tune-vertical
-switch.lr_vizio:
-  icon: mdi:television
-switch.macmini:
-  icon: mdi:desktop-classic
 switch.power_strip_outlet_1:
   icon: mdi:power-socket-us
 switch.power_strip_outlet_2:
@@ -53,8 +40,6 @@ switch.power_strip_outlet_4:
   icon: mdi:power-socket-us
 switch.power_strip_usbs:
   icon: mdi:usb-port
-switch.clock_2:
-  icon: mdi:clock
 light.fan_lights:
   icon: mdi:ceiling-light
 automation.morning_lights_on:
@@ -64,8 +49,6 @@ group.bedroom_motion:
 person.anthony:
   entity_picture: /local/anthony.png
   icon: /local/anthony.png
-switch.vizio_tv:
-  icon: mdi:television
 media_player.50_tcl_roku_tv:
   icon: mdi:youtube-tv
 remote.50_tcl_roku_tv:

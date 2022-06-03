@@ -15,7 +15,6 @@
           target:
             entity_id:
               - script.stuff_off
-              - script.ac_off
     blinds:
       turn_on:
         service: cover.open_cover
@@ -60,6 +59,9 @@
       friendly_name: Air Conditioner
       value_template: "{{ states('sensor.ac_plug_wattage')|float(0) > 6 }}"
       turn_on:
+        - condition: state
+          entity_id: switch.ac
+          state: 'off'
         - service: remote.send_command
           data:
             entity_id: remote.bedroom_rm4_remote
@@ -69,6 +71,9 @@
         - service: homeassistant.update_entity
           entity_id: sensor.ac_plug_wattage
       turn_off:
+        - condition: state
+          entity_id: switch.ac
+          state: 'on'
         - service: remote.send_command
           data:
             entity_id: remote.bedroom_rm4_remote

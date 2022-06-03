@@ -4,10 +4,10 @@ smart_home:
       - switch.windows
       - script.stuff_on
       - script.stuff_off
-      - scene.white
-      - scene.color
-      - scene.lights_off
-      - script.1574728463699
+      - script.white
+      - script.color_loop
+      - script.fan_off
+      - script.music
       - switch.clock
       - light.bedroom_lights
       - light.fan_lights

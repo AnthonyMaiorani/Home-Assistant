@@ -38,7 +38,7 @@
   - event: start
     platform: homeassistant
   action:
-    parallel:
+  - parallel:
     - data:
         name: ios-dark-mode-dark-blue
       service: frontend.set_theme
@@ -50,6 +50,10 @@
         entity_id: input_select.anthony
       data:
         option: Home
+    - service: input_boolean.turn_on
+      data: {}
+      target:
+        entity_id: input_boolean.govee_cyan
   initial_state: true
   mode: single
 - id: '1617634628204'
@@ -132,22 +136,15 @@
   - condition: template
     value_template: '{{states(''person.anthony'') != ''home''}}'
   action:
-    parallel:
+  - parallel:
     - service: script.stuff_off
       data: {}
-    - service: input_boolean.turn_off
+    - service: homeassistant.turn_off
       data: {}
       target:
-        entity_id: input_boolean.bedmotion
-    - if:
-      - condition: state
-        entity_id: switch.ac
-        state: 'on'
-      then:
-      - service: switch.turn_off
-        target:
-          entity_id: switch.ac
-        data: {}
+        entity_id:
+        - input_boolean.bedmotion
+        - switch.ac
   mode: single
 - id: '1621816232606'
   alias: Taylor Wyze Power
@@ -156,7 +153,7 @@
   - platform: time_pattern
     minutes: /2
   - platform: zone
-    entity_id: device_tracker.life360_taylor
+    entity_id: person.taylor
     zone: zone.taylor_s_home
     event: enter
   - platform: zone
@@ -176,6 +173,7 @@
       - service: homeassistant.turn_off
         target:
           entity_id: group.apartment
+        data: {}
     default:
     - condition: state
       entity_id: group.apartment
@@ -183,6 +181,7 @@
     - service: homeassistant.turn_on
       target:
         entity_id: group.apartment
+      data: {}
   mode: single
 - id: '1627401846713'
   alias: Arrived Home
@@ -806,34 +805,8 @@
     default: []
   mode: parallel
   max: 2
-- id: '1641480765757'
-  alias: Reset Triggers
-  description: ''
-  trigger:
-  - platform: state
-    entity_id: input_boolean.cotton_candy_trigger
-    to: 'on'
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 1
-  - platform: state
-    entity_id: input_boolean.blue_vibes_trigger
-    to: 'on'
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 1
-  condition: []
-  action:
-  - service: input_boolean.turn_off
-    target:
-      entity_id:
-      - input_boolean.cotton_candy_trigger
-      - input_boolean.blue_vibes_trigger
-  mode: single
 - id: '1644476253725'
-  alias: Bed Scale Motion
+  alias: Bed Occupancy
   description: If motion detected in bed under certain circumstances, turn off overhead
     lights.
   trigger:
@@ -981,7 +954,7 @@
     default: []
   mode: single
 - id: '1653601692731'
-  alias: AC Sleep Timer
+  alias: AC Controls
   description: ''
   trigger:
   - platform: state
@@ -993,6 +966,26 @@
     event_data:
       entity_id: timer.ac
     id: timerfinished
+  - platform: state
+    entity_id:
+    - input_button.ac_mode
+    id: mode
+  - platform: state
+    entity_id:
+    - input_button.ac_temp_up
+    id: tempup
+  - platform: state
+    entity_id:
+    - input_button.ac_temp_down
+    id: tempdown
+  - platform: state
+    entity_id:
+    - input_button.ac_fan_up
+    id: fanup
+  - platform: state
+    entity_id:
+    - input_button.ac_fan_down
+    id: fandown
   condition: []
   action:
   - choose:
@@ -1000,15 +993,10 @@
       - condition: trigger
         id: buttonpress
       sequence:
-      - if:
-        - condition: state
+      - service: switch.turn_on
+        data: {}
+        target:
           entity_id: switch.ac
-          state: 'off'
-        then:
-        - service: switch.turn_on
-          data: {}
-          target:
-            entity_id: switch.ac
       - parallel:
         - service: remote.send_command
           data:
@@ -1027,15 +1015,55 @@
       - condition: trigger
         id: timerfinished
       sequence:
-      - if:
-        - condition: state
+      - service: switch.turn_off
+        data: {}
+        target:
           entity_id: switch.ac
-          state: 'on'
-        then:
-        - service: switch.turn_off
-          data: {}
-          target:
-            entity_id: switch.ac
+    - conditions:
+      - condition: trigger
+        id: mode
+      sequence:
+      - service: remote.send_command
+        data:
+          command: mode
+          device: ac
+        entity_id: remote.bedroom_rm4_remote
+    - conditions:
+      - condition: trigger
+        id: tempup
+      sequence:
+      - data:
+          command: temp_up
+          device: ac
+        entity_id: remote.bedroom_rm4_remote
+        service: remote.send_command
+    - conditions:
+      - condition: trigger
+        id: tempdown
+      sequence:
+      - data:
+          command: temp_down
+          device: ac
+        entity_id: remote.bedroom_rm4_remote
+        service: remote.send_command
+    - conditions:
+      - condition: trigger
+        id: fanup
+      sequence:
+      - data:
+          command: fan_up
+          device: ac
+        entity_id: remote.bedroom_rm4_remote
+        service: remote.send_command
+    - conditions:
+      - condition: trigger
+        id: fandown
+      sequence:
+      - data:
+          command: fan_down
+          device: ac
+        entity_id: remote.bedroom_rm4_remote
+        service: remote.send_command
     default: []
   mode: parallel
-  max: 2
+  max: 20

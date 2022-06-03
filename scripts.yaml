@@ -33,12 +33,17 @@ stuff_off:
 fan_off:
   alias: Lights Off
   sequence:
-    parallel:
-    - service: script.turn_on
+  - parallel:
+    - service: light.turn_on
       target:
         entity_id:
-        - script.cyan
-      data: {}
+        - light.glide
+      data:
+        rgb_color:
+        - 0
+        - 126
+        - 255
+        brightness_pct: 1
     - service: homeassistant.turn_off
       data: {}
       target:
@@ -55,18 +60,56 @@ fan_off:
       target:
         entity_id:
         - input_boolean.automating
-        - script.1591907627081
         - input_boolean.govee_cyan
         - group.misc_leds
+    - parallel:
+      - data:
+          brightness: 255
+          effect: Color Loop
+          color_name: cyan
+        service: light.turn_on
+        target:
+          entity_id:
+          - light.bed_lights
+          - light.desk_lights
+          - light.rgb_light_switch
+      - if:
+        - condition: state
+          entity_id: binary_sensor.closet
+          state: 'on'
+        then:
+        - service: light.turn_on
+          target:
+            entity_id: light.closet_lights
+          data:
+            effect: Color Loop
   mode: single
 color_loop:
   alias: Color
   sequence:
   - parallel:
-    - service: script.turn_on
-      target:
-        entity_id: script.rainbow
-      data: {}
+    - choose:
+      - conditions:
+        - condition: state
+          entity_id: input_boolean.govee_cyan
+          state: 'on'
+        sequence:
+        - service: media_player.play_media
+          target:
+            entity_id: media_player.bedroom_dot
+          data:
+            media_content_type: routine
+            media_content_id: rainbow
+        - service: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.govee_cyan
+          data: {}
+      default:
+      - service: light.turn_on
+        target:
+          entity_id:
+          - light.glide
+        data: {}
     - service: homeassistant.turn_on
       data: {}
       target:
@@ -97,6 +140,38 @@ color_loop:
           entity_id: light.shapes_007f
         data:
           brightness_pct: 100
+    - choose:
+      - conditions:
+        - condition: state
+          entity_id: binary_sensor.webcam
+          state: 'on'
+        sequence:
+        - service: light.turn_on
+          target:
+            entity_id: light.shapes_007f
+          data:
+            brightness_pct: 55
+            effect: Webcam
+      - conditions:
+        - condition: template
+          value_template: '{{ as_timestamp(now()) < (as_timestamp(states(''sensor.desktop_pc_lastactive''))
+            + 300) }}'
+        - condition: state
+          entity_id: binary_sensor.bedroom_door
+          state: 'off'
+        sequence:
+        - service: light.turn_on
+          target:
+            entity_id: light.shapes_007f
+          data:
+            brightness_pct: 60
+            effect: Rainbow
+      default:
+      - service: light.turn_on
+        target:
+          entity_id: light.shapes_007f
+        data:
+          brightness_pct: 100
     - if:
       - condition: state
         entity_id: binary_sensor.closet
@@ -112,10 +187,28 @@ white:
   alias: White
   sequence:
   - parallel:
-    - service: script.turn_on
-      data: {}
-      target:
-        entity_id: script.rainbow
+    - choose:
+      - conditions:
+        - condition: state
+          entity_id: input_boolean.govee_cyan
+          state: 'on'
+        sequence:
+        - service: media_player.play_media
+          target:
+            entity_id: media_player.bedroom_dot
+          data:
+            media_content_type: routine
+            media_content_id: rainbow
+        - service: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.govee_cyan
+          data: {}
+      default:
+      - service: light.turn_on
+        target:
+          entity_id:
+          - light.glide
+        data: {}
     - data:
         brightness: 255
         effect: None
@@ -123,13 +216,33 @@ white:
       service: light.turn_on
       target:
         entity_id: light.fan_lights
-    - if:
-      - condition: not
-        conditions:
+    - choose:
+      - conditions:
         - condition: state
           entity_id: binary_sensor.webcam
           state: 'on'
-      then:
+        sequence:
+        - service: light.turn_on
+          target:
+            entity_id: light.shapes_007f
+          data:
+            brightness_pct: 70
+            effect: Webcam
+      - conditions:
+        - condition: template
+          value_template: '{{ as_timestamp(now()) < (as_timestamp(states(''sensor.desktop_pc_lastactive''))
+            + 300) }}'
+        - condition: state
+          entity_id: binary_sensor.bedroom_door
+          state: 'off'
+        sequence:
+        - service: light.turn_on
+          target:
+            entity_id: light.shapes_007f
+          data:
+            brightness_pct: 70
+            effect: Rainbow
+      default:
       - service: light.turn_on
         target:
           entity_id: light.shapes_007f
@@ -139,132 +252,63 @@ white:
       service: homeassistant.turn_on
       target:
         entity_id:
-        - script.1591907627081
         - group.misc_leds
         - input_boolean.automating
+    - parallel:
+      - data:
+          brightness: 255
+          effect: Color Loop
+          color_name: cyan
+        service: light.turn_on
+        target:
+          entity_id:
+          - light.bed_lights
+          - light.desk_lights
+          - light.rgb_light_switch
+      - if:
+        - condition: state
+          entity_id: binary_sensor.closet
+          state: 'on'
+        then:
+        - service: light.turn_on
+          target:
+            entity_id: light.closet_lights
+          data:
+            effect: Color Loop
   mode: single
-'1574728463699':
+music:
   alias: Music
   sequence:
-  - service: script.turn_on
-    data: {}
-    target:
-      entity_id: script.govee_music
-  - service: light.turn_on
-    target:
-      entity_id: light.desk_lights
-    data:
-      brightness_pct: 90
-  - service: light.turn_on
-    data:
-      effect: Music
-    target:
-      entity_id:
-      - light.bedroom_lights
-      - light.closet_lights
-  - service: input_select.select_option
-    target:
-      entity_id: input_select.nanoleaf_music
-    data:
-      option: "{{ state_attr('input_select.nanoleaf_music', 'options')\n    | reject('in',\
-        \ [states('input_select.nanoleaf_music')])\n    | list | random }}\n"
-  - service: light.turn_on
-    target:
-      entity_id: light.shapes_007f
-    data:
-      brightness_pct: 100
-      effect: '{{ states(''input_select.nanoleaf_music'') }}'
-  mode: single
-'1576649794372':
-  alias: Bed
-  sequence:
   - parallel:
-    - data: {}
-      service: homeassistant.turn_on
-      target:
-        entity_id:
-        - script.fan_off
-        - switch.windows
-    - service: input_boolean.turn_off
-      target:
-        entity_id: input_boolean.bedmotion
+    - service: input_button.press
       data: {}
-  mode: single
-'1591567135401':
-  alias: Fan Speed
-  sequence:
-  - data:
-      command: fan_up
-      device: ac
-    entity_id: remote.bedroom_rm4_remote
-    service: remote.send_command
-  mode: single
-  icon: mdi:fan-chevron-up
-'1591907627081':
-  alias: LED Strips
-  sequence:
-    parallel:
-    - data:
-        brightness: 255
-        effect: Color Loop
-        color_name: cyan
-      service: light.turn_on
+      target:
+        entity_id: input_button.music_trigger
+    - service: light.turn_on
+      target:
+        entity_id: light.desk_lights
+      data:
+        brightness_pct: 90
+    - service: light.turn_on
+      data:
+        effect: Music
       target:
         entity_id:
-        - light.bed_lights
-        - light.desk_lights
-        - light.rgb_light_switch
-    - if:
-      - condition: state
-        entity_id: binary_sensor.closet
-        state: 'on'
-      then:
-      - service: light.turn_on
-        target:
-          entity_id: light.closet_lights
-        data:
-          effect: Color Loop
+        - light.bedroom_lights
+        - light.closet_lights
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.nanoleaf_music
+      data:
+        option: "{{ state_attr('input_select.nanoleaf_music', 'options')\n    | reject('in',\
+          \ [states('input_select.nanoleaf_music')])\n    | list | random }}\n"
+    - service: light.turn_on
+      target:
+        entity_id: light.shapes_007f
+      data:
+        brightness_pct: 100
+        effect: '{{ states(''input_select.nanoleaf_music'') }}'
   mode: single
-ac_mode:
-  alias: AC Mode
-  sequence:
-  - service: remote.send_command
-    data:
-      command: mode
-      device: ac
-    entity_id: remote.bedroom_rm4_remote
-  mode: single
-  icon: mdi:hvac
-fan_speed_down:
-  alias: Fan Speed Down
-  sequence:
-  - data:
-      command: fan_down
-      device: ac
-    entity_id: remote.bedroom_rm4_remote
-    service: remote.send_command
-  mode: single
-  icon: mdi:fan-chevron-down
-temp_up:
-  alias: Increase Temperature
-  sequence:
-  - data:
-      command: temp_up
-      device: ac
-    entity_id: remote.bedroom_rm4_remote
-    service: remote.send_command
-  mode: single
-  icon: mdi:thermometer-plus
-temp_down:
-  alias: Decrease Temperature
-  sequence:
-  - data:
-      command: temp_down
-      device: ac
-    entity_id: remote.bedroom_rm4_remote
-    service: remote.send_command
-  mode: single
-  icon: mdi:thermometer-minus
 call:
   alias: Call
   sequence:
@@ -275,10 +319,16 @@ call:
         - input_boolean.govee_cyan
         - input_boolean.automating
       data: {}
-    - service: script.turn_on
+    - service: light.turn_on
       target:
-        entity_id: script.cyan
-      data: {}
+        entity_id:
+        - light.glide
+      data:
+        rgb_color:
+        - 0
+        - 126
+        - 255
+        brightness_pct: 1
     - service: light.turn_on
       target:
         entity_id:
@@ -330,130 +380,13 @@ call:
       - 255
   mode: single
   icon: mdi:phone
-ac_off:
-  alias: AC Off
-  sequence:
-  - condition: state
-    entity_id: switch.ac
-    state: 'on'
-  - service: switch.turn_off
-    target:
-      entity_id: switch.ac
-  mode: single
-color_desktop:
-  alias: Color Desktop
-  sequence:
-  - parallel:
-    - service: script.turn_on
-      target:
-        entity_id: script.color_loop
-      data: {}
-    - choose:
-      - conditions:
-        - condition: state
-          entity_id: binary_sensor.webcam
-          state: 'on'
-        sequence:
-        - service: light.turn_on
-          target:
-            entity_id: light.shapes_007f
-          data:
-            brightness_pct: 55
-            effect: Webcam
-      default:
-      - service: light.turn_on
-        target:
-          entity_id: light.shapes_007f
-        data:
-          brightness_pct: 60
-          effect: Rainbow
-  mode: single
-white_desktop:
-  alias: White Desktop
-  sequence:
-  - parallel:
-    - service: script.turn_on
-      target:
-        entity_id: script.white
-      data: {}
-    - choose:
-      - conditions:
-        - condition: state
-          entity_id: binary_sensor.webcam
-          state: 'on'
-        sequence:
-        - service: light.turn_on
-          target:
-            entity_id: light.shapes_007f
-          data:
-            brightness_pct: 70
-            effect: Webcam
-      default:
-      - service: light.turn_on
-        target:
-          entity_id: light.shapes_007f
-        data:
-          brightness_pct: 70
-          effect: Rainbow
-  mode: single
-cyan:
-  alias: Cyan
-  sequence:
-  - service: light.turn_on
-    target:
-      entity_id:
-      - light.glide
-    data:
-      rgb_color:
-      - 0
-      - 126
-      - 255
-      brightness_pct: 1
-  mode: single
-rainbow:
-  alias: Rainbow
-  sequence:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: input_boolean.govee_cyan
-        state: 'on'
-      sequence:
-      - service: media_player.play_media
-        target:
-          entity_id: media_player.bedroom_dot
-        data:
-          media_content_type: routine
-          media_content_id: rainbow
-      - service: input_boolean.turn_off
-        target:
-          entity_id: input_boolean.govee_cyan
-    default:
-    - service: light.turn_on
-      target:
-        entity_id:
-        - light.glide
-  mode: single
-govee_music:
-  alias: Govee Music
-  sequence:
-  - service: input_boolean.toggle
-    data: {}
-    target:
-      entity_id: input_boolean.music_trigger
-  mode: single
-set_ac_to_73ish:
+set_ac_to_72:
   alias: Set AC to 72
   sequence:
-  - if:
-    - condition: state
+  - service: switch.turn_on
+    data: {}
+    target:
       entity_id: switch.ac
-      state: 'off'
-    then:
-    - service: switch.turn_on
-      data: {}
-      target:
-        entity_id: switch.ac
   - service: remote.send_command
     data:
       device: ac
@@ -471,3 +404,4 @@ set_ac_to_73ish:
     target:
       entity_id: remote.bedroom_rm4_remote
   mode: single
+  icon: mdi:home-thermometer-outline
