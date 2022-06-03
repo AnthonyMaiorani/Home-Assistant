@@ -684,12 +684,12 @@
         data:
           option: "{{ state_attr('input_select.nanoleaf_scenes', 'options')\n    |\
             \ reject('in', [states('input_select.nanoleaf_scenes')])\n    | reject('in',\
-            \ [states('light.shapes_007f')])\n    | reject('in', 'moonlight')\n  \
-            \  | reject('in', 'Lightscape')\n    | reject('in', 'Night light')\n \
-            \   | reject('in', 'Tron Legacy')\n    | reject('in', 'Pink To Blue')\n\
-            \    | reject('in', 'Rain')\n    | reject('in', 'TRON CITY')\n    | reject('in',\
-            \ 'Waterfall')\n    | reject('in', 'Playstation Blue')\n    | reject('in',\
-            \ 'Bedtime')\n    | reject('in', 'Auora magic')\n    | list | random }}\n"
+            \ 'moonlight')\n    | reject('in', 'Lightscape')\n    | reject('in', 'Night\
+            \ light')\n    | reject('in', 'Tron Legacy')\n    | reject('in', 'Pink\
+            \ To Blue')\n    | reject('in', 'Rain')\n    | reject('in', 'TRON CITY')\n\
+            \    | reject('in', 'Waterfall')\n    | reject('in', 'Playstation Blue')\n\
+            \    | reject('in', 'Bedtime')\n    | reject('in', 'Aurora magic')\n \
+            \   | list | random }}\n"
     - conditions:
       - condition: state
         entity_id: light.smart_bulb_1
