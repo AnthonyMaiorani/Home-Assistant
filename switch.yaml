@@ -15,6 +15,10 @@
           target:
             entity_id:
               - script.stuff_off
+        - service: switch.turn_off
+          target:
+            entity_id:
+              - switch.ac
     blinds:
       turn_on:
         service: cover.open_cover
