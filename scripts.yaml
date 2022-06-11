@@ -154,8 +154,7 @@ color_loop:
             effect: Webcam
       - conditions:
         - condition: template
-          value_template: '{{ as_timestamp(now()) < (as_timestamp(states(''sensor.desktop_pc_lastactive''))
-            + 300) }}'
+          value_template: '{{ as_timestamp(now(), 301) < as_timestamp(states(''sensor.desktop_pc_lastactive''), 0) + 300 }}'
         - condition: state
           entity_id: binary_sensor.bedroom_door
           state: 'off'
@@ -230,8 +229,7 @@ white:
             effect: Webcam
       - conditions:
         - condition: template
-          value_template: '{{ as_timestamp(now()) < (as_timestamp(states(''sensor.desktop_pc_lastactive''))
-            + 300) }}'
+          value_template: '{{ as_timestamp(now(), 301) < as_timestamp(states(''sensor.desktop_pc_lastactive''), 0) + 300 }}'
         - condition: state
           entity_id: binary_sensor.bedroom_door
           state: 'off'
