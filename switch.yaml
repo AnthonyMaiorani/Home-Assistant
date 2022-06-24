@@ -1,3 +1,12 @@
+- platform: wake_on_lan
+  mac: !secret desktop
+  name: Desktop
+  host: !secret host
+  turn_off:
+    - service: button.press
+      target:
+        entity_id:
+          - button.shutdown
 - platform: command_line
   switches:
     u6_pro_led:
@@ -93,9 +102,6 @@
       friendly_name: Desktop
       value_template: "{{ states('sensor.monitor_plug_wattage')|float(0) > 6 }}"
       turn_on:
-        - service: wake_on_lan.send_magic_packet
-          data:
-            mac: !secret desktop
         - service: button.press
           target:
             entity_id:

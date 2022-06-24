@@ -145,6 +145,10 @@
         entity_id:
         - input_boolean.bedmotion
         - switch.ac
+    - service: button.press
+      data: {}
+      target:
+        entity_id: button.shutdown
   mode: single
 - id: '1621816232606'
   alias: Taylor Wyze Power
@@ -196,16 +200,15 @@
     entity_id: input_select.anthony
     state: Just Arrived
   action:
-    parallel:
+  - parallel:
     - service: script.turn_on
       target:
         entity_id: script.stuff_on
       data: {}
-    - service: input_select.select_option
+    - service: switch.turn_on
+      data: {}
       target:
-        entity_id: input_select.anthony
-      data:
-        option: Home
+        entity_id: switch.desktop
   mode: single
 - id: '1627443167507'
   alias: Bedroom Alerts
@@ -261,9 +264,13 @@
   description: ''
   trigger:
   - platform: state
-    entity_id: input_select.anthony
+    entity_id:
+    - input_select.anthony
     to: Just Arrived
-    for: 00:20:00
+    for:
+      hours: 0
+      minutes: 40
+      seconds: 0
     id: Home
   - platform: state
     entity_id: input_select.anthony
