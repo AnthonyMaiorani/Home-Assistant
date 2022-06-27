@@ -748,6 +748,11 @@
     - binary_sensor.discord_active
     to: 'off'
     id: discordquit
+  - platform: state
+    entity_id:
+    - binary_sensor.webcam
+    to: unavailable
+    id: unavailable
   condition: []
   action:
   - choose:
@@ -801,8 +806,16 @@
           - button.deletereg
         data: {}
     - conditions:
-      - condition: trigger
-        id: 'off'
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: unavailable
+        - condition: trigger
+          id: 'off'
+      - condition: state
+        entity_id: light.shapes_007f
+        attribute: effect
+        state: Webcam
       sequence:
       - service: light.turn_on
         target:

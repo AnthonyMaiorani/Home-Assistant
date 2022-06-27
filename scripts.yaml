@@ -83,6 +83,21 @@ fan_off:
             entity_id: light.closet_lights
           data:
             effect: Color Loop
+    - if:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: binary_sensor.webcam
+          state: 'on'
+        - condition: template
+          value_template: '{{ states("input_select.nanoleaf_scenes") == states("input_select.nanoleaf_scenes")
+            }}'
+      then:
+      - service: light.turn_on
+        target:
+          entity_id: light.shapes_007f
+        data:
+          effect: '{{ states(''input_select.nanoleaf_scenes'') }}'
   mode: single
 color_loop:
   alias: Color
@@ -154,7 +169,8 @@ color_loop:
             effect: Webcam
       - conditions:
         - condition: template
-          value_template: '{{ as_timestamp(now(), 301) < as_timestamp(states(''sensor.desktop_pc_lastactive''), 0) + 300 }}'
+          value_template: '{{ as_timestamp(now(), 301) < as_timestamp(states(''sensor.desktop_pc_lastactive''),
+            0) + 300 }}'
         - condition: state
           entity_id: binary_sensor.bedroom_door
           state: 'off'
@@ -164,7 +180,6 @@ color_loop:
             entity_id: light.shapes_007f
           data:
             brightness_pct: 60
-            effect: Rainbow
       default:
       - service: light.turn_on
         target:
@@ -181,6 +196,21 @@ color_loop:
           entity_id: light.closet_lights
         data:
           effect: Color Loop
+    - if:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: binary_sensor.webcam
+          state: 'on'
+        - condition: template
+          value_template: '{{ states("input_select.nanoleaf_scenes") == states("input_select.nanoleaf_scenes")
+            }}'
+      then:
+      - service: light.turn_on
+        target:
+          entity_id: light.shapes_007f
+        data:
+          effect: '{{ states(''input_select.nanoleaf_scenes'') }}'
   mode: single
 white:
   alias: White
@@ -229,7 +259,8 @@ white:
             effect: Webcam
       - conditions:
         - condition: template
-          value_template: '{{ as_timestamp(now(), 301) < as_timestamp(states(''sensor.desktop_pc_lastactive''), 0) + 300 }}'
+          value_template: '{{ as_timestamp(now(), 301) < as_timestamp(states(''sensor.desktop_pc_lastactive''),
+            0) + 300 }}'
         - condition: state
           entity_id: binary_sensor.bedroom_door
           state: 'off'
@@ -239,7 +270,6 @@ white:
             entity_id: light.shapes_007f
           data:
             brightness_pct: 70
-            effect: Rainbow
       default:
       - service: light.turn_on
         target:
@@ -273,15 +303,32 @@ white:
             entity_id: light.closet_lights
           data:
             effect: Color Loop
+    - if:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: binary_sensor.webcam
+          state: 'on'
+        - condition: template
+          value_template: '{{ states("input_select.nanoleaf_scenes") == states("input_select.nanoleaf_scenes")
+            }}'
+      then:
+      - service: light.turn_on
+        target:
+          entity_id: light.shapes_007f
+        data:
+          effect: '{{ states(''input_select.nanoleaf_scenes'') }}'
   mode: single
 music:
   alias: Music
   sequence:
   - parallel:
-    - service: input_button.press
-      data: {}
+    - service: media_player.play_media
       target:
-        entity_id: input_button.music_trigger
+        entity_id: media_player.bedroom_dot
+      data:
+        media_content_type: routine
+        media_content_id: music mode
     - service: light.turn_on
       target:
         entity_id: light.desk_lights
