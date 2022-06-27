@@ -209,6 +209,15 @@
       data: {}
       target:
         entity_id: switch.desktop
+    - if:
+      - condition: state
+        entity_id: switch.ac
+        state: 'off'
+      then:
+      - service: input_button.press
+        data: {}
+        target:
+          entity_id: input_button.ac_timer_start
   mode: single
 - id: '1627443167507'
   alias: Bedroom Alerts
@@ -1087,3 +1096,28 @@
     default: []
   mode: parallel
   max: 20
+- id: '1656373322370'
+  alias: Cool Room
+  description: ''
+  trigger:
+  - platform: zone
+    entity_id: person.anthony
+    zone: zone.home
+    event: enter
+  condition:
+  - condition: state
+    entity_id: person.anthony
+    state: Just Arrived
+  action:
+  - wait_for_trigger:
+    - platform: state
+      entity_id:
+      - cover.garage_door
+      to: opening
+    continue_on_timeout: false
+    timeout: 00:30:00
+  - service: input_button.press
+    data: {}
+    target:
+      entity_id: input_button.ac_timer_start
+  mode: single
