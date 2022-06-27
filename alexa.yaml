@@ -7,7 +7,6 @@ smart_home:
       - script.white
       - script.color_loop
       - script.fan_off
-      - script.music
       - switch.clock
       - light.bedroom_lights
       - light.fan_lights
