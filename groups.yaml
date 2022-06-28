@@ -11,7 +11,7 @@ room: # used for ha menu
     - script.call
     - input_button.ac_timer_start
     - script.set_ac_to_72
-    - switch.windows
+    - switch.desktop
     - cover.bedroom_blinds
 misc_leds:
   name: Other Room Lights
