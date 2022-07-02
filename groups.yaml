@@ -6,11 +6,8 @@ room: # used for ha menu
     - script.white
     - script.fan_off
     - script.color_loop
-    - switch.ac
     - script.music
     - script.call
-    - input_button.ac_timer_start
-    - script.set_ac_to_72
     - switch.desktop
     - cover.bedroom_blinds
 misc_leds:
@@ -19,7 +16,6 @@ misc_leds:
     - switch.light_switch
     - switch.u6_pro_led
     - switch.clock
-    - switch.case_lights
 apartment:
   name: Apartment Cameras
   entities:

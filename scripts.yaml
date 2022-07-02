@@ -1,14 +1,10 @@
 stuff_on:
   sequence:
-    parallel:
+  - parallel:
     - service: script.turn_on
       data: {}
       target:
         entity_id: script.white
-    - service: switch.turn_on
-      data: {}
-      target:
-        entity_id: switch.windows
     - data:
         option: Home
       entity_id: input_select.anthony
@@ -409,7 +405,6 @@ call:
         - switch.clock
         - light.fan_lights
         - light.desk_lights
-        - switch.u6_pro_led
         - light.closet_lights
         - switch.desktop
   - service: light.turn_on

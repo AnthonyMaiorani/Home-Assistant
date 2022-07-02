@@ -115,7 +115,7 @@
     to: 'on'
     for: 00:05:00
   - platform: state
-    entity_id: switch.windows
+    entity_id: switch.desktop
     for: 00:01:00
     from: 'off'
     to: 'on'
@@ -136,10 +136,6 @@
         entity_id:
         - input_boolean.bedmotion
         - climate.bedroom_ac
-    - service: button.press
-      data: {}
-      target:
-        entity_id: button.shutdown
   mode: single
 - id: '1621816232606'
   alias: Taylor Wyze Power
@@ -835,8 +831,14 @@
   - choose:
     - conditions:
       - condition: time
-        before: 00:00:00
+        before: 04:00:00
         after: '22:00:00'
+      - condition: state
+        entity_id: light.desk_lights
+        state: 'on'
+      - condition: state
+        entity_id: binary_sensor.webcam
+        state: 'on'
       sequence:
       - service: script.call
         data: {}

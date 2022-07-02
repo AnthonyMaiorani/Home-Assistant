@@ -24,10 +24,10 @@
           target:
             entity_id:
               - script.stuff_off
-        - service: switch.turn_off
+        - service: climate.turn_off
           target:
             entity_id:
-              - switch.ac
+              - climate.bedroom_ac
     blinds:
       turn_on:
         service: cover.open_cover
@@ -68,36 +68,6 @@
             command: 'off'
             device: case
             num_repeats: 6
-#    ac:
-#      friendly_name: Air Conditioner
-#      value_template: "{{ states('sensor.ac_plug_wattage')|float(0) > 6 }}"
-#      turn_on:
-#        - condition: state
-#          entity_id: switch.ac
-#          state: 'off'
-#        - service: remote.send_command
-#          data:
-#            entity_id: remote.bedroom_rm4_remote
-#            command: power
-#            device: ac
-#        - delay: 4
-#        - service: homeassistant.update_entity
-#          entity_id: sensor.ac_plug_wattage
-#      turn_off:
-#        - condition: state
-#          entity_id: switch.ac
-#          state: 'on'
-#        - service: remote.send_command
-#          data:
-#            entity_id: remote.bedroom_rm4_remote
-#            command: power
-#            device: ac
-#        - service: timer.cancel
-#          target:
-#            entity_id: timer.ac
-#        - delay: 8
-#        - service: homeassistant.update_entity
-#          entity_id: sensor.ac_plug_wattage
     windows:
       friendly_name: Desktop
       value_template: "{{ states('sensor.monitor_plug_wattage')|float(0) > 6 }}"
