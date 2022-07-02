@@ -21,13 +21,13 @@ stuff_off:
     service: homeassistant.turn_off
     target:
       entity_id:
-      - switch.windows
       - light.bedroom_lights
       - light.closet_lights
       - light.shapes_007f
       - light.glide
       - group.misc_leds
       - switch.blinds
+      - switch.desktop
   alias: Night
   mode: single
 fan_off:
@@ -406,13 +406,12 @@ call:
       service: homeassistant.turn_off
       target:
         entity_id:
-        - switch.windows
         - switch.clock
         - light.fan_lights
         - light.desk_lights
         - switch.u6_pro_led
         - light.closet_lights
-        - switch.case_lights
+        - switch.desktop
   - service: light.turn_on
     target:
       entity_id:
@@ -425,28 +424,3 @@ call:
       - 255
   mode: single
   icon: mdi:phone
-set_ac_to_72:
-  alias: Set AC to 72
-  sequence:
-  - service: switch.turn_on
-    data: {}
-    target:
-      entity_id: switch.ac
-  - service: remote.send_command
-    data:
-      device: ac
-      command: temp_down
-      num_repeats: 30
-      delay_secs: 0.1
-    target:
-      entity_id: remote.bedroom_rm4_remote
-  - service: remote.send_command
-    data:
-      device: ac
-      command: temp_up
-      num_repeats: 8
-      delay_secs: 0.1
-    target:
-      entity_id: remote.bedroom_rm4_remote
-  mode: single
-  icon: mdi:home-thermometer-outline

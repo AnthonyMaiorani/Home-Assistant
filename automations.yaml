@@ -21,16 +21,7 @@
       - script.white
       - input_boolean.bedmotion
     data: {}
-  - wait_for_trigger:
-    - platform: state
-      entity_id: binary_sensor.bed_occupancy
-      to: 'off'
-      for:
-        hours: 0
-        minutes: 0
-        seconds: 4
-    continue_on_timeout: false
-  mode: restart
+  mode: single
 - id: 43a25b65afed4a4680f5ec81172f11e8
   alias: Startup Actions
   description: Set Theme, Ensure Location Input Select is Updated
@@ -144,7 +135,7 @@
       target:
         entity_id:
         - input_boolean.bedmotion
-        - switch.ac
+        - climate.bedroom_ac
     - service: button.press
       data: {}
       target:
@@ -205,19 +196,9 @@
       target:
         entity_id: script.stuff_on
       data: {}
-    - service: switch.turn_on
-      data: {}
-      target:
-        entity_id: switch.desktop
-    - if:
-      - condition: state
-        entity_id: switch.ac
-        state: 'off'
-      then:
-      - service: input_button.press
-        data: {}
-        target:
-          entity_id: input_button.ac_timer_start
+    - service: climate.set_hvac_mode
+      data:
+        hvac_mode: cool
   mode: single
 - id: '1627443167507'
   alias: Bedroom Alerts
@@ -853,6 +834,13 @@
   action:
   - choose:
     - conditions:
+      - condition: time
+        before: 00:00:00
+        after: '22:00:00'
+      sequence:
+      - service: script.call
+        data: {}
+    - conditions:
       - condition: state
         entity_id: light.fan_lights
         state: 'on'
@@ -861,18 +849,6 @@
         data: {}
         target:
           entity_id: script.fan_off
-    - conditions:
-      - condition: state
-        entity_id: light.bed_lights
-        state: 'on'
-      - condition: state
-        entity_id: light.shapes_007f
-        state: 'off'
-      sequence:
-      - service: light.turn_off
-        data: {}
-        target:
-          entity_id: light.bed_lights
     default: []
   mode: single
 - id: '1645695901319'
@@ -982,120 +958,6 @@
           entity_id: input_select.riana
     default: []
   mode: single
-- id: '1653601692731'
-  alias: AC Controls
-  description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - input_button.ac_timer_start
-    id: buttonpress
-  - platform: event
-    event_type: timer.finished
-    event_data:
-      entity_id: timer.ac
-    id: timerfinished
-  - platform: state
-    entity_id:
-    - input_button.ac_mode
-    id: mode
-  - platform: state
-    entity_id:
-    - input_button.ac_temp_up
-    id: tempup
-  - platform: state
-    entity_id:
-    - input_button.ac_temp_down
-    id: tempdown
-  - platform: state
-    entity_id:
-    - input_button.ac_fan_up
-    id: fanup
-  - platform: state
-    entity_id:
-    - input_button.ac_fan_down
-    id: fandown
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: buttonpress
-      sequence:
-      - service: switch.turn_on
-        data: {}
-        target:
-          entity_id: switch.ac
-      - parallel:
-        - service: remote.send_command
-          data:
-            device: ac
-            command: temp_down
-            num_repeats: 30
-            delay_secs: 0.1
-          target:
-            entity_id: remote.bedroom_rm4_remote
-        - service: timer.start
-          data:
-            duration: 0:25:00
-          target:
-            entity_id: timer.ac
-    - conditions:
-      - condition: trigger
-        id: timerfinished
-      sequence:
-      - service: switch.turn_off
-        data: {}
-        target:
-          entity_id: switch.ac
-    - conditions:
-      - condition: trigger
-        id: mode
-      sequence:
-      - service: remote.send_command
-        data:
-          command: mode
-          device: ac
-        entity_id: remote.bedroom_rm4_remote
-    - conditions:
-      - condition: trigger
-        id: tempup
-      sequence:
-      - data:
-          command: temp_up
-          device: ac
-        entity_id: remote.bedroom_rm4_remote
-        service: remote.send_command
-    - conditions:
-      - condition: trigger
-        id: tempdown
-      sequence:
-      - data:
-          command: temp_down
-          device: ac
-        entity_id: remote.bedroom_rm4_remote
-        service: remote.send_command
-    - conditions:
-      - condition: trigger
-        id: fanup
-      sequence:
-      - data:
-          command: fan_up
-          device: ac
-        entity_id: remote.bedroom_rm4_remote
-        service: remote.send_command
-    - conditions:
-      - condition: trigger
-        id: fandown
-      sequence:
-      - data:
-          command: fan_down
-          device: ac
-        entity_id: remote.bedroom_rm4_remote
-        service: remote.send_command
-    default: []
-  mode: parallel
-  max: 20
 - id: '1656373322370'
   alias: Cool Room
   description: ''
@@ -1104,20 +966,39 @@
     entity_id: person.anthony
     zone: zone.home
     event: enter
-  condition:
-  - condition: state
-    entity_id: person.anthony
-    state: Just Arrived
+  condition: []
   action:
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - condition: state
+    state: Just Arrived
+    entity_id: input_select.anthony
   - wait_for_trigger:
     - platform: state
       entity_id:
       - cover.garage_door
-      to: opening
+    - platform: state
+      entity_id:
+      - lock.front_door
     continue_on_timeout: false
     timeout: 00:30:00
-  - service: input_button.press
+  - service: climate.set_hvac_mode
+    data:
+      hvac_mode: cool
+    target:
+      entity_id: climate.bedroom_ac
+  - wait_for_trigger:
+    - platform: zone
+      entity_id: person.anthony
+      zone: zone.home
+      event: leave
+    continue_on_timeout: false
+    timeout: 00:25:00
+  - service: climate.turn_off
     data: {}
     target:
-      entity_id: input_button.ac_timer_start
+      entity_id: climate.bedroom_ac
   mode: single

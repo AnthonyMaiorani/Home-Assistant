@@ -10,6 +10,5 @@ smart_home:
       - switch.clock
       - light.bedroom_lights
       - light.fan_lights
-      - switch.ac
       - cover.garage_door
       - light.led_strips
