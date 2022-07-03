@@ -18,16 +18,20 @@
     bedroomtoggle:
       value_template: "{{ is_state('light.desk_lights', 'on') }}"
       turn_on:
-        - service: script.stuff_on
+        - parallel:
+          - service: script.morning
+          - service: climate.set_hvac_mode
+            data:
+              hvac_mode: cool
+            target:
+              entity_id: climate.bedroom_ac
       turn_off:
-        - service: script.turn_on
-          target:
-            entity_id:
-              - script.stuff_off
-        - service: climate.turn_off
-          target:
-            entity_id:
-              - climate.bedroom_ac
+        - parallel:
+          - service: script.night
+          - service: climate.turn_off
+            target:
+              entity_id:
+                - climate.bedroom_ac
     blinds:
       turn_on:
         service: cover.open_cover
@@ -48,26 +52,6 @@
         - service: lock.unlock
           entity_id:
             - lock.front_door
-    case_lights:
-      friendly_name: Case Lights
-      turn_on:
-        - service: remote.send_command
-          data:
-            entity_id: remote.bedroom_rm4_remote
-            command: 'off'
-            device: case
-        - service: remote.send_command
-          data:
-            entity_id: remote.bedroom_rm4_remote
-            command: 'on'
-            device: case
-      turn_off:
-        - service: remote.send_command
-          data:
-            entity_id: remote.bedroom_rm4_remote
-            command: 'off'
-            device: case
-            num_repeats: 6
     windows:
       friendly_name: Desktop
       value_template: "{{ states('sensor.monitor_plug_wattage')|float(0) > 6 }}"

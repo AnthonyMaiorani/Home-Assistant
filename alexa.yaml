@@ -2,9 +2,8 @@ smart_home:
   filter:
     include_entities:
       - switch.desktop
-      - script.stuff_on
-      - script.stuff_off
-      - script.white
+      - script.night
+      - script.morning
       - script.color_loop
       - script.fan_off
       - switch.clock

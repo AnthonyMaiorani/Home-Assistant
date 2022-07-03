@@ -51,7 +51,7 @@ binary_sensor:
         - ON for at least .4s
       then:
       - homeassistant.service:
-          service: script.white
+          service: script.morning
           
 light:
   - platform: rgb

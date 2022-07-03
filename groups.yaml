@@ -1,9 +1,8 @@
 room: # used for ha menu
   name: Anthony's Room
   entities: 
-    - script.stuff_on
-    - script.stuff_off
-    - script.white
+    - script.morning
+    - script.night
     - script.fan_off
     - script.color_loop
     - script.music

@@ -18,7 +18,7 @@
   - service: homeassistant.turn_on
     target:
       entity_id:
-      - script.white
+      - script.morning
       - input_boolean.bedmotion
     data: {}
   mode: single
@@ -182,7 +182,7 @@
     entity_id: light.fan_lights
     state: 'off'
   action:
-  - service: script.white
+  - service: script.morning
   mode: single
 - id: '1620710706685'
   alias: Color Loop
@@ -222,21 +222,18 @@
     from: 'off'
     to: 'on'
     for: 00:05:00
-  - platform: state
-    entity_id: switch.desktop
-    for: 00:01:00
-    from: 'off'
-    to: 'on'
   - platform: zone
     entity_id: person.anthony
     zone: zone.home
     event: leave
+  - platform: time_pattern
+    minutes: /20
   condition:
   - condition: template
     value_template: '{{states(''person.anthony'') != ''home''}}'
   action:
   - parallel:
-    - service: script.stuff_off
+    - service: script.night
       data: {}
     - service: homeassistant.turn_off
       data: {}
@@ -295,8 +292,14 @@
     entity_id: input_select.anthony
     state: Just Arrived
   action:
-  - service: script.stuff_on
-    data: {}
+  - parallel:
+    - service: script.morning
+      data: {}
+    - service: climate.set_hvac_mode
+      data:
+        hvac_mode: cool
+      target:
+        entity_id: climate.bedroom_ac
   mode: single
 - id: '1627443167507'
   alias: Bedroom Alerts
@@ -741,10 +744,6 @@
           entity_id:
           - light.bedroom_lights
     default: []
-  - service: button.press
-    data: {}
-    target:
-      entity_id: button.mousepad_on
   mode: single
 - id: '1639192672045'
   alias: Nanoleaf Scene Changer

@@ -6,14 +6,12 @@ switch.morning_automations:
   icon: mdi:home-automation
 script.color_loop:
   icon: mdi:lightbulb-on
-script.white:
+script.morning:
   icon: mdi:white-balance-sunny
 script.music:
   icon: mdi:party-popper
-script.stuff_off:
+script.night:
   icon: mdi:weather-night
-script.stuff_on:
-  icon: mdi:weather-sunset
 switch.clock:
   icon: mdi:clock
 switch.light_switch:
@@ -59,5 +57,3 @@ media_player.living_room:
   icon: mdi:youtube-tv
 switch.ap_led:
   icon: mdi:access-point
-switch.case_lights:
-  icon: mdi:desktop-tower
