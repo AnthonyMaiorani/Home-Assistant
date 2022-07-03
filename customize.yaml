@@ -1,59 +1,10 @@
-script.fan_off:
-  icon: mdi:ceiling-light
 switch.windows:
   icon: mdi:microsoft-windows
-switch.morning_automations:
-  icon: mdi:home-automation
-script.color_loop:
-  icon: mdi:lightbulb-on
-script.morning:
-  icon: mdi:white-balance-sunny
-script.music:
-  icon: mdi:party-popper
-script.night:
-  icon: mdi:weather-night
-switch.clock:
-  icon: mdi:clock
-switch.light_switch:
-  icon: mdi:light-switch
-light.rgb_light_switch:
-  icon: mdi:light-switch
 light.bedroom_lights:
   icon: mdi:lightbulb-group
-light.bed_lights:
-  icon: mdi:bed-queen
-light.desk_lights:
-  icon: mdi:desk
-light.closet_lights:
-  icon: mdi:wardrobe
-light.led_strips:
-  icon: mdi:led-strip-variant
-switch.power_strip_outlet_1:
-  icon: mdi:power-socket-us
-switch.power_strip_outlet_2:
-  icon: mdi:power-socket-us
-switch.power_strip_outlet_3:
-  icon: mdi:power-socket-us
-switch.power_strip_outlet_4:
-  icon: mdi:power-socket-us
-switch.power_strip_usbs:
-  icon: mdi:usb-port
 light.fan_lights:
   icon: mdi:ceiling-light
-automation.morning_lights_on:
-  icon: mdi:home-automation
 group.bedroom_motion:
   icon: mdi:motion-sensor
-person.anthony:
-  entity_picture: /local/anthony.png
-  icon: /local/anthony.png
-media_player.50_tcl_roku_tv:
-  icon: mdi:youtube-tv
-remote.50_tcl_roku_tv:
-  icon: mdi:youtube-tv
-media_player.living_room_denon:
-  icon: mdi:audio-video
-media_player.living_room:
-  icon: mdi:youtube-tv
 switch.ap_led:
   icon: mdi:access-point
