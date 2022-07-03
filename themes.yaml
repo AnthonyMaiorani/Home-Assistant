@@ -1,5 +1,8 @@
 themes:
   ios-dark-mode-dark-blue:
+    dialog-backdrop-filter: blur(5px)
+    iron-overlay-backdrop-opacity: 1
+    iron-overlay-backdrop-background-color: rgba(0, 0, 0, 0.32)
     # Global
     #background-image: "center / cover no-repeat fixed url('/hacsfiles/themes/ios-themes/homekit-bg-dark-blue.jpg')"
     #lovelace-background: var(--background-image)

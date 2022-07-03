@@ -9,6 +9,11 @@ stuff_on:
         option: Home
       entity_id: input_select.anthony
       service: input_select.select_option
+    - service: climate.set_hvac_mode
+      data:
+        hvac_mode: cool
+      target:
+        entity_id: climate.bedroom_ac
   alias: Morning
   mode: single
 stuff_off:
