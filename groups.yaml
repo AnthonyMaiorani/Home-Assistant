@@ -21,5 +21,4 @@ apartment:
   entities:
     - switch.apartment_cam
     - switch.bedroom_cam
-    - switch.kitchen_cam_2
     - switch.litter_cam
