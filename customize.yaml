@@ -8,3 +8,5 @@ group.bedroom_motion:
   icon: mdi:motion-sensor
 switch.ap_led:
   icon: mdi:access-point
+switch.ac:
+  icon: mdi:air-conditioner
