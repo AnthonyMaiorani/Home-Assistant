@@ -417,3 +417,33 @@ morning:
         entity_id: input_select.anthony
   mode: single
   icon: mdi:white-balance-sunny
+start_car:
+  alias: Start Car
+  sequence:
+  - if:
+    - condition: zone
+      entity_id: person.anthony
+      zone: zone.home
+    then:
+    - service: cover.open_cover
+      data: {}
+      target:
+        entity_id: cover.garage_door
+    - wait_for_trigger:
+      - platform: state
+        entity_id:
+        - cover.garage_door
+        to: opening
+      continue_on_timeout: false
+      timeout: 00:01:00
+    - delay:
+        hours: 0
+        minutes: 0
+        seconds: 4
+        milliseconds: 0
+  - service: switch.turn_on
+    data: {}
+    target:
+      entity_id: switch.accord_remotestart
+  mode: single
+  icon: mdi:car

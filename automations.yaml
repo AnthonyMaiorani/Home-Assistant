@@ -41,11 +41,6 @@
     - input_boolean.ac_boost
     to: 'off'
     id: 'off'
-  - platform: state
-    entity_id:
-    - climate.bedroom_ac
-    id: turnedoff
-    to: 'off'
   condition: []
   action:
   - choose:
@@ -89,53 +84,27 @@
       - condition: or
         conditions:
         - condition: trigger
-          id: timerfinished
-        - condition: trigger
           id: 'off'
+        - condition: trigger
+          id: timerfinished
       sequence:
-      - service: climate.set_hvac_mode
-        data:
-          hvac_mode: cool
-        target:
-          entity_id: climate.bedroom_ac
-      - if:
-        - condition: state
-          entity_id: automation.ac_controls
-          state: 'on'
-        then:
-        - service: input_boolean.turn_off
-          data: {}
-          target:
-            entity_id: input_boolean.ac_boost
-        else:
-        - service: timer.cancel
-          data: {}
-          target:
-            entity_id: timer.ac
-      - service: switch.turn_on
-        data: {}
-        target:
-          entity_id: switch.ac
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 1
-          milliseconds: 0
-    - conditions:
-      - condition: trigger
-        id: turnedoff
-      - condition: state
-        entity_id: timer.ac
-        state: active
-      sequence:
-      - service: timer.cancel
-        data: {}
-        target:
-          entity_id: timer.ac
       - service: input_boolean.turn_off
         data: {}
         target:
           entity_id: input_boolean.ac_boost
+      - service: timer.cancel
+        data: {}
+        target:
+          entity_id: timer.ac
+      - if:
+        - condition: state
+          entity_id: timer.ac
+          state: 'on'
+        then:
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id: switch.ac
       - delay:
           hours: 0
           minutes: 0
@@ -797,14 +766,14 @@
         target:
           entity_id: input_select.nanoleaf_scenes
         data:
-          option: "{{ state_attr('input_select.nanoleaf_scenes', 'options')\n    |\
-            \ reject('in', [states('input_select.nanoleaf_scenes')])\n    | reject('in',\
-            \ 'moonlight')\n    | reject('in', 'Lightscape')\n    | reject('in', 'Night\
-            \ light')\n    | reject('in', 'Tron Legacy')\n    | reject('in', 'Pink\
-            \ To Blue')\n    | reject('in', 'Rain')\n    | reject('in', 'TRON CITY')\n\
-            \    | reject('in', 'Waterfall')\n    | reject('in', 'Playstation Blue')\n\
-            \    | reject('in', 'Bedtime')\n    | reject('in', 'Aurora magic')\n \
-            \   | list | random }}\n"
+          option: "{{ state_attr('input_select.nanoleaf_scenes', 'options')\n    |
+            reject('in', [states('input_select.nanoleaf_scenes')])\n    | reject('in',
+            'moonlight')\n    | reject('in', 'Lightscape')\n    | reject('in', 'Night
+            light')\n    | reject('in', 'Tron Legacy')\n    | reject('in', 'Pink To
+            Blue')\n    | reject('in', 'Rain')\n    | reject('in', 'TRON CITY')\n
+            \   | reject('in', 'Waterfall')\n    | reject('in', 'Playstation Blue')\n
+            \   | reject('in', 'Bedtime')\n    | reject('in', 'Aurora magic')\n    |
+            list | random }}\n"
     - conditions:
       - condition: state
         entity_id: light.smart_bulb_1
@@ -815,16 +784,16 @@
         target:
           entity_id: input_select.nanoleaf_music
         data:
-          option: "{{ state_attr('input_select.nanoleaf_music', 'options')\n    |\
-            \ reject('in', [states('input_select.nanoleaf_music')])\n    | list |\
-            \ random }}\n"
+          option: "{{ state_attr('input_select.nanoleaf_music', 'options')\n    |
+            reject('in', [states('input_select.nanoleaf_music')])\n    | list | random
+            }}\n"
     default:
     - service: input_select.select_option
       target:
         entity_id: input_select.nanoleaf_scenes
       data:
-        option: "{{ state_attr('input_select.nanoleaf_scenes', 'options')\n    | reject('in',\
-          \ [states('input_select.nanoleaf_scenes')])\n    | list | random }}\n"
+        option: "{{ state_attr('input_select.nanoleaf_scenes', 'options')\n    | reject('in',
+          [states('input_select.nanoleaf_scenes')])\n    | list | random }}\n"
   - condition: template
     value_template: '{{ state_attr("light.shapes_007f", "effect") != "Webcam" and
       states(''light.shapes_007f'') == ''on''}} '

@@ -38,10 +38,6 @@ template:
         state: >
           {{ states('sensor.discord')|float(-1) > 0}}
 
-life360: # location disabled
-  members:
-    exclude: Anthony Maiorani
-
 mqtt:
   binary_sensor:
     - state_topic: "FP"

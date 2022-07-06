@@ -87,6 +87,12 @@
           entity_id: climate.bedroom_ac
         data:
           hvac_mode: 'off'
+      - service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.ac_boost
+      - service: timer.cancel
+        target:
+          entity_id: timer.ac
     blinds:
       turn_on:
         service: cover.open_cover
