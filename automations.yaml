@@ -235,7 +235,7 @@
     zone: zone.taylor_s_home
     event: enter
   - platform: zone
-    entity_id: device_tracker.life360_taylor
+    entity_id: person.taylor
     zone: zone.taylor_s_home
     event: leave
   - platform: homeassistant
@@ -246,7 +246,7 @@
     - conditions:
       - condition: state
         state: Taylor's Home
-        entity_id: device_tracker.life360_taylor
+        entity_id: person.taylor
       sequence:
       - service: homeassistant.turn_off
         target:
@@ -994,7 +994,7 @@
     id: Home
   - platform: state
     entity_id:
-    - device_tracker.life360_riana
+    - person.riana
     id: Away
     to: Just Left
     for:
@@ -1002,12 +1002,12 @@
       minutes: 10
       seconds: 0
   - platform: zone
-    entity_id: device_tracker.life360_riana
+    entity_id: person.riana
     zone: zone.home
     event: enter
     id: Just Arrived
   - platform: zone
-    entity_id: device_tracker.life360_riana
+    entity_id: person.riana
     zone: zone.home
     event: leave
     id: Just Left
