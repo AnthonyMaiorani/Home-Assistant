@@ -1,4 +1,7 @@
 smart_home:
+  endpoint: !secret a_endpoint
+  client_id: !secret a_client
+  client_secret: !secret a_secret
   filter:
     include_entities:
       - switch.desktop
@@ -6,5 +9,5 @@ smart_home:
       - script.morning
       - script.color_loop
       - script.fan_off
-      - switch.clock
       - cover.garage_door
+      - input_button.activategoveerainbow
