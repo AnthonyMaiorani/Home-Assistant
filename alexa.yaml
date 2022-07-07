@@ -7,7 +7,4 @@ smart_home:
       - script.color_loop
       - script.fan_off
       - switch.clock
-      - light.bedroom_lights
-      - light.fan_lights
       - cover.garage_door
-      - light.led_strips
