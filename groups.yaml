@@ -7,6 +7,7 @@ room: # used for ha menu
     - script.color_loop
     - script.music
     - script.call
+    - switch.ac
     - input_boolean.ac_boost
     - switch.desktop
     - cover.bedroom_blinds
