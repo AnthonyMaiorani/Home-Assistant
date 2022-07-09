@@ -10,6 +10,7 @@ smart_home:
       - script.color_loop
       - script.fan_off
       - cover.garage_door
+      - cover.bedroom_blinds
       - input_boolean.ac_boost
       - climate.bedroom_ac
       - input_button.activategoveerainbow
