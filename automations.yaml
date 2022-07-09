@@ -51,7 +51,7 @@
       - parallel:
         - service: timer.start
           data:
-            duration: 0:25:00
+            duration: 0:15:00
           target:
             entity_id: timer.ac
         - service: climate.set_hvac_mode
@@ -119,22 +119,46 @@
   - event: start
     platform: homeassistant
   action:
+  - service: automation.turn_off
+    data:
+      stop_actions: false
+    target:
+      entity_id: automation.ac_controls
   - parallel:
     - data:
         name: ios-dark-mode-dark-blue
       service: frontend.set_theme
-    - condition: zone
-      entity_id: person.anthony
-      zone: zone.home
-    - service: input_select.select_option
-      target:
-        entity_id: input_select.anthony
-      data:
-        option: Home
     - service: input_boolean.turn_on
       data: {}
       target:
         entity_id: input_boolean.govee_cyan
+    - if:
+      - condition: zone
+        entity_id: person.anthony
+        zone: zone.home
+      then:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.anthony
+        data:
+          option: Home
+    - if:
+      - condition: state
+        entity_id: timer.ac
+        state: 'off'
+      then:
+      - service: timer.cancel
+        data: {}
+        target:
+          entity_id: timer.ac
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id: input_boolean.ac_boost
+  - service: automation.turn_on
+    data: {}
+    target:
+      entity_id: automation.ac_controls
   initial_state: true
   mode: single
 - id: '1617634628204'
@@ -280,17 +304,13 @@
     - if:
       - condition: state
         entity_id: input_boolean.ac_boost
-        state: 'on'
+        state: 'off'
       then:
-      - service: switch.turn_on
-        data: {}
-        target:
-          entity_id: switch.ac
-      else:
       - service: input_boolean.turn_on
         data: {}
         target:
           entity_id: input_boolean.ac_boost
+      else: []
   mode: single
 - id: '1627443167507'
   alias: Bedroom Alerts
