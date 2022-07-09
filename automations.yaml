@@ -144,17 +144,25 @@
           option: Home
     - if:
       - condition: state
-        entity_id: timer.ac
-        state: 'off'
+        entity_id: switch.ac
+        state: 'on'
+      - condition: state
+        entity_id: input_boolean.ac_boost
+        state: 'on'
       then:
-      - service: timer.cancel
+      - service: timer.start
         data: {}
         target:
           entity_id: timer.ac
+      else:
       - service: input_boolean.turn_off
         data: {}
         target:
           entity_id: input_boolean.ac_boost
+      - service: timer.cancel
+        data: {}
+        target:
+          entity_id: timer.ac
   - service: automation.turn_on
     data: {}
     target:
