@@ -13,4 +13,5 @@ smart_home:
       - cover.bedroom_blinds
       - input_boolean.ac_boost
       - climate.bedroom_ac
+      - lock.front_door
       - input_button.activategoveerainbow
