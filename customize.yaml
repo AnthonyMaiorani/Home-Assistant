@@ -1,5 +1,3 @@
-switch.windows:
-  icon: mdi:microsoft-windows
 light.bedroom_lights:
   icon: mdi:lightbulb-group
 light.fan_lights:
