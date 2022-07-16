@@ -291,17 +291,33 @@ call:
   icon: mdi:phone
 night:
   sequence:
-  - data: {}
-    service: homeassistant.turn_off
-    target:
-      entity_id:
-      - light.bedroom_lights
-      - light.closet_lights
-      - light.shapes_007f
-      - light.glide
-      - group.misc_leds
-      - switch.blinds
-      - switch.desktop
+  - parallel:
+    - data: {}
+      service: homeassistant.turn_off
+      target:
+        entity_id:
+        - group.misc_leds
+    - service: media_player.play_media
+      target:
+        entity_id: media_player.bedroom_dot
+      data:
+        media_content_type: routine
+        media_content_id: govee off
+    - service: light.turn_off
+      data: {}
+      target:
+        entity_id:
+        - light.shapes_007f
+        - light.bedroom_lights
+        - light.closet_lights
+    - service: cover.close_cover
+      data: {}
+      target:
+        entity_id: cover.bedroom_blinds
+    - service: switch.turn_off
+      data: {}
+      target:
+        entity_id: switch.desktop
   alias: Night
   mode: single
   icon: mdi:weather-night
