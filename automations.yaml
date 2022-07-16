@@ -951,7 +951,7 @@
   - choose:
     - conditions:
       - condition: time
-        before: 04:00:00
+        before: 05:00:00
         after: '22:00:00'
       - condition: state
         entity_id: light.desk_lights
@@ -1133,7 +1133,7 @@
   description: ''
   trigger:
   - platform: time
-    at: 00:00:00
+    at: 00:01:00
   condition:
   - condition: state
     entity_id: binary_sensor.workday_sensor
