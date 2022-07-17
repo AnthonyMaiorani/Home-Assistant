@@ -221,13 +221,13 @@ music:
 call:
   alias: Call
   sequence:
+  - service: input_boolean.turn_on
+    target:
+      entity_id:
+      - input_boolean.govee_cyan
+      - input_boolean.automating
+    data: {}
   - parallel:
-    - service: input_boolean.turn_on
-      target:
-        entity_id:
-        - input_boolean.govee_cyan
-        - input_boolean.automating
-      data: {}
     - service: light.turn_on
       target:
         entity_id:
@@ -266,27 +266,24 @@ call:
       data:
         brightness_pct: 10
         effect: '{{ states(''input_select.nanoleaf_scenes'') }}'
-    - data: {}
-      service: homeassistant.turn_off
+    - service: input_boolean.turn_off
+      data: {}
+      target:
+        entity_id: input_boolean.bedmotion
+    - service: switch.turn_off
+      data: {}
       target:
         entity_id:
         - switch.clock
-        - light.fan_lights
-        - light.desk_lights
-        - light.closet_lights
-        - switch.desktop
         - switch.u6_pro_led
-        - input_boolean.bedmotion
-  - service: light.turn_on
-    target:
-      entity_id:
-      - light.bed_lights
-    data:
-      effect: None
-      rgb_color:
-      - 0
-      - 255
-      - 255
+        - switch.desktop
+    - service: light.turn_off
+      data: {}
+      target:
+        entity_id:
+        - light.fan_lights
+        - light.closet_lights
+        - light.desk_lights
   mode: single
   icon: mdi:phone
 night:
