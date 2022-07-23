@@ -50,10 +50,3 @@ mqtt:
       payload_on: "on"
       off_delay: 600000
       device_class: motion
-
-climate:
-  - platform: midea_ac
-    host: !secret m_host
-    id: !secret m_id
-    token: !secret m_token
-    k1: !secret m_key

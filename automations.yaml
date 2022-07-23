@@ -65,19 +65,9 @@
           hvac_mode: cool
         target:
           entity_id: climate.bedroom_ac
-      - service: climate.set_swing_mode
-        data:
-          swing_mode: Vertical
-        target:
-          entity_id: climate.bedroom_ac
       - service: climate.set_preset_mode
         data:
-          preset_mode: none
-        target:
-          entity_id: climate.bedroom_ac
-      - service: climate.set_fan_mode
-        data:
-          fan_mode: Full
+          preset_mode: Boost
         target:
           entity_id: climate.bedroom_ac
     - conditions:
@@ -163,6 +153,10 @@
         data: {}
         target:
           entity_id: timer.ac
+    - service: input_boolean.turn_off
+      data: {}
+      target:
+        entity_id: input_boolean.automating
   - service: automation.turn_on
     data: {}
     target:
@@ -723,6 +717,11 @@
     - condition: state
       entity_id: sensor.desktop_pc_lastactive
       state: unknown
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: automation.bed_occupancy
+      state: 'on'
   action:
   - choose:
     - conditions:
@@ -960,8 +959,29 @@
         entity_id: binary_sensor.webcam
         state: 'on'
       sequence:
-      - service: script.call
+      - service: script.turn_on
         data: {}
+        target:
+          entity_id: script.call
+      - if:
+        - condition: state
+          entity_id: switch.ac
+          state: 'on'
+        then:
+        - service: climate.turn_off
+          data: {}
+          target:
+            entity_id: climate.bedroom_ac
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 5
+            milliseconds: 0
+        - service: climate.set_hvac_mode
+          data:
+            hvac_mode: cool
+          target:
+            entity_id: climate.bedroom_ac
     - conditions:
       - condition: state
         entity_id: light.fan_lights

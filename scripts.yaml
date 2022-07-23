@@ -307,6 +307,7 @@ night:
         - light.shapes_007f
         - light.bedroom_lights
         - light.closet_lights
+        - light.glide
     - service: cover.close_cover
       data: {}
       target:
