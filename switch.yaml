@@ -34,24 +34,12 @@
                 - climate.bedroom_ac
     ac:
       friendly_name: AC
-      value_template: "{{ is_state('climate.bedroom_ac', 'cool') }}"
+      value_template: "{{ is_state('climate.bedroom_ac', 'cool') or is_state('climate.bedroom_ac', 'heat_cool')}}"
       turn_on:
       - service: climate.set_temperature
         data:
           temperature: 73
-          hvac_mode: cool
-        target:
-          entity_id: climate.bedroom_ac
-      - delay: 2
-      - service: climate.set_preset_mode
-        data:
-          preset_mode: none
-        target:
-          entity_id: climate.bedroom_ac
-      - delay: 2
-      - service: climate.set_fan_mode
-        data:
-          fan_mode: silent
+          hvac_mode: heat_cool
         target:
           entity_id: climate.bedroom_ac
       - service: input_boolean.turn_off
@@ -61,10 +49,7 @@
         target:
           entity_id: timer.ac
       turn_off:
-      - service: climate.set_temperature
-        data:
-          temperature: 73
-          hvac_mode: 'off'
+      - service: climate.turn_off
         target:
           entity_id: climate.bedroom_ac
       - service: input_boolean.turn_off
