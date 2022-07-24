@@ -704,7 +704,8 @@
   trigger:
   - platform: state
     entity_id:
-    - sensor.desktop_pc_lastactive
+    - switch.desktop
+    to: 'on'
   condition:
   - condition: state
     entity_id: light.shapes_007f
@@ -712,11 +713,6 @@
   - condition: template
     value_template: '{{ state_attr(''light.shapes_007f'',''brightness'') | float >
       153 }}'
-  - condition: not
-    conditions:
-    - condition: state
-      entity_id: sensor.desktop_pc_lastactive
-      state: unknown
   - condition: not
     conditions:
     - condition: state
@@ -779,9 +775,14 @@
   action:
   - choose:
     - conditions:
-      - condition: time
-        after: 09:59:00
-        before: '23:59:00'
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: switch.desktop
+          state: 'on'
+        - condition: time
+          after: 09:59:00
+          before: '23:59:00'
       - condition: not
         conditions:
         - condition: state
@@ -979,7 +980,7 @@
             milliseconds: 0
         - service: climate.set_hvac_mode
           data:
-            hvac_mode: cool
+            hvac_mode: heat_cool
           target:
             entity_id: climate.bedroom_ac
     - conditions:
