@@ -284,6 +284,15 @@ call:
         - light.fan_lights
         - light.closet_lights
         - light.desk_lights
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - service: switch.turn_off
+    data: {}
+    target:
+      entity_id: switch.usb_hub
   mode: single
   icon: mdi:phone
 night:
@@ -316,6 +325,20 @@ night:
       data: {}
       target:
         entity_id: switch.desktop
+    - if:
+      - condition: state
+        state: 'on'
+        entity_id: binary_sensor.bed_occupancy
+      then:
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 5
+          milliseconds: 0
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id: switch.usb_hub
   alias: Night
   mode: single
   icon: mdi:weather-night

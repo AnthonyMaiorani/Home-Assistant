@@ -9,6 +9,7 @@ wifi:
   fast_connect: on
   ap: {}
   power_save_mode: none
+  use_address: 192.168.1.35
 
 captive_portal:
 logger:
@@ -26,7 +27,7 @@ sensor:
 #      - delta: 3000
       - calibrate_linear:
           - 392000 -> 0
-          - 460000 -> 300
+          - 428000 -> 280
 #      - sliding_window_moving_average:
 #          window_size: 5
 #          send_every: 3

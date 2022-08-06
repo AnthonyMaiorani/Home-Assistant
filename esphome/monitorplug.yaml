@@ -1,5 +1,5 @@
 esphome:
-  name: monitorplug
+  name: usbhub
   platform: ESP8266
   board: esp01_1m
 
@@ -7,6 +7,7 @@ wifi:
   ssid: !secret ssid
   password: !secret password
   fast_connect: on
+  use_address: 192.168.1.145
   ap: {}
 
 captive_portal:
@@ -19,8 +20,8 @@ time:
     id: homeassistant_time
 
 substitutions:
-  name: "Monitor Plug"
-  restore_mode: ALWAYS_ON
+  name: "USB Hub"
+  restore_mode: RESTORE_DEFAULT_ON
   current_res: "0.0019"
   voltage_div: "2150"
     
@@ -29,7 +30,8 @@ binary_sensor:
     pin:
       number: GPIO3
       inverted: True
-    name: "${name} Button"
+    id: button
+    #name: "${name} Plug Button"
     internal: true
     on_press:
       then:
@@ -39,7 +41,7 @@ binary_sensor:
 switch:
   # Main plug control relay
   - platform: gpio
-#    name: "${name}"
+    name: "${name}"
     id: "relay"
     pin: GPIO14
     restore_mode: ${restore_mode}
@@ -64,18 +66,18 @@ sensor:
       inverted: True
     cf_pin: GPIO04
     cf1_pin: GPIO5
-#    current_resistor: ${current_res}
-#    voltage_divider: ${voltage_div}
-#    current:
-#      name: "${name} Amperage"
-#      internal: true
-#      unit_of_measurement: A
-#      filters:
-#    voltage:
-#      name: "${name} Voltage"
-#      internal: true
-#      unit_of_measurement: V
-#      filters:
+    current_resistor: ${current_res}
+    voltage_divider: ${voltage_div}
+    current:
+      name: "${name} Amperage"
+      #internal: true
+      unit_of_measurement: A
+      filters:
+    voltage:
+      name: "${name} Voltage"
+      #internal: true
+      unit_of_measurement: V
+      filters:
     power:
       id: "wattage"
       name: "${name} Wattage"

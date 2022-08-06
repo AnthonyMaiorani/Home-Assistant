@@ -781,7 +781,7 @@
           entity_id: switch.desktop
           state: 'on'
         - condition: time
-          after: 09:59:00
+          after: 07:59:00
           before: '23:59:00'
       - condition: not
         conditions:
@@ -978,11 +978,12 @@
             minutes: 0
             seconds: 5
             milliseconds: 0
-        - service: climate.set_hvac_mode
-          data:
-            hvac_mode: heat_cool
-          target:
-            entity_id: climate.bedroom_ac
+      - service: climate.set_temperature
+        data:
+          temperature: 70
+          hvac_mode: heat_cool
+        target:
+          entity_id: climate.bedroom_ac
     - conditions:
       - condition: state
         entity_id: light.fan_lights
@@ -992,6 +993,12 @@
         data: {}
         target:
           entity_id: script.fan_off
+      - service: climate.set_temperature
+        data:
+          temperature: 70
+          hvac_mode: heat_cool
+        target:
+          entity_id: climate.bedroom_ac
     default: []
   mode: single
 - id: '1645695901319'
@@ -1167,4 +1174,50 @@
     data:
       message: Check Alexa App
       title: Morning alarm not set
+  mode: single
+- id: '1658727301790'
+  alias: USB Hub
+  description: ''
+  trigger:
+  - platform: sun
+    event: sunrise
+    offset: 0
+  - platform: zone
+    entity_id: person.anthony
+    zone: zone.home
+    event: leave
+  - platform: state
+    entity_id:
+    - light.desk_lights
+    - light.fan_lights
+    - switch.desktop
+    to: 'on'
+  condition: []
+  action:
+  - service: switch.turn_on
+    data: {}
+    target:
+      entity_id: switch.usb_hub
+  mode: single
+- id: '1659756376934'
+  alias: New Automation
+  description: ''
+  trigger:
+  - platform: template
+    value_template: '{{ as_timestamp(now(), 301) < as_timestamp(states(''sensor.desktop_pc_lastactive''),
+      0) + 300 }}'
+  condition:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: climate.bedroom_ac
+      attribute: temperature
+      state: '75'
+  action:
+  - service: climate.set_temperature
+    data:
+      temperature: 75
+      hvac_mode: heat_cool
+    target:
+      entity_id: climate.bedroom_ac
   mode: single
