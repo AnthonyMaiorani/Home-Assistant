@@ -153,30 +153,11 @@
         data: {}
         target:
           entity_id: timer.ac
-    - service: input_boolean.turn_off
-      data: {}
-      target:
-        entity_id: input_boolean.automating
   - service: automation.turn_on
     data: {}
     target:
       entity_id: automation.ac_controls
   initial_state: true
-  mode: single
-- id: '1617634628204'
-  alias: Automating
-  description: Reset automating bool used for light switch
-  trigger:
-  - platform: state
-    entity_id: input_boolean.automating
-    to: 'on'
-  condition: []
-  action:
-  - wait_template: ''
-    timeout: '1.8'
-  - service: input_boolean.turn_off
-    target:
-      entity_id: input_boolean.automating
   mode: single
 - id: '1620642299524'
   alias: Motion Bypass
@@ -486,6 +467,12 @@
       data: {}
       target:
         entity_id: input_boolean.bedmotion
+    - service: climate.set_temperature
+      data:
+        temperature: 73
+        hvac_mode: heat_cool
+      target:
+        entity_id: climate.bedroom_ac
   mode: single
 - id: '1627966300438'
   alias: Close Blinds When Dark
@@ -964,20 +951,6 @@
         data: {}
         target:
           entity_id: script.call
-      - if:
-        - condition: state
-          entity_id: switch.ac
-          state: 'on'
-        then:
-        - service: climate.turn_off
-          data: {}
-          target:
-            entity_id: climate.bedroom_ac
-        - delay:
-            hours: 0
-            minutes: 0
-            seconds: 5
-            milliseconds: 0
       - service: climate.set_temperature
         data:
           temperature: 70
@@ -1217,6 +1190,45 @@
   - service: climate.set_temperature
     data:
       temperature: 75
+      hvac_mode: heat_cool
+    target:
+      entity_id: climate.bedroom_ac
+  mode: single
+- id: '1659818079496'
+  alias: Door
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.bedroom_door
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: person.anthony
+    state: Home
+  - condition: state
+    entity_id: timer.ac
+    state: 'on'
+  - condition: state
+    entity_id: input_boolean.ac_boost
+    state: 'off'
+  action:
+  - service: climate.set_temperature
+    data:
+      temperature: 76
+      hvac_mode: heat_cool
+    target:
+      entity_id: climate.bedroom_ac
+  - wait_for_trigger:
+    - platform: state
+      entity_id:
+      - binary_sensor.bedroom_door
+      to: 'off'
+    continue_on_timeout: false
+    timeout: 01:00:00
+  - service: climate.set_temperature
+    data:
+      temperature: 73
       hvac_mode: heat_cool
     target:
       entity_id: climate.bedroom_ac

@@ -8,6 +8,7 @@ wifi:
   password: !secret password
   fast_connect: on
   ap: {}
+  use_address: 192.168.1.234
 
 captive_portal:
 logger:
@@ -24,8 +25,12 @@ sensor:
 
 binary_sensor:
   - platform: homeassistant
-    entity_id: input_boolean.automating
-    id: automating
+    entity_id: binary_sensor.bedroom_on
+    id: bedroomstate
+    on_press:
+      - light.turn_on: rgb_light_switch
+    on_release:
+      - light.turn_off: rgb_light_switch
   - platform: gpio
     pin:
       number: GPIO13
@@ -37,16 +42,20 @@ binary_sensor:
         - ON for at most .3s
         - OFF for at least .4s
       then:
-        - delay: .1s
-        - if:
-            condition:
-              binary_sensor.is_off: automating
-            then:
-              - homeassistant.service:
-                  service: switch.toggle
-                  data:
-                    entity_id: switch.bedroomtoggle
-        - light.turn_on: rgb_light_switch
+        - homeassistant.service:
+            service: switch.toggle
+            data:
+              entity_id: switch.bedroomtoggle
+#        - delay: .1s
+#        - if:
+#            condition:
+#              binary_sensor.is_off: automating
+#            then:
+#              - homeassistant.service:
+#                  service: switch.toggle
+#                  data:
+#                    entity_id: switch.bedroomtoggle
+#        - light.turn_on: rgb_light_switch
     - timing:
         - ON for at least .4s
       then:
@@ -61,6 +70,12 @@ light:
     green: output_green
     blue: output_blue
     restore_mode: RESTORE_DEFAULT_OFF
+#    on_turn_on: 
+#        - switch.turn_on: relay2
+#        - switch.turn_on: relay4
+#    on_turn_off: 
+#        - switch.turn_off: relay2
+#        - switch.turn_off: relay4
     effects:
       - random:
           name: Music
@@ -87,43 +102,76 @@ light:
               }
               call.perform();
             }
+  - platform: rgb
+    id: rgb_light_switch_corner
+    name: "RGB ${name} Corner"
+    red: output_red_corner
+    green: output_green_corner
+    blue: output_blue_corner
+    restore_mode: RESTORE_DEFAULT_OFF
+    effects:
+      - random:
+          name: Music
+          transition_length: .1s
+          update_interval: .2s
+      - lambda:
+          name: Color Loop
+          lambda: |-
+            static float state = 0;
+            if (state != id(hassstate).state) {
+              state = id(hassstate).state;
+              auto call = id(rgb_light_switch_corner).turn_on();
+              call.set_transition_length(3000);
+              if (state == 0) {
+                call.set_rgb(0.45, 0.98, 0.39);
+              } else if (state == 1) {
+                call.set_rgb(0.45, 0.98, 0.93);
+              } else if (state == 2) {
+                call.set_rgb(0.38, 0.15, 0.96);
+              } else if (state == 3) {
+                call.set_rgb(0.5, 0.17, 0.96);
+              } else {
+                call.set_rgb(0.92, 0.2, 0.27);
+              }
+              call.perform();
+            }
 
 switch:
-  - platform: gpio
-    name: "${name}"
-    pin: GPIO15
-    id: 'relay1'
-    restore_mode: RESTORE_DEFAULT_OFF
-    on_turn_on: 
-      then:
-        - light.turn_on: rgb_light_switch
-        - switch.turn_on: relay2
-        - switch.turn_on: relay4
-    on_turn_off: 
-        - light.turn_off: rgb_light_switch
-        - switch.turn_off: relay2
-        - switch.turn_off: relay4
-  - platform: gpio
-    name: "${name} Corner Light Red"
-    pin: GPIO0
-    internal: true
-    id: 'relay2'
-    inverted: yes
-    restore_mode: ALWAYS_OFF
-  - platform: gpio
-    name: "${name} Corner Light Green"
-    pin: GPIO12
-    internal: true
-    id: 'relay3'
-    inverted: yes
-    restore_mode: ALWAYS_OFF
-  - platform: gpio
-    name: "${name} Corner Light Blue"
-    pin: GPIO2
-    internal: true
-    inverted: yes
-    id: 'relay4'
-    restore_mode: ALWAYS_OFF
+#  - platform: gpio
+#    #name: "${name}"
+#    pin: GPIO15
+#    id: 'relay1'
+#    restore_mode: ALWAYS_OFF
+#    on_turn_on: 
+#      then:
+#        - light.turn_on: rgb_light_switch
+#        - switch.turn_on: relay2
+#        - switch.turn_on: relay4
+#    on_turn_off: 
+#        - light.turn_off: rgb_light_switch
+#        - switch.turn_off: relay2
+#        - switch.turn_off: relay4
+#  - platform: gpio
+#    name: "${name} Corner Light Red"
+#    pin: GPIO0
+#    internal: true
+#    id: 'relay2'
+#    inverted: yes
+#    restore_mode: ALWAYS_OFF
+#  - platform: gpio
+#    name: "${name} Corner Light Green"
+#    pin: GPIO12
+#    internal: true
+#    id: 'relay3'
+#    inverted: yes
+#    restore_mode: ALWAYS_OFF
+#  - platform: gpio
+#    name: "${name} Corner Light Blue"
+#    pin: GPIO2
+#    internal: true
+#    inverted: yes
+#    id: 'relay4'
+#    restore_mode: ALWAYS_OFF
 
 output:
   - platform: esp8266_pwm
@@ -135,3 +183,15 @@ output:
   - platform: esp8266_pwm
     id: output_blue
     pin: GPIO4
+  - platform: esp8266_pwm
+    id: output_green_corner
+    pin: GPIO12
+    inverted: true
+  - platform: esp8266_pwm
+    id: output_red_corner
+    pin: GPIO0
+    inverted: true
+  - platform: esp8266_pwm
+    id: output_blue_corner
+    pin: GPIO2
+    inverted: true

@@ -14,7 +14,6 @@ room: # used for ha menu
 misc_leds:
   name: Other Room Lights
   entities: 
-    - switch.light_switch
     - switch.u6_pro_led
     - switch.clock
 apartment:

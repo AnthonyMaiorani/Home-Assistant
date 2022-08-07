@@ -37,6 +37,9 @@ template:
       - name: "Discord Active"
         state: >
           {{ states('sensor.discord')|float(-1) > 0}}
+      - name: "Bedroom On"
+        state: >
+          {{ is_state('light.bedroom_lights', 'on') }}
 
 mqtt:
   binary_sensor:

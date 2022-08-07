@@ -27,7 +27,6 @@ fan_off:
       service: homeassistant.turn_on
       target:
         entity_id:
-        - input_boolean.automating
         - input_boolean.govee_cyan
         - group.misc_leds
     - parallel:
@@ -98,7 +97,6 @@ color_loop:
       data: {}
       target:
         entity_id:
-        - input_boolean.automating
         - group.misc_leds
     - data:
         brightness: 255
@@ -225,7 +223,6 @@ call:
     target:
       entity_id:
       - input_boolean.govee_cyan
-      - input_boolean.automating
     data: {}
   - parallel:
     - service: light.turn_on
@@ -253,6 +250,7 @@ call:
       target:
         entity_id:
         - light.rgb_light_switch
+        - light.rgb_light_switch_corner
       data:
         effect: None
         rgb_color:
@@ -411,7 +409,6 @@ morning:
       target:
         entity_id:
         - group.misc_leds
-        - input_boolean.automating
     - if:
       - condition: not
         conditions:
