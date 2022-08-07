@@ -15,3 +15,6 @@ smart_home:
       - climate.bedroom_ac
       - lock.front_door
       - input_button.activategoveerainbow
+      - input_button.activategoveecyan
+      - input_button.activategoveemusic
+      - input_button.activategoveeoff

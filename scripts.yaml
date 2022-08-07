@@ -2,16 +2,10 @@ fan_off:
   alias: Lights Off
   sequence:
   - parallel:
-    - service: light.turn_on
+    - service: input_button.press
+      data: {}
       target:
-        entity_id:
-        - light.glide
-      data:
-        rgb_color:
-        - 0
-        - 126
-        - 255
-        brightness_pct: 1
+        entity_id: input_button.activategoveecyan
     - service: homeassistant.turn_off
       data: {}
       target:
@@ -40,6 +34,7 @@ fan_off:
           - light.bed_lights
           - light.desk_lights
           - light.rgb_light_switch
+          - light.rgb_light_switch_corner
       - if:
         - condition: state
           entity_id: binary_sensor.closet
@@ -77,12 +72,10 @@ color_loop:
           entity_id: input_boolean.govee_cyan
           state: 'on'
         sequence:
-        - service: media_player.play_media
+        - service: input_button.press
+          data: {}
           target:
-            entity_id: media_player.bedroom_dot
-          data:
-            media_content_type: routine
-            media_content_id: rainbow
+            entity_id: input_button.activategoveerainbow
         - service: input_boolean.turn_off
           target:
             entity_id: input_boolean.govee_cyan
@@ -184,12 +177,10 @@ music:
   alias: Music
   sequence:
   - parallel:
-    - service: media_player.play_media
+    - service: input_button.press
+      data: {}
       target:
-        entity_id: media_player.bedroom_dot
-      data:
-        media_content_type: routine
-        media_content_id: music mode
+        entity_id: input_button.activategoveemusic
     - service: light.turn_on
       target:
         entity_id: light.desk_lights
@@ -225,16 +216,10 @@ call:
       - input_boolean.govee_cyan
     data: {}
   - parallel:
-    - service: light.turn_on
+    - service: input_button.press
+      data: {}
       target:
-        entity_id:
-        - light.glide
-      data:
-        rgb_color:
-        - 0
-        - 126
-        - 255
-        brightness_pct: 1
+        entity_id: input_button.activategoveecyan
     - service: light.turn_on
       target:
         entity_id:
@@ -301,12 +286,10 @@ night:
       target:
         entity_id:
         - group.misc_leds
-    - service: media_player.play_media
+    - service: input_button.press
+      data: {}
       target:
-        entity_id: media_player.bedroom_dot
-      data:
-        media_content_type: routine
-        media_content_id: govee off
+        entity_id: input_button.activategoveeoff
     - service: light.turn_off
       data: {}
       target:
@@ -350,12 +333,10 @@ morning:
           entity_id: input_boolean.govee_cyan
           state: 'on'
         sequence:
-        - service: media_player.play_media
+        - service: input_button.press
+          data: {}
           target:
-            entity_id: media_player.bedroom_dot
-          data:
-            media_content_type: routine
-            media_content_id: rainbow
+            entity_id: input_button.activategoveerainbow
         - service: input_boolean.turn_off
           target:
             entity_id: input_boolean.govee_cyan
@@ -444,6 +425,7 @@ morning:
         - light.bed_lights
         - light.desk_lights
         - light.rgb_light_switch
+        - light.rgb_light_switch_corner
     - service: input_select.select_option
       data:
         option: Home
