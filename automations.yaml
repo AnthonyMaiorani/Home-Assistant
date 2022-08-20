@@ -10,18 +10,40 @@
       '
   condition: []
   action:
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.bedroom_lights
+  - parallel:
+    - service: light.turn_on
+      data:
+        transition: 45
+        effect: None
+        color_temp: 500
+        brightness: 255
+      target:
+        entity_id: light.fan_lights
+    - service: light.turn_on
+      data:
+        effect: Vibrant Sunrise
+        transition: 45
+        brightness_pct: 100
+      target:
+        entity_id: light.shapes_007f
   - delay:
       hours: 0
       minutes: 0
-      seconds: 10
+      seconds: 45
       milliseconds: 0
-  - service: homeassistant.turn_on
-    target:
-      entity_id:
-      - script.morning
-      - input_boolean.bedmotion
+  - service: script.turn_on
     data: {}
-  mode: single
+    target:
+      entity_id: script.morning
+  - service: automation.trigger
+    data: {}
+    target:
+      entity_id: automation.nanoleaf_scene_changer
+  mode: restart
 - id: '1653601692731'
   alias: AC Boost
   description: ''
@@ -48,28 +70,11 @@
       - condition: trigger
         id: buttonpress
       sequence:
-      - parallel:
-        - service: timer.start
-          data:
-            duration: 0:15:00
-          target:
-            entity_id: timer.ac
-        - service: climate.set_temperature
-          data:
-            temperature: 61
-            hvac_mode: cool
-          target:
-            entity_id: climate.bedroom_ac
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 2
-          milliseconds: 0
-      - service: climate.set_preset_mode
+      - service: timer.start
         data:
-          preset_mode: boost
+          duration: 0:25:00
         target:
-          entity_id: climate.bedroom_ac
+          entity_id: timer.ac
     - conditions:
       - condition: or
         conditions:
@@ -86,15 +91,6 @@
         data: {}
         target:
           entity_id: timer.ac
-      - if:
-        - condition: state
-          entity_id: switch.ac
-          state: 'on'
-        then:
-        - service: switch.turn_on
-          data: {}
-          target:
-            entity_id: switch.ac
       - delay:
           hours: 0
           minutes: 0
@@ -294,6 +290,13 @@
         target:
           entity_id: input_boolean.ac_boost
       else: []
+  - service: notify.mobile_app_iphone
+    data:
+      message: Play music?
+      data:
+        shortcut:
+          name: LoFi
+          ignore_result: ignore
   mode: single
 - id: '1627443167507'
   alias: Bedroom Alerts
@@ -467,12 +470,6 @@
       data: {}
       target:
         entity_id: input_boolean.bedmotion
-    - service: climate.set_temperature
-      data:
-        temperature: 73
-        hvac_mode: heat_cool
-      target:
-        entity_id: climate.bedroom_ac
   mode: single
 - id: '1627966300438'
   alias: Close Blinds When Dark
@@ -703,7 +700,7 @@
   - condition: not
     conditions:
     - condition: state
-      entity_id: automation.bed_occupancy
+      entity_id: binary_sensor.bed_occupancy
       state: 'on'
   action:
   - choose:
@@ -951,12 +948,6 @@
         data: {}
         target:
           entity_id: script.call
-      - service: climate.set_temperature
-        data:
-          temperature: 70
-          hvac_mode: heat_cool
-        target:
-          entity_id: climate.bedroom_ac
     - conditions:
       - condition: state
         entity_id: light.fan_lights
@@ -966,12 +957,6 @@
         data: {}
         target:
           entity_id: script.fan_off
-      - service: climate.set_temperature
-        data:
-          temperature: 70
-          hvac_mode: heat_cool
-        target:
-          entity_id: climate.bedroom_ac
     default: []
   mode: single
 - id: '1645695901319'
@@ -1147,6 +1132,15 @@
     data:
       message: Check Alexa App
       title: Morning alarm not set
+      data:
+        push:
+          sound:
+            name: default
+            critical: 1
+            volume: 0.3
+        actions:
+        - action: Open Alexa App
+          title: Open Alexa App
   mode: single
 - id: '1658727301790'
   alias: USB Hub
@@ -1172,64 +1166,67 @@
     target:
       entity_id: switch.usb_hub
   mode: single
-- id: '1659756376934'
-  alias: New Automation
-  description: ''
-  trigger:
-  - platform: template
-    value_template: '{{ as_timestamp(now(), 301) < as_timestamp(states(''sensor.desktop_pc_lastactive''),
-      0) + 300 }}'
-  condition:
-  - condition: not
-    conditions:
-    - condition: state
-      entity_id: climate.bedroom_ac
-      attribute: temperature
-      state: '75'
-  action:
-  - service: climate.set_temperature
-    data:
-      temperature: 75
-      hvac_mode: heat_cool
-    target:
-      entity_id: climate.bedroom_ac
-  mode: single
-- id: '1659818079496'
-  alias: Door
+- id: '1660977660346'
+  alias: Set Temperature
   description: ''
   trigger:
   - platform: state
     entity_id:
-    - binary_sensor.bedroom_door
+    - sensor.ac_thermostat_temperature
+  - platform: state
+    entity_id:
+    - switch.ac
     to: 'on'
   condition:
   - condition: state
-    entity_id: person.anthony
-    state: Home
-  - condition: state
-    entity_id: timer.ac
+    entity_id: switch.ac
     state: 'on'
-  - condition: state
-    entity_id: input_boolean.ac_boost
-    state: 'off'
   action:
   - service: climate.set_temperature
     data:
-      temperature: 76
       hvac_mode: heat_cool
+      temperature: '{{states(''sensor.ac_thermostat_temperature'') |int}}'
     target:
       entity_id: climate.bedroom_ac
-  - wait_for_trigger:
-    - platform: state
-      entity_id:
-      - binary_sensor.bedroom_door
-      to: 'off'
-    continue_on_timeout: false
-    timeout: 01:00:00
-  - service: climate.set_temperature
-    data:
-      temperature: 73
-      hvac_mode: heat_cool
-    target:
-      entity_id: climate.bedroom_ac
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 1
+      milliseconds: 0
+  - if:
+    - condition: state
+      entity_id: input_boolean.ac_boost
+      state: 'on'
+    then:
+    - service: climate.set_preset_mode
+      data:
+        preset_mode: Boost
+      target:
+        entity_id: climate.bedroom_ac
+    - delay:
+        hours: 0
+        minutes: 0
+        seconds: 1
+        milliseconds: 0
+    - service: climate.set_hvac_mode
+      data:
+        hvac_mode: cool
+      target:
+        entity_id: climate.bedroom_ac
+    else:
+    - service: climate.set_preset_mode
+      data:
+        preset_mode: None
+      target:
+        entity_id: climate.bedroom_ac
+    - delay:
+        hours: 0
+        minutes: 0
+        seconds: 1
+        milliseconds: 0
+    - service: climate.set_hvac_mode
+      data:
+        hvac_mode: heat_cool
+      target:
+        entity_id: climate.bedroom_ac
   mode: single

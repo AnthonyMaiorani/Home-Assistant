@@ -8,7 +8,10 @@ wifi:
   password: !secret password
   fast_connect: on
   ap: {}
-  use_address: 192.168.1.234
+  manual_ip:
+    static_ip: 192.168.1.234
+    gateway: 192.168.1.1
+    subnet: 255.255.255.0
 
 captive_portal:
 logger:
@@ -29,8 +32,10 @@ binary_sensor:
     id: bedroomstate
     on_press:
       - light.turn_on: rgb_light_switch
+      - light.turn_on: rgb_light_switch_corner
     on_release:
       - light.turn_off: rgb_light_switch
+      - light.turn_off: rgb_light_switch_corner
   - platform: gpio
     pin:
       number: GPIO13
@@ -57,7 +62,7 @@ binary_sensor:
 #                    entity_id: switch.bedroomtoggle
 #        - light.turn_on: rgb_light_switch
     - timing:
-        - ON for at least .4s
+        - ON for at least .301s
       then:
       - homeassistant.service:
           service: script.morning
@@ -65,7 +70,7 @@ binary_sensor:
 light:
   - platform: rgb
     id: rgb_light_switch
-    name: "RGB ${name}"
+    name: "${name}"
     red: output_red
     green: output_green
     blue: output_blue
@@ -84,7 +89,7 @@ light:
       - lambda:
           name: Color Loop
           lambda: |-
-            static float state = 0;
+            static float state;
             if (state != id(hassstate).state) {
               state = id(hassstate).state;
               auto call = id(rgb_light_switch).turn_on();
@@ -104,7 +109,7 @@ light:
             }
   - platform: rgb
     id: rgb_light_switch_corner
-    name: "RGB ${name} Corner"
+    name: "${name} Corner"
     red: output_red_corner
     green: output_green_corner
     blue: output_blue_corner
@@ -117,7 +122,7 @@ light:
       - lambda:
           name: Color Loop
           lambda: |-
-            static float state = 0;
+            static float state;
             if (state != id(hassstate).state) {
               state = id(hassstate).state;
               auto call = id(rgb_light_switch_corner).turn_on();
@@ -136,7 +141,7 @@ light:
               call.perform();
             }
 
-switch:
+#switch:
 #  - platform: gpio
 #    #name: "${name}"
 #    pin: GPIO15

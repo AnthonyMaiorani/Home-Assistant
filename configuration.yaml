@@ -40,6 +40,15 @@ template:
       - name: "Bedroom On"
         state: >
           {{ is_state('light.bedroom_lights', 'on') }}
+  - sensor:
+      - name: "AC Thermostat Temperature"
+        state: >
+          {% if is_state("input_boolean.ac_boost", "on") -%} 61 
+          {% elif is_state("binary_sensor.bedroom_door", "on") -%} 76
+          {% elif is_state("switch.desktop", "on") -%} 75
+          {% elif is_state("light.fan_lights", "on") -%} 73 
+          {%- else -%} 70 
+          {%- endif %}
 
 mqtt:
   binary_sensor:

@@ -6,8 +6,8 @@
     - light.smart_bulb_2
     - light.smart_bulb_3
     - light.desk_lights
-    - light.rgb_light_switch
-    - light.rgb_light_switch_corner
+    - light.light_switch
+    - light.light_switch_corner
 - platform: group
   name: LED Strips
   entities:

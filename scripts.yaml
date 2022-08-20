@@ -2,10 +2,16 @@ fan_off:
   alias: Lights Off
   sequence:
   - parallel:
-    - service: input_button.press
-      data: {}
+    - service: light.turn_on
+      data:
+        rgbw_color:
+        - 0
+        - 125
+        - 255
+        - 0
+        brightness: 2
       target:
-        entity_id: input_button.activategoveecyan
+        entity_id: light.glide
     - service: homeassistant.turn_off
       data: {}
       target:
@@ -33,8 +39,8 @@ fan_off:
           entity_id:
           - light.bed_lights
           - light.desk_lights
-          - light.rgb_light_switch
-          - light.rgb_light_switch_corner
+          - light.light_switch
+          - light.light_switch_corner
       - if:
         - condition: state
           entity_id: binary_sensor.closet
@@ -216,10 +222,6 @@ call:
       - input_boolean.govee_cyan
     data: {}
   - parallel:
-    - service: input_button.press
-      data: {}
-      target:
-        entity_id: input_button.activategoveecyan
     - service: light.turn_on
       target:
         entity_id:
@@ -234,8 +236,8 @@ call:
     - service: light.turn_on
       target:
         entity_id:
-        - light.rgb_light_switch
-        - light.rgb_light_switch_corner
+        - light.light_switch
+        - light.light_switch_corner
       data:
         effect: None
         rgb_color:
@@ -258,7 +260,6 @@ call:
       target:
         entity_id:
         - switch.clock
-        - switch.u6_pro_led
         - switch.desktop
     - service: light.turn_off
       data: {}
@@ -267,6 +268,16 @@ call:
         - light.fan_lights
         - light.closet_lights
         - light.desk_lights
+    - service: light.turn_on
+      data:
+        rgbw_color:
+        - 0
+        - 125
+        - 255
+        - 0
+        brightness: 2
+      target:
+        entity_id: light.glide
   - delay:
       hours: 0
       minutes: 0
@@ -424,8 +435,8 @@ morning:
         entity_id:
         - light.bed_lights
         - light.desk_lights
-        - light.rgb_light_switch
-        - light.rgb_light_switch_corner
+        - light.light_switch
+        - light.light_switch_corner
     - service: input_select.select_option
       data:
         option: Home
