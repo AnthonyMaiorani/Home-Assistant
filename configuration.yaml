@@ -47,7 +47,7 @@ template:
           {% elif is_state("binary_sensor.bedroom_door", "on") -%} 76
           {% elif is_state("switch.desktop", "on") -%} 75
           {% elif is_state("light.fan_lights", "on") -%} 73 
-          {%- else -%} 70 
+          {%- else -%} 71
           {%- endif %}
 
 mqtt:
