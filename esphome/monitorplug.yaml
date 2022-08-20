@@ -7,7 +7,6 @@ wifi:
   ssid: !secret ssid
   password: !secret password
   fast_connect: on
-  use_address: 192.168.1.145
   ap: {}
 
 captive_portal:

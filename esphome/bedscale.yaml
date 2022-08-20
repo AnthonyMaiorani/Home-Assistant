@@ -8,8 +8,6 @@ wifi:
   password: !secret password
   fast_connect: on
   ap: {}
-  power_save_mode: none
-  use_address: 192.168.1.35
 
 captive_portal:
 logger:

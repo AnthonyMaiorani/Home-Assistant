@@ -8,10 +8,6 @@ wifi:
   password: !secret password
   fast_connect: on
   ap: {}
-  manual_ip:
-    static_ip: 192.168.1.234
-    gateway: 192.168.1.1
-    subnet: 255.255.255.0
 
 captive_portal:
 logger:
@@ -51,16 +47,6 @@ binary_sensor:
             service: switch.toggle
             data:
               entity_id: switch.bedroomtoggle
-#        - delay: .1s
-#        - if:
-#            condition:
-#              binary_sensor.is_off: automating
-#            then:
-#              - homeassistant.service:
-#                  service: switch.toggle
-#                  data:
-#                    entity_id: switch.bedroomtoggle
-#        - light.turn_on: rgb_light_switch
     - timing:
         - ON for at least .301s
       then:
@@ -75,12 +61,6 @@ light:
     green: output_green
     blue: output_blue
     restore_mode: RESTORE_DEFAULT_OFF
-#    on_turn_on: 
-#        - switch.turn_on: relay2
-#        - switch.turn_on: relay4
-#    on_turn_off: 
-#        - switch.turn_off: relay2
-#        - switch.turn_off: relay4
     effects:
       - random:
           name: Music
@@ -140,43 +120,6 @@ light:
               }
               call.perform();
             }
-
-#switch:
-#  - platform: gpio
-#    #name: "${name}"
-#    pin: GPIO15
-#    id: 'relay1'
-#    restore_mode: ALWAYS_OFF
-#    on_turn_on: 
-#      then:
-#        - light.turn_on: rgb_light_switch
-#        - switch.turn_on: relay2
-#        - switch.turn_on: relay4
-#    on_turn_off: 
-#        - light.turn_off: rgb_light_switch
-#        - switch.turn_off: relay2
-#        - switch.turn_off: relay4
-#  - platform: gpio
-#    name: "${name} Corner Light Red"
-#    pin: GPIO0
-#    internal: true
-#    id: 'relay2'
-#    inverted: yes
-#    restore_mode: ALWAYS_OFF
-#  - platform: gpio
-#    name: "${name} Corner Light Green"
-#    pin: GPIO12
-#    internal: true
-#    id: 'relay3'
-#    inverted: yes
-#    restore_mode: ALWAYS_OFF
-#  - platform: gpio
-#    name: "${name} Corner Light Blue"
-#    pin: GPIO2
-#    internal: true
-#    inverted: yes
-#    id: 'relay4'
-#    restore_mode: ALWAYS_OFF
 
 output:
   - platform: esp8266_pwm

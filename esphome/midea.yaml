@@ -5,7 +5,6 @@ esphome:
 
 wifi:
   ssid: !secret ssid
-  use_address: 192.168.1.3
   password: !secret password
   fast_connect: on
   ap: {}
@@ -27,19 +26,19 @@ uart:
 # Main settings
 climate:
   - platform: midea
-    name: Bedroom AC            # Use a unique name.
+    name: Bedroom AC            
     #period: 1200ms
     num_attempts: 5
-    autoconf: true              # Autoconfigure most options.
+    autoconf: true              
     visual:             
-      min_temperature: 16 °C # Optional. Example of visual settings override.
-      temperature_step: 1 °C    # min: 0.5
-    supported_modes:            # All capabilities in this section detected by autoconf.
-      - FAN_ONLY                # This capability is always used.
+      min_temperature: 16 °C
+      temperature_step: 1 °C    
+    supported_modes:            
+      - FAN_ONLY                
       - COOL
       - DRY
     custom_fan_modes:
       - SILENT
       - TURBO
-    outdoor_temperature:        # Optional. Outdoor temperature sensor (may display incorrect values after long inactivity).
+    outdoor_temperature:        
       name: Temp
