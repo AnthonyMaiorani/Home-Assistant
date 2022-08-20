@@ -39,6 +39,10 @@
     data: {}
     target:
       entity_id: script.morning
+  - service: input_boolean.turn_on
+    data: {}
+    target:
+      entity_id: input_boolean.bedmotion
   - service: automation.trigger
     data: {}
     target:
@@ -294,6 +298,9 @@
     data:
       message: Play music?
       data:
+        tag: music
+        push:
+          interruption-level: passive
         shortcut:
           name: LoFi
           ignore_result: ignore
@@ -329,6 +336,8 @@
         data:
           message: Bedroom closet has been opened
           title: Motion detected in bedroom
+          data:
+            group: bedroom
     - conditions:
       - condition: trigger
         id: Motion
@@ -337,6 +346,8 @@
         data:
           message: Bedroom door has been opened
           title: Motion detected in bedroom
+          data:
+            group: bedroom
     - conditions:
       - condition: trigger
         id: closetclosed
@@ -345,6 +356,8 @@
         data:
           message: Bedroom closet has been closed
           title: Motion detected in bedroom
+          data:
+            group: bedroom
     default: []
   mode: single
 - id: '1627778209718'
@@ -660,6 +673,7 @@
       message: Person detected at Front Porch
       data:
         image: /local/FP.jpg
+        tag: front
   mode: single
 - id: '1635205275088'
   alias: Backyard Camera Notification
@@ -681,6 +695,7 @@
       message: Person detected at Backyard
       data:
         image: /local/backyard.jpg
+        tag: backyard
   mode: single
 - id: '1639191711934'
   alias: Dim Nanoleaf when using computer
