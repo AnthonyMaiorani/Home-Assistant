@@ -1200,11 +1200,16 @@
   - condition: state
     entity_id: switch.ac
     state: 'on'
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: sensor.ac_thermostat_temperature
+      state: unavailable
   action:
   - service: climate.set_temperature
     data:
       hvac_mode: heat_cool
-      temperature: '{{states(''sensor.ac_thermostat_temperature'') |int(72)}}'
+      temperature: '{{states(''sensor.ac_thermostat_temperature'') |int}}'
     target:
       entity_id: climate.bedroom_ac
   - delay:
