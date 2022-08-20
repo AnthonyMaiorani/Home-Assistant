@@ -49,7 +49,7 @@
       entity_id: automation.nanoleaf_scene_changer
   mode: restart
 - id: '1653601692731'
-  alias: AC Boost
+  alias: AC Boost Control
   description: ''
   trigger:
   - platform: state
@@ -160,7 +160,7 @@
   initial_state: true
   mode: single
 - id: '1620642299524'
-  alias: Motion Bypass
+  alias: Motion Bypass Control
   description: Turn lights on if bed motion sensing bypass is enabled
   trigger:
   - platform: state
@@ -172,6 +172,7 @@
     state: 'off'
   action:
   - service: script.morning
+    data: {}
   mode: single
 - id: '1620710706685'
   alias: Color Loop
@@ -502,7 +503,7 @@
       entity_id: switch.blinds
   mode: single
 - id: '1629524719390'
-  alias: Closet Lights
+  alias: Closet Lights Control
   description: ''
   trigger:
   - platform: state
@@ -566,6 +567,7 @@
       - service: light.turn_off
         target:
           entity_id: light.closet_lights
+        data: {}
     - conditions:
       - condition: trigger
         id: startup
@@ -615,6 +617,7 @@
           - service: light.turn_off
             target:
               entity_id: light.closet_lights
+            data: {}
         default: []
     - conditions:
       - condition: trigger
@@ -626,6 +629,7 @@
       - service: light.turn_off
         target:
           entity_id: light.closet_lights
+        data: {}
     default: []
   mode: single
 - id: '1629947581379'
@@ -931,7 +935,7 @@
   mode: parallel
   max: 2
 - id: '1644476253725'
-  alias: Bed Occupancy
+  alias: Bed Occupancy Detected
   description: If motion detected in bed under certain circumstances, turn off overhead
     lights.
   trigger:
