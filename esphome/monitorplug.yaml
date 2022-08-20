@@ -59,31 +59,32 @@ sensor:
         # Multiplication factor from W to kW is 0.001
 #        - multiply: 0.001
 #    unit_of_measurement: kWh
-  - platform: hlw8012
-    sel_pin:
-      number: GPIO12
-      inverted: True
-    cf_pin: GPIO04
-    cf1_pin: GPIO5
-    current_resistor: ${current_res}
-    voltage_divider: ${voltage_div}
-    current:
-      name: "${name} Amperage"
-      #internal: true
-      unit_of_measurement: A
-      filters:
-    voltage:
-      name: "${name} Voltage"
-      #internal: true
-      unit_of_measurement: V
-      filters:
-    power:
-      id: "wattage"
-      name: "${name} Wattage"
-      unit_of_measurement: W
-      filters:
-        - sliding_window_moving_average:
-            window_size: 2
-            send_every: 1
-    change_mode_every: 8
-    update_interval: 3s # Longer interval gives better accuracy
+#  - platform: hlw8012
+#    sel_pin:
+#      number: GPIO12
+#      inverted: True
+#    cf_pin: GPIO04
+#    cf1_pin: GPIO5
+#    current_resistor: ${current_res}
+#    voltage_divider: ${voltage_div}
+#    current:
+#      name: "${name} Amperage"
+#      internal: true
+#      unit_of_measurement: A
+#      filters:
+#    voltage:
+#      name: "${name} Voltage"
+#      internal: true
+#      unit_of_measurement: V
+#      filters:
+#    power:
+#      id: "wattage"
+#      name: "${name} Wattage"
+#      internal: true
+#      unit_of_measurement: W
+#      filters:
+#        - sliding_window_moving_average:
+#            window_size: 2
+#            send_every: 1
+#    change_mode_every: 8
+#    update_interval: 3s # Longer interval gives better accuracy

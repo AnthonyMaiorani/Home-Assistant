@@ -1162,7 +1162,7 @@
           title: Open Alexa App
   mode: single
 - id: '1658727301790'
-  alias: USB Hub
+  alias: USB Control
   description: ''
   trigger:
   - platform: sun
