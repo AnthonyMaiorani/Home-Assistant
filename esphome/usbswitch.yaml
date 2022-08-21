@@ -1,0 +1,68 @@
+substitutions:
+  devicename: usb_relay
+  upper_devicename: "USB Relay"
+
+esphome:
+  name: usbswitch
+  platform: ESP8266
+  board: esp01_1m
+
+wifi:
+  ssid: !secret ssid
+  password: !secret password
+  fast_connect: on
+  ap: {}
+
+captive_portal:
+logger:
+api:
+ota:
+
+status_led:
+  pin:
+    number: GPIO16 # Blue LED
+
+switch:
+  # Relay
+  - platform: gpio
+    id: relay
+    pin: GPIO5
+
+  # Green LED
+  - platform: gpio
+    pin: GPIO14
+    id: green_led
+    inverted: true # start on
+
+  # Switch template to link relay and green LED states
+  # LED is on when relay is off
+  - platform: template
+    id: "${devicename}_relay"
+    name: $upper_devicename
+    lambda: |-
+      if (id(relay).state) {
+        return true;
+      } else {
+        return false;
+      }
+    turn_on_action:
+        - switch.turn_on:
+            id: green_led
+        - switch.turn_on:
+            id: relay
+    turn_off_action:
+        - switch.turn_off:
+            id: green_led
+        - switch.turn_off:
+            id: relay
+
+# Button
+binary_sensor:
+  - platform: gpio
+    id: button
+    pin:
+      number: GPIO04
+      mode: INPUT_PULLUP
+      inverted: True
+    on_press:
+      - switch.toggle: "${devicename}_relay"

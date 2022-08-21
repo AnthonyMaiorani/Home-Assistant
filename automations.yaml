@@ -1196,10 +1196,19 @@
     entity_id:
     - switch.ac
     to: 'on'
+  - platform: state
+    entity_id:
+    - input_boolean.ac_boost
+    to: 'on'
   condition:
-  - condition: state
-    entity_id: switch.ac
-    state: 'on'
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: switch.ac
+      state: 'on'
+    - condition: state
+      entity_id: input_boolean.ac_boost
+      state: 'on'
   - condition: not
     conditions:
     - condition: state
