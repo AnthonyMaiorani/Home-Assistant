@@ -252,6 +252,9 @@
       - condition: state
         state: Taylor's Home
         entity_id: person.taylor
+      - condition: state
+        entity_id: group.apartment
+        state: 'on'
       sequence:
       - service: homeassistant.turn_off
         target:
