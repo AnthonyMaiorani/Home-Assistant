@@ -8,8 +8,16 @@
       }}
 
       '
-  condition: []
+  condition:
+  - condition: state
+    entity_id: light.fan_lights
+    state: 'off'
   action:
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 9
+      milliseconds: 0
   - service: automation.turn_off
     data: {}
     target:
@@ -55,7 +63,7 @@
     data: {}
     target:
       entity_id: automation.nanoleaf_scene_changer
-  mode: restart
+  mode: single
 - id: '1653601692731'
   alias: AC Boost Control
   description: ''
@@ -1234,4 +1242,4 @@
         preset_mode: none
       target:
         entity_id: climate.bedroom_ac
-  mode: single
+  mode: queued
