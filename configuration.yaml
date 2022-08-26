@@ -95,25 +95,12 @@ template:
       - platform: state
         entity_id:
           - binary_sensor.webcam
+          - media_player.spotify_anthony221121
       - platform: state
         entity_id:
           - light.shapes_007f
         from: "off"
         to: "on"
-      - platform: state
-        entity_id:
-          - media_player.spotify_anthony221121
-        from: "playing"
-        to: "idle"
-      - platform: state
-        entity_id:
-          - media_player.spotify_anthony221121
-        from: "idle"
-        to: "playing"
-      - platform: state
-        entity_id:
-          - media_player.spotify_anthony221121
-        attribute: media_playlist
     sensor:
       - name: "Nanoleaf Scene"
         state: >
