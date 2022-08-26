@@ -1,6 +1,5 @@
 esphome:
   name: athombulb2
-  name_add_mac_suffix: true
   platform: ESP8266
   board: esp8285
 
@@ -8,8 +7,12 @@ wifi:
   ssid: !secret ssid
   password: !secret password
   fast_connect: on
-  use_address: !secret athombulb2
   ap: {}
+  manual_ip:
+    static_ip: 192.168.1.156
+    gateway: 192.168.1.1
+    subnet: 255.255.255.0
+    dns1: 192.168.1.250
 
 captive_portal:
 logger:
