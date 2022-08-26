@@ -37,10 +37,6 @@ fan_off:
         - light.light_switch
         - light.light_switch_corner
         - light.closet_lights
-    - service: automation.trigger
-      data: {}
-      target:
-        entity_id: automation.nanoleaf_scene_changer_and_auto_brightness
   mode: single
   icon: mdi:ceiling-light
 color_loop:
@@ -86,10 +82,6 @@ color_loop:
         entity_id:
         - light.bedroom_lights
         - light.closet_lights
-  - service: automation.trigger
-    data: {}
-    target:
-      entity_id: automation.nanoleaf_scene_changer_and_auto_brightness
   mode: single
   icon: mdi:lightbulb-on
 music:
@@ -116,10 +108,6 @@ music:
       data: {}
       target:
         entity_id: light.shapes_007f
-  - service: automation.trigger
-    data: {}
-    target:
-      entity_id: automation.nanoleaf_scene_changer_and_auto_brightness
   mode: single
   icon: mdi:party-popper
 call:
@@ -182,10 +170,6 @@ call:
         brightness: 2
       target:
         entity_id: light.glide
-    - service: automation.trigger
-      data: {}
-      target:
-        entity_id: automation.nanoleaf_scene_changer_and_auto_brightness
   mode: single
   icon: mdi:phone
 night:
@@ -282,10 +266,6 @@ morning:
         option: Home
       target:
         entity_id: input_select.anthony
-  - service: automation.trigger
-    data: {}
-    target:
-      entity_id: automation.nanoleaf_scene_changer_and_auto_brightness
   mode: single
   icon: mdi:white-balance-sunny
 start_car:
