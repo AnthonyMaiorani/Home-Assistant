@@ -18,54 +18,25 @@ fan_off:
         entity_id:
         - light.fan_lights
         - input_boolean.bedmotion
-    - service: light.turn_on
-      target:
-        entity_id: light.shapes_007f
-      data:
-        brightness_pct: 25
     - data: {}
       service: homeassistant.turn_on
       target:
         entity_id:
         - input_boolean.govee_cyan
         - group.misc_leds
-    - parallel:
-      - data:
-          brightness: 255
-          effect: Color Loop
-          color_name: cyan
-        service: light.turn_on
-        target:
-          entity_id:
-          - light.bed_lights
-          - light.desk_lights
-          - light.light_switch
-          - light.light_switch_corner
-      - if:
-        - condition: state
-          entity_id: binary_sensor.closet
-          state: 'on'
-        then:
-        - service: light.turn_on
-          target:
-            entity_id: light.closet_lights
-          data:
-            effect: Color Loop
-    - if:
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: binary_sensor.webcam
-          state: 'on'
-        - condition: template
-          value_template: '{{ states("input_select.nanoleaf_scenes") == states("input_select.nanoleaf_scenes")
-            }}'
-      then:
-      - service: light.turn_on
-        target:
-          entity_id: light.shapes_007f
-        data:
-          effect: '{{ states(''input_select.nanoleaf_scenes'') }}'
+        - light.shapes_007f
+    - data:
+        brightness: 255
+        effect: Color Loop
+        color_name: cyan
+      service: light.turn_on
+      target:
+        entity_id:
+        - light.bed_lights
+        - light.desk_lights
+        - light.light_switch
+        - light.light_switch_corner
+        - light.closet_lights
   mode: single
   icon: mdi:ceiling-light
 color_loop:
@@ -97,6 +68,7 @@ color_loop:
       target:
         entity_id:
         - group.misc_leds
+        - light.shapes_007f
     - data:
         brightness: 255
         effect: Color Loop
@@ -109,74 +81,7 @@ color_loop:
       target:
         entity_id:
         - light.bedroom_lights
-    - if:
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: binary_sensor.webcam
-          state: 'on'
-      then:
-      - service: light.turn_on
-        target:
-          entity_id: light.shapes_007f
-        data:
-          brightness_pct: 100
-    - choose:
-      - conditions:
-        - condition: state
-          entity_id: binary_sensor.webcam
-          state: 'on'
-        sequence:
-        - service: light.turn_on
-          target:
-            entity_id: light.shapes_007f
-          data:
-            brightness_pct: 55
-            effect: Webcam
-      - conditions:
-        - condition: template
-          value_template: '{{ as_timestamp(now(), 301) < as_timestamp(states(''sensor.desktop_pc_lastactive''),
-            0) + 300 }}'
-        - condition: state
-          entity_id: binary_sensor.bedroom_door
-          state: 'off'
-        sequence:
-        - service: light.turn_on
-          target:
-            entity_id: light.shapes_007f
-          data:
-            brightness_pct: 60
-      default:
-      - service: light.turn_on
-        target:
-          entity_id: light.shapes_007f
-        data:
-          brightness_pct: 100
-    - if:
-      - condition: state
-        entity_id: binary_sensor.closet
-        state: 'on'
-      then:
-      - service: light.turn_on
-        target:
-          entity_id: light.closet_lights
-        data:
-          effect: Color Loop
-    - if:
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: binary_sensor.webcam
-          state: 'on'
-        - condition: template
-          value_template: '{{ states("input_select.nanoleaf_scenes") == states("input_select.nanoleaf_scenes")
-            }}'
-      then:
-      - service: light.turn_on
-        target:
-          entity_id: light.shapes_007f
-        data:
-          effect: '{{ states(''input_select.nanoleaf_scenes'') }}'
+        - light.closet_lights
   mode: single
   icon: mdi:lightbulb-on
 music:
@@ -199,18 +104,10 @@ music:
         entity_id:
         - light.bedroom_lights
         - light.closet_lights
-    - service: input_select.select_option
-      target:
-        entity_id: input_select.nanoleaf_music
-      data:
-        option: "{{ state_attr('input_select.nanoleaf_music', 'options')\n    | reject('in',
-          [states('input_select.nanoleaf_music')])\n    | list | random }}\n"
     - service: light.turn_on
+      data: {}
       target:
         entity_id: light.shapes_007f
-      data:
-        brightness_pct: 100
-        effect: '{{ states(''input_select.nanoleaf_music'') }}'
   mode: single
   icon: mdi:party-popper
 call:
@@ -245,12 +142,6 @@ call:
         - 255
         - 255
         brightness_pct: 50
-    - service: light.turn_on
-      target:
-        entity_id: light.shapes_007f
-      data:
-        brightness_pct: 10
-        effect: '{{ states(''input_select.nanoleaf_scenes'') }}'
     - service: input_boolean.turn_off
       data: {}
       target:
@@ -261,6 +152,7 @@ call:
         entity_id:
         - switch.clock
         - switch.desktop
+        - switch.usb_hub
     - service: light.turn_off
       data: {}
       target:
@@ -278,10 +170,6 @@ call:
         brightness: 2
       target:
         entity_id: light.glide
-  - service: switch.turn_off
-    data: {}
-    target:
-      entity_id: switch.usb_hub
   mode: single
   icon: mdi:phone
 night:
@@ -317,11 +205,6 @@ night:
         state: 'on'
         entity_id: binary_sensor.bed_occupancy
       then:
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 5
-          milliseconds: 0
       - service: switch.turn_off
         data: {}
         target:
@@ -360,67 +243,12 @@ morning:
       service: light.turn_on
       target:
         entity_id: light.fan_lights
-    - choose:
-      - conditions:
-        - condition: state
-          entity_id: binary_sensor.webcam
-          state: 'on'
-        sequence:
-        - service: light.turn_on
-          target:
-            entity_id: light.shapes_007f
-          data:
-            brightness_pct: 70
-            effect: Webcam
-      - conditions:
-        - condition: template
-          value_template: '{{ as_timestamp(now(), 301) < as_timestamp(states(''sensor.desktop_pc_lastactive''),
-            0) + 300 }}'
-        - condition: state
-          entity_id: binary_sensor.bedroom_door
-          state: 'off'
-        sequence:
-        - service: light.turn_on
-          target:
-            entity_id: light.shapes_007f
-          data:
-            brightness_pct: 70
-      default:
-      - service: light.turn_on
-        target:
-          entity_id: light.shapes_007f
-        data:
-          brightness_pct: 100
     - data: {}
       service: homeassistant.turn_on
       target:
         entity_id:
         - group.misc_leds
-    - if:
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: binary_sensor.webcam
-          state: 'on'
-        - condition: template
-          value_template: '{{ states("input_select.nanoleaf_scenes") == states("input_select.nanoleaf_scenes")
-            }}'
-      then:
-      - service: light.turn_on
-        target:
-          entity_id: light.shapes_007f
-        data:
-          effect: '{{ states(''input_select.nanoleaf_scenes'') }}'
-    - if:
-      - condition: state
-        entity_id: binary_sensor.closet
-        state: 'on'
-      then:
-      - service: light.turn_on
-        target:
-          entity_id: light.closet_lights
-        data:
-          effect: Color Loop
+        - light.shapes_007f
     - data:
         brightness: 255
         effect: Color Loop
@@ -432,6 +260,7 @@ morning:
         - light.desk_lights
         - light.light_switch
         - light.light_switch_corner
+        - light.closet_lights
     - service: input_select.select_option
       data:
         option: Home
