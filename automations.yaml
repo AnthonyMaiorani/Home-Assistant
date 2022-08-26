@@ -1175,12 +1175,28 @@
       \nor \n(not is_state('sensor.nanoleaf_scene', 'unknown') and not \nis_state_attr('light.shapes_007f',
       \"brightness\", \nstates('sensor.nanoleaf_auto_brightness')|int - 2)) }}"
   action:
-  - service: light.turn_on
-    target:
-      entity_id: light.shapes_007f
-    data:
-      effect: '{{ states(''sensor.nanoleaf_scene'') }}'
-      brightness: '{{ states(''sensor.nanoleaf_auto_brightness'') }}'
+  - if:
+    - condition: template
+      value_template: "{{ (not is_state('sensor.nanoleaf_scene', 'unknown') and not
+        \nis_state_attr('light.shapes_007f', \"effect\", \nstates('sensor.nanoleaf_scene')))
+        \ }}"
+    then:
+    - service: light.turn_on
+      target:
+        entity_id: light.shapes_007f
+      data:
+        effect: '{{ states(''sensor.nanoleaf_scene'') }}'
+  - if:
+    - condition: template
+      value_template: "{{(not is_state('sensor.nanoleaf_scene', 'unknown') and not
+        \nis_state_attr('light.shapes_007f', \"brightness\", \nstates('sensor.nanoleaf_auto_brightness')|int
+        - 2)) }}"
+    then:
+    - service: light.turn_on
+      target:
+        entity_id: light.shapes_007f
+      data:
+        brightness: '{{ states(''sensor.nanoleaf_auto_brightness'') }}'
   mode: single
 - id: '1661505890362'
   alias: Spotify Refresh
