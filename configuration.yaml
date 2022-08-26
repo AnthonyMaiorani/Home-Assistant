@@ -76,9 +76,9 @@ template:
           {# At desk with lights off #}
           {% elif is_state("switch.desktop", "on") -%} 102
           {# Night call #}
-          {% elif state_attr('light.bed_lights', 'rgb_color') 
-          == (0, 255, 255) and 
-          is_state_attr("light.bed_lights", "Effect", "None")%} 25
+          {% elif state_attr('light.bed_lights', 'rgb_color')
+          | join(' ') == "0 255 255" and 
+          is_state_attr("light.bed_lights", "effect", "None")%} 25
           {# Normal #}
           {% elif is_state("light.fan_lights", "on") -%} 254
           {# In bed #}
