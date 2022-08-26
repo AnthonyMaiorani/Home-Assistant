@@ -1182,3 +1182,33 @@
       effect: '{{ states(''sensor.nanoleaf_scene'') }}'
       brightness: '{{ states(''sensor.nanoleaf_auto_brightness'') }}'
   mode: single
+- id: '1661505890362'
+  alias: Spotify Refresh
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - media_player.spotify_anthony221121
+  condition: []
+  action:
+  - repeat:
+      while:
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: media_player.spotify_anthony221121
+          state: playing
+        - condition: state
+          entity_id: media_player.spotify_anthony221121
+          state: idle
+      sequence:
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 1
+          milliseconds: 0
+      - service: homeassistant.update_entity
+        data: {}
+        target:
+          entity_id: media_player.spotify_anthony221121
+  mode: single
