@@ -103,6 +103,16 @@ template:
       - platform: state
         entity_id:
           - media_player.spotify_anthony221121
+        from: "playing"
+        to: "idle"
+      - platform: state
+        entity_id:
+          - media_player.spotify_anthony221121
+        from: "idle"
+        to: "playing"
+      - platform: state
+        entity_id:
+          - media_player.spotify_anthony221121
         attribute: media_playlist
     sensor:
       - name: "Nanoleaf Scene"
