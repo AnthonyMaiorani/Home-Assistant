@@ -620,239 +620,6 @@
             image: /local/backyard.jpg
     default: []
   mode: single
-- id: '1639191711934'
-  alias: Dim Nanoleaf when using computer
-  description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - switch.desktop
-    to: 'on'
-  condition:
-  - condition: state
-    entity_id: light.shapes_007f
-    state: 'on'
-  - condition: template
-    value_template: '{{ state_attr(''light.shapes_007f'',''brightness'') | float >
-      153 }}'
-  - condition: not
-    conditions:
-    - condition: state
-      entity_id: binary_sensor.bed_occupancy
-      state: 'on'
-  action:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: light.fan_lights
-        state: 'on'
-      sequence:
-      - service: light.turn_on
-        target:
-          entity_id: light.shapes_007f
-        data:
-          brightness_pct: 60
-    default:
-    - service: light.turn_on
-      target:
-        entity_id: light.shapes_007f
-      data:
-        brightness_pct: 40
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: light.fan_lights
-        state: 'off'
-      - condition: state
-        entity_id: light.desk_lights
-        state: 'on'
-      sequence:
-      - data:
-          brightness: 255
-          effect: Color Loop
-          rgbw_color:
-          - 0
-          - 255
-          - 255
-          - 0
-        service: light.turn_on
-        target:
-          entity_id:
-          - light.bedroom_lights
-    default: []
-  mode: single
-- id: '1639192672045'
-  alias: Nanoleaf Scene Changer
-  description: Cycle Favorite Nanoleaf Scenes
-  trigger:
-  - platform: time_pattern
-    minutes: /30
-    id: normal
-  - platform: state
-    entity_id: light.smart_bulb_1
-    attribute: effect
-    id: music
-    from: Music
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: or
-        conditions:
-        - condition: state
-          entity_id: switch.desktop
-          state: 'on'
-        - condition: time
-          after: 07:59:00
-          before: '23:59:00'
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: light.smart_bulb_1
-          attribute: Effect
-          state: Music
-      sequence:
-      - service: input_select.select_option
-        target:
-          entity_id: input_select.nanoleaf_scenes
-        data:
-          option: "{{ state_attr('input_select.nanoleaf_scenes', 'options')\n    |
-            reject('in', [states('input_select.nanoleaf_scenes')])\n    | reject('in',
-            'moonlight')\n    | reject('in', 'Lightscape')\n    | reject('in', 'Night
-            light')\n    | reject('in', 'Tron Legacy')\n    | reject('in', 'Pink To
-            Blue')\n    | reject('in', 'Rain')\n    | reject('in', 'TRON CITY')\n
-            \   | reject('in', 'Waterfall')\n    | reject('in', 'Playstation Blue')\n
-            \   | reject('in', 'Bedtime')\n    | reject('in', 'Aurora magic')\n    |
-            list | random }}\n"
-    - conditions:
-      - condition: state
-        entity_id: light.smart_bulb_1
-        attribute: Effect
-        state: Music
-      sequence:
-      - service: input_select.select_option
-        target:
-          entity_id: input_select.nanoleaf_music
-        data:
-          option: "{{ state_attr('input_select.nanoleaf_music', 'options')\n    |
-            reject('in', [states('input_select.nanoleaf_music')])\n    | list | random
-            }}\n"
-    default:
-    - service: input_select.select_option
-      target:
-        entity_id: input_select.nanoleaf_scenes
-      data:
-        option: "{{ state_attr('input_select.nanoleaf_scenes', 'options')\n    | reject('in',
-          [states('input_select.nanoleaf_scenes')])\n    | list | random }}\n"
-  - condition: template
-    value_template: '{{ state_attr("light.shapes_007f", "effect") != "Webcam" and
-      states(''light.shapes_007f'') == ''on''}} '
-  - service: light.turn_on
-    target:
-      entity_id: light.shapes_007f
-    data:
-      effect: '{{ states(''input_select.nanoleaf_scenes'') }}'
-  mode: single
-- id: '1641384613637'
-  alias: Webcam Lighting
-  description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - binary_sensor.webcam
-    to: 'on'
-    id: 'on'
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 1
-  - platform: state
-    entity_id:
-    - binary_sensor.webcam
-    id: 'off'
-    to: 'off'
-  - platform: state
-    entity_id:
-    - binary_sensor.discord_active
-    to: 'off'
-    id: discordquit
-  - platform: state
-    entity_id:
-    - binary_sensor.webcam
-    to: unavailable
-    id: unavailable
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: 'on'
-      sequence:
-      - choose:
-        - conditions:
-          - condition: state
-            entity_id: light.fan_lights
-            state: None
-            attribute: effect
-          sequence:
-          - service: button.press
-            target:
-              entity_id:
-              - button.white
-            data: {}
-          - service: light.turn_on
-            target:
-              entity_id: light.shapes_007f
-            data:
-              brightness_pct: 70
-              effect: Webcam
-        default:
-        - service: button.press
-          target:
-            entity_id:
-            - button.color
-          data: {}
-        - service: light.turn_on
-          target:
-            entity_id: light.shapes_007f
-          data:
-            brightness_pct: 55
-            effect: Webcam
-    - conditions:
-      - condition: trigger
-        id: discordquit
-      - condition: state
-        entity_id: light.bedroom_lights
-        state: 'on'
-      - condition: state
-        entity_id: binary_sensor.webcam
-        state: 'on'
-      sequence:
-      - service: button.press
-        target:
-          entity_id:
-          - button.deletereg
-        data: {}
-    - conditions:
-      - condition: or
-        conditions:
-        - condition: trigger
-          id: unavailable
-        - condition: trigger
-          id: 'off'
-      - condition: state
-        entity_id: light.shapes_007f
-        attribute: effect
-        state: Webcam
-      sequence:
-      - service: light.turn_on
-        target:
-          entity_id: light.shapes_007f
-        data:
-          effect: '{{ states(''input_select.nanoleaf_scenes'') }}'
-    default: []
-  mode: parallel
-  max: 2
 - id: '1644476253725'
   alias: Bed Occupancy Detected
   description: If motion detected in bed under certain circumstances, turn off overhead
@@ -1169,6 +936,10 @@
   - platform: event
     event_type: script_started
     context: {}
+  - platform: event
+    event_type: event_template_reloaded
+  - platform: event
+    event_type: automation_reloaded
   condition:
   - condition: template
     value_template: "{{ (not is_state('sensor.nanoleaf_scene', 'unknown') and not
@@ -1205,19 +976,17 @@
   trigger:
   - platform: state
     entity_id:
-    - media_player.spotify_anthony221121
+    - light.shapes_007f
+    to: 'on'
+  - platform: event
+    event_type: automation_reloaded
   condition: []
   action:
   - repeat:
-      while:
-      - condition: or
-        conditions:
-        - condition: state
-          entity_id: media_player.spotify_anthony221121
-          state: playing
-        - condition: state
-          entity_id: media_player.spotify_anthony221121
-          state: idle
+      until:
+      - condition: state
+        entity_id: light.shapes_007f
+        state: 'off'
       sequence:
       - delay:
           hours: 0

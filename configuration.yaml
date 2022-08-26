@@ -60,8 +60,10 @@ template:
           {%- endif %}
       - name: "Nanoleaf Auto-Brightness"
         state: >
+          {# Off #}
+          {% if is_state("light.bedroom_lights", "off") -%} 0
           {# In call with color loop #}
-          {% if is_state("switch.desktop", "on") and 
+          {% elif is_state("switch.desktop", "on") and 
           is_state("binary_sensor.webcam", "on") and 
           is_state_attr("light.fan_lights", "Effect", "Color") -%} 137
           {# In call with lights white #}
@@ -86,32 +88,46 @@ template:
           {%- else -%} 0
           {%- endif %} 
   - trigger:
-      # - platform: event
-      #   event_type: event_template_reloaded
-      # - platform: homeassistant
-      #   event: start
       - platform: time_pattern
         minutes: /30
       - platform: state
         entity_id:
           - binary_sensor.webcam
-          - media_player.spotify_anthony221121
       - platform: state
         entity_id:
           - light.shapes_007f
         from: "off"
         to: "on"
+      - platform: state
+        entity_id:
+          - media_player.spotify_anthony221121
+        to: "playing"
+      - platform: state
+        entity_id:
+          - media_player.spotify_anthony221121
+        to: "idle"
+      - platform: state
+        entity_id:
+          - media_player.spotify_anthony221121
+        to: "paused"
+      - platform: state
+        entity_id:
+          - media_player.spotify_anthony221121
+        attribute: media_playlist
     sensor:
       - name: "Nanoleaf Scene"
         state: >
+          {# Off #}
+          {% if is_state("light.bedroom_lights", "off") -%}
+          {% set scenes = "unknown" %}
           {# In call #}
-          {% if is_state("binary_sensor.webcam", "on") -%}
+          {% elif is_state("binary_sensor.webcam", "on") -%}
           {% set scenes = "Webcam" %}
           {# Music #}
           {% elif is_state("media_player.spotify_anthony221121", "playing") -%} 
           {% set scenes = ['Shooting Stars', 'Cotton Candy', 'Pop Rocks',
           'Rhythmic Northern Lights', 'Meteor Shower', "Soda", 
-          'Pulse Pop Beats', 'Energize', 'Electric Purple', 'Mood Movie', 
+          'Pulse Pop Beats', 'Energize', 'Electric purple', 'Mood Movie', 
           'Water Cooler', 'Clubbing', 'Snowy Holiday', 'Lofi Sound'] | 
           reject('in', [state_attr('light.shapes_007f', "effect")]) | list %}
           {% if not is_state_attr("media_player.spotify_anthony221121", 
