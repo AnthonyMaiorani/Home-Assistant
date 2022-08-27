@@ -900,10 +900,12 @@
     event_type: automation_reloaded
   condition:
   - condition: template
-    value_template: "{{ (not is_state('sensor.nanoleaf_scene', 'unknown') and not
-      \nis_state_attr('light.shapes_007f', \"effect\", \nstates('sensor.nanoleaf_scene')))
-      \nor \n(not is_state('sensor.nanoleaf_scene', 'unknown') and not \nis_state_attr('light.shapes_007f',
-      \"brightness\", \nstates('sensor.nanoleaf_auto_brightness')|int - 2)) }}"
+    value_template: "{{ (not is_state('sensor.nanoleaf_scene', 'unavailable') and
+      not\nnot is_state('sensor.nanoleaf_scene', 'unknown') and not \nis_state_attr('light.shapes_007f',
+      \"effect\", \nstates('sensor.nanoleaf_scene'))) \nor \n(not is_state('sensor.nanoleaf_scene',
+      'unavailable') and not\nnot is_state('sensor.nanoleaf_scene', 'unknown') and
+      not \nis_state_attr('light.shapes_007f', \"brightness\", \nstates('sensor.nanoleaf_auto_brightness')|int
+      - 2)) }}"
   action:
   - if:
     - condition: template
