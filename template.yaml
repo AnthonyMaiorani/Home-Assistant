@@ -36,7 +36,8 @@
       is_state("binary_sensor.webcam", "on") and
       is_state("light.fan_lights", "on") -%} 175
       {# Door opened #}
-      {% elif is_state("binary_sensor.bedroom_door", "on") -%} 254
+      {% elif is_state("binary_sensor.bedroom_door", "on") and not 
+      state_attr('light.bed_lights', 'rgb_color')| join(' ') == "0 255 255"-%} 254
       {# At desk with lights on #}
       {% elif is_state("switch.desktop", "on") and 
       is_state("light.fan_lights", "on") -%} 153
