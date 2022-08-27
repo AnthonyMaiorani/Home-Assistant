@@ -92,19 +92,19 @@
     - name: "Nanoleaf Scene"
       state: >
         {# Off #}
-        {% if is_state("light.bedroom_lights", "off") -%}
-        {% set scenes = "unknown" %}
+        {% if is_state('light.bedroom_lights', 'off') -%}
+        {% set scenes = ['unknown'] %}
         {# In call #}
-        {% elif is_state("binary_sensor.webcam", "on") -%}
-        {% set scenes = "Webcam" %}
+        {% elif is_state("binary_sensor.webcam", 'on') -%}
+        {% set scenes = ['Webcam'] %}
         {# Music #}
-        {% elif is_state("media_player.spotify_anthony221121", "playing") -%} 
+        {% elif is_state('media_player.spotify_anthony221121', 'playing') -%} 
         {% set scenes = ['Shooting Stars', 'Cotton Candy', 'Pop Rocks',
-        'Rhythmic Northern Lights', 'Meteor Shower', "Soda", 
+        'Rhythmic Northern Lights', 'Meteor Shower', 'Soda', 
         'Pulse Pop Beats', 'Energize', 'Electric purple', 'Mood Movie', 
         'Water Cooler', 'Clubbing', 'Snowy Holiday', 'Lofi Sound'] | 
-        reject('in', [state_attr('light.shapes_007f', "effect")]) | list %}
-        {% if not is_state_attr("media_player.spotify_anthony221121", 
+        reject('in', [state_attr('light.shapes_007f', 'effect')]) | list %}
+        {% if not is_state_attr('media_player.spotify_anthony221121', 
         "media_playlist", "lofi hip hop music - beats to relax/study to") -%} 
         {% set scenes = scenes + ['cool thing', 'Hip Hop', 'Prism',
         'Tachyon Light2', 'Oceanworks'] %} {%- endif %}  
