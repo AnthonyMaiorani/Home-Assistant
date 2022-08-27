@@ -54,6 +54,15 @@
       {%- endif %} 
 - trigger:
   - platform: time_pattern
+    seconds: /3
+  sensor:
+    - name: colorloopstate
+      state: >
+        {% if states('sensor.colorloopstate')|int(0) == 4 %} 0
+        {% else %} {{ states('sensor.colorloopstate')|int(0) + 1 }}
+        {% endif %}
+- trigger:
+  - platform: time_pattern
     minutes: /30
   - platform: state
     entity_id:

@@ -24,7 +24,7 @@ substitutions:
 
 sensor:
   - platform: homeassistant
-    entity_id: input_number.colorloopstate
+    entity_id: sensor.colorloopstate
     id: hassstate
 
 binary_sensor:

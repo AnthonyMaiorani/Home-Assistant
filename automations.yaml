@@ -175,50 +175,14 @@
   - service: script.morning
     data: {}
   mode: single
-- id: '1620710706685'
-  alias: Color Loop
-  description: Adjust color loop state
-  trigger:
-  - platform: time_pattern
-    seconds: /3
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: input_number.colorloopstate
-        state: '4.0'
-      sequence:
-      - service: input_number.set_value
-        target:
-          entity_id: input_number.colorloopstate
-        data:
-          value: 0
-    default:
-    - service: input_number.increment
-      target:
-        entity_id: input_number.colorloopstate
-  mode: single
 - id: '1621577255605'
   alias: Left Home
   description: Turns bedroom off when leaving home, and ensures bedroom stays off
   trigger:
-  - platform: state
-    entity_id: light.desk_lights
-    from: 'off'
-    to: 'on'
-    for: 00:05:00
-  - platform: state
-    entity_id: light.fan_lights
-    from: 'off'
-    to: 'on'
-    for: 00:05:00
   - platform: zone
     entity_id: person.anthony
     zone: zone.home
     event: leave
-  - platform: time_pattern
-    minutes: /20
   condition:
   - condition: template
     value_template: '{{states(''person.anthony'') != ''home''}}'
@@ -424,16 +388,10 @@
       - parallel:
         - service: script.morning
           data: {}
-        - if:
-          - condition: state
+        - service: input_boolean.turn_on
+          data: {}
+          target:
             entity_id: input_boolean.ac_boost
-            state: 'off'
-          then:
-          - service: input_boolean.turn_on
-            data: {}
-            target:
-              entity_id: input_boolean.ac_boost
-          else: []
         - service: notify.mobile_app_iphone
           data:
             message: Play music?
@@ -974,27 +932,22 @@
   alias: Spotify Refresh
   description: ''
   trigger:
-  - platform: state
-    entity_id:
-    - light.shapes_007f
-    to: 'on'
   - platform: event
     event_type: automation_reloaded
   condition: []
   action:
   - repeat:
-      until:
-      - condition: state
-        entity_id: light.shapes_007f
-        state: 'off'
+      while:
+      - condition: template
+        value_template: '{{ true }}'
       sequence:
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 1
-          milliseconds: 0
       - service: homeassistant.update_entity
         data: {}
         target:
           entity_id: media_player.spotify_anthony221121
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 3
+          milliseconds: 0
   mode: single
