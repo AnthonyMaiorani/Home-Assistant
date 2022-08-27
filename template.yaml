@@ -26,31 +26,32 @@
   - name: "Nanoleaf Auto-Brightness"
     state: >
       {# Off #}
-      {% if is_state("light.bedroom_lights", "off") -%} 0
+      {% if is_state('light.bedroom_lights', 'off') and expand('light.bedroom_lights')
+      |selectattr('state','in',['unavailable','unknown','none'])|list|count < 1 -%} 0
       {# In call with color loop #}
-      {% elif is_state("switch.desktop", "on") and 
-      is_state("binary_sensor.webcam", "on") and 
-      is_state_attr("light.fan_lights", "Effect", "Color") -%} 137
+      {% elif is_state('switch.desktop', 'on') and 
+      is_state('binary_sensor.webcam', 'on') and 
+      is_state_attr('light.fan_lights', 'Effect', 'Color') -%} 137
       {# In call with lights white #}
-      {% elif is_state("switch.desktop", "on") and
-      is_state("binary_sensor.webcam", "on") and
-      is_state("light.fan_lights", "on") -%} 175
+      {% elif is_state('switch.desktop', 'on') and
+      is_state('binary_sensor.webcam', 'on') and
+      is_state('light.fan_lights', 'on') -%} 175
       {# Door opened #}
-      {% elif is_state("binary_sensor.bedroom_door", "on") and not 
-      state_attr('light.bed_lights', 'rgb_color')| join(' ') == "0 255 255"-%} 254
+      {% elif is_state('binary_sensor.bedroom_door', 'on') and not 
+      state_attr('light.bed_lights', 'rgb_color')| join(' ') == '0 255 255'-%} 254
       {# At desk with lights on #}
-      {% elif is_state("switch.desktop", "on") and 
-      is_state("light.fan_lights", "on") -%} 153
+      {% elif is_state('switch.desktop', 'on') and 
+      is_state('light.fan_lights', 'on') -%} 153
       {# At desk with lights off #}
-      {% elif is_state("switch.desktop", "on") -%} 102
+      {% elif is_state('switch.desktop', 'on') -%} 102
       {# Night call #}
       {% elif state_attr('light.bed_lights', 'rgb_color')
-      | join(' ') == "0 255 255" and 
-      is_state_attr("light.bed_lights", "effect", "None")%} 25
+      | join(' ') == '0 255 255' and 
+      is_state_attr('light.bed_lights', 'effect', 'None')%} 25
       {# Normal #}
-      {% elif is_state("light.fan_lights", "on") -%} 254
+      {% elif is_state('light.fan_lights', 'on') -%} 254
       {# In bed #}
-      {% elif is_state("light.bedroom_lights", "on") -%} 63
+      {% elif is_state('light.bedroom_lights', 'on') -%} 63
       {%- else -%} 0
       {%- endif %} 
 - trigger:
@@ -70,21 +71,11 @@
       - binary_sensor.webcam
   - platform: state
     entity_id:
-      - light.shapes_007f
-    from: "off"
-    to: "on"
-  - platform: state
-    entity_id:
       - media_player.spotify_anthony221121
-    to: "playing"
-  - platform: state
-    entity_id:
-      - media_player.spotify_anthony221121
-    to: "idle"
-  - platform: state
-    entity_id:
-      - media_player.spotify_anthony221121
-    to: "paused"
+    to: 
+      - "playing"
+      - "idle"
+      - "paused"
   - platform: state
     entity_id:
       - media_player.spotify_anthony221121
@@ -93,7 +84,8 @@
     - name: "Nanoleaf Scene"
       state: >
         {# Off #}
-        {% if is_state('light.bedroom_lights', 'off') -%}
+        {% if is_state('light.bedroom_lights', 'off') and expand('light.bedroom_lights')
+        |selectattr('state','in',['unavailable','unknown','none'])|list|count < 1 -%}
         {% set scenes = ['unknown'] %}
         {# In call #}
         {% elif is_state("binary_sensor.webcam", 'on') -%}
@@ -112,9 +104,9 @@
         {% else %} {# Normal #}
         {% set scenes = ['Cosmos', 'Dynamic Blue', 'Ocean', 
         'Vaporwave', 'Rainbow', 'energy'] | 
-        reject('in', [state_attr('light.shapes_007f', "effect")]) | list %}
+        reject('in', [state_attr('light.shapes_007f', 'effect')]) | list %}
         {% if now().hour < 7 and 
-        is_state("switch.desktop", "off") %}  {% set scenes = scenes + 
+        is_state('switch.desktop', 'off') %}  {% set scenes = scenes + 
         ['moonlight', 'Lightscape', 'Night light', 'Tron Legacy',
         'Pink To Blue', 'Rain', 'TRON CITY', 'Waterfall', 
         'Playstation Blue', 'Bedtime', 'Aurora magic', 'Holodek'] %}

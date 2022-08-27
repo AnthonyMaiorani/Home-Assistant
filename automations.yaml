@@ -839,11 +839,6 @@
     entity_id:
     - sensor.nanoleaf_scene
     - sensor.nanoleaf_auto_brightness
-  - platform: state
-    entity_id:
-    - light.shapes_007f
-    from: 'off'
-    to: 'on'
   - platform: event
     event_type: script_started
     context: {}
