@@ -1,9 +1,10 @@
 substitutions:
-  devicename: usb_relay
+  name: usbswitch
   upper_devicename: "USB Relay"
+  static_ip: 192.168.1.56
 
 esphome:
-  name: usbswitch
+  name: ${name}
   platform: ESP8266
   board: esp01_1m
 
@@ -11,12 +12,11 @@ wifi:
   ssid: !secret ssid
   password: !secret password
   fast_connect: on
-  ap: {}
   manual_ip:
-    static_ip: 192.168.1.56
-    gateway: 192.168.1.1
-    subnet: 255.255.255.0
-    dns1: 192.168.1.250
+    static_ip: ${static_ip}
+    gateway: !secret gateway
+    subnet: !secret subnet
+    dns1: !secret dns1
 
 captive_portal:
 logger:
@@ -42,7 +42,7 @@ switch:
   # Switch template to link relay and green LED states
   # LED is on when relay is off
   - platform: template
-    id: "${devicename}_relay"
+    id: "${name}_relay"
     name: $upper_devicename
     lambda: |-
       if (id(relay).state) {
@@ -70,4 +70,4 @@ binary_sensor:
       mode: INPUT_PULLUP
       inverted: True
     on_press:
-      - switch.toggle: "${devicename}_relay"
+      - switch.toggle: "${name}_relay"

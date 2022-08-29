@@ -7,12 +7,14 @@ wifi:
   ssid: !secret ssid
   password: !secret password
   fast_connect: on
-  ap: {}
   manual_ip:
-    static_ip: 192.168.1.3
-    gateway: 192.168.1.1
-    subnet: 255.255.255.0
-    dns1: 192.168.1.250
+    static_ip: ${static_ip}
+    gateway: !secret gateway
+    subnet: !secret subnet
+    dns1: !secret dns1
+    
+substitutions:
+  static_ip: 192.168.1.3
 
 captive_portal:
 api:

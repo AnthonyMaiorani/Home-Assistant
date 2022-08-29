@@ -7,12 +7,11 @@ wifi:
   ssid: !secret ssid
   password: !secret password
   fast_connect: on
-  ap: {}
   manual_ip:
-    static_ip: 192.168.1.238
-    gateway: 192.168.1.1
-    subnet: 255.255.255.0
-    dns1: 192.168.1.250
+    static_ip: ${static_ip}
+    gateway: !secret gateway
+    subnet: !secret subnet
+    dns1: !secret dns1
 
 captive_portal:
 logger:
@@ -21,6 +20,7 @@ ota:
 
 substitutions:
   name: "Smart Outlet"
+  static_ip: 192.168.1.238
 
 binary_sensor:
   - platform: gpio

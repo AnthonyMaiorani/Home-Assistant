@@ -64,6 +64,8 @@
         {% else %} {{ states('sensor.colorloopstate')|int(0) + 1 }}
         {% endif %}
 - trigger:
+  - platform: event
+    event_type: event_change_nanoleaf
   - platform: time_pattern
     minutes: /30
   - platform: state
