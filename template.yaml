@@ -31,11 +31,15 @@
       {# In call with color loop #}
       {% elif is_state('switch.desktop', 'on') and 
       is_state('binary_sensor.webcam', 'on') and 
-      is_state_attr('light.fan_lights', 'Effect', 'Color') -%} 137
+      is_state_attr('light.fan_lights', 'effect', 'Color Loop') -%} 142
       {# In call with lights white #}
       {% elif is_state('switch.desktop', 'on') and
       is_state('binary_sensor.webcam', 'on') and
-      is_state('light.fan_lights', 'on') -%} 175
+      is_state('light.fan_lights', 'on') -%} 204
+      {# Night call #}
+      {% elif state_attr('light.bed_lights', 'rgb_color')
+      | join(' ') == '0 255 255' and 
+      is_state_attr('light.bed_lights', 'effect', 'None')%} 25
       {# Door opened #}
       {% elif is_state('binary_sensor.bedroom_door', 'on') and not 
       state_attr('light.bed_lights', 'rgb_color')| join(' ') == '0 255 255'-%} 254
@@ -44,10 +48,6 @@
       is_state('light.fan_lights', 'on') -%} 153
       {# At desk with lights off #}
       {% elif is_state('switch.desktop', 'on') -%} 102
-      {# Night call #}
-      {% elif state_attr('light.bed_lights', 'rgb_color')
-      | join(' ') == '0 255 255' and 
-      is_state_attr('light.bed_lights', 'effect', 'None')%} 25
       {# Normal #}
       {% elif is_state('light.fan_lights', 'on') -%} 254
       {# In bed #}
@@ -93,7 +93,8 @@
         {% elif is_state("binary_sensor.webcam", 'on') -%}
         {% set scenes = ['Webcam'] %}
         {# Music #}
-        {% elif is_state('media_player.spotify_anthony221121', 'playing') -%} 
+        {% elif is_state('media_player.spotify_anthony221121', 'playing') and 
+        not state_attr('light.bed_lights', 'rgb_color')| join(' ') == '0 255 255'-%}  
         {% set scenes = ['Shooting Stars', 'Cotton Candy', 'Pop Rocks',
         'Rhythmic Northern Lights', 'Meteor Shower', 'Soda', 
         'Pulse Pop Beats', 'Energize', 'Electric purple', 'Mood Movie', 

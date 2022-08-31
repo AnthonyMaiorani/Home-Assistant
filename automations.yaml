@@ -880,6 +880,8 @@
   trigger:
   - platform: event
     event_type: automation_reloaded
+  - platform: homeassistant
+    event: start
   condition: []
   action:
   - repeat:
@@ -896,4 +898,36 @@
           minutes: 0
           seconds: 3
           milliseconds: 0
+  mode: single
+- id: '1661880635465'
+  alias: Suggest Starting Car
+  description: ''
+  trigger:
+  - platform: time
+    at: '11:45:00'
+  - platform: time
+    at: '12:40:00'
+  - platform: time
+    at: '16:25:00'
+  condition:
+  - condition: time
+    before: 00:00:00
+    weekday:
+    - mon
+    - wed
+    - tue
+    - thu
+    - fri
+    after: 00:00:00
+  - condition: or
+    conditions:
+    - condition: zone
+      entity_id: person.anthony
+      zone: zone.utd
+    - condition: zone
+      entity_id: person.anthony
+      zone: zone.raytheon
+  action:
+  - service: notify.mobile_app_iphone
+    data: {}
   mode: single
