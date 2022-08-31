@@ -31,7 +31,7 @@ sensor:
     filters:
 #      - delta: 3000
       - calibrate_linear:
-          - 392000 -> 0
+          - 375500 -> 0
           - 428000 -> 280
 #      - sliding_window_moving_average:
 #          window_size: 5
