@@ -61,6 +61,15 @@
       entity_id: automation.bed_occupancy
   - event: event_change_nanoleaf
     event_data: {}
+  - delay:
+      hours: 0
+      minutes: 4
+      seconds: 0
+      milliseconds: 0
+  - service: homeassistant.update_entity
+    data: {}
+    target:
+      entity_id: sensor.bedroom_dot_next_alarm
   mode: single
 - id: '1653601692731'
   alias: AC Boost Control

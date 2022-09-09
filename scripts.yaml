@@ -292,18 +292,47 @@ start_car:
         to: opening
       continue_on_timeout: false
       timeout: 00:01:00
-  - parallel:
-    - service: drone_mobile.refresh_device_status_honda_accord
-      data: {}
-    - wait_for_trigger:
-      - platform: state
-        entity_id:
-        - sensor.accord_lastrefresh
-      continue_on_timeout: false
-      timeout: 00:00:30
   - service: switch.turn_on
     data: {}
     target:
       entity_id: switch.accord_remotestart
   mode: single
   icon: mdi:car
+reconnect_iot:
+  alias: Reconnect IOT
+  sequence:
+  - parallel:
+    - service: unifi.reconnect_client
+      data:
+        device_id: cf1727564e8e1414a848455da2f29fce
+    - service: unifi.reconnect_client
+      data:
+        device_id: 36ce1af0488e99fc5eae2c880ab9e836
+    - service: unifi.reconnect_client
+      data:
+        device_id: a0db0d712ad7a7afacd033bfbc78a155
+    - service: unifi.reconnect_client
+      data:
+        device_id: 73669e6afa1b4aab852597eaa337ccca
+    - service: unifi.reconnect_client
+      data:
+        device_id: 9bdc1fcf6c55f1b580802739f71e205c
+    - service: unifi.reconnect_client
+      data:
+        device_id: e562ce10dbed425c8a7648617ee63c13
+    - service: unifi.reconnect_client
+      data:
+        device_id: e04683beb4443177bf1efaec9ecf3626
+    - service: unifi.reconnect_client
+      data:
+        device_id: d17b85b4018141749b9c7775aacb2336
+    - service: unifi.reconnect_client
+      data:
+        device_id: 32e68440a6bf677e14380d6fd815522d
+    - service: unifi.reconnect_client
+      data:
+        device_id: 92370e357c1742129f33df5b2c530303
+    - service: unifi.reconnect_client
+      data:
+        device_id: d8c0ac0aef5e4a2f140ebb30b37e3875
+  mode: single

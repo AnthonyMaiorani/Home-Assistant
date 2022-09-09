@@ -26,11 +26,11 @@
   - name: "Nanoleaf Auto-Brightness"
     state: >
       {# Off #}
-      {% if is_state('light.bedroom_lights', 'off') and expand('light.bedroom_lights')
+      {% if not is_state('input_select.anthony', 'Home') -%} 0
+      {% elif is_state('light.bedroom_lights', 'off') and expand('light.bedroom_lights')
       |selectattr('state','in',['unavailable','unknown','none'])|list|count < 1 -%} 0
       {# In call with color loop #}
-      {% elif is_state('switch.desktop', 'on') and 
-      is_state('binary_sensor.webcam', 'on') and 
+      {% elif is_state('switch.desktop', 'on') and is_state('binary_sensor.webcam', 'on') and 
       is_state_attr('light.fan_lights', 'effect', 'Color Loop') -%} 142
       {# In call with lights white #}
       {% elif is_state('switch.desktop', 'on') and
@@ -41,8 +41,8 @@
       | join(' ') == '0 255 255' and 
       is_state_attr('light.bed_lights', 'effect', 'None')%} 25
       {# Door opened #}
-      {% elif is_state('binary_sensor.bedroom_door', 'on') and not 
-      state_attr('light.bed_lights', 'rgb_color')| join(' ') == '0 255 255'-%} 254
+      {% elif is_state('binary_sensor.bedroom_door', 'on') and 
+      is_state('light.fan_lights', 'on')-%} 254
       {# At desk with lights on #}
       {% elif is_state('switch.desktop', 'on') and 
       is_state('light.fan_lights', 'on') -%} 153
@@ -94,7 +94,8 @@
         {% set scenes = ['Webcam'] %}
         {# Music #}
         {% elif is_state('media_player.spotify_anthony221121', 'playing') and 
-        not state_attr('light.bed_lights', 'rgb_color')| join(' ') == '0 255 255'-%}  
+        is_state('switch.desktop', 'off') and not 
+        state_attr('light.bed_lights', 'rgb_color')| join(' ') == '0 255 255'-%}  
         {% set scenes = ['Shooting Stars', 'Cotton Candy', 'Pop Rocks',
         'Rhythmic Northern Lights', 'Meteor Shower', 'Soda', 
         'Pulse Pop Beats', 'Energize', 'Electric purple', 'Mood Movie', 
