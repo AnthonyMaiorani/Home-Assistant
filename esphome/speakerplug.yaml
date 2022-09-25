@@ -72,11 +72,11 @@ sensor:
     cf1_pin: GPIO5
 #    current_resistor: ${current_res}
 #    voltage_divider: ${voltage_div}
-#    current:
-#      name: "${name} Amperage"
-#      internal: true
-#      unit_of_measurement: A
-#      filters:
+    current:
+      name: "${name} Amperage"
+      internal: true
+      unit_of_measurement: A
+      filters:
 #    voltage:
 #      name: "${name} Voltage"
 #      internal: true
