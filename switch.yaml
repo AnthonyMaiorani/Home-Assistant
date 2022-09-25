@@ -7,6 +7,7 @@
       target:
         entity_id:
           - button.shutdown
+          
 - platform: command_line
   switches:
     u6_pro_led:
@@ -71,3 +72,42 @@
         - service: lock.unlock
           entity_id:
             - lock.front_door
+    case_lights:
+      friendly_name: Case Lights
+      turn_on:
+        - service: remote.send_command
+          data:
+            entity_id: remote.bedroom_rm4_remote
+            command: 'off'
+            device: case
+        - service: remote.send_command
+          data:
+            entity_id: remote.bedroom_rm4_remote
+            command: 'on'
+            device: case
+      turn_off:
+        - service: remote.send_command
+          data:
+            entity_id: remote.bedroom_rm4_remote
+            command: 'off'
+            device: case
+            num_repeats: 6
+    windows:
+      friendly_name: Windows
+      value_template: "{{ states('sensor.monitor_plug_wattage')|float(0) > 6 }}"
+      turn_on:
+        - service: button.press
+          target:
+            entity_id:
+              - button.on
+        - delay: 13
+        - service: homeassistant.update_entity
+          entity_id: sensor.monitor_plug_wattage
+      turn_off:
+        - service: button.press
+          target:
+            entity_id:
+              - button.sleep
+        - delay: 20
+        - service: homeassistant.update_entity
+          entity_id: sensor.monitor_plug_wattage

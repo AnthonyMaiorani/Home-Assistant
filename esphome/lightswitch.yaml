@@ -126,6 +126,13 @@ light:
               call.perform();
             }
 
+switch:
+  - platform: gpio
+    #name: "${name}"
+    pin: GPIO15
+    id: 'relay1'
+    restore_mode: ALWAYS_OFF
+
 output:
   - platform: esp8266_pwm
     id: output_green

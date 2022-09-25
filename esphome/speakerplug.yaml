@@ -1,6 +1,6 @@
 
 esphome:
-  name: monitorplug
+  name: speakerplug
   platform: ESP8266
   board: esp01_1m
 
@@ -24,8 +24,8 @@ time:
     id: homeassistant_time
 
 substitutions:
-  name: "Monitor Plug"
-  static_ip: 192.168.1.145
+  name: "Speaker Plug"
+  static_ip: 192.168.1.227
   restore_mode: ALWAYS_ON
   current_res: "0.0019"
   voltage_div: "2150"

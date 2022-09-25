@@ -1,12 +1,28 @@
 esphome:
-  name: bedscale
-  platform: ESP8266
-  board: d1_mini
+  name: occupancy-eth
 
-wifi:
-  ssid: !secret ssid
-  password: !secret password
-  fast_connect: on
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+#wifi:
+#  ssid: !secret ssid
+#  password: !secret password
+#  fast_connect: on
+#  manual_ip:
+#    static_ip: ${static_ip}
+#    gateway: !secret gateway
+#    subnet: !secret subnet
+#    dns1: !secret dns1
+
+ethernet:
+  type: LAN8720
+  mdc_pin: GPIO23
+  mdio_pin: GPIO18
+  clk_mode: GPIO0_IN
+  phy_addr: 1
+  power_pin: GPIO16
   manual_ip:
     static_ip: ${static_ip}
     gateway: !secret gateway
@@ -14,9 +30,10 @@ wifi:
     dns1: !secret dns1
 
 substitutions:
-  static_ip: 192.168.1.35
+  static_ip: 192.168.1.146
 
-captive_portal:
+
+#captive_portal:
 logger:
 api:
 ota:
@@ -26,22 +43,22 @@ sensor:
     gain: 128
 #    name: "Bed Weight"
     id: bed_weight
-    dout_pin: D4
-    clk_pin: RX
+    dout_pin: GPIO2
+    clk_pin: GPIO4
     filters:
-#      - delta: 3000
-      #- calibrate_linear:
-          #- 375500 -> 0
-          #- 8388607 -> 285
+      - delta: 3000
+      - calibrate_linear:
+          - 320000 -> 0
+          - 338000 -> 285
 #      - sliding_window_moving_average:
 #          window_size: 5
 #          send_every: 3
-#      - lambda: |-
-#          if (x >= 0) return x;
-#          else return {};
-#      - lambda: |-
-#          if (x <= 500) return x;
-#          else return {};
+      - lambda: |-
+          if (x >= 0) return x;
+          else return {};
+      - lambda: |-
+          if (x <= 500) return x;
+          else return {};
     on_value:
       - if:
           condition:

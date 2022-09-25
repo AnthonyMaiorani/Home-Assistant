@@ -275,6 +275,27 @@ start_car:
     - condition: zone
       entity_id: person.anthony
       zone: zone.home
+    - condition: state
+      entity_id: binary_sensor.workday_sensor
+      state: 'on'
+    - condition: time
+      before: '11:00:00'
+      after: 07:00:00
+      weekday:
+      - mon
+      - tue
+      - wed
+      - thu
+      - fri
+    then:
+    - service: input_boolean.turn_on
+      data: {}
+      target:
+        entity_id: input_boolean.ac_boost
+  - if:
+    - condition: zone
+      entity_id: person.anthony
+      zone: zone.home
     - condition: not
       conditions:
       - condition: state
@@ -296,6 +317,56 @@ start_car:
     data: {}
     target:
       entity_id: switch.accord_remotestart
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - service: drone_mobile.refresh_device_status_accord
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - if:
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: sensor.accord_ignitionstatus
+        state: 'on'
+    then:
+    - service: switch.turn_on
+      data: {}
+      target:
+        entity_id: switch.accord_remotestart
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - service: drone_mobile.refresh_device_status_accord
+    data: {}
+  - wait_for_trigger:
+    - platform: state
+      entity_id:
+      - sensor.accord_ignitionstatus
+      to: 'on'
+    timeout:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - if:
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: sensor.accord_ignitionstatus
+        state: 'On'
+    then:
+    - service: notify.mobile_app_iphone
+      data:
+        message: Remote start failed
   mode: single
   icon: mdi:car
 reconnect_iot:

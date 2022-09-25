@@ -10,6 +10,7 @@ room: # used for ha menu
     - switch.ac
     - input_boolean.ac_boost
     - switch.desktop
+    - switch.windows
     - cover.bedroom_blinds
 misc_leds:
   name: Other Room Lights
