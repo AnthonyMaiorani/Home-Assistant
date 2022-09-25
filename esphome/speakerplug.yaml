@@ -57,26 +57,18 @@ status_led:
     inverted: False
 
 sensor:
-#  - platform: total_daily_energy
-#    name: "${name} Total Daily Energy"
-#    power_id: "wattage"
-#    filters:
-        # Multiplication factor from W to kW is 0.001
-#        - multiply: 0.001
-#    unit_of_measurement: kWh
   - platform: hlw8012
     sel_pin:
       number: GPIO12
       inverted: True
     cf_pin: GPIO04
     cf1_pin: GPIO5
-#    current_resistor: ${current_res}
-#    voltage_divider: ${voltage_div}
+    current_resistor: ${current_res}
+    voltage_divider: ${voltage_div}
     current:
       name: "${name} Amperage"
-      internal: true
       unit_of_measurement: A
-      filters:
+#      filters:
 #    voltage:
 #      name: "${name} Voltage"
 #      internal: true
