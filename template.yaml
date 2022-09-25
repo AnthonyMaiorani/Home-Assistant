@@ -105,6 +105,9 @@
         "media_playlist", "lofi hip hop music - beats to relax/study to") -%} 
         {% set scenes = scenes + ['cool thing', 'Hip Hop', 'Prism',
         'Tachyon Light2', 'Oceanworks'] %} {%- endif %}  
+        {# Unnecessary Trigger #}
+        {% elif now().minute != 30 and now().minute != 0 -%}
+        {% set scenes = [state_attr('light.shapes_007f', 'effect')] %}
         {% else %} {# Normal #}
         {% set scenes = ['Cosmos', 'Dynamic Blue', 'Ocean', 
         'Vaporwave', 'Rainbow', 'energy'] | 
