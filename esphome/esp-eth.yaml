@@ -1,0 +1,39 @@
+esphome:
+  name: esp-eth
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+#wifi:
+#  ssid: !secret ssid
+#  password: !secret password
+#  fast_connect: on
+#  manual_ip:
+#    static_ip: ${static_ip}
+#    gateway: !secret gateway
+#    subnet: !secret subnet
+#    dns1: !secret dns1
+
+ethernet:
+  type: LAN8720
+  mdc_pin: GPIO23
+  mdio_pin: GPIO18
+  clk_mode: GPIO0_IN
+  phy_addr: 1
+  power_pin: GPIO16
+#  manual_ip:
+#    static_ip: ${static_ip}
+#    gateway: !secret gateway
+#    subnet: !secret subnet
+#    dns1: !secret dns1
+
+substitutions:
+  static_ip: 192.168.1.146
+
+
+#captive_portal:
+logger:
+api:
+ota:
