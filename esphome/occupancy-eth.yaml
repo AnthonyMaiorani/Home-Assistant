@@ -49,16 +49,16 @@ sensor:
       - delta: 3000
       - calibrate_linear:
           - 320000 -> 0
-          - 338000 -> 285
+          - 386000 -> 285
 #      - sliding_window_moving_average:
 #          window_size: 5
 #          send_every: 3
       - lambda: |-
           if (x >= 0) return x;
           else return {};
-      - lambda: |-
-          if (x <= 500) return x;
-          else return {};
+ #     - lambda: |-
+ #         if (x <= 500) return x;
+ #         else return {};
     on_value:
       - if:
           condition:

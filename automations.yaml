@@ -912,31 +912,61 @@
   alias: Suggest Starting Car
   description: ''
   trigger:
-  - platform: time
-    at: '11:45:00'
-  - platform: time
-    at: '12:40:00'
-  - platform: time
-    at: '16:25:00'
-  condition:
-  - condition: time
-    before: 00:00:00
-    weekday:
-    - mon
-    - wed
-    - tue
-    - thu
-    - fri
-    after: 00:00:00
-  - condition: or
-    conditions:
-    - condition: zone
-      entity_id: person.anthony
-      zone: zone.utd
-    - condition: zone
-      entity_id: person.anthony
-      zone: zone.raytheon
+  - platform: template
+    value_template: "        {% if states(\"person.anthony\") in [\"UTD\"] and \n
+      \       is_state(\"binary_sensor.workday_sensor\", \"on\") and\n        ( now().hour
+      == 11 and now().minute == 40 and\n        ( now.weekday() in [\"Monday\", \"Wednesday\",
+      \"Friday\"]) or\n        ( now().hour == 12 and now().minute == 40 and\n        now.weekday()
+      in [\"Tueday\", \"Thursday\"]) or\n        ( now().hour == 16 and now().minute
+      == 25 and\n        now.weekday() == \"Thursday\")) -%} True\n        {% else
+      %} False\n        {%- endif %} "
+  condition: []
   action:
   - service: notify.mobile_app_iphone
-    data: {}
+    data:
+      data:
+        tag: car
+        push:
+          interruption-level: passive
+        shortcut:
+          name: Start Car
+          ignore_result: ignore
+      message: Start car?
+  mode: single
+- id: '1664335198513'
+  alias: Backyard Light
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.back_door
+  - platform: homeassistant
+    event: start
+  - platform: sun
+    event: sunset
+    offset: 0
+  - platform: sun
+    event: sunrise
+    offset: 0
+  condition: []
+  action:
+  - if:
+    - condition: state
+      entity_id: binary_sensor.back_door
+      state: 'on'
+    - condition: sun
+      after: sunset
+    then:
+    - service: switch.turn_on
+      data: {}
+      target:
+        entity_id: switch.porch_light
+    else:
+    - condition: state
+      entity_id: binary_sensor.back_door
+      state: 'off'
+    - service: switch.turn_off
+      data: {}
+      target:
+        entity_id: switch.porch_light
   mode: single

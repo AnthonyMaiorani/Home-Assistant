@@ -23,17 +23,70 @@ ethernet:
   clk_mode: GPIO0_IN
   phy_addr: 1
   power_pin: GPIO16
-#  manual_ip:
-#    static_ip: ${static_ip}
-#    gateway: !secret gateway
-#    subnet: !secret subnet
-#    dns1: !secret dns1
+  manual_ip:
+    static_ip: ${static_ip}
+    gateway: !secret gateway
+    subnet: !secret subnet
+    dns1: !secret dns1
 
 substitutions:
-  static_ip: 192.168.1.146
-
+  static_ip: 192.168.1.193
+  red: GPIO02
+  green: GPIO12
+  blue: GPIO4
+  friendly_name: "Desk Lights"
 
 #captive_portal:
 logger:
 api:
 ota:
+
+sensor:
+  - platform: homeassistant
+    entity_id: sensor.colorloopstate
+    id: hassstate
+
+light:
+  - platform: rgb
+    id: leds
+    name: "${friendly_name}"
+    red: output_red
+    green: output_green
+    blue: output_blue
+    restore_mode: RESTORE_DEFAULT_OFF
+    effects:
+      - random:
+          name: Music
+          transition_length: .1s
+          update_interval: .2s
+      - lambda:
+          name: Color Loop
+          lambda: |-
+            static float state = 0;
+            if (state != id(hassstate).state) {
+              state = id(hassstate).state;
+              auto call = id(leds).turn_on();
+              call.set_transition_length(3000);
+              if (state == 0) {
+                call.set_rgb(0.45, 0.98, 0.39);
+              } else if (state == 1) {
+                call.set_rgb(0.45, 0.98, 0.93);
+              } else if (state == 2) {
+                call.set_rgb(0.38, 0.15, 0.96);
+              } else if (state == 3) {
+                call.set_rgb(0.5, 0.17, 0.96);
+              } else {
+                call.set_rgb(0.92, 0.2, 0.27);
+              }
+              call.perform();
+            }
+output:
+  - platform: ledc
+    id: output_red
+    pin: ${red}
+  - platform: ledc
+    id: output_green
+    pin: ${green}
+  - platform: ledc
+    id: output_blue
+    pin: ${blue}
