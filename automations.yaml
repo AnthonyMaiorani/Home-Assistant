@@ -837,6 +837,16 @@
         preset_mode: none
       target:
         entity_id: climate.bedroom_ac
+    - delay:
+        hours: 0
+        minutes: 0
+        seconds: 2
+        milliseconds: 0
+    - service: climate.set_preset_mode
+      data:
+        preset_mode: none
+      target:
+        entity_id: climate.bedroom_ac
   mode: queued
 - id: '1661502555805'
   alias: Nanoleaf Scene Changer and Auto Brightness

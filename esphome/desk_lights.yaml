@@ -1,9 +1,0 @@
-<<: !include .led_base.yaml
-
-substitutions:
-  friendly_name: "Desk Lights"
-  name: desklights
-  static_ip: 192.168.1.202
-  red: GPIO12
-  green: GPIO4
-  blue: GPIO14
