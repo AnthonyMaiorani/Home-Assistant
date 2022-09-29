@@ -80,6 +80,12 @@
       - "paused"
   - platform: state
     entity_id:
+      - pyscript.airport_playing
+    to: 
+      - "True"
+      - "False"
+  - platform: state
+    entity_id:
       - media_player.spotify_anthony221121
     attribute: media_playlist
   sensor:
@@ -94,7 +100,8 @@
         {% set scenes = ['Webcam'] %}
         {# Music #}
         {% elif is_state('media_player.spotify_anthony221121', 'playing') and 
-        is_state('switch.desktop', 'off') and not 
+        is_state('switch.desktop', 'off') and 
+        is_state('pyscript.airport_playing', 'True') and not 
         state_attr('light.bed_lights', 'rgb_color')| join(' ') == '0 255 255'-%}  
         {% set scenes = ['Shooting Stars', 'Cotton Candy', 'Pop Rocks',
         'Rhythmic Northern Lights', 'Meteor Shower', 'Soda', 
