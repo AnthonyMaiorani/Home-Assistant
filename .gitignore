@@ -10,6 +10,8 @@
 !blueprints/**
 !blueprints/
 !packages
+!pyscript/
+!*.py
 
 # Ignore folders.
 .storage
