@@ -352,6 +352,7 @@
           data: {}
           target:
             entity_id: input_boolean.ac_boost
+          enabled: false
         - service: notify.mobile_app_iphone
           data:
             message: Play music?
@@ -362,6 +363,7 @@
               shortcut:
                 name: LoFi
                 ignore_result: ignore
+          enabled: false
     - conditions:
       - condition: state
         entity_id: input_select.anthony
@@ -925,11 +927,10 @@
   - platform: template
     value_template: "        {% if states(\"person.anthony\") in [\"UTD\"] and \n
       \       is_state(\"binary_sensor.workday_sensor\", \"on\") and\n        ( now().hour
-      == 11 and now().minute == 40 and\n        ( now.weekday() in [\"Monday\", \"Wednesday\",
-      \"Friday\"]) or\n        ( now().hour == 12 and now().minute == 40 and\n        now.weekday()
-      in [\"Tueday\", \"Thursday\"]) or\n        ( now().hour == 16 and now().minute
-      == 25 and\n        now.weekday() == \"Thursday\")) -%} True\n        {% else
-      %} False\n        {%- endif %} "
+      == 11 and now().minute == 40 and\n        ( now().weekday() in [0, 2, 4]) or\n
+      \       ( now().hour == 12 and now().minute == 40 and\n        now().weekday()
+      in [1, 3]) or\n        ( now().hour == 16 and now().minute == 25 and\n        now().weekday()
+      == 3)) -%} True\n        {% else %} False\n        {%- endif %}"
   condition: []
   action:
   - service: notify.mobile_app_iphone
@@ -958,14 +959,20 @@
   - platform: sun
     event: sunrise
     offset: 0
+  - platform: event
+    event_type: automation_reloaded
   condition: []
   action:
   - if:
     - condition: state
       entity_id: binary_sensor.back_door
       state: 'on'
-    - condition: sun
-      after: sunset
+    - condition: or
+      conditions:
+      - condition: sun
+        before: sunrise
+      - condition: sun
+        after: sunset
     then:
     - service: switch.turn_on
       data: {}
@@ -979,4 +986,91 @@
       data: {}
       target:
         entity_id: switch.porch_light
+  mode: single
+- id: '1664505341968'
+  alias: Arrived Home
+  description: ''
+  trigger:
+  - platform: zone
+    entity_id: person.anthony
+    zone: zone.home
+    event: enter
+  condition:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: person.riana
+      state: Just Arrived
+    - condition: not
+      conditions:
+      - condition: zone
+        entity_id: device_tracker.riana
+        zone: zone.home
+      - condition: zone
+        entity_id: device_tracker.dana
+        zone: zone.home
+  - condition: sun
+    after: sunset
+  action:
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - condition: state
+    state: Just Arrived
+    entity_id: input_select.anthony
+  - wait_for_trigger:
+    - platform: state
+      entity_id:
+      - cover.garage_door
+    - platform: state
+      entity_id:
+      - lock.front_door
+    continue_on_timeout: false
+    timeout: 00:30:00
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 45
+      milliseconds: 0
+  - service: notify.mobile_app_iphone
+    data:
+      message: Play music?
+      data:
+        tag: music
+        push:
+          interruption-level: passive
+        shortcut:
+          name: LoFi
+          ignore_result: ignore
+  - condition: sun
+    after: sunset
+  - service: light.turn_on
+    data:
+      brightness_pct: 15
+    target:
+      entity_id: light.kitchen_lights
+  - service: switch.turn_on
+    data: {}
+    target:
+      entity_id: switch.living_room_fan
+  - wait_for_trigger:
+    - platform: zone
+      entity_id: person.anthony
+      zone: zone.home
+      event: leave
+    continue_on_timeout: false
+    timeout: 00:25:00
+  - condition: state
+    entity_id: zone.home
+    state: '0'
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.kitchen_lights
+  - service: switch.turn_off
+    data: {}
+    target:
+      entity_id: switch.living_room_fan
   mode: single
