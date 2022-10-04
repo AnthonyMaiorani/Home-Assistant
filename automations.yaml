@@ -41,7 +41,9 @@
         transition: 45
         brightness_pct: 100
       target:
-        entity_id: light.shapes_007f
+        entity_id:
+        - light.shapes_007f
+        - light.shapes_ee82
   - delay:
       hours: 0
       minutes: 0
@@ -203,6 +205,26 @@
         entity_id:
         - input_boolean.bedmotion
         - climate.bedroom_ac
+  - condition: state
+    entity_id: zone.home
+    state: '0'
+  - condition: state
+    entity_id: binary_sensor.back_door
+    state: 'off'
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id:
+      - light.living_room_lights
+      - light.kitchen_lights
+  - service: switch.turn_off
+    data: {}
+    target:
+      entity_id:
+      - switch.fronttv
+      - switch.lrtv
+      - switch.living_room_fan
+      - switch.porch_light
   mode: single
 - id: '1627443167507'
   alias: Bedroom Alerts
@@ -425,10 +447,10 @@
     entity_id: cover.bedroom_blinds
     state: open
   action:
-  - service: switch.turn_off
+  - service: cover.close_cover
     data: {}
     target:
-      entity_id: switch.blinds
+      entity_id: cover.bedroom_blinds
   mode: single
 - id: '1629524719390'
   alias: Closet Lights Control
@@ -573,6 +595,10 @@
         data: {}
         target:
           entity_id: script.call
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id: switch.living_room_fan
     - conditions:
       - condition: state
         entity_id: light.fan_lights
@@ -582,6 +608,10 @@
         data: {}
         target:
           entity_id: script.fan_off
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id: switch.living_room_fan
     default: []
   mode: single
 - id: '1645695901319'
@@ -880,7 +910,9 @@
     then:
     - service: light.turn_on
       target:
-        entity_id: light.shapes_007f
+        entity_id:
+        - light.shapes_007f
+        - light.shapes_ee82
       data:
         effect: '{{ states(''sensor.nanoleaf_scene'') }}'
   - if:
@@ -891,7 +923,9 @@
     then:
     - service: light.turn_on
       target:
-        entity_id: light.shapes_007f
+        entity_id:
+        - light.shapes_007f
+        - light.shapes_ee82
       data:
         brightness: '{{ states(''sensor.nanoleaf_auto_brightness'') }}'
   mode: queued
@@ -1001,16 +1035,12 @@
     - condition: state
       entity_id: person.riana
       state: Just Arrived
-    - condition: not
-      conditions:
-      - condition: zone
-        entity_id: device_tracker.riana
-        zone: zone.home
-      - condition: zone
-        entity_id: device_tracker.dana
-        zone: zone.home
-  - condition: sun
-    after: sunset
+    - condition: zone
+      entity_id: device_tracker.riana
+      zone: zone.home
+    - condition: zone
+      entity_id: device_tracker.dana
+      zone: zone.home
   action:
   - delay:
       hours: 0
@@ -1032,7 +1062,7 @@
   - delay:
       hours: 0
       minutes: 0
-      seconds: 45
+      seconds: 10
       milliseconds: 0
   - service: notify.mobile_app_iphone
     data:
@@ -1073,4 +1103,19 @@
     data: {}
     target:
       entity_id: switch.living_room_fan
+  mode: single
+- id: '1664570555449'
+  alias: Turn on TV
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - media_player.living_room
+    to: playing
+  condition: []
+  action:
+  - service: media_player.turn_on
+    data: {}
+    target:
+      entity_id: media_player.living_room
   mode: single

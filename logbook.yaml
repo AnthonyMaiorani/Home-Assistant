@@ -1,10 +1,14 @@
 exclude:
+  entity_globs:
+    - button.*ping
   domains:
     - input_number
     - input_boolean
     - sensor
     - group
     - remote
+    - pyscript
+    - update
   entities:
     - automation.taylor_wyze_power
     - automation.color_loop

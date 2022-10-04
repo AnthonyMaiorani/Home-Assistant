@@ -192,6 +192,7 @@ night:
         - light.bedroom_lights
         - light.closet_lights
         - light.glide
+        - light.shapes_ee82
     - service: cover.close_cover
       data: {}
       target:

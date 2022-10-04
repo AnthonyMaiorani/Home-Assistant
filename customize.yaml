@@ -12,7 +12,3 @@ light.led_strips:
   icon: mdi:led-strip-variant
 sensor.ac_thermostat_temperature:
   icon: mdi:thermostat
-switch.blinds:
-  icon: mdi:roller-shade
-switch.windows:
-  icon: mdi:microsoft-windows

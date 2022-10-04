@@ -11,10 +11,16 @@ smart_home:
       - script.fan_off
       - cover.garage_door
       - cover.bedroom_blinds
-      - input_boolean.ac_boost
+#      - input_boolean.ac_boost
       - climate.bedroom_ac
       - lock.front_door
       - input_button.activategoveerainbow
       - input_button.activategoveecyan
       - input_button.activategoveemusic
       - input_button.activategoveeoff
+      - switch.lrtv
+      - switch.fronttv
+      - switch.living_room_fan
+      - switch.porch_light
+      - light.kitchen_lights 
+      - light.living_room_lights

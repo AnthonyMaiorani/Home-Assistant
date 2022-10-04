@@ -33,6 +33,7 @@
             target:
               entity_id:
                 - climate.bedroom_ac
+                
     ac:
       friendly_name: AC
       value_template: "{{ is_state('climate.bedroom_ac', 'cool') }}"
@@ -52,62 +53,47 @@
       - service: timer.cancel
         target:
           entity_id: timer.ac
-    blinds:
+    lrtv:
+      friendly_name: Living Room TV
+      value_template: "{{ not is_state('media_player.living_room_denon', 'off') }}"
       turn_on:
-        service: cover.open_cover
-        target:
-          entity_id: cover.bedroom_blinds
-      turn_off:
-        service: cover.close_cover
-        target:
-          entity_id: cover.bedroom_blinds
-    lock:
-      friendly_name: Front Door Lock
-      value_template: "{{ is_state('lock.front_door', 'locked') }}"
-      turn_on:
-        - service: lock.lock
+        - service: media_player.turn_on
           entity_id:
-            - lock.front_door
+            - media_player.living_room
       turn_off:
-        - service: lock.unlock
+        - service: media_player.turn_off
           entity_id:
-            - lock.front_door
-    case_lights:
-      friendly_name: Case Lights
+            - media_player.living_room
+    fronttv:
+      friendly_name: Front TV
+      value_template: "{{ not states('media_player.front') in ['standby', 'unavailable'] }}"
       turn_on:
-        - service: remote.send_command
-          data:
-            entity_id: remote.bedroom_rm4_remote
-            command: 'off'
-            device: case
-        - service: remote.send_command
-          data:
-            entity_id: remote.bedroom_rm4_remote
-            command: 'on'
-            device: case
+        - service: media_player.turn_on
+          entity_id:
+            - media_player.front
       turn_off:
-        - service: remote.send_command
-          data:
-            entity_id: remote.bedroom_rm4_remote
-            command: 'off'
-            device: case
-            num_repeats: 6
-    windows:
-      friendly_name: Windows
-      value_template: "{{ states('sensor.monitor_plug_wattage')|float(0) > 6 }}"
+        - service: media_player.turn_off
+          entity_id:
+            - media_player.front
+    guesttv:
+      friendly_name: Guest TV
+      value_template: "{{ is_state('remote.guest_bedroom_tv', 'on') }}"
       turn_on:
-        - service: button.press
-          target:
-            entity_id:
-              - button.on
-        - delay: 13
-        - service: homeassistant.update_entity
-          entity_id: sensor.monitor_plug_wattage
+        - service: media_player.turn_on
+          entity_id:
+            - media_player.guest_bedroom_tv
       turn_off:
-        - service: button.press
-          target:
-            entity_id:
-              - button.sleep
-        - delay: 20
-        - service: homeassistant.update_entity
-          entity_id: sensor.monitor_plug_wattage
+        - service: media_player.turn_off
+          entity_id:
+            - media_player.guest_bedroom_tv
+    mastertv:
+      friendly_name: Master TV
+      value_template: "{{ is_state('remote.master_bedroom_tv', 'on') }}"
+      turn_on:
+        - service: media_player.turn_on
+          entity_id:
+            - media_player.master_bedroom_tv
+      turn_off:
+        - service: media_player.turn_off
+          entity_id:
+            - media_player.master_bedroom_tv
