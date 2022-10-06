@@ -1,2 +1,6 @@
 - platform: workday
   country: US
+- platform: ping
+  host: 1.1.1.1
+  scan_interval: 10
+  name: "Internet"

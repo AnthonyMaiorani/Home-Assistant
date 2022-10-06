@@ -19,8 +19,3 @@ home:
     - switch.living_room_fan
     - switch.lrtv
     - switch.fronttv
-misc_leds:
-  name: Other Room Lights
-  entities: 
-    - switch.u6_pro_led
-    - switch.clock

@@ -8,7 +8,8 @@
 - sensor:
   - name: "AC Thermostat Temperature"
     state: >
-      {% if is_state("input_boolean.ac_boost", "on") -%} 61 
+      {% if states('person.anthony') in ['UTD', 'Raytheon', 'Away', 'not_home'] %} unknown
+      {% elif is_state("input_boolean.ac_boost", "on") -%} 61 
       {% elif is_state("binary_sensor.bedroom_door", "on") and is_state("person.riana", "home") -%} 76
       {% elif is_state("switch.desktop", "on") -%} 75
       {% elif is_state("light.fan_lights", "on") -%} 73 

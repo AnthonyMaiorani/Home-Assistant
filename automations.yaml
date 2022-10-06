@@ -163,6 +163,10 @@
         data: {}
         target:
           entity_id: timer.ac
+    - service: switch.turn_on
+      data: {}
+      target:
+        entity_id: switch.router
   - service: automation.turn_on
     data: {}
     target:
@@ -412,7 +416,9 @@
               state: 'off'
             - service: light.turn_on
               target:
-                entity_id: light.shapes_007f
+                entity_id:
+                - light.shapes_007f
+                - light.shapes_ee82
               data:
                 brightness_pct: 100
           - conditions:
@@ -425,7 +431,9 @@
             sequence:
             - service: light.turn_on
               target:
-                entity_id: light.shapes_007f
+                entity_id:
+                - light.shapes_007f
+                - light.shapes_ee82
               data:
                 brightness_pct: 100
           default: []
@@ -1118,4 +1126,151 @@
     data: {}
     target:
       entity_id: media_player.living_room
+  mode: single
+- id: '1665075533217'
+  alias: Reboot Router
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.internet
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+  condition: []
+  action:
+  - service: switch.turn_off
+    data: {}
+    target:
+      entity_id: switch.router
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: switch.turn_on
+    data: {}
+    target:
+      entity_id: switch.router
+  mode: single
+- id: '1665075937053'
+  alias: Dog Food
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.dog_food
+    to: 'on'
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: time
+        before: '12:00:00'
+        after: 00:00:01
+      sequence:
+      - if:
+        - condition: state
+          entity_id: input_boolean.breakfast
+          state: 'off'
+        then:
+        - service: input_boolean.turn_on
+          data: {}
+          target:
+            entity_id: input_boolean.breakfast
+        else:
+        - service: notify.mobile_app_iphone
+          data:
+            message: Lola already ate breakfast
+            data:
+              push:
+                sound:
+                  name: default
+                  critical: 1
+                  volume: 0.3
+    - conditions:
+      - condition: time
+        before: '23:59:59'
+        after: '12:00:00'
+      sequence:
+      - if:
+        - condition: state
+          entity_id: input_boolean.dinner
+          state: 'off'
+        then:
+        - service: input_boolean.turn_on
+          data: {}
+          target:
+            entity_id: input_boolean.dinner
+        else:
+        - service: notify.mobile_app_iphone
+          data:
+            message: Lola already ate dinner
+            data:
+              push:
+                sound:
+                  name: default
+                  critical: 1
+                  volume: 0.3
+  mode: single
+- id: '1665076615181'
+  alias: Dog Food Reminder
+  description: ''
+  trigger:
+  - platform: time
+    at: '11:30:00'
+    id: Breakfast
+  - platform: time
+    at: '19:00:00'
+    id: Dinner
+  - platform: time
+    at: 00:00:00
+    id: Reset
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: Breakfast
+      - condition: state
+        entity_id: input_boolean.breakfast
+        state: 'off'
+      sequence:
+      - service: notify.mobile_app_iphone
+        data:
+          message: Lola hasn't eaten breakfast yet
+          data:
+            push:
+              sound:
+                name: default
+                critical: 1
+                volume: 0.3
+    - conditions:
+      - condition: trigger
+        id: Dinner
+      - condition: state
+        entity_id: input_boolean.dinner
+        state: 'off'
+      sequence:
+      - service: notify.mobile_app_iphone
+        data:
+          message: Lola hasn't eaten dinner yet
+          data:
+            push:
+              sound:
+                name: default
+                critical: 1
+                volume: 0.3
+    - conditions:
+      - condition: trigger
+        id: Reset
+      sequence:
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id:
+          - input_boolean.breakfast
+          - input_boolean.dinner
   mode: single

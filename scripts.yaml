@@ -23,8 +23,9 @@ fan_off:
       target:
         entity_id:
         - input_boolean.govee_cyan
-        - group.misc_leds
+        - switch.u6_pro_led
         - light.shapes_007f
+        - light.shapes_ee82
     - data:
         brightness: 255
         effect: Color Loop
@@ -67,8 +68,9 @@ color_loop:
       data: {}
       target:
         entity_id:
-        - group.misc_leds
+        - switch.u6_pro_led
         - light.shapes_007f
+        - light.shapes_ee82
     - data:
         brightness: 255
         effect: Color Loop
@@ -107,7 +109,9 @@ music:
     - service: light.turn_on
       data: {}
       target:
-        entity_id: light.shapes_007f
+        entity_id: 
+          - light.shapes_007f
+          - light.shapes_ee82
   mode: single
   icon: mdi:party-popper
 call:
@@ -150,7 +154,6 @@ call:
       data: {}
       target:
         entity_id:
-        - switch.clock
         - switch.desktop
         - switch.usb_hub
     - service: light.turn_off
@@ -179,7 +182,7 @@ night:
       service: homeassistant.turn_off
       target:
         entity_id:
-        - group.misc_leds
+        - switch.u6_pro_led
     - service: input_button.press
       data: {}
       target:
@@ -248,8 +251,9 @@ morning:
       service: homeassistant.turn_on
       target:
         entity_id:
-        - group.misc_leds
+        - switch.u6_pro_led
         - light.shapes_007f
+        - light.shapes_ee82
     - data:
         brightness: 255
         effect: Color Loop
