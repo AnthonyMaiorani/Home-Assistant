@@ -1220,10 +1220,10 @@
   description: ''
   trigger:
   - platform: time
-    at: '11:30:00'
+    at: '10:30:00'
     id: Breakfast
   - platform: time
-    at: '19:00:00'
+    at: '18:00:00'
     id: Dinner
   - platform: time
     at: 00:00:00
