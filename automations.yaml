@@ -1155,66 +1155,6 @@
     target:
       entity_id: switch.router
   mode: single
-- id: '1665075937053'
-  alias: Dog Food
-  description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - binary_sensor.dog_food
-    to: 'on'
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: time
-        before: '12:00:00'
-        after: 00:00:01
-      sequence:
-      - if:
-        - condition: state
-          entity_id: input_boolean.breakfast
-          state: 'off'
-        then:
-        - service: input_boolean.turn_on
-          data: {}
-          target:
-            entity_id: input_boolean.breakfast
-        else:
-        - service: notify.mobile_app_iphone
-          data:
-            message: Lola already ate breakfast
-            data:
-              push:
-                sound:
-                  name: default
-                  critical: 1
-                  volume: 0.3
-    - conditions:
-      - condition: time
-        before: '23:59:59'
-        after: '12:00:00'
-      sequence:
-      - if:
-        - condition: state
-          entity_id: input_boolean.dinner
-          state: 'off'
-        then:
-        - service: input_boolean.turn_on
-          data: {}
-          target:
-            entity_id: input_boolean.dinner
-        else:
-        - service: notify.mobile_app_iphone
-          data:
-            message: Lola already ate dinner
-            data:
-              push:
-                sound:
-                  name: default
-                  critical: 1
-                  volume: 0.3
-  mode: single
 - id: '1665076615181'
   alias: Dog Food Reminder
   description: ''
@@ -1228,6 +1168,11 @@
   - platform: time
     at: 00:00:00
     id: Reset
+  - platform: state
+    entity_id:
+    - binary_sensor.dog_food
+    to: 'on'
+    id: Feeding
   condition: []
   action:
   - choose:
@@ -1273,4 +1218,57 @@
           entity_id:
           - input_boolean.breakfast
           - input_boolean.dinner
+    - conditions:
+      - condition: trigger
+        id: Feeding
+      sequence:
+      - choose:
+        - conditions:
+          - condition: time
+            before: '12:00:00'
+            after: 00:00:01
+          sequence:
+          - if:
+            - condition: state
+              entity_id: input_boolean.breakfast
+              state: 'off'
+            then:
+            - service: input_boolean.turn_on
+              data: {}
+              target:
+                entity_id: input_boolean.breakfast
+            else:
+            - service: notify.mobile_app_iphone
+              data:
+                message: Lola already ate breakfast
+                data:
+                  push:
+                    sound:
+                      name: default
+                      critical: 1
+                      volume: 0.3
+        - conditions:
+          - condition: time
+            before: '23:59:59'
+            after: '12:00:00'
+          sequence:
+          - if:
+            - condition: state
+              entity_id: input_boolean.dinner
+              state: 'off'
+            then:
+            - service: input_boolean.turn_on
+              data: {}
+              target:
+                entity_id: input_boolean.dinner
+            else:
+            - service: notify.mobile_app_iphone
+              data:
+                message: Lola already ate dinner
+                data:
+                  push:
+                    sound:
+                      name: default
+                      critical: 1
+                      volume: 0.3
   mode: single
