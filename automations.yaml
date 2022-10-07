@@ -229,6 +229,10 @@
       - switch.lrtv
       - switch.living_room_fan
       - switch.porch_light
+  - service: homeassistant.turn_off
+    data: {}
+    target:
+      entity_id: input_boolean.privacy
   mode: single
 - id: '1627443167507'
   alias: Bedroom Alerts
@@ -1271,4 +1275,145 @@
                       name: default
                       critical: 1
                       volume: 0.3
+  mode: single
+- id: '1665170199807'
+  alias: Privacy
+  description: ''
+  trigger:
+  - platform: time_pattern
+    seconds: /2
+  condition:
+  - condition: template
+    value_template: "{{ states('group.indoor_cams') in ['on', 'off'] and \nnot states('group.indoor_cams')
+      == states('input_boolean.privacy')}} "
+  action:
+  - if:
+    - condition: state
+      entity_id: input_boolean.privacy
+      state: 'on'
+    then:
+    - service: homeassistant.turn_off
+      data: {}
+      target:
+        entity_id: group.indoor_cams
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_boolean.privacy
+        state: 'on'
+      sequence:
+      - service: homeassistant.turn_off
+        data: {}
+        target:
+          entity_id: group.indoor_cams
+    - conditions:
+      - condition: state
+        entity_id: input_boolean.privacy
+        state: 'off'
+      sequence:
+      - service: homeassistant.turn_on
+        data: {}
+        target:
+          entity_id: group.indoor_cams
+  mode: single
+- id: '1665186115040'
+  alias: Dog Medicine Reminder
+  description: ''
+  trigger:
+  - platform: time
+    at: '12:00:00'
+    id: Morning
+  - platform: time
+    at: '22:00:00'
+    id: Night
+  - platform: time
+    at: 00:00:00
+    id: Reset
+  - platform: state
+    entity_id:
+    - binary_sensor.tilt_shock_xs_sensor_window_door_is_open
+    to:
+    - 'on'
+    - 'off'
+    id: GivingPill
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: Morning
+      - condition: state
+        entity_id: input_boolean.morning_medicine
+        state: 'off'
+      sequence:
+      - service: notify.mobile_app_iphone
+        data:
+          message: Lola hasn't gotten her medicine yet
+          data:
+            push:
+              sound:
+                name: default
+                critical: 1
+                volume: 0.3
+    - conditions:
+      - condition: trigger
+        id: Night
+      - condition: state
+        entity_id: input_boolean.night_medicine
+        state: 'off'
+      sequence:
+      - service: notify.mobile_app_iphone
+        data:
+          message: Lola hasn't gotten her medicine yet
+          data:
+            push:
+              sound:
+                name: default
+                critical: 1
+                volume: 0.3
+    - conditions:
+      - condition: trigger
+        id: Reset
+      sequence:
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id:
+          - input_boolean.morning_medicine
+          - input_boolean.night_medicine
+    - conditions:
+      - condition: trigger
+        id: GivingPill
+      sequence:
+      - choose:
+        - conditions:
+          - condition: time
+            before: '12:00:00'
+            after: 00:00:01
+          sequence:
+          - if:
+            - condition: state
+              entity_id: input_boolean.morning_medicine
+              state: 'off'
+            then:
+            - service: input_boolean.turn_on
+              data: {}
+              target:
+                entity_id: input_boolean.morning_medicine
+            else: []
+        - conditions:
+          - condition: time
+            before: '23:59:59'
+            after: '12:00:00'
+          sequence:
+          - if:
+            - condition: state
+              entity_id: input_boolean.night_medicine
+              state: 'off'
+            then:
+            - service: input_boolean.turn_on
+              data: {}
+              target:
+                entity_id: input_boolean.night_medicine
+            else: []
   mode: single

@@ -12,3 +12,7 @@ light.led_strips:
   icon: mdi:led-strip-variant
 sensor.ac_thermostat_temperature:
   icon: mdi:thermostat
+switch.lrtv:
+  icon: mdi:youtube-tv
+switch.fronttv:
+  icon: mdi:youtube-tv
