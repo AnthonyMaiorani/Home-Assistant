@@ -167,6 +167,21 @@
       data: {}
       target:
         entity_id: switch.router
+    - service: button.press
+      data: {}
+      target:
+        entity_id:
+        - button.node_12_ping
+        - button.node_3_ping
+        - button.node_6_ping
+        - button.node_13_ping
+        - button.node_19_ping
+        - button.node_17_ping
+        - button.node_18_ping
+        - button.node_10_ping
+        - button.node_8_ping
+        - button.z_wave_plug_ping
+        - button.node_20_ping
   - service: automation.turn_on
     data: {}
     target:
@@ -826,6 +841,10 @@
     - light.fan_lights
     - switch.desktop
     to: 'on'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 15
   condition:
   - condition: state
     entity_id: switch.usb_hub
@@ -1175,8 +1194,15 @@
   - platform: state
     entity_id:
     - binary_sensor.dog_food
-    to: 'on'
     id: Feeding
+    from: 'off'
+    to: 'on'
+  - platform: state
+    entity_id:
+    - binary_sensor.dog_food
+    from: 'on'
+    to: 'off'
+    id: Feeding2
   condition: []
   action:
   - choose:
@@ -1225,6 +1251,12 @@
     - conditions:
       - condition: trigger
         id: Feeding
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: Feeding
+        - condition: trigger
+          id: Feeding2
       sequence:
       - choose:
         - conditions:
@@ -1251,6 +1283,7 @@
                       name: default
                       critical: 1
                       volume: 0.3
+              enabled: false
         - conditions:
           - condition: time
             before: '23:59:59'
@@ -1275,6 +1308,12 @@
                       name: default
                       critical: 1
                       volume: 0.3
+              enabled: false
+      - delay:
+          hours: 0
+          minutes: 5
+          seconds: 0
+          milliseconds: 0
   mode: single
 - id: '1665170199807'
   alias: Privacy
@@ -1284,8 +1323,7 @@
     seconds: /2
   condition:
   - condition: template
-    value_template: "{{ states('group.indoor_cams') in ['on', 'off'] and \nnot states('group.indoor_cams')
-      == states('input_boolean.privacy')}} "
+    value_template: '{{ states(''group.indoor_cams'') == states(''input_boolean.privacy'')}} '
   action:
   - if:
     - condition: state
@@ -1331,11 +1369,10 @@
     id: Reset
   - platform: state
     entity_id:
-    - binary_sensor.tilt_shock_xs_sensor_window_door_is_open
-    to:
-    - 'on'
-    - 'off'
+    - binary_sensor.shock
     id: GivingPill
+    from: 'off'
+    to: 'on'
   condition: []
   action:
   - choose:
