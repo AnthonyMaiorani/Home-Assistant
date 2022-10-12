@@ -982,7 +982,7 @@
       - delay:
           hours: 0
           minutes: 0
-          seconds: 3
+          seconds: 4
           milliseconds: 0
   mode: single
 - id: '1661880635465'
@@ -1426,7 +1426,7 @@
         - conditions:
           - condition: time
             before: '12:00:00'
-            after: 00:00:01
+            after: 04:00:00
           sequence:
           - if:
             - condition: state
@@ -1441,7 +1441,7 @@
         - conditions:
           - condition: time
             before: '23:59:59'
-            after: '12:00:00'
+            after: '18:30:00'
           sequence:
           - if:
             - condition: state
