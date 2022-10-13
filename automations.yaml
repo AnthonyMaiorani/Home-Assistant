@@ -1028,12 +1028,26 @@
     event_type: automation_reloaded
   - platform: homeassistant
     event: start
+  - platform: state
+    entity_id:
+    - input_select.anthony
+    to: Home
+  - platform: state
+    entity_id:
+    - input_select.anthony
+    to: Just Arrived
   condition: []
   action:
   - repeat:
       while:
-      - condition: template
-        value_template: '{{ true }}'
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: input_select.anthony
+          state: Home
+        - condition: state
+          entity_id: input_select.anthony
+          state: Just Arrived
       sequence:
       - service: homeassistant.update_entity
         data: {}
