@@ -142,6 +142,15 @@
           entity_id: input_select.anthony
         data:
           option: Home
+      else:
+      - condition: template
+        value_template: '{{ states(''person.anthony'')|lower in [''utd'', ''raytheon'',
+          ''away'', ''not_home''] }}'
+      - service: input_select.select_option
+        data:
+          option: Away
+        target:
+          entity_id: input_select.anthony
     - if:
       - condition: state
         entity_id: switch.ac
@@ -327,17 +336,37 @@
     id: Away
     to: Just Left
     for: 00:10:00
-  - platform: zone
-    entity_id: person.anthony
-    zone: zone.home
-    event: enter
+  - platform: state
+    entity_id:
+    - person.anthony
+    to: home
     id: Just Arrived
-  - platform: zone
-    entity_id: person.anthony
-    zone: zone.home
-    event: leave
+  - platform: state
+    entity_id:
+    - person.anthony
+    from: home
     id: Just Left
-  condition: []
+  - platform: state
+    entity_id:
+    - person.anthony
+    to: utd
+    id: utd
+  - platform: state
+    entity_id:
+    - person.anthony
+    to: raytheon
+    id: raytheon
+  condition:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: person.anthony
+      state: unavailable
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: person.anthony
+      state: unknown
   action:
   - choose:
     - conditions:
@@ -350,8 +379,14 @@
         data:
           option: Home
     - conditions:
-      - condition: trigger
-        id: Away
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: Away
+        - condition: trigger
+          id: raytheon
+        - condition: trigger
+          id: utd
       sequence:
       - service: input_select.select_option
         target:
