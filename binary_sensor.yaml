@@ -6,6 +6,4 @@
   name: "Internet"
 - platform: ping
   host: !secret host
-  scan_interval: 2
-  count: 6
   name: Desktop Power

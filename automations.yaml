@@ -640,6 +640,18 @@
         target:
           entity_id: switch.living_room_fan
     default: []
+  - if:
+    - condition: time
+      before: 05:00:00
+      after: '22:00:00'
+    - condition: state
+      entity_id: switch.desktop
+      state: 'off'
+    then:
+    - service: switch.turn_off
+      data: {}
+      target:
+        entity_id: switch.usb_hub
   mode: single
 - id: '1645695901319'
   alias: Enable Morning Automation
@@ -849,6 +861,14 @@
   - condition: state
     entity_id: switch.usb_hub
     state: 'off'
+  - condition: or
+    conditions:
+    - condition: time
+      before: '22:00:00'
+      after: 05:00:00
+    - condition: state
+      entity_id: switch.desktkl
+      state: 'on'
   action:
   - service: switch.turn_on
     data: {}
