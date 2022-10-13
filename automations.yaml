@@ -1050,12 +1050,11 @@
   description: ''
   trigger:
   - platform: template
-    value_template: "        {% if states(\"person.anthony\") in [\"UTD\"] and \n
-      \       is_state(\"binary_sensor.workday_sensor\", \"on\") and\n        ( now().hour
-      == 11 and now().minute == 40 and\n        ( now().weekday() in [0, 2, 4]) or\n
-      \       ( now().hour == 12 and now().minute == 40 and\n        now().weekday()
-      in [1, 3]) or\n        ( now().hour == 16 and now().minute == 25 and\n        now().weekday()
-      == 3)) -%} True\n        {% else %} False\n        {%- endif %}"
+    value_template: "{{ states(\"person.anthony\")|lower in [\"utd\"] and \n\nis_state(\"binary_sensor.workday_sensor\",
+      \"on\") and\n\n  ( now().hour == 11 and now().minute == 40 and\n  ( now().weekday()
+      in [0, 2, 4]) or\n\n  ( now().hour == 12 and now().minute == 40 and\n  now().weekday()
+      in [1, 3]) or\n  \n  ( now().hour == 16 and now().minute == 25 and\n  now().weekday()
+      == 3)) \n}}"
   condition: []
   action:
   - service: notify.mobile_app_iphone
