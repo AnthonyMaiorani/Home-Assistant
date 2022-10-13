@@ -81,6 +81,11 @@
       - "paused"
   - platform: state
     entity_id:
+      - light.shapes_007f
+    from: "off"
+    to: "on"
+  - platform: state
+    entity_id:
       - pyscript.airport_playing
     to: 
       - "True"

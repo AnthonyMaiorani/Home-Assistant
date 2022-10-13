@@ -1,13 +1,3 @@
-- platform: wake_on_lan
-  mac: !secret desktop
-  name: Desktop
-  host: !secret host
-  turn_off:
-    - service: button.press
-      target:
-        entity_id:
-          - button.shutdown
-          
 - platform: command_line
   switches:
     u6_pro_led:
@@ -97,3 +87,16 @@
         - service: media_player.turn_off
           entity_id:
             - media_player.master_bedroom_tv
+    desktop:
+      friendly_name: Desktop
+      value_template: "{{ states('binary_sensor.desktop_power') }}"
+      turn_on:
+        - service: wake_on_lan.send_magic_packet
+          data:
+            mac: !secret desktop
+            broadcast_address: !secret host
+      turn_off:
+        - service: button.press
+          target:
+            entity_id:
+              - button.shutdown

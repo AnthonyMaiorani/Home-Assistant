@@ -4,3 +4,8 @@
   host: 1.1.1.1
   scan_interval: 10
   name: "Internet"
+- platform: ping
+  host: !secret host
+  scan_interval: 2
+  count: 6
+  name: Desktop Power
