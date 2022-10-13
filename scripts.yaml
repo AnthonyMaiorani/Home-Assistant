@@ -109,9 +109,9 @@ music:
     - service: light.turn_on
       data: {}
       target:
-        entity_id: 
-          - light.shapes_007f
-          - light.shapes_ee82
+        entity_id:
+        - light.shapes_007f
+        - light.shapes_ee82
   mode: single
   icon: mdi:party-popper
 call:
@@ -298,14 +298,22 @@ start_car:
       target:
         entity_id: input_boolean.ac_boost
   - if:
-    - condition: zone
-      entity_id: person.anthony
-      zone: zone.home
     - condition: not
       conditions:
       - condition: state
         entity_id: cover.garage_door
         state: open
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: person.anthony
+        state: home
+      - condition: state
+        entity_id: input_select.anthony
+        state: Home
+      - condition: state
+        entity_id: input_select.anthony
+        state: Just Arrived
     then:
     - service: cover.open_cover
       data: {}
@@ -374,41 +382,3 @@ start_car:
         message: Remote start failed
   mode: single
   icon: mdi:car
-reconnect_iot:
-  alias: Reconnect IOT
-  sequence:
-  - parallel:
-    - service: unifi.reconnect_client
-      data:
-        device_id: cf1727564e8e1414a848455da2f29fce
-    - service: unifi.reconnect_client
-      data:
-        device_id: 36ce1af0488e99fc5eae2c880ab9e836
-    - service: unifi.reconnect_client
-      data:
-        device_id: a0db0d712ad7a7afacd033bfbc78a155
-    - service: unifi.reconnect_client
-      data:
-        device_id: 73669e6afa1b4aab852597eaa337ccca
-    - service: unifi.reconnect_client
-      data:
-        device_id: 9bdc1fcf6c55f1b580802739f71e205c
-    - service: unifi.reconnect_client
-      data:
-        device_id: e562ce10dbed425c8a7648617ee63c13
-    - service: unifi.reconnect_client
-      data:
-        device_id: e04683beb4443177bf1efaec9ecf3626
-    - service: unifi.reconnect_client
-      data:
-        device_id: d17b85b4018141749b9c7775aacb2336
-    - service: unifi.reconnect_client
-      data:
-        device_id: 32e68440a6bf677e14380d6fd815522d
-    - service: unifi.reconnect_client
-      data:
-        device_id: 92370e357c1742129f33df5b2c530303
-    - service: unifi.reconnect_client
-      data:
-        device_id: d8c0ac0aef5e4a2f140ebb30b37e3875
-  mode: single
