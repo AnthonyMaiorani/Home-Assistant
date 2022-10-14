@@ -692,6 +692,10 @@
       data: {}
       target:
         entity_id: switch.usb_hub
+  - service: input_boolean.turn_off
+    data: {}
+    target:
+      entity_id: input_boolean.privacy
   mode: single
 - id: '1645695901319'
   alias: Enable Morning Automation
