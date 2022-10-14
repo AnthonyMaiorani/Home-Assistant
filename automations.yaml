@@ -1532,9 +1532,17 @@
     event: sunset
     offset: 0
   condition:
-  - condition: zone
-    entity_id: person.anthony
-    zone: zone.home
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: person.anthony
+      state: home
+    - condition: state
+      entity_id: input_select.anthony
+      state: Home
+    - condition: state
+      entity_id: input_select.anthony
+      state: Just Arrived
   - condition: state
     entity_id: light.kitchen_lights
     state: 'off'
