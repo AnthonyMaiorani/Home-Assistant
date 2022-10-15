@@ -1,0 +1,130 @@
+esphome:
+  name: bed-esp
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+ethernet:
+  type: LAN8720
+  mdc_pin: GPIO23
+  mdio_pin: GPIO18
+  clk_mode: GPIO0_IN
+  phy_addr: 1
+  power_pin: GPIO16
+  manual_ip:
+    static_ip: ${static_ip}
+    gateway: !secret gateway
+    subnet: !secret subnet
+    dns1: !secret dns1
+
+substitutions:
+  static_ip: 192.168.1.146
+  red: GPIO05
+  green: GPIO33
+  blue: GPIO32
+  friendly_name: "Bed Lights"
+
+logger:
+api:
+ota:
+
+sensor:
+  - platform: hx711
+    gain: 128
+#    name: "Bed Weight"
+    id: bed_weight
+    dout_pin: GPIO14
+    clk_pin: GPIO17
+    filters:
+      - delta: 3000
+      - calibrate_linear:
+          - 320000 -> 0
+          - 340000 -> 270
+#      - sliding_window_moving_average:
+#          window_size: 5
+#          send_every: 3
+      - lambda: |-
+          if (x >= 0) return x;
+          else return {};
+ #     - lambda: |-
+ #         if (x <= 500) return x;
+ #         else return {};
+    on_value:
+      - if:
+          condition:
+            - lambda: |-
+                static float last = 0.0;
+                float diff = x - last;
+                last = x;
+                return x < 10.0 && diff < 1.0 && diff > - 1.0;
+          then:
+            - lambda: 'id(constant_weight) = x;'
+    update_interval: 350ms
+    unit_of_measurement: lbs
+    accuracy_decimals: 0
+  - platform: homeassistant
+    entity_id: sensor.colorloopstate
+    id: hassstate
+    
+globals:
+  - id: constant_weight
+    type: float
+    
+binary_sensor:
+  - platform: template
+    name: "Bed Occupancy"
+    device_class: occupancy
+    lambda: |-
+      if (id(bed_weight).state > 160) {
+        return true;
+      } else {
+        return false;
+      }      
+
+light:
+  - platform: rgb
+    id: leds
+    name: "${friendly_name}"
+    red: output_red
+    green: output_green
+    blue: output_blue
+    restore_mode: RESTORE_DEFAULT_OFF
+    effects:
+      - random:
+          name: Music
+          transition_length: .1s
+          update_interval: .2s
+      - lambda:
+          name: Color Loop
+          lambda: |-
+            static float state = 0;
+            if (state != id(hassstate).state) {
+              state = id(hassstate).state;
+              auto call = id(leds).turn_on();
+              call.set_transition_length(3000);
+              if (state == 0) {
+                call.set_rgb(0.45, 0.98, 0.39);
+              } else if (state == 1) {
+                call.set_rgb(0.45, 0.98, 0.93);
+              } else if (state == 2) {
+                call.set_rgb(0.38, 0.15, 0.96);
+              } else if (state == 3) {
+                call.set_rgb(0.5, 0.17, 0.96);
+              } else {
+                call.set_rgb(0.92, 0.2, 0.27);
+              }
+              call.perform();
+            }
+
+output:
+  - platform: ledc
+    id: output_red
+    pin: ${red}
+  - platform: ledc
+    id: output_green
+    pin: ${green}
+  - platform: ledc
+    id: output_blue
+    pin: ${blue}

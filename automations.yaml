@@ -133,9 +133,9 @@
       target:
         entity_id: input_boolean.govee_cyan
     - if:
-      - condition: zone
+      - condition: state
         entity_id: person.anthony
-        zone: zone.home
+        state: home
       then:
       - service: input_select.select_option
         target:
@@ -221,13 +221,23 @@
   alias: Left Home
   description: Turns bedroom off when leaving home, and ensures bedroom stays off
   trigger:
-  - platform: zone
-    entity_id: person.anthony
-    zone: zone.home
-    event: leave
+  - platform: state
+    entity_id:
+    - person.anthony
+    from: home
   condition:
   - condition: template
     value_template: '{{states(''person.anthony'') != ''home''}}'
+  - condition: not
+    conditions:
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: person.anthony
+        state: unavailable
+      - condition: state
+        entity_id: person.anthony
+        state: unknown
   action:
   - parallel:
     - service: script.night
@@ -887,10 +897,6 @@
   - platform: sun
     event: sunrise
     offset: 0
-  - platform: zone
-    entity_id: person.anthony
-    zone: zone.home
-    event: leave
   - platform: state
     entity_id:
     - light.desk_lights
@@ -901,6 +907,11 @@
       hours: 0
       minutes: 0
       seconds: 15
+  - platform: state
+    entity_id:
+    - input_select.anthony
+    from: home
+    to: Just Left
   condition:
   - condition: state
     entity_id: switch.usb_hub
@@ -911,7 +922,7 @@
       before: '22:00:00'
       after: 05:00:00
     - condition: state
-      entity_id: switch.desktkl
+      entity_id: switch.desktop
       state: 'on'
   action:
   - service: switch.turn_on
@@ -997,6 +1008,14 @@
       \n(not states('sensor.nanoleaf_auto_brightness') in (\"unavailable\", \"unknown\")
       and not \nis_state_attr('light.shapes_007f', \"brightness\", states('sensor.nanoleaf_auto_brightness')|int
       - 2)) }}"
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: light.shapes_007f
+      state: 'on'
+    - condition: state
+      entity_id: light.shapes_ee82
+      state: 'on'
   action:
   - if:
     - condition: template
@@ -1133,22 +1152,19 @@
   alias: Arrived Home
   description: ''
   trigger:
-  - platform: zone
-    entity_id: person.anthony
-    zone: zone.home
-    event: enter
+  - platform: state
+    entity_id:
+    - input_select.anthony
+    to: Just Arrived
   condition:
   - condition: not
     conditions:
     - condition: state
       entity_id: person.riana
-      state: Just Arrived
-    - condition: zone
-      entity_id: device_tracker.riana
-      zone: zone.home
-    - condition: zone
-      entity_id: device_tracker.dana
-      zone: zone.home
+      state: home
+    - condition: state
+      entity_id: person.dana
+      state: home
   action:
   - delay:
       hours: 0
@@ -1194,10 +1210,10 @@
     target:
       entity_id: switch.living_room_fan
   - wait_for_trigger:
-    - platform: zone
-      entity_id: person.anthony
-      zone: zone.home
-      event: leave
+    - platform: state
+      entity_id:
+      - input_select.anthony
+      to: Just Left
     continue_on_timeout: false
     timeout: 00:25:00
   - condition: state

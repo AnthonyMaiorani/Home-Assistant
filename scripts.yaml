@@ -18,8 +18,6 @@ fan_off:
         entity_id:
         - light.fan_lights
         - input_boolean.bedmotion
-        - light.wyzebulb1_rgb
-        - light.wyzebulb1_white
     - data: {}
       service: homeassistant.turn_on
       target:
@@ -86,11 +84,6 @@ color_loop:
         entity_id:
         - light.bedroom_lights
         - light.closet_lights
-        - light.wyzebulb1_rgb
-    - service: light.turn_off
-      data: {}
-      target:
-        entity_id: light.wyzebulb1_white
   mode: single
   icon: mdi:lightbulb-on
 music:
@@ -203,8 +196,6 @@ night:
         - light.closet_lights
         - light.glide
         - light.shapes_ee82
-        - light.wyzebulb1_rgb
-        - light.wyzebulb1_white
     - service: cover.close_cover
       data: {}
       target:
@@ -275,25 +266,17 @@ morning:
         - light.light_switch
         - light.light_switch_corner
         - light.closet_lights
-        - light.wyzebulb1_white
     - service: input_select.select_option
       data:
         option: Home
       target:
         entity_id: input_select.anthony
-    - service: light.turn_off
-      data: {}
-      target:
-        entity_id: light.wyzebulb1_rgb
   mode: single
   icon: mdi:white-balance-sunny
 start_car:
   alias: Start Car
   sequence:
   - if:
-    - condition: zone
-      entity_id: person.anthony
-      zone: zone.home
     - condition: state
       entity_id: binary_sensor.workday_sensor
       state: 'on'
@@ -306,6 +289,9 @@ start_car:
       - wed
       - thu
       - fri
+    - condition: state
+      entity_id: person.anthony
+      state: home
     then:
     - service: input_boolean.turn_on
       data: {}

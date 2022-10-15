@@ -1,9 +1,9 @@
-- platform: command_line
-  switches:
-    u6_pro_led:
-      friendly_name: "U6-Pro LED"
-      command_on: !secret u6_pro_on
-      command_off: !secret u6_pro_off
+# - platform: command_line
+#   switches:
+#     u6_pro_led:
+#       friendly_name: "U6-Pro LED"
+#       command_on: !secret u6_pro_on
+#       command_off: !secret u6_pro_off
 - platform: template
   switches:
     bedroomtoggle:
@@ -94,7 +94,7 @@
         - service: wake_on_lan.send_magic_packet
           data:
             mac: !secret desktop
-            broadcast_address: !secret host
+#            broadcast_address: !secret host
       turn_off:
         - service: button.press
           target:

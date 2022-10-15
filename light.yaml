@@ -8,6 +8,7 @@
     - light.desk_lights
     - light.light_switch
     - light.light_switch_corner
+    - light.wyze_bulb_1
 - platform: group
   name: LED Strips
   entities:
@@ -20,3 +21,4 @@
     - light.smart_bulb_1
     - light.smart_bulb_2
     - light.smart_bulb_3
+    - light.wyze_bulb_1

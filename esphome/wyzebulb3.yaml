@@ -1,0 +1,6 @@
+<<: !include .wyze_base.yaml
+
+substitutions:
+  name: wyzebulb3
+  friendly_name: Wyze Bulb 3
+  static_ip: 192.168.1.81

@@ -1,9 +1,0 @@
-<<: !include .led_base.yaml
-
-substitutions:
-  friendly_name: "Bed Lights"
-  name: bedlights
-  static_ip: 192.168.1.232
-  red: GPIO14
-  green: GPIO5
-  blue: GPIO12
