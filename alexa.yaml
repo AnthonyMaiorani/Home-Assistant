@@ -11,7 +11,7 @@ smart_home:
       - script.fan_off
       - cover.garage_door
       - cover.bedroom_blinds
-#      - input_boolean.ac_boost
+      - switch.ac_boost
       - climate.bedroom_ac
       - lock.front_door
       - input_button.activategoveerainbow
