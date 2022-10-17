@@ -180,13 +180,15 @@
         - button.node_3_ping
         - button.node_6_ping
         - button.node_13_ping
-        - button.node_19_ping
         - button.node_17_ping
         - button.node_18_ping
         - button.node_10_ping
         - button.node_8_ping
         - button.z_wave_plug_ping
-        - button.node_20_ping
+        - button.node_21_ping
+        - button.node_22_ping
+        - button.node_13_ping
+        - button.laundry_room_light_ping
   - service: automation.turn_on
     data: {}
     target:
@@ -1260,8 +1262,8 @@
     to: 'off'
     for:
       hours: 0
-      minutes: 1
-      seconds: 0
+      minutes: 10
+      seconds: 1
   condition: []
   action:
   - service: switch.turn_off
@@ -1600,6 +1602,10 @@
     - input_boolean.dinner
     to: 'on'
     from: 'off'
+  - platform: state
+    entity_id:
+    - lock.front_door
+    to: unlocked
   condition:
   - condition: state
     entity_id: switch.ac
@@ -1615,6 +1621,9 @@
     state: Home
   - condition: state
     entity_id: switch.desktop
+    state: 'off'
+  - condition: state
+    entity_id: input_boolean.ac_boost
     state: 'off'
   action:
   - service: switch.turn_off

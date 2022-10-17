@@ -2,8 +2,10 @@
   country: US
 - platform: ping
   host: 1.1.1.1
-  scan_interval: 10
-  name: "Internet"
+  name: "Cloudflare"
+- platform: ping
+  host: 8.8.8.8
+  name: "Google DNS"
 - platform: ping
   host: !secret host
   name: Desktop Power
