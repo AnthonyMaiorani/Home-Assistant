@@ -913,7 +913,7 @@
     for:
       hours: 0
       minutes: 0
-      seconds: 15
+      seconds: 1
   - platform: state
     entity_id:
     - input_select.anthony
@@ -1258,13 +1258,22 @@
   trigger:
   - platform: state
     entity_id:
-    - binary_sensor.internet
+    - binary_sensor.cloudflare
+    - binary_sensor.google_dns
     to: 'off'
     for:
       hours: 0
       minutes: 10
       seconds: 1
-  condition: []
+  condition:
+  - condition: and
+    conditions:
+    - condition: state
+      entity_id: binary_sensor.google_dns
+      state: 'off'
+    - condition: state
+      entity_id: binary_sensor.cloudflare
+      state: 'off'
   action:
   - service: switch.turn_off
     data: {}
@@ -1291,7 +1300,7 @@
     at: '18:00:00'
     id: Dinner
   - platform: time
-    at: 00:00:00
+    at: 02:00:00
     id: Reset
   - platform: state
     entity_id:
@@ -1464,7 +1473,7 @@
     at: '22:00:00'
     id: Night
   - platform: time
-    at: 00:00:00
+    at: 02:00:00
     id: Reset
   - platform: state
     entity_id:
@@ -1630,4 +1639,45 @@
     data: {}
     target:
       entity_id: switch.ac
+  mode: single
+- id: '1665996041801'
+  alias: Katchy
+  description: ''
+  trigger:
+  - platform: homeassistant
+    event: start
+  - platform: state
+    entity_id:
+    - input_select.anthony
+  - platform: event
+    event_type: automation_reloaded
+  condition: []
+  action:
+  - if:
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: input_select.anthony
+        state: Home
+      - condition: state
+        entity_id: input_select.anthony
+        state: Just Arrived
+    then:
+    - service: switch.turn_off
+      data: {}
+      target:
+        entity_id: switch.katchy
+    else:
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: input_select.anthony
+        state: Just Left
+      - condition: state
+        entity_id: input_select.anthony
+        state: Away
+    - service: switch.turn_on
+      data: {}
+      target:
+        entity_id: switch.katchy
   mode: single
