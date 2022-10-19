@@ -189,6 +189,7 @@
         - button.node_22_ping
         - button.node_13_ping
         - button.laundry_room_light_ping
+        - button.node_25_ping
   - service: automation.turn_on
     data: {}
     target:
@@ -1213,7 +1214,9 @@
     data:
       brightness_pct: 15
     target:
-      entity_id: light.kitchen_lights
+      entity_id:
+      - light.kitchen_lights
+      - light.hallway_lights
   - service: switch.turn_on
     data: {}
     target:
@@ -1587,9 +1590,11 @@
   action:
   - service: light.turn_on
     data:
-      brightness_pct: 10
+      brightness_pct: 15
     target:
-      entity_id: light.kitchen_lights
+      entity_id:
+      - light.kitchen_lights
+      - light.hallway_lights
   mode: single
 - id: '1665630463210'
   alias: Turn off AC when not in room
