@@ -1,11 +1,3 @@
-- platform: workday
-  country: US
-- platform: ping
-  host: 1.1.1.1
-  name: "Cloudflare"
-- platform: ping
-  host: 8.8.8.8
-  name: "Google DNS"
 - platform: ping
   host: !secret host
   name: Desktop Power

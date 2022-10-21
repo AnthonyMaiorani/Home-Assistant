@@ -196,15 +196,6 @@
     data: {}
     target:
       entity_id: automation.ac_controls
-  - delay:
-      hours: 0
-      minutes: 1
-      seconds: 0
-      milliseconds: 0
-  - service: switch.turn_on
-    data: {}
-    target:
-      entity_id: switch.router
   initial_state: true
   mode: single
 - id: '1620642299524'
