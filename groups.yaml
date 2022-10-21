@@ -19,6 +19,11 @@ home:
     - switch.living_room_fan
     - switch.lrtv
     - switch.fronttv
+    - switch.guesttv
+    - switch.mastertv
+    - light.hallway_lights
+    - switch.exhaust_fan
+    - input_boolean.privacy
 indoor_cams:
   name: Indoor Wyze Cams
   entities:
