@@ -190,6 +190,8 @@
         - button.node_13_ping
         - button.laundry_room_light_ping
         - button.node_25_ping
+        - button.node_26_ping
+        - button.gym_fan_ping
   - service: automation.turn_on
     data: {}
     target:
@@ -263,6 +265,7 @@
       entity_id:
       - light.living_room_lights
       - light.kitchen_lights
+      - light.hallway_lights
   - service: switch.turn_off
     data: {}
     target:
@@ -271,6 +274,7 @@
       - switch.lrtv
       - switch.living_room_fan
       - switch.porch_light
+      - switch.laundry_room_light
   - service: homeassistant.turn_off
     data: {}
     target:
@@ -295,8 +299,16 @@
     to: 'off'
     id: closetclosed
   condition:
-  - condition: template
-    value_template: '{{states(''person.anthony'') != ''home''}}'
+  - condition: not
+    conditions:
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: input_select.anthony
+        state: Home
+      - condition: state
+        entity_id: input_select.anthony
+        state: Just Arrived
   action:
   - choose:
     - conditions:
@@ -977,6 +989,16 @@
         preset_mode: boost
       target:
         entity_id: climate.bedroom_ac
+    - delay:
+        hours: 0
+        minutes: 0
+        seconds: 2
+        milliseconds: 0
+    - service: climate.set_preset_mode
+      data:
+        preset_mode: boost
+      target:
+        entity_id: climate.bedroom_ac
     else:
     - service: climate.set_preset_mode
       data:
@@ -1551,7 +1573,7 @@
             else: []
         - conditions:
           - condition: time
-            before: '23:59:59'
+            before: 02:30:00
             after: '18:30:00'
           sequence:
           - if:
@@ -1571,7 +1593,7 @@
   trigger:
   - platform: sun
     event: sunset
-    offset: 0
+    offset: -00:30:00
   condition:
   - condition: or
     conditions:
@@ -1614,6 +1636,7 @@
     - input_boolean.night_medicine
     - input_boolean.breakfast
     - input_boolean.dinner
+    - binary_sensor.back_door
     to: 'on'
     from: 'off'
   - platform: state
@@ -1685,4 +1708,97 @@
       data: {}
       target:
         entity_id: switch.katchy
+  mode: single
+- id: '1666368810191'
+  alias: Exhaust Fan
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.shower
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+    alias: When shower is turned off
+    id: showerdone
+  - platform: state
+    entity_id:
+    - switch.exhaust_fan
+    from: 'off'
+    to: 'on'
+    id: manually
+    alias: When exhaust fan is turned on
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.exhaust
+    id: done
+    alias: When timer finishes
+  - platform: state
+    entity_id:
+    - binary_sensor.shower
+    from: 'off'
+    to: 'on'
+    alias: When shower is turned on
+    id: showerstart
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: manually
+        - condition: trigger
+          id: showerdone
+        alias: Shower turned off or Fan turned on
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: timer.exhaust
+          state: active
+        - condition: state
+          entity_id: binary_sensor.shower
+          state: 'on'
+        - condition: state
+          entity_id: switch.exhaust_fan
+          state: 'off'
+        alias: Confirm fan is off, shower is off, timer is off
+      sequence:
+      - service: timer.start
+        data: {}
+        target:
+          entity_id: timer.exhaust
+    - conditions:
+      - condition: trigger
+        id: done
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: timer.exhaust
+          state: active
+        - condition: state
+          entity_id: binary_sensor.shower
+          state: 'on'
+        - condition: state
+          entity_id: switch.exhaust_fan
+          state: 'off'
+        alias: Confirm fan is off, shower is off, timer is off
+      sequence:
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id: switch.exhaust_fan
+    - conditions:
+      - condition: trigger
+        id: showerstart
+      sequence:
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id:
+          - switch.exhaust_fan
+          - switch.ac_boost
   mode: single
