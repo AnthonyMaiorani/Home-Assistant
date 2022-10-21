@@ -1743,6 +1743,12 @@
     to: 'on'
     alias: When shower is turned on
     id: showerstart
+  - platform: state
+    entity_id:
+    - switch.exhaust_fan
+    from: 'on'
+    to: 'off'
+    id: turnedoff
   condition: []
   action:
   - choose:
@@ -1801,4 +1807,12 @@
           entity_id:
           - switch.exhaust_fan
           - switch.ac_boost
+    - conditions:
+      - condition: trigger
+        id: turnedoff
+      sequence:
+      - service: timer.cancel
+        data: {}
+        target:
+          entity_id: timer.exhaust
   mode: single
