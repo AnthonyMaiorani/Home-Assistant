@@ -17,6 +17,17 @@
         - service: input_boolean.turn_off
           target:
               entity_id: input_boolean.ac_boost
+    privacy:
+      friendly_name: "Privacy"
+      value_template: "{{ is_state('input_boolean.privacy', 'on') }}"
+      turn_on:
+        - service: input_boolean.turn_on
+          target:
+              entity_id: input_boolean.privacy
+      turn_off:
+        - service: input_boolean.turn_off
+          target:
+              entity_id: input_boolean.privacy
     bedroomtoggle:
       value_template: "{{ is_state('light.desk_lights', 'on') }}"
       turn_on:
