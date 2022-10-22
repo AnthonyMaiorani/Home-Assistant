@@ -6,6 +6,7 @@ esphome:
 wifi:
   ssid: !secret ssid
   password: !secret password
+  output_power: 8.5dB
   fast_connect: on
   manual_ip:
     static_ip: ${static_ip}

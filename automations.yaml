@@ -1489,7 +1489,7 @@
     at: '22:00:00'
     id: Night
   - platform: time
-    at: 02:00:00
+    at: 02:30:01
     id: Reset
   - platform: state
     entity_id:
