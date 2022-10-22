@@ -34,6 +34,6 @@ exclude:
     - sun.sun
     - sensor.internet_time
     - govee.state
-    - sensor.bedroom_dot_next_alarm
+    - sensor.anthony_s_echo_show_next_alarm
     - switch.bedroom_cam
     - switch.kitchen_cam_2

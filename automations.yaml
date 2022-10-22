@@ -2,7 +2,7 @@
   alias: Morning Automation
   trigger:
   - platform: template
-    value_template: '{% set alarm_time = as_timestamp(states(''sensor.bedroom_dot_next_alarm''),
+    value_template: '{% set alarm_time = as_timestamp(states(''sensor.anthony_s_echo_show_next_alarm''),
       999999999999) %} {% set current_time = as_timestamp(states(''sensor.date_time'').replace('','',
       ''''), 0) %} {% set pre_time = 2 %} {{ current_time >= alarm_time - pre_time
       }}
@@ -71,7 +71,7 @@
   - service: homeassistant.update_entity
     data: {}
     target:
-      entity_id: sensor.bedroom_dot_next_alarm
+      entity_id: sensor.anthony_s_echo_show_next_alarm
   mode: single
 - id: '1653601692731'
   alias: AC Boost Control
@@ -723,11 +723,11 @@
   description: ''
   trigger:
   - platform: state
-    entity_id: sensor.bedroom_dot_next_alarm
+    entity_id: sensor.anthony_s_echo_show_next_alarm
     to: unavailable
     id: no alarm
   - platform: state
-    entity_id: sensor.bedroom_dot_next_alarm
+    entity_id: sensor.anthony_s_echo_show_next_alarm
     from: unavailable
     id: alarm
   condition: []
@@ -884,7 +884,7 @@
     entity_id: binary_sensor.workday_sensor
     state: 'on'
   - condition: state
-    entity_id: sensor.bedroom_dot_next_alarm
+    entity_id: sensor.anthony_s_echo_show_next_alarm
     state: unavailable
   action:
   - service: notify.mobile_app_iphone
