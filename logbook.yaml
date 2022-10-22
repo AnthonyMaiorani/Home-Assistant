@@ -3,8 +3,8 @@ exclude:
     - button.*ping
   domains:
     - input_number
-    - input_boolean
-    - sensor
+#    - input_boolean
+#    - sensor
     - group
     - remote
     - pyscript

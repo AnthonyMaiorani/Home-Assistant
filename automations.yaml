@@ -1807,3 +1807,73 @@
         target:
           entity_id: timer.exhaust
   mode: single
+- id: '1666480822238'
+  alias: Laundry Room Light
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.motion_sensor_motion_detection
+    from: 'on'
+    to: 'off'
+    alias: cleared
+    id: cleared
+  - platform: state
+    entity_id:
+    - binary_sensor.motion_sensor_motion_detection
+    from: 'off'
+    to: 'on'
+    alias: detected
+    id: detected
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.laundry_room_light
+    alias: timer finished
+    id: timer finished
+  - platform: state
+    entity_id:
+    - switch.laundry_room_light
+    from: 'on'
+    to: 'off'
+    alias: manually turned off
+    id: manually turned off
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: detected
+      sequence:
+      - service: timer.cancel
+        data: {}
+        target:
+          entity_id: timer.laundry_room_light
+    - conditions:
+      - condition: trigger
+        id: cleared
+      - condition: state
+        entity_id: switch.laundry_room_light
+        state: 'on'
+      sequence:
+      - service: timer.start
+        data: {}
+        target:
+          entity_id: timer.laundry_room_light
+    - conditions:
+      - condition: trigger
+        id: timer finished
+      sequence:
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id: switch.laundry_room_light
+    - conditions:
+      - condition: trigger
+        id: manually turned off
+      sequence:
+      - service: timer.cancel
+        data: {}
+        target:
+          entity_id: timer.laundry_room_light
+  mode: single
