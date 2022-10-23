@@ -1,16 +1,16 @@
 exclude:
   entity_globs:
     - button.*ping
+    - sensor.date*
   domains:
     - input_number
-#    - input_boolean
-#    - sensor
     - group
     - remote
     - pyscript
     - update
   entities:
     - automation.color_loop
+    - sensor.colorloopstate
     - sensor.desktop_idle_time
     - sensor.hacs
     - group.bedroom_motion

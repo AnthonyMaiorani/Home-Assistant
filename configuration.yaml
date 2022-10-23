@@ -46,7 +46,7 @@ timer:
     restore: true
     icon: mdi:air-conditioner
   laundry_room_light:
-    duration: "00:08:00"
+    duration: "00:01:00"
     name: "Laundry Room Light Timer"
     restore: true
     icon: mdi:alarm-light

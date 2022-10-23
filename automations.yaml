@@ -1628,6 +1628,7 @@
     - input_boolean.breakfast
     - input_boolean.dinner
     - binary_sensor.back_door
+    - binary_sensor.laundry_room_motion
     to: 'on'
     from: 'off'
   - platform: state
@@ -1813,14 +1814,14 @@
   trigger:
   - platform: state
     entity_id:
-    - binary_sensor.motion_sensor_motion_detection
+    - binary_sensor.laundry_room_motion
     from: 'on'
     to: 'off'
     alias: cleared
     id: cleared
   - platform: state
     entity_id:
-    - binary_sensor.motion_sensor_motion_detection
+    - binary_sensor.laundry_room_motion
     from: 'off'
     to: 'on'
     alias: detected
@@ -1838,6 +1839,12 @@
     to: 'off'
     alias: manually turned off
     id: manually turned off
+  - platform: homeassistant
+    event: start
+    id: startup
+  - platform: event
+    event_type: automation_reloaded
+    id: reload
   condition: []
   action:
   - choose:
@@ -1845,10 +1852,23 @@
       - condition: trigger
         id: detected
       sequence:
-      - service: timer.cancel
-        data: {}
+      - service: timer.start
+        data:
+          duration: 00:01:00
         target:
           entity_id: timer.laundry_room_light
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: switch.laundry_room_light
+            state: 'on'
+          alias: if light off
+        then:
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id: switch.laundry_room_light
     - conditions:
       - condition: trigger
         id: cleared
@@ -1863,6 +1883,11 @@
     - conditions:
       - condition: trigger
         id: timer finished
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: switch.laundry_room_light
+          state: 'off'
       sequence:
       - service: switch.turn_off
         data: {}
@@ -1874,6 +1899,25 @@
       sequence:
       - service: timer.cancel
         data: {}
+        target:
+          entity_id: timer.laundry_room_light
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: reload
+        - condition: trigger
+          id: startup
+      - condition: state
+        entity_id: switch.laundry_room_light
+        state: 'on'
+      - condition: state
+        entity_id: timer.laundry_room_light
+        state: idle
+      sequence:
+      - service: timer.start
+        data:
+          duration: 00:01:00
         target:
           entity_id: timer.laundry_room_light
   mode: single
