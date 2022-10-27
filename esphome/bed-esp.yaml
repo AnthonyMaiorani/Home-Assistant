@@ -77,7 +77,7 @@ binary_sensor:
     name: "Bed Occupancy"
     device_class: occupancy
     lambda: |-
-      if (id(bed_weight).state > 150) {
+      if (id(bed_weight).state > 115) {
         return true;
       } else {
         return false;

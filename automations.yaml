@@ -172,26 +172,10 @@
         data: {}
         target:
           entity_id: timer.ac
-    - service: button.press
+    - service: automation.trigger
       data: {}
       target:
-        entity_id:
-        - button.node_12_ping
-        - button.node_3_ping
-        - button.node_6_ping
-        - button.node_13_ping
-        - button.node_17_ping
-        - button.node_18_ping
-        - button.node_10_ping
-        - button.node_8_ping
-        - button.z_wave_plug_ping
-        - button.node_21_ping
-        - button.node_22_ping
-        - button.node_13_ping
-        - button.laundry_room_light_ping
-        - button.node_25_ping
-        - button.node_26_ping
-        - button.gym_fan_ping
+        entity_id: automation.ping_z_wave_devices
   - service: automation.turn_on
     data: {}
     target:
@@ -270,6 +254,18 @@
     data: {}
     target:
       entity_id: input_boolean.privacy
+  - if:
+    - condition: state
+      entity_id: switch.exhaust_fan
+      state: 'on'
+    - condition: state
+      entity_id: timer.exhaust
+      state: idle
+    then:
+    - service: timer.start
+      data: {}
+      target:
+        entity_id: timer.exhaust
   mode: single
 - id: '1627443167507'
   alias: Bedroom Alerts
@@ -1113,16 +1109,19 @@
       in [0, 2, 4]) or\n\n  ( now().hour == 12 and now().minute == 40 and\n  now().weekday()
       in [1, 3]) or\n  \n  ( now().hour == 16 and now().minute == 25 and\n  now().weekday()
       == 3)) \n}}"
+  - platform: state
+    entity_id:
+    - binary_sensor.shower
+    from: 'on'
+    to: 'off'
   condition: []
   action:
   - service: notify.mobile_app_iphone
     data:
       data:
         tag: car
-        push:
-          interruption-level: passive
         shortcut:
-          name: Start Car
+          name: Start My Car
           ignore_result: ignore
       message: Start car?
   mode: single
@@ -1268,43 +1267,6 @@
     target:
       entity_id: media_player.living_room
   mode: single
-- id: '1665075533217'
-  alias: Reboot Router
-  description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - binary_sensor.cloudflare
-    - binary_sensor.google_dns
-    to: 'off'
-    for:
-      hours: 0
-      minutes: 10
-      seconds: 1
-  condition:
-  - condition: and
-    conditions:
-    - condition: state
-      entity_id: binary_sensor.google_dns
-      state: 'off'
-    - condition: state
-      entity_id: binary_sensor.cloudflare
-      state: 'off'
-  action:
-  - service: switch.turn_off
-    data: {}
-    target:
-      entity_id: switch.router
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 2
-      milliseconds: 0
-  - service: switch.turn_on
-    data: {}
-    target:
-      entity_id: switch.router
-  mode: single
 - id: '1665076615181'
   alias: Dog Food Reminder
   description: ''
@@ -1316,7 +1278,7 @@
     at: '18:00:00'
     id: Dinner
   - platform: time
-    at: 02:00:00
+    at: 02:30:01
     id: Reset
   - platform: state
     entity_id:
@@ -1550,7 +1512,7 @@
         - conditions:
           - condition: time
             before: '14:30:00'
-            after: 04:00:00
+            after: 06:00:00
           sequence:
           - if:
             - condition: state
@@ -1845,18 +1807,32 @@
   - platform: event
     event_type: automation_reloaded
     id: reload
+  - platform: state
+    entity_id:
+    - binary_sensor.laundry_room_door
+    from: 'off'
+    to: 'on'
+    id: door opened
+    alias: door opened
+  - platform: state
+    entity_id:
+    - binary_sensor.laundry_room_door
+    from: 'on'
+    to: 'off'
+    alias: door closed
+    id: door closed
   condition: []
   action:
   - choose:
     - conditions:
-      - condition: trigger
-        id: detected
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: detected
+        - condition: trigger
+          id: door opened
+        alias: door opened or motion detected
       sequence:
-      - service: timer.start
-        data:
-          duration: 00:01:00
-        target:
-          entity_id: timer.laundry_room_light
       - if:
         - condition: not
           conditions:
@@ -1869,6 +1845,15 @@
           data: {}
           target:
             entity_id: switch.laundry_room_light
+        else:
+        - condition: state
+          entity_id: timer.laundry_room_light
+          state: active
+        - service: timer.start
+          data:
+            duration: 00:01:00
+          target:
+            entity_id: timer.laundry_room_light
     - conditions:
       - condition: trigger
         id: cleared
@@ -1877,7 +1862,8 @@
         state: 'on'
       sequence:
       - service: timer.start
-        data: {}
+        data:
+          duration: 00:01:00
         target:
           entity_id: timer.laundry_room_light
     - conditions:
@@ -1920,4 +1906,241 @@
           duration: 00:01:00
         target:
           entity_id: timer.laundry_room_light
+    - conditions:
+      - condition: trigger
+        id: door closed
+      sequence:
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id: switch.laundry_room_light
+      - service: timer.cancel
+        data: {}
+        target:
+          entity_id: timer.laundry_room_light
   mode: single
+- id: '1666594099613'
+  alias: Ping Z-Wave Devices
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - light.hallway_lights
+    - light.living_room_lights
+    - light.kitchen_lights
+    - switch.exhaust_fan
+    - switch.katchy
+    - switch.gym_fan
+    - switch.living_room_fan
+    - switch.porch_light
+    - switch.laundry_room_light
+    to: unavailable
+  condition: []
+  action:
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 3
+      milliseconds: 0
+  - service: button.press
+    data: {}
+    target:
+      entity_id:
+      - button.node_25_ping
+      - button.node_18_ping
+      - button.node_19_ping
+      - button.node_26_ping
+      - button.node_22_ping
+      - button.node_17_ping
+      - button.node_10_ping
+      - button.laundry_room_light_ping
+      - button.gym_fan_ping
+  mode: single
+- id: '1666715700705'
+  alias: Hallway Lights Manually Turned On
+  description: ''
+  trigger: []
+  condition: []
+  action:
+  - service: light.turn_on
+    data:
+      brightness_pct: 100
+    target:
+      entity_id: light.hallway_lights
+  mode: single
+- id: '1666852312966'
+  alias: Frigate
+  description: ''
+  trigger:
+  - platform: mqtt
+    topic: frigate/events
+    payload: new
+    value_template: '{{ value_json.type }}'
+  condition: []
+  action:
+  - service: notify.mobile_app_iphone
+    data:
+      message: A {{trigger.payload_json["after"]["label"]}} was detected.
+      data:
+        image: https://maioranihome.duckdns.org/api/frigate/notifications/{{trigger.payload_json["after"]["id"]}}/thumbnail.jpg
+        tag: '{{trigger.payload_json["after"]["id"]}}'
+        when: '{{trigger.payload_json["after"]["start_time"]|int}}'
+        entity_id: camera.{{trigger.payload_json["after"]["camera"]}}
+    enabled: false
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.payload_json[''after''][''camera''] == ''porch''
+          }}'
+      sequence:
+      - service: notify.mobile_app_iphone
+        data:
+          message: A {{trigger.payload_json["before"]["label"]}} was detected at the
+            porch at {{ as_timestamp(now()) | timestamp_custom("%I:%M %p") }}
+          data:
+            image: https://maioranihome.duckdns.org/api/frigate/notifications/{{trigger.payload_json["after"]["id"]}}/thumbnail.jpg
+            tag: '{{trigger.payload_json["after"]["id"]}}'
+            when: '{{trigger.payload_json["after"]["start_time"]|int}}'
+        enabled: false
+      - service: blueiris.trigger_camera
+        data: {}
+        target:
+          entity_id: camera.elitedesk_front_porch
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.payload_json[''after''][''camera''] == ''backyard''
+          }}'
+      sequence:
+      - service: blueiris.trigger_camera
+        data: {}
+        target:
+          entity_id:
+          - camera.elitedesk_backyard
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.payload_json[''after''][''camera''] == ''garage''
+          }}'
+      sequence:
+      - service: blueiris.trigger_camera
+        data: {}
+        target:
+          entity_id:
+          - camera.elitedesk_garage
+  mode: single
+- id: '1666854622989'
+  alias: Porch Notification
+  description: ''
+  use_blueprint:
+    path: hunterjm/frigate_0.10_notification.yaml
+    input:
+      camera: porch
+      notify_device: 2f9895582e5a0adcb1c85c73c972294a
+      base_url: https://maioranihome.duckdns.org
+      update_thumbnail: false
+      labels:
+      - person
+      cooldown: 100
+      silence_timer: 60
+      loiter_timer: 5
+- id: '1666854812903'
+  alias: Backyard
+  description: ''
+  use_blueprint:
+    path: hunterjm/frigate_0.10_notification.yaml
+    input:
+      camera: backyard
+      notify_device: 2f9895582e5a0adcb1c85c73c972294a
+      base_url: https://maioranihome.duckdns.org
+      update_thumbnail: false
+      labels:
+      - person
+      cooldown: 100
+      loiter_timer: 5
+      silence_timer: 60
+- id: '1666891695746'
+  alias: Camera Triggers
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.back_door
+    from: 'off'
+    to: 'on'
+    id: back door opened
+    alias: back door opened
+  - platform: state
+    entity_id:
+    - binary_sensor.front_door
+    from: 'off'
+    to: 'on'
+    id: front door opened
+    alias: front door opened
+  - platform: state
+    entity_id:
+    - binary_sensor.front_door
+    from: 'on'
+    to: 'off'
+    id: front door closed
+    alias: front door closed
+  - platform: state
+    entity_id:
+    - binary_sensor.back_door
+    from: 'on'
+    to: 'off'
+    alias: back door closed
+    id: back door closed
+  - platform: state
+    entity_id:
+    - cover.garage_door
+    alias: garage door opening
+    id: garage door state change
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: front door opened
+        - condition: trigger
+          id: front door closed
+        alias: When Front door opened or closed
+      sequence:
+      - service: blueiris.trigger_camera
+        data: {}
+        target:
+          entity_id:
+          - camera.elitedesk_front_porch
+          - camera.elitedesk_living_room
+          - camera.elitedesk_pet
+          - camera.elitedesk_gym
+        alias: record front porch and living room and pet and gym
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: back door opened
+        - condition: trigger
+          id: back door closed
+        alias: When back door opened or closed
+      sequence:
+      - service: blueiris.trigger_camera
+        data: {}
+        target:
+          entity_id:
+          - camera.elitedesk_backyard
+          - camera.elitedesk_living_room
+        alias: record living room and backyard
+    - conditions:
+      - condition: trigger
+        id: garage door state change
+      - condition: template
+        value_template: '{{ states(''cover.garage_door'') not in [''unknown'', ''unavailable'']
+          }}'
+      sequence:
+      - service: blueiris.trigger_camera
+        data: {}
+        target:
+          entity_id: camera.elitedesk_garage
+  mode: parallel
+  max: 10

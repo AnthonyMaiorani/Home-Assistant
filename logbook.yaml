@@ -2,6 +2,7 @@ exclude:
   entity_globs:
     - button.*ping
     - sensor.date*
+    - sensor.time*
   domains:
     - input_number
     - group
