@@ -23,7 +23,6 @@ fan_off:
       target:
         entity_id:
         - input_boolean.govee_cyan
-        - switch.u6_pro_led
         - light.shapes_007f
         - light.shapes_ee82
     - data:
@@ -68,7 +67,6 @@ color_loop:
       data: {}
       target:
         entity_id:
-        - switch.u6_pro_led
         - light.shapes_007f
         - light.shapes_ee82
     - data:
@@ -178,11 +176,6 @@ call:
 night:
   sequence:
   - parallel:
-    - data: {}
-      service: homeassistant.turn_off
-      target:
-        entity_id:
-        - switch.u6_pro_led
     - service: input_button.press
       data: {}
       target:
@@ -251,7 +244,6 @@ morning:
       service: homeassistant.turn_on
       target:
         entity_id:
-        - switch.u6_pro_led
         - light.shapes_007f
         - light.shapes_ee82
     - data:

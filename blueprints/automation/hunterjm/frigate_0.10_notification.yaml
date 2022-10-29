@@ -212,13 +212,13 @@ action:
               data:
                 tag: '{{ id }}'
                 group: frigate-notification-{{ camera }}
-                image: /api/frigate/notifications/{{id}}/snapshot.jpg?bbox=1
+                image: /api/frigate/notifications/{{id}}/snapshot.jpg
                 clickAction: '{{base_url}}/api/frigate/notifications/{{id}}/{{camera}}/clip.mp4'
                 ttl: '{{ iif(critical, 0, 3600000) }}'
                 priority: '{{ iif(critical, ''high'', ''normal'') }}'
                 url: '{{base_url}}/api/frigate/notifications/{{id}}/{{camera}}/clip.mp4'
                 attachment:
-                  url: /api/frigate/notifications/{{id}}/snapshot.jpg?bbox=1
+                  url: /api/frigate/notifications/{{id}}/snapshot.jpg
                 push:
                   interruption-level: '{{ iif(critical, ''critical'', ''active'')
                     }}'
@@ -236,13 +236,13 @@ action:
               data:
                 tag: '{{ id }}'
                 group: frigate-notification-{{ camera }}
-                image: /api/frigate/notifications/{{id}}/snapshot.jpg?bbox=1
+                image: /api/frigate/notifications/{{id}}/snapshot.jpg
                 clickAction: '{{base_url}}/api/frigate/notifications/{{id}}/{{camera}}/clip.mp4'
                 ttl: '{{ iif(critical, 0, 3600000) }}'
                 priority: '{{ iif(critical, ''high'', ''normal'') }}'
                 url: '{{base_url}}/api/frigate/notifications/{{id}}/{{camera}}/clip.mp4'
                 attachment:
-                  url: /api/frigate/notifications/{{id}}/snapshot.jpg?bbox=1
+                  url: /api/frigate/notifications/{{id}}/snapshot.jpg
                 push:
                   interruption-level: '{{ iif(critical, ''critical'', ''active'')
                     }}'
@@ -303,13 +303,13 @@ action:
                   data:
                     tag: '{{ id }}{{''-loitering'' if loitering}}'
                     group: frigate-notification-{{ camera }}{{'-loitering' if loitering}}
-                    image: /api/frigate/notifications/{{id}}/snapshot.jpg?bbox=1
+                    image: /api/frigate/notifications/{{id}}/snapshot.jpg
                     clickAction: '{{base_url}}/api/frigate/notifications/{{id}}/{{camera}}/clip.mp4'
                     ttl: '{{ iif(critical, 0, 3600000) }}'
                     priority: '{{ iif(critical, ''high'', ''normal'') }}'
                     url: '{{base_url}}/api/frigate/notifications/{{id}}/{{camera}}/clip.mp4'
                     attachment:
-                      url: /api/frigate/notifications/{{id}}/snapshot.jpg?bbox=1
+                      url: /api/frigate/notifications/{{id}}/snapshot.jpg
                     sound: '{{ iif(update, ''none'', ''default'') }}'
                     push:
                       interruption-level: '{{ iif(critical, ''critical'', ''active'')
@@ -329,13 +329,13 @@ action:
                   data:
                     tag: '{{ id }}{{''-loitering'' if loitering}}'
                     group: frigate-notification-{{ camera }}{{'-loitering' if loitering}}
-                    image: /api/frigate/notifications/{{id}}/snapshot.jpg?bbox=1
+                    image: /api/frigate/notifications/{{id}}/snapshot.jpg
                     clickAction: '{{base_url}}/api/frigate/notifications/{{id}}/{{camera}}/clip.mp4'
                     ttl: '{{ iif(critical, 0, 3600000) }}'
                     priority: '{{ iif(critical, ''high'', ''normal'') }}'
                     url: '{{base_url}}/api/frigate/notifications/{{id}}/{{camera}}/clip.mp4'
                     attachment:
-                      url: /api/frigate/notifications/{{id}}/snapshot.jpg?bbox=1
+                      url: /api/frigate/notifications/{{id}}/snapshot.jpg
                     sound: '{{ iif(update, ''none'', ''default'') }}'
                     push:
                       interruption-level: '{{ iif(critical, ''critical'', ''active'')

@@ -16,7 +16,7 @@ switch.lrtv:
   icon: mdi:youtube-tv
 switch.fronttv:
   icon: mdi:youtube-tv
-switch.gusttv:
+switch.guesttv:
   icon: mdi:youtube-tv
 switch.mastertv:
   icon: mdi:youtube-tv
