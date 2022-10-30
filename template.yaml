@@ -11,7 +11,8 @@
 - sensor:
   - name: "AC Thermostat Temperature"
     state: >
-      {% if states('person.anthony')|lower in ['utd', 'raytheon', 'away', 'not_home'] %} unknown
+      {% if states('person.anthony')|lower in ['utd', 'raytheon', 'away', 'not_home'] 
+      or not is_state('switch.ac', "on") or is_state('script.night', "on") %} unknown
       {% elif is_state("input_boolean.ac_boost", "on") -%} 61 
       {% elif is_state("binary_sensor.bedroom_door", "on") and 
       is_state("person.riana", "home") -%} 76
@@ -42,7 +43,7 @@
       is_state('binary_sensor.webcam', 'on') and
       is_state('light.fan_lights', 'on') -%} 204
       {# Night call #}
-      {% elif state_attr('light.bed_lights', 'rgb_color')
+      {% elif is_state('light.fan_lights', 'on') and state_attr('light.bed_lights', 'rgb_color')
       | join(' ') == '0 255 255' and 
       is_state_attr('light.bed_lights', 'effect', 'None')%} 25
       {# Door opened #}

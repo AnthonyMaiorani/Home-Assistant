@@ -18,6 +18,7 @@ fan_off:
         entity_id:
         - light.fan_lights
         - input_boolean.bedmotion
+        - switch.katchy
     - data: {}
       service: homeassistant.turn_on
       target:

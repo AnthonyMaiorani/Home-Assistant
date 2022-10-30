@@ -683,20 +683,45 @@
         data: {}
         target:
           entity_id: switch.living_room_fan
-    - conditions:
+    default:
+    - if:
       - condition: state
         entity_id: light.fan_lights
         state: 'on'
-      sequence:
+      then:
       - service: script.turn_on
         data: {}
         target:
           entity_id: script.fan_off
+      alias: Fan Lights Off
+    - if:
+      - condition: state
+        entity_id: input_select.anthony
+        state: Home
+      - condition: state
+        entity_id: zone.home
+        state: '1'
+      then:
+      - service: light.turn_off
+        data: {}
+        target:
+          entity_id:
+          - light.bathroom_lights
+          - light.living_room_lights
       - service: switch.turn_off
         data: {}
         target:
-          entity_id: switch.living_room_fan
-    default: []
+          entity_id:
+          - switch.living_room_fan
+          - switch.fronttv
+          - switch.lrtv
+          - switch.guesttv
+          - switch.laundry_room_light
+          - switch.gym_fan
+    - service: input_boolean.turn_off
+      data: {}
+      target:
+        entity_id: input_boolean.privacy
   - if:
     - condition: time
       before: 05:00:00
@@ -709,10 +734,6 @@
       data: {}
       target:
         entity_id: switch.usb_hub
-  - service: input_boolean.turn_off
-    data: {}
-    target:
-      entity_id: input_boolean.privacy
   mode: single
 - id: '1645695901319'
   alias: Enable Morning Automation
@@ -951,14 +972,17 @@
     to: 'on'
   condition:
   - condition: template
-    value_template: "{{ (not is_state('sensor.ac_thermostat_temperature', 'unknown')
-      and not \nis_state_attr('climate.bedroom_ac', \"temperature\", \nstates('sensor.ac_thermostat_temperature')|int))
-      \nor is_state('input_boolean.ac_boost', 'on') }}"
+    value_template: "{% set trigger = 'false' %}\n{% if is_state('input_boolean.ac_boost',
+      'on') %} \n  {% set trigger = 'true' %}\n{% elif not is_state('sensor.ac_thermostat_temperature',
+      'unknown') \n  and states('sensor.ac_thermostat_temperature') is not none %}\n
+      \ {% if not is_state_attr('climate.bedroom_ac', \"temperature\", \n  states('sensor.ac_thermostat_temperature')|int)
+      %} \n    {% set trigger = 'true' %}\n  {% endif %}\n{% endif %}\n{{ trigger
+      }}"
   action:
   - service: climate.set_temperature
     data:
       hvac_mode: cool
-      temperature: '{{states(''sensor.ac_thermostat_temperature'') |int}}'
+      temperature: '{{states(''sensor.ac_thermostat_temperature'') |int(61)}}'
     target:
       entity_id: climate.bedroom_ac
   - delay:
@@ -2000,19 +2024,27 @@
       minutes: 0
       seconds: 3
       milliseconds: 0
-  - service: button.press
-    data: {}
-    target:
-      entity_id:
-      - button.node_25_ping
-      - button.node_18_ping
-      - button.node_19_ping
-      - button.node_26_ping
-      - button.node_22_ping
-      - button.node_17_ping
-      - button.node_10_ping
-      - button.laundry_room_light_ping
-      - button.gym_fan_ping
+  - repeat:
+      count: '5'
+      sequence:
+      - service: button.press
+        data: {}
+        target:
+          entity_id:
+          - button.node_25_ping
+          - button.node_18_ping
+          - button.node_19_ping
+          - button.node_26_ping
+          - button.node_22_ping
+          - button.node_17_ping
+          - button.node_10_ping
+          - button.laundry_room_light_ping
+          - button.gym_fan_ping
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 7
+          milliseconds: 0
   mode: single
 - id: '1666715700705'
   alias: Hallway Lights Manually Turned On
@@ -2099,7 +2131,7 @@
       - person
       cooldown: 100
       silence_timer: 60
-      loiter_timer: 5
+      loiter_timer: 0
 - id: '1666854812903'
   alias: Backyard
   description: ''
@@ -2113,7 +2145,7 @@
       labels:
       - person
       cooldown: 100
-      loiter_timer: 5
+      loiter_timer: 0
       silence_timer: 60
 - id: '1666891695746'
   alias: Camera Triggers
@@ -2216,15 +2248,17 @@
   description: ''
   trigger:
   - platform: template
-    value_template: "{{ \nstates('sensor.mail_usps_mail')|float(0) > 0\nand distance(states.device_tracker.iphone)|float(1)
-      < 0.7 \nand now().hour|float(0) > 17 \nand states('input_boolean.mail_notification_sent')|string(\"on\")
-      == \"off\"\n}}"
+    value_template: "{% set trigger = 'false' %}\n{% if now().hour|float(0) > 17 %}\n
+      \ {% if state_attr('automation.mail_notification', \n  'last_triggered') is
+      not none %}\n      {% if state_attr('automation.mail_notification', \n      'last_triggered').day|int(now().day)
+      < now().day %}\n        {% if distance(states.device_tracker.iphone) is not
+      none %}\n          {% if distance(states.device_tracker.iphone) < 0.7 %}\n            {%
+      set trigger = 'true' %}\n          {% endif %}\n        {% elif states('input_select.anthony')
+      in ['Home', \n        'Just Arrived'] %} {% set trigger = 'true' %}\n        {%
+      endif %}\n      {% endif %}\n  {% endif %}\n{% endif %}\n{{ trigger }}"
+    id: send notification
   condition: []
   action:
-  - service: input_boolean.turn_on
-    data: {}
-    target:
-      entity_id: input_boolean.mail_notification_sent
   - service: notify.mobile_app_iphone
     data:
       message: '{{ states(''sensor.mail_usps_mail'') }} {% if states(''sensor.mail_usps_mail'')|float(0)
@@ -2257,4 +2291,47 @@
     device_id: 0d8385157604101c280ca9507b833fc9
     entity_id: switch.psu
     domain: switch
+  mode: single
+- id: '1667124189208'
+  alias: Bathroom Lights
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.bathroom_door
+    from: 'off'
+    to: 'on'
+    alias: door opened
+    id: door opened
+  - platform: state
+    entity_id:
+    - binary_sensor.4_in_1_sensor_motion_detection
+    from: 'off'
+    to: 'on'
+    alias: motion detected
+    id: motion detected
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: sun
+        before: sunrise
+      - condition: state
+        entity_id: light.bedroom_lights
+        state: 'off'
+      - condition: state
+        entity_id: light.bathroom_lights
+        state: 'off'
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: door opened
+        - condition: trigger
+          id: motion detected
+      sequence:
+      - type: turn_on
+        device_id: 624405d34a0a0bc8df3990c131a31bd2
+        entity_id: light.bathroom_lights
+        domain: light
+        brightness_pct: 4
   mode: single

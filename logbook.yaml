@@ -3,6 +3,7 @@ exclude:
     - button.*ping
     - sensor.date*
     - sensor.time*
+    - sensor.*node_status
   domains:
     - input_number
     - group
