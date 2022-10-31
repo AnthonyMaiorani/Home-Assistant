@@ -957,7 +957,7 @@
     value_template: "{% set trigger = 'false' %}\n{% if is_state('input_boolean.ac_boost',
       'on') %} \n  {% set trigger = 'true' %}\n{% elif not is_state('sensor.ac_thermostat_temperature',
       'unknown') \n  and states('sensor.ac_thermostat_temperature') is not none %}\n
-      \ {% if not is_state_attr('climate.bedroom_ac', \"temperature\", \n  states('sensor.ac_thermostat_temperature')|int)
+      \ {% if not is_state_attr('climate.bedroom_ac', \"temperature\", \n  states('sensor.ac_thermostat_temperature')|int(61))
       %} \n    {% set trigger = 'true' %}\n  {% endif %}\n{% endif %}\n{{ trigger
       }}"
   action:
