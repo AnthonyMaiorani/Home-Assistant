@@ -1,3 +1,6 @@
 - platform: ping
   host: !secret host
   name: Desktop Power
+- platform: workday
+  country: US
+  days_offset: 1

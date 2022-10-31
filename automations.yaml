@@ -103,14 +103,24 @@
       target:
         entity_id: timer.ac
     else:
-    - service: input_boolean.turn_off
-      data: {}
-      target:
-        entity_id: input_boolean.ac_boost
-    - service: timer.cancel
-      data: {}
-      target:
-        entity_id: timer.ac
+    - if:
+      - condition: state
+        entity_id: binary_sensor.shower
+        state: 'on'
+      then:
+      - service: timer.start
+        data: {}
+        target:
+          entity_id: timer.ac
+      else:
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id: input_boolean.ac_boost
+      - service: timer.cancel
+        data: {}
+        target:
+          entity_id: timer.ac
   mode: single
 - id: 43a25b65afed4a4680f5ec81172f11e8
   alias: Startup Actions
@@ -890,34 +900,6 @@
     target:
       entity_id: climate.bedroom_ac
   mode: single
-- id: '1656925466000'
-  alias: Alarm Reminder
-  description: ''
-  trigger:
-  - platform: time
-    at: 00:01:00
-  condition:
-  - condition: state
-    entity_id: binary_sensor.workday_sensor
-    state: 'on'
-  - condition: state
-    entity_id: sensor.anthony_s_echo_show_next_alarm
-    state: unavailable
-  action:
-  - service: notify.mobile_app_iphone
-    data:
-      message: Check Alexa App
-      title: Morning alarm not set
-      data:
-        push:
-          sound:
-            name: default
-            critical: 1
-            volume: 0.3
-        actions:
-        - action: Open Alexa App
-          title: Open Alexa App
-  mode: single
 - id: '1658727301790'
   alias: USB Control
   description: ''
@@ -1483,6 +1465,16 @@
     id: GivingPill
     from: 'off'
     to: 'on'
+  - platform: state
+    entity_id:
+    - input_boolean.morning_medicine
+    to: 'on'
+    for:
+      hours: 12
+      minutes: 0
+      seconds: 0
+    alias: night medicine reminder
+    id: night medicine reminder
   condition: []
   action:
   - choose:
@@ -1563,6 +1555,19 @@
               target:
                 entity_id: input_boolean.night_medicine
             else: []
+    - conditions:
+      - condition: trigger
+        id: night medicine reminder
+      - condition: time
+        before: '21:15:00'
+        after: 00:00:00
+      - condition: state
+        entity_id: input_boolean.night_medicine
+        state: 'off'
+      sequence:
+      - service: notify.mobile_app_iphone
+        data:
+          message: It's time to give Lola her medicine
   mode: single
 - id: '1665630167045'
   alias: Turn on home lights at night
@@ -2016,6 +2021,7 @@
     - switch.living_room_fan
     - switch.porch_light
     - switch.laundry_room_light
+    - light.bathroom_lights
     to: unavailable
   condition: []
   action:
@@ -2040,6 +2046,7 @@
           - button.node_10_ping
           - button.laundry_room_light_ping
           - button.gym_fan_ping
+          - button.node_32_ping
       - delay:
           hours: 0
           minutes: 0
@@ -2096,6 +2103,11 @@
         data: {}
         target:
           entity_id: camera.elitedesk_front_porch
+      - service: notify.alexa_media_anthony_s_2nd_echo_show_5_2nd_gen
+        data:
+          message: Someone is at the front door
+          data:
+            type: tts
     - conditions:
       - condition: template
         value_template: '{{ trigger.payload_json[''after''][''camera''] == ''backyard''
@@ -2249,13 +2261,16 @@
   trigger:
   - platform: template
     value_template: "{% set trigger = 'false' %}\n{% if now().hour|float(0) > 17 %}\n
-      \ {% if state_attr('automation.mail_notification', \n  'last_triggered') is
-      not none %}\n      {% if state_attr('automation.mail_notification', \n      'last_triggered').day|int(now().day)
-      < now().day %}\n        {% if distance(states.device_tracker.iphone) is not
-      none %}\n          {% if distance(states.device_tracker.iphone) < 0.7 %}\n            {%
-      set trigger = 'true' %}\n          {% endif %}\n        {% elif states('input_select.anthony')
-      in ['Home', \n        'Just Arrived'] %} {% set trigger = 'true' %}\n        {%
-      endif %}\n      {% endif %}\n  {% endif %}\n{% endif %}\n{{ trigger }}"
+      \ {% if states('sensor.mail_usps_mail') is not none %}\n    {% if states('sensor.mail_usps_mail')|int(0)
+      > 0 %}\n      {% if state_attr('automation.mail_notification', \n      'last_triggered')
+      is not none %}\n          {% if state_attr('automation.mail_notification', \n
+      \         'last_triggered').day|int(now().day) < now().day %}\n            {%
+      if distance(states.device_tracker.iphone) is not none %}\n              {% if
+      distance(states.device_tracker.iphone) < 0.7 %}\n                {% set trigger
+      = 'true' %}\n              {% endif %}\n            {% elif states('input_select.anthony')
+      in ['Home', \n            'Just Arrived'] %} {% set trigger = 'true' %}\n            {%
+      endif %}\n          {% endif %}\n      {% endif %}\n    {% endif %}\n  {% endif
+      %}\n{% endif %}\n{{ trigger }}"
     id: send notification
   condition: []
   action:
@@ -2310,28 +2325,132 @@
     to: 'on'
     alias: motion detected
     id: motion detected
+  - platform: state
+    entity_id:
+    - binary_sensor.bathroom_door
+    to: 'off'
+    from: 'on'
+    id: door closed
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.bathroom_light
+    alias: timer finished
+    id: timer finished
   condition: []
   action:
   - choose:
     - conditions:
       - condition: sun
         before: sunrise
+        alias: Dark Outside
       - condition: state
         entity_id: light.bedroom_lights
         state: 'off'
+        alias: Bedroom Lights are off
       - condition: state
         entity_id: light.bathroom_lights
         state: 'off'
+        alias: Lights are off
       - condition: or
         conditions:
         - condition: trigger
           id: door opened
         - condition: trigger
           id: motion detected
+        alias: Presence Detected
       sequence:
       - type: turn_on
         device_id: 624405d34a0a0bc8df3990c131a31bd2
         entity_id: light.bathroom_lights
         domain: light
         brightness_pct: 4
+        alias: Turn on bathroom lights dimly
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: door opened
+        - condition: trigger
+          id: motion detected
+        alias: Presence Detected
+      - condition: state
+        entity_id: light.bathroom_lights
+        state: 'off'
+        alias: Lights are off
+      sequence:
+      - type: turn_on
+        device_id: 624405d34a0a0bc8df3990c131a31bd2
+        entity_id: light.bathroom_lights
+        domain: light
+        brightness_pct: 100
+    - conditions:
+      - condition: trigger
+        id: door closed
+        alias: Triggered By Door Closed
+      - condition: state
+        entity_id: binary_sensor.shower
+        state: 'off'
+      sequence:
+      - service: timer.start
+        data:
+          duration: 00:03:00
+        target:
+          entity_id: timer.bathroom_light
+        alias: Start timer
+    - conditions:
+      - condition: trigger
+        id: motion detected
+        alias: Motion detected
+      - condition: state
+        entity_id: binary_sensor.bathroom_door
+        state: 'off'
+        alias: Door closed
+      sequence:
+      - service: timer.cancel
+        data: {}
+        target:
+          entity_id: timer.bathroom_light
+        alias: Cancel Timer, room occupied
+    - conditions:
+      - condition: trigger
+        id: timer finished
+        alias: Timer Finished
+      - condition: state
+        entity_id: binary_sensor.shower
+        state: 'off'
+        alias: Not showering
+      sequence:
+      - type: turn_off
+        device_id: 624405d34a0a0bc8df3990c131a31bd2
+        entity_id: light.bathroom_lights
+        domain: light
+  mode: single
+- id: '1667193576124'
+  alias: Alarm Reminder
+  description: ''
+  trigger:
+  - platform: time
+    at: '22:00:00'
+  condition:
+  - condition: state
+    entity_id: binary_sensor.workday_sensor
+    state: 'on'
+  - condition: state
+    entity_id: sensor.anthony_s_echo_show_next_alarm
+    state: unavailable
+  action:
+  - service: notify.mobile_app_iphone
+    data:
+      message: Check Alexa App
+      title: Morning alarm not set
+      data:
+        push:
+          sound:
+            name: default
+            critical: 1
+            volume: 0.3
+        actions:
+        - action: Open Alexa App
+          title: Open Alexa App
   mode: single
