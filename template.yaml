@@ -22,12 +22,15 @@
       {%- endif %}
   - name: "Alarm Display"
     state: >
-      {% if states.sensor.anthony_s_echo_show_next_alarm.state == "unavailable" -%} 0
-      {% elif as_datetime(states.sensor.anthony_s_echo_show_next_alarm.state).day - now().day > 1 -%} 0
-      {% elif as_datetime(states.sensor.anthony_s_echo_show_next_alarm.state).day != now().day -%}
-      {{ (as_datetime(states.sensor.anthony_s_echo_show_next_alarm.state).strftime("%s") | int) | timestamp_custom("%A at %-I:%M %p", false) }}
+      {% if states('sensor.anthony_s_echo_show_next_alarm') is none 
+      or states('sensor.anthony_s_echo_show_next_alarm') 
+      in ['unknown', 'unavailable']-%} 0
+      {% elif as_datetime('states.sensor.anthony_s_echo_show_next_alarm.state').day - now().day > 1 -%} 0
+      {% elif as_datetime('states.sensor.anthony_s_echo_show_next_alarm.state').day - now().day > 1 -%} 0
+      {% elif as_datetime('states.sensor.anthony_s_echo_show_next_alarm.state') < states('sensor.time_date') -%} 0
+      {{ (as_datetime('states.sensor.anthony_s_echo_show_next_alarm.state').strftime("%s") | int) | timestamp_custom("%A at %-I:%M %p", false) }}
       {%- else -%} 
-      {{ (as_datetime(states.sensor.anthony_s_echo_show_next_alarm.state).strftime("%s") | int) | timestamp_custom("%-I:%M %p", false) }}
+      {{ (as_datetime('states.sensor.anthony_s_echo_show_next_alarm.state').strftime("%s") | int) | timestamp_custom("%-I:%M %p", false) }}
       {%- endif %}
   - name: "Nanoleaf Auto-Brightness"
     state: >
