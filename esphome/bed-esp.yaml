@@ -41,7 +41,7 @@ sensor:
       - delta: 3000
       - calibrate_linear:
           - 320000 -> 0
-          - 330000 -> 270
+          - 338000 -> 270
 #      - sliding_window_moving_average:
 #          window_size: 5
 #          send_every: 3
@@ -77,7 +77,7 @@ binary_sensor:
     name: "Bed Occupancy"
     device_class: occupancy
     lambda: |-
-      if (id(bed_weight).state > 60) {
+      if (id(bed_weight).state > 150) {
         return true;
       } else {
         return false;

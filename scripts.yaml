@@ -237,7 +237,7 @@ morning:
     - data:
         brightness: 255
         effect: None
-        color_temp: 400
+        color_temp: 500
       service: light.turn_on
       target:
         entity_id: light.fan_lights

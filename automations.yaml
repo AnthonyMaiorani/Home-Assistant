@@ -97,6 +97,11 @@
     - condition: trigger
       id: buttonpress
     then:
+    - service: climate.set_hvac_mode
+      data:
+        hvac_mode: cool
+      target:
+        entity_id: climate.bedroom_ac
     - service: timer.start
       data:
         duration: 0:25:00
@@ -232,12 +237,16 @@
   - parallel:
     - service: script.night
       data: {}
+    - service: timer.cancel
+      data: {}
+      target:
+        entity_id: timer.ac
     - service: homeassistant.turn_off
       data: {}
       target:
         entity_id:
         - input_boolean.bedmotion
-        - climate.bedroom_ac
+        - switch.ac
   - condition: state
     entity_id: zone.home
     state: '0'
@@ -251,6 +260,7 @@
       - light.living_room_lights
       - light.kitchen_lights
       - light.hallway_lights
+      - light.bathroom_lights
   - service: switch.turn_off
     data: {}
     target:
@@ -960,54 +970,71 @@
       \ {% if not is_state_attr('climate.bedroom_ac', \"temperature\", \n  states('sensor.ac_thermostat_temperature')|int(61))
       %} \n    {% set trigger = 'true' %}\n  {% endif %}\n{% endif %}\n{{ trigger
       }}"
+  - condition: state
+    entity_id: switch.ac
+    state: 'on'
   action:
-  - service: climate.set_temperature
-    data:
-      hvac_mode: cool
-      temperature: '{{states(''sensor.ac_thermostat_temperature'') |int(61)}}'
-    target:
-      entity_id: climate.bedroom_ac
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 1
-      milliseconds: 0
   - if:
     - condition: state
-      entity_id: input_boolean.ac_boost
-      state: 'on'
+      entity_id: input_select.anthony
+      state: Home
     then:
-    - service: climate.set_preset_mode
+    - service: climate.set_temperature
       data:
-        preset_mode: boost
+        hvac_mode: cool
+        temperature: '{{states(''sensor.ac_thermostat_temperature'') |int(61)}}'
       target:
         entity_id: climate.bedroom_ac
     - delay:
         hours: 0
         minutes: 0
-        seconds: 2
+        seconds: 1
         milliseconds: 0
-    - service: climate.set_preset_mode
-      data:
-        preset_mode: boost
-      target:
-        entity_id: climate.bedroom_ac
+    - if:
+      - condition: state
+        entity_id: input_boolean.ac_boost
+        state: 'on'
+      then:
+      - service: climate.set_preset_mode
+        data:
+          preset_mode: boost
+        target:
+          entity_id: climate.bedroom_ac
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 2
+          milliseconds: 0
+      - service: climate.set_preset_mode
+        data:
+          preset_mode: boost
+        target:
+          entity_id: climate.bedroom_ac
+      else:
+      - service: climate.set_preset_mode
+        data:
+          preset_mode: none
+        target:
+          entity_id: climate.bedroom_ac
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 2
+          milliseconds: 0
+      - service: climate.set_preset_mode
+        data:
+          preset_mode: none
+        target:
+          entity_id: climate.bedroom_ac
     else:
-    - service: climate.set_preset_mode
-      data:
-        preset_mode: none
+    - service: timer.cancel
+      data: {}
       target:
-        entity_id: climate.bedroom_ac
-    - delay:
-        hours: 0
-        minutes: 0
-        seconds: 2
-        milliseconds: 0
-    - service: climate.set_preset_mode
-      data:
-        preset_mode: none
+        entity_id: timer.ac
+    - service: switch.turn_off
+      data: {}
       target:
-        entity_id: climate.bedroom_ac
+        entity_id: switch.ac
   mode: queued
 - id: '1661502555805'
   alias: Nanoleaf Scene Changer and Auto Brightness
@@ -1173,7 +1200,8 @@
       data: {}
       target:
         entity_id: switch.porch_light
-  mode: single
+  mode: parallel
+  max: 10
 - id: '1664505341968'
   alias: Arrived Home
   description: ''
@@ -1228,6 +1256,7 @@
       before: sunrise
     - condition: sun
       after: sunset
+      after_offset: -00:30:00
   - service: light.turn_on
     data:
       brightness_pct: 15
@@ -1252,7 +1281,9 @@
   - service: light.turn_off
     data: {}
     target:
-      entity_id: light.kitchen_lights
+      entity_id:
+      - light.kitchen_lights
+      - light.hallway_lights
   - service: switch.turn_off
     data: {}
     target:
@@ -1847,7 +1878,8 @@
           data: {}
           target:
             entity_id: timer.exhaust
-  mode: single
+  mode: queued
+  max: 10
 - id: '1666480822238'
   alias: Laundry Room Light
   description: ''
@@ -2261,15 +2293,15 @@
   trigger:
   - platform: template
     value_template: "{% set trigger = 'false' %}\n{% if now().hour|float(0) > 17 %}\n
-      \ {% if states('sensor.mail_usps_mail') is not none %}\n    {% if states('sensor.mail_usps_mail')|int(0)
-      > 0 %}\n      {% if state_attr('automation.mail_notification', \n      'last_triggered')
-      is not none %}\n          {% if state_attr('automation.mail_notification', \n
-      \         'last_triggered').day|int(now().day) < now().day %}\n            {%
-      if distance(states.device_tracker.iphone) is not none %}\n              {% if
-      distance(states.device_tracker.iphone) < 0.7 %}\n                {% set trigger
-      = 'true' %}\n              {% endif %}\n            {% elif states('input_select.anthony')
-      in ['Home', \n            'Just Arrived'] %} {% set trigger = 'true' %}\n            {%
-      endif %}\n          {% endif %}\n      {% endif %}\n    {% endif %}\n  {% endif
+      \ {% if state_attr('automation.mail_notification', \n      'last_triggered')
+      is not none %}\n    {% if states('sensor.mail_usps_mail') is not none %}\n      {%
+      if states('sensor.mail_usps_mail')|int(0) > 0 %}\n        {% if state_attr('automation.mail_notification',
+      \n        'last_triggered').day|int(now().day) < now().day %}\n          {%
+      if states('input_select.anthony') in ['Home', \n          'Just Arrived'] %}
+      {% set trigger = 'true' %}\n          {% elif distance(states.device_tracker.iphone)
+      is not none %}\n            {% if distance(states.device_tracker.iphone) < 0.7
+      %}\n              {% set trigger = 'true' %}\n            {% endif %}\n          {%
+      endif %}\n        {% endif %}\n      {% endif %}\n    {% endif %}\n  {% endif
       %}\n{% endif %}\n{{ trigger }}"
     id: send notification
   condition: []
@@ -2320,7 +2352,7 @@
     id: door opened
   - platform: state
     entity_id:
-    - binary_sensor.4_in_1_sensor_motion_detection
+    - binary_sensor.bathroom_multi_sensor_motion_detection
     from: 'off'
     to: 'on'
     alias: motion detected
@@ -2337,6 +2369,23 @@
       entity_id: timer.bathroom_light
     alias: timer finished
     id: timer finished
+  - platform: state
+    entity_id:
+    - binary_sensor.bathroom_multi_sensor_motion_detection
+    to: 'off'
+    from: 'on'
+    for:
+      hours: 0
+      minutes: 3
+      seconds: 0
+    alias: no motion detected
+    id: no motion detected
+  - platform: homeassistant
+    event: start
+    id: startup
+  - platform: event
+    event_type: automation_reloaded
+    id: reload
   condition: []
   action:
   - choose:
@@ -2385,12 +2434,15 @@
         domain: light
         brightness_pct: 100
     - conditions:
-      - condition: trigger
-        id: door closed
-        alias: Triggered By Door Closed
       - condition: state
         entity_id: binary_sensor.shower
         state: 'off'
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: door closed
+        - condition: trigger
+          id: no motion detected
       sequence:
       - service: timer.start
         data:
@@ -2425,7 +2477,32 @@
         device_id: 624405d34a0a0bc8df3990c131a31bd2
         entity_id: light.bathroom_lights
         domain: light
-  mode: single
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: reload
+        - condition: trigger
+          id: startup
+      - condition: state
+        entity_id: light.bathroom_lights
+        state: 'on'
+      - condition: state
+        entity_id: timer.bathroom_light
+        state: idle
+      - condition: state
+        entity_id: binary_sensor.bathroom_multi_sensor_motion_detection
+        state: 'off'
+      - condition: state
+        entity_id: binary_sensor.shower
+        state: 'off'
+      sequence:
+      - service: timer.start
+        data: {}
+        target:
+          entity_id: timer.bathroom_light
+  mode: parallel
+  max: 10
 - id: '1667193576124'
   alias: Alarm Reminder
   description: ''
