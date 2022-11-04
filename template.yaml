@@ -2,9 +2,9 @@
   - name: "Discord Active"
     state: >
       {{ states('sensor.discord')|float(-1) > 0}}
-  - name: "Shower"
-    state: >
-      {{ states('sensor.bathroom_humidity')|float(0) > 64.9}}
+#  - name: "Shower"
+#    state: >
+ #     {{ states('sensor.bathroom_multi_sensor_humidity')|float(0) > 66}}
   - name: "Bedroom On"
     state: >
       {{ is_state('light.bedroom_lights', 'on') }}

@@ -11,6 +11,7 @@ room: # used for ha menu
     - input_boolean.ac_boost
     - switch.desktop
     - cover.bedroom_blinds
+    - switch.katchy
 home:
   name: Home
   entities: 

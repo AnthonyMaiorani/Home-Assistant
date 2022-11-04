@@ -112,6 +112,14 @@
       - condition: state
         entity_id: binary_sensor.shower
         state: 'on'
+      - condition: device
+        type: is_on
+        device_id: 624405d34a0a0bc8df3990c131a31bd2
+        entity_id: light.bathroom_lights
+        domain: light
+      - condition: state
+        entity_id: input_select.anthony
+        state: Home
       then:
       - service: timer.start
         data: {}
@@ -1375,8 +1383,6 @@
           - input_boolean.breakfast
           - input_boolean.dinner
     - conditions:
-      - condition: trigger
-        id: Feeding
       - condition: or
         conditions:
         - condition: trigger
@@ -1606,7 +1612,7 @@
   trigger:
   - platform: sun
     event: sunset
-    offset: -00:30:00
+    offset: -00:45:00
   condition:
   - condition: or
     conditions:
@@ -1770,6 +1776,14 @@
     event_type: automation_reloaded
     alias: reload
     id: reload
+  - platform: template
+    value_template: "{% if states.switch.exhaust_fan.last_changed is defined %}\n
+      \ {% if as_timestamp(states.switch.exhaust_fan.last_changed)|timestamp_local
+      is defined %}\n    {{ is_state('switch.exhaust_fan', 'on') and is_state('switch.light.bathroom_lights',
+      'on') and\n       as_timestamp(states.switch.exhaust_fan.last_changed) > as_timestamp(now())
+      - (3600) }}\n  {%endif%}\n{%endif%}"
+    alias: turn off
+    id: turn off
   condition: []
   action:
   - choose:
@@ -1821,6 +1835,11 @@
     - conditions:
       - condition: trigger
         id: showerstart
+      - condition: device
+        type: is_on
+        device_id: 624405d34a0a0bc8df3990c131a31bd2
+        entity_id: light.bathroom_lights
+        domain: light
       sequence:
       - service: switch.turn_on
         data: {}
@@ -1843,6 +1862,7 @@
           id: restart
         - condition: trigger
           id: reload
+        alias: restart/reload
       - condition: or
         conditions:
         - condition: state
@@ -1851,11 +1871,18 @@
         - condition: state
           entity_id: switch.exhaust_fan
           state: 'on'
+        alias: shower / fan on
       sequence:
       - if:
         - condition: state
           entity_id: binary_sensor.shower
           state: 'on'
+        - condition: device
+          type: is_on
+          device_id: 624405d34a0a0bc8df3990c131a31bd2
+          entity_id: light.bathroom_lights
+          domain: light
+          enabled: true
         then:
         - service: timer.cancel
           data: {}
@@ -1878,6 +1905,18 @@
           data: {}
           target:
             entity_id: timer.exhaust
+    - conditions:
+      - condition: trigger
+        id: turn off
+      sequence:
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id: switch.exhaust_fan
+      - service: timer.cancel
+        data: {}
+        target:
+          entity_id: timer.exhaust
   mode: queued
   max: 10
 - id: '1666480822238'
@@ -2257,6 +2296,24 @@
           - camera.elitedesk_pet
           - camera.elitedesk_gym
         alias: record front porch and living room and pet and gym
+      - if:
+        - condition: state
+          entity_id: binary_sensor.front_door_open
+          state: 'on'
+        then:
+        - service: automation.turn_off
+          data: {}
+          target:
+            entity_id: automation.porch_notification
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 6
+            milliseconds: 0
+        - service: automation.turn_on
+          data: {}
+          target:
+            entity_id: automation.porch_notification
     - conditions:
       - condition: or
         conditions:
@@ -2352,7 +2409,7 @@
     id: door opened
   - platform: state
     entity_id:
-    - binary_sensor.bathroom_multi_sensor_motion_detection
+    - binary_sensor.bathroom_multi_sensor_motion
     from: 'off'
     to: 'on'
     alias: motion detected
@@ -2371,7 +2428,7 @@
     id: timer finished
   - platform: state
     entity_id:
-    - binary_sensor.bathroom_multi_sensor_motion_detection
+    - binary_sensor.bathroom_multi_sensor_motion
     to: 'off'
     from: 'on'
     for:
@@ -2428,11 +2485,22 @@
         state: 'off'
         alias: Lights are off
       sequence:
-      - type: turn_on
-        device_id: 624405d34a0a0bc8df3990c131a31bd2
-        entity_id: light.bathroom_lights
-        domain: light
-        brightness_pct: 100
+      - if:
+        - condition: device
+          type: is_off
+          device_id: 624405d34a0a0bc8df3990c131a31bd2
+          entity_id: light.bathroom_lights
+          domain: light
+        then:
+        - type: turn_on
+          device_id: 624405d34a0a0bc8df3990c131a31bd2
+          entity_id: light.bathroom_lights
+          domain: light
+          brightness_pct: 100
+      - service: timer.cancel
+        data: {}
+        target:
+          entity_id: timer.bathroom_light
     - conditions:
       - condition: state
         entity_id: binary_sensor.shower
@@ -2443,6 +2511,11 @@
           id: door closed
         - condition: trigger
           id: no motion detected
+      - condition: device
+        type: is_on
+        device_id: 624405d34a0a0bc8df3990c131a31bd2
+        entity_id: light.bathroom_lights
+        domain: light
       sequence:
       - service: timer.start
         data:
@@ -2491,7 +2564,7 @@
         entity_id: timer.bathroom_light
         state: idle
       - condition: state
-        entity_id: binary_sensor.bathroom_multi_sensor_motion_detection
+        entity_id: binary_sensor.bathroom_multi_sensor_motion
         state: 'off'
       - condition: state
         entity_id: binary_sensor.shower
