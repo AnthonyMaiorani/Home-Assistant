@@ -1189,12 +1189,9 @@
     - condition: state
       entity_id: binary_sensor.back_door
       state: 'on'
-    - condition: or
-      conditions:
-      - condition: sun
-        before: sunrise
-      - condition: sun
-        after: sunset
+    - condition: sun
+      before: sunrise
+      after: sunset
     then:
     - service: switch.turn_on
       data: {}
@@ -1222,22 +1219,15 @@
   - condition: not
     conditions:
     - condition: state
-      entity_id: person.riana
-      state: home
-    - condition: state
       entity_id: person.dana
       state: home
+    - condition: state
+      entity_id: input_select.riana
+      state: Just Arrived
+    - condition: state
+      entity_id: input_select.riana
+      state: Home
   action:
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 1
-      milliseconds: 0
-    enabled: false
-  - condition: state
-    state: Just Arrived
-    entity_id: input_select.anthony
-    enabled: false
   - wait_for_trigger:
     - platform: state
       entity_id:
@@ -1247,24 +1237,10 @@
       - lock.front_door
     continue_on_timeout: false
     timeout: 00:30:00
-  - service: notify.mobile_app_iphone
-    data:
-      message: Play music?
-      data:
-        tag: music
-        push:
-          interruption-level: passive
-        shortcut:
-          name: LoFi
-          ignore_result: ignore
-    enabled: false
-  - condition: or
-    conditions:
-    - condition: sun
-      before: sunrise
-    - condition: sun
-      after: sunset
-      after_offset: -00:30:00
+  - condition: sun
+    before: sunrise
+    after: sunset
+    after_offset: -00:45:00
   - service: light.turn_on
     data:
       brightness_pct: 15
@@ -1616,9 +1592,6 @@
   condition:
   - condition: or
     conditions:
-    - condition: state
-      entity_id: person.anthony
-      state: home
     - condition: state
       entity_id: input_select.anthony
       state: Home
@@ -1977,6 +1950,12 @@
     from: 'off'
     alias: food opened
     id: food opened
+  - platform: state
+    entity_id:
+    - binary_sensor.dog_food
+    to: 'off'
+    from: 'on'
+    id: food closed
   condition: []
   action:
   - choose:
@@ -1989,6 +1968,8 @@
           id: door opened
         - condition: trigger
           id: food opened
+        - condition: trigger
+          id: food closed
         alias: door opened or motion detected
       sequence:
       - if:
@@ -2004,12 +1985,9 @@
           target:
             entity_id: switch.laundry_room_light
         else:
-        - condition: state
-          entity_id: timer.laundry_room_light
-          state: active
         - service: timer.start
           data:
-            duration: 00:01:00
+            duration: 00:01:30
           target:
             entity_id: timer.laundry_room_light
     - conditions:
@@ -2032,6 +2010,9 @@
         - condition: state
           entity_id: switch.laundry_room_light
           state: 'off'
+        - condition: state
+          entity_id: binary_sensor.laundry_room_motion
+          state: 'on'
       sequence:
       - service: switch.turn_off
         data: {}
@@ -2076,7 +2057,8 @@
         data: {}
         target:
           entity_id: timer.laundry_room_light
-  mode: single
+  mode: queued
+  max: 10
 - id: '1666594099613'
   alias: Ping Z-Wave Devices
   description: ''
@@ -2243,14 +2225,14 @@
     alias: back door opened
   - platform: state
     entity_id:
-    - binary_sensor.front_door
+    - lock.front_door
     from: 'off'
     to: 'on'
     id: front door opened
     alias: front door opened
   - platform: state
     entity_id:
-    - binary_sensor.front_door
+    - lock.front_door
     from: 'on'
     to: 'off'
     id: front door closed
@@ -2298,7 +2280,7 @@
         alias: record front porch and living room and pet and gym
       - if:
         - condition: state
-          entity_id: binary_sensor.front_door_open
+          entity_id: binary_sensor.front_door
           state: 'on'
         then:
         - service: automation.turn_off
@@ -2450,6 +2432,7 @@
       - condition: sun
         before: sunrise
         alias: Dark Outside
+        after: sunset
       - condition: state
         entity_id: light.bedroom_lights
         state: 'off'
@@ -2527,10 +2510,6 @@
       - condition: trigger
         id: motion detected
         alias: Motion detected
-      - condition: state
-        entity_id: binary_sensor.bathroom_door
-        state: 'off'
-        alias: Door closed
       sequence:
       - service: timer.cancel
         data: {}
@@ -2603,4 +2582,78 @@
         actions:
         - action: Open Alexa App
           title: Open Alexa App
+  mode: single
+- id: '1667745697711'
+  alias: Ecobee
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_select.riana
+  - platform: state
+    entity_id:
+    - input_select.anthony
+  - platform: homeassistant
+    event: start
+  - platform: event
+    event_type: automation_reloaded
+    id: reload
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: select.home_current_mode
+        state: away
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: input_select.anthony
+          state: Home
+        - condition: state
+          entity_id: input_select.anthony
+          state: Just Arrived
+        - condition: state
+          entity_id: input_select.riana
+          state: Home
+        - condition: state
+          entity_id: input_select.riana
+          state: Just Arrived
+      sequence:
+      - service: select.select_option
+        data:
+          option: Home
+        target:
+          entity_id: select.home_current_mode
+    - conditions:
+      - condition: state
+        entity_id: select.home_current_mode
+        state: home
+      - condition: and
+        conditions:
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: input_select.anthony
+            state: Just Left
+          - condition: state
+            entity_id: input_select.anthony
+            state: Away
+          alias: anthony away
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: input_select.riana
+            state: Away
+          - condition: state
+            entity_id: input_select.riana
+            state: Just Left
+          alias: riana away
+        alias: Nobody Home
+      sequence:
+      - service: select.select_option
+        data:
+          option: Away
+        target:
+          entity_id: select.home_current_mode
   mode: single
