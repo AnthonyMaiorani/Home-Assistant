@@ -6,6 +6,12 @@
   # - name: "Shower"
   #   state: >
   #     {{ states('sensor.acurite_humidity')|float(0) > 67.1}}
+  - name: "Expand Card"
+    unique_id: expand_card
+    state: > 
+      {% if states('switch.ac') is defined and states('switch.lrtv') is defined %} 
+      {{ not (states('switch.ac') == "on" or  states('switch.lrtv') == "on") }}
+      {% endif %}
   - name: "Bedroom On"
     state: >
       {{ is_state('light.bedroom_lights', 'on') }}
@@ -118,10 +124,11 @@
         {% elif is_state("binary_sensor.webcam", 'on') -%}
         {% set scenes = ['Webcam'] %}
         {# Music #}
-        {% elif is_state('media_player.spotify_anthony221121', 'playing') and 
-        is_state('switch.desktop', 'off') and 
-        is_state('pyscript.airport_playing', 'True') and not 
-        state_attr('light.bed_lights', 'rgb_color')| join(' ') == '0 255 255'-%}  
+        {% elif is_state('switch.desktop', 'off') 
+        and is_state('media_player.owntone_output_desk', 'on') or 
+        (is_state('pyscript.airport_playing', 'True') and 
+        is_state('media_player.spotify_anthony221121', 'playing')) and not 
+        state_attr('light.bed_lights', 'rgb_color')| join(' ') == '0 255 255'-%} 
         {% set scenes = ['Shooting Stars', 'Cotton Candy', 'Pop Rocks',
         'Rhythmic Northern Lights', 'Meteor Shower', 'Soda', 
         'Pulse Pop Beats', 'Energize', 'Electric purple', 'Mood Movie', 
