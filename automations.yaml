@@ -52,7 +52,9 @@
   - service: script.turn_on
     data: {}
     target:
-      entity_id: script.morning
+      entity_id:
+      - script.morning
+      - script.test
   - service: input_boolean.turn_on
     data: {}
     target:
@@ -305,6 +307,10 @@
       data: {}
       target:
         entity_id: timer.exhaust
+  - service: media_player.turn_off
+    data: {}
+    target:
+      entity_id: media_player.owntone_server
   mode: single
 - id: '1627443167507'
   alias: Bedroom Alerts
@@ -1071,12 +1077,6 @@
   - platform: event
     event_type: automation_reloaded
   condition:
-  - condition: template
-    value_template: "{{ (not states('sensor.nanoleaf_scene') in (\"unavailable\",
-      \"unknown\") and not \nis_state_attr('light.shapes_007f', \"effect\", states('sensor.nanoleaf_scene')))\nor
-      \n(not states('sensor.nanoleaf_auto_brightness') in (\"unavailable\", \"unknown\")
-      and not \nis_state_attr('light.shapes_007f', \"brightness\", states('sensor.nanoleaf_auto_brightness')|int
-      - 2)) }}"
   - condition: or
     conditions:
     - condition: state
@@ -1086,6 +1086,13 @@
       entity_id: light.shapes_ee82
       state: 'on'
   action:
+  - wait_template: "  {{ (not states('sensor.nanoleaf_scene') in (\"unavailable\",
+      \"unknown\") and not \n\n  is_state_attr('light.shapes_007f', \"effect\", states('sensor.nanoleaf_scene')))\n\n
+      \ or \n\n  (not states('sensor.nanoleaf_auto_brightness') in (\"unavailable\",
+      \"unknown\")\n  and not \n\n  is_state_attr('light.shapes_007f', \"brightness\",\n
+      \ states('sensor.nanoleaf_auto_brightness')|int - 2)) }}"
+    continue_on_timeout: false
+    timeout: 00:05:00
   - if:
     - condition: template
       value_template: "{{ not states('sensor.nanoleaf_scene') in (\"unavailable\",
@@ -1750,7 +1757,7 @@
     alias: When timer finishes
   - platform: state
     entity_id:
-    - binary_sensor.shower
+    - input_boolean.shower
     from: 'off'
     to: 'on'
     alias: When shower is turned on
@@ -2465,7 +2472,7 @@
         alias: Dark Outside
         after: sunset
       - condition: state
-        entity_id: light.bedroom_lights
+        entity_id: light.fan_lights
         state: 'off'
         alias: Bedroom Lights are off
       - condition: state

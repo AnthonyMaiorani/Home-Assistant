@@ -2,14 +2,17 @@
   - name: "Discord Active"
     state: >
       {{ states('sensor.discord')|float(-1) > 0}}
-  - name: "Shower"
-    state: >
-      {{ states('sensor.acurite_humidity')|float(0) > 66}}
+    unique_id: discord_active
+  # - name: "Shower"
+  #   state: >
+  #     {{ states('sensor.acurite_humidity')|float(0) > 67.1}}
   - name: "Bedroom On"
     state: >
       {{ is_state('light.bedroom_lights', 'on') }}
+    unique_id: bedroom_on
 - sensor:
   - name: "AC Thermostat Temperature"
+    unique_id: ac_thermostat_temperature
     state: >
       {% if states('person.anthony')|lower in ['utd', 'raytheon', 'away', 'not_home'] 
       or not is_state('switch.ac', "on") or is_state('script.night', "on") %} unknown
@@ -21,6 +24,7 @@
       {%- else -%} 71
       {%- endif %}
   - name: "Alarm Display"
+    unique_id: alarm_display
     state: >
       {% if states.sensor.anthony_s_echo_show_next_alarm.state in ['unknown' ,'unavailable'] or 
       (as_datetime(states.sensor.anthony_s_echo_show_next_alarm.state) -
@@ -31,6 +35,7 @@
       {{ (as_datetime(states.sensor.anthony_s_echo_show_next_alarm.state).strftime("%s") | int) | timestamp_custom("%-I:%M %p", false) }}
       {%- endif %}
   - name: "Nanoleaf Auto-Brightness"
+    unique_id: nanoleaf_auto_brightness
     state: >
       {# Off #}
       {% if not states('input_select.anthony') in ['Just Arrived', 'Home'] or
@@ -66,6 +71,7 @@
     seconds: /3
   sensor:
     - name: colorloopstate
+      unique_id: color_loop_state
       state: >
         {% if states('sensor.colorloopstate')|int(0) == 4 %} 0
         {% else %} {{ states('sensor.colorloopstate')|int(0) + 1 }}
@@ -102,6 +108,7 @@
     attribute: media_playlist
   sensor:
     - name: "Nanoleaf Scene"
+      unique_id: nanoleaf_scene
       state: >
         {# Off #}
         {% if is_state('light.bedroom_lights', 'off') and expand('light.bedroom_lights')

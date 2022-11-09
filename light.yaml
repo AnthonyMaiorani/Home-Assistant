@@ -1,5 +1,6 @@
 - platform: group
   name: Bedroom Lights
+  unique_id: bedroom_lights
   entities:
     - light.bed_lights
     - light.smart_bulb_1
@@ -10,12 +11,14 @@
     - light.light_switch_corner
     - light.wyze_bulb_1
 - platform: group
+  unique_id: led_strips
   name: LED Strips
   entities:
     - light.bed_lights
     - light.desk_lights
     - light.closet_lights
 - platform: group
+  unique_id: fan_lights
   name: Fan Lights
   entities:
     - light.smart_bulb_1

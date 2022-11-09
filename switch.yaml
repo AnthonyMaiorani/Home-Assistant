@@ -7,6 +7,7 @@
 - platform: template
   switches:
     ac_boost:
+      unique_id: ac_boost
       friendly_name: "AC Boost"
       value_template: "{{ is_state('input_boolean.ac_boost', 'on') }}"
       turn_on:
@@ -19,6 +20,7 @@
               entity_id: input_boolean.ac_boost
     privacy:
       friendly_name: "Privacy"
+      unique_id: privacy
       value_template: "{{ is_state('input_boolean.privacy', 'on') }}"
       turn_on:
         - service: input_boolean.turn_on
@@ -29,6 +31,7 @@
           target:
               entity_id: input_boolean.privacy
     bedroomtoggle:
+      unique_id: bedroom_toggle
       value_template: "{{ is_state('light.bedroom_lights', 'on') }}"
       turn_on:
         - parallel:
@@ -47,6 +50,7 @@
                 - climate.bedroom_ac
     ac:
       friendly_name: AC
+      unique_id: ac
       value_template: "{{ is_state('climate.bedroom_ac', 'cool') }}"
       turn_on:
       - service: climate.set_hvac_mode
@@ -65,6 +69,7 @@
         target:
           entity_id: timer.ac
     lrtv:
+      unique_id: lrtv
       friendly_name: Living Room TV
       value_template: "{{ not is_state('media_player.living_room_denon', 'off') }}"
       turn_on:
@@ -76,6 +81,7 @@
           entity_id:
             - media_player.living_room
     fronttv:
+      unique_id: fronttv
       friendly_name: Front TV
       value_template: "{{ not states('media_player.front') in ['standby', 'unavailable'] }}"
       turn_on:
@@ -87,6 +93,7 @@
           entity_id:
             - media_player.front
     guesttv:
+      unique_id: guesttv
       friendly_name: Guest TV
       value_template: "{{ is_state('remote.guest_bedroom_tv', 'on') }}"
       turn_on:
@@ -98,6 +105,7 @@
           entity_id:
             - media_player.guest_bedroom_tv
     mastertv:
+      unique_id: mastertv
       friendly_name: Master TV
       value_template: "{{ is_state('remote.master_bedroom_tv', 'on') }}"
       turn_on:
@@ -109,6 +117,7 @@
           entity_id:
             - media_player.master_bedroom_tv
     desktop:
+      unique_id: desktop
       friendly_name: Desktop
       value_template: "{{ states('binary_sensor.desktop_power') }}"
       turn_on:

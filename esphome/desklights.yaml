@@ -32,9 +32,9 @@ light:
   - platform: rgb
     id: leds
     name: "${friendly_name}"
-    red: output_red
-    green: output_green
-    blue: output_blue
+    red: output_red_2
+    green: output_green_2
+    blue: output_blue_2
     restore_mode: RESTORE_DEFAULT_OFF
     effects:
       - random:
@@ -65,9 +65,9 @@ light:
   - platform: rgb
     id: closetleds
     name: "${friendly_name_2}"
-    red: output_red_2
-    green: output_green_2
-    blue: output_blue_2
+    red: output_red
+    green: output_green
+    blue: output_blue
     restore_mode: RESTORE_DEFAULT_OFF
     effects:
       - random:
