@@ -50,3 +50,32 @@ timer:
     name: "Laundry Room Light Timer"
     restore: true
     icon: mdi:alarm-light
+
+alarm_control_panel:
+  - platform: template
+    panels:
+      safe_alarm_panel:
+        name: "Alarm Panel"
+        value_template: "{{states('sensor.alarm_system_status')}}"
+        code_arm_required: false
+        
+        arm_away:
+          - service: esphome.alarm_alarm_arm_away
+                  
+        arm_home:
+          - service: esphome.alarm_alarm_arm_home
+          
+        arm_night:
+          - service: esphome.alarm_alarm_arm_night
+            data_template:
+              code: '{{code}}' #if you didnt set it in the yaml, then send the code here
+          
+        disarm:
+          - service: esphome.alarm_alarm_disarm
+            data_template:
+              code: '{{code}}'       
+
+logger:
+  default: info
+  logs:
+    yalexs: debug

@@ -91,7 +91,15 @@
     - input_boolean.ac_boost
     - switch.ac
     to: 'off'
-  condition: []
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_select.anthony
+      state: Home
+    - condition: state
+      entity_id: input_select.anthony
+      state: Just Arrived
   action:
   - if:
     - condition: trigger
@@ -134,6 +142,9 @@
         data: {}
         target:
           entity_id: timer.ac
+  - choose:
+    - conditions: []
+      sequence: []
   mode: single
 - id: 43a25b65afed4a4680f5ec81172f11e8
   alias: Startup Actions
@@ -1660,6 +1671,14 @@
     data: {}
     target:
       entity_id: switch.ac
+  - service: timer.cancel
+    data: {}
+    target:
+      entity_id: timer.ac
+  - service: input_boolean.turn_off
+    data: {}
+    target:
+      entity_id: input_boolean.ac_boost
   mode: single
 - id: '1665996041801'
   alias: Katchy
@@ -2268,34 +2287,38 @@
         - condition: trigger
           id: front door closed
         alias: When Front door opened or closed
+      - condition: state
+        entity_id: input_boolean.privacy
+        state: 'off'
       sequence:
-      - service: blueiris.trigger_camera
-        data: {}
-        target:
-          entity_id:
-          - camera.elitedesk_front_porch
-          - camera.elitedesk_living_room
-          - camera.elitedesk_pet
-          - camera.elitedesk_gym
-        alias: record front porch and living room and pet and gym
-      - if:
-        - condition: state
-          entity_id: binary_sensor.front_door
-          state: 'on'
-        then:
-        - service: automation.turn_off
+      - parallel:
+        - service: blueiris.trigger_camera
           data: {}
           target:
-            entity_id: automation.porch_notification
-        - delay:
-            hours: 0
-            minutes: 0
-            seconds: 6
-            milliseconds: 0
-        - service: automation.turn_on
-          data: {}
-          target:
-            entity_id: automation.porch_notification
+            entity_id:
+            - camera.elitedesk_front_porch
+            - camera.elitedesk_living_room
+            - camera.elitedesk_pet
+            - camera.elitedesk_gym
+          alias: record front porch and living room and pet and gym
+        - if:
+          - condition: state
+            entity_id: binary_sensor.front_door
+            state: 'on'
+          then:
+          - service: automation.turn_off
+            data: {}
+            target:
+              entity_id: automation.porch_notification
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 6
+              milliseconds: 0
+          - service: automation.turn_on
+            data: {}
+            target:
+              entity_id: automation.porch_notification
     - conditions:
       - condition: or
         conditions:
@@ -2304,6 +2327,9 @@
         - condition: trigger
           id: back door closed
         alias: When back door opened or closed
+      - condition: state
+        entity_id: input_boolean.privacy
+        state: 'off'
       sequence:
       - service: blueiris.trigger_camera
         data: {}
@@ -2351,6 +2377,11 @@
         == 1 %}peice{%else%}peices{%endif%} of mail were delivered.'
       data:
         entity_id: camera.mail_usps_camera
+        push:
+          sound:
+            name: default
+            critical: 1
+            volume: 0.3
   mode: single
 - id: '1666941460103'
   alias: PSU Safety
@@ -2602,9 +2633,6 @@
   action:
   - choose:
     - conditions:
-      - condition: state
-        entity_id: select.home_current_mode
-        state: away
       - condition: or
         conditions:
         - condition: state
@@ -2622,13 +2650,14 @@
       sequence:
       - service: select.select_option
         data:
-          option: Home
+          option: home
         target:
           entity_id: select.home_current_mode
+      - service: button.press
+        data: {}
+        target:
+          entity_id: button.home_clear_hold
     - conditions:
-      - condition: state
-        entity_id: select.home_current_mode
-        state: home
       - condition: and
         conditions:
         - condition: or
@@ -2653,7 +2682,7 @@
       sequence:
       - service: select.select_option
         data:
-          option: Away
+          option: away
         target:
           entity_id: select.home_current_mode
   mode: single

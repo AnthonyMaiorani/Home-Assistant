@@ -1,5 +1,5 @@
 esphome:
-  name: wt32-eth01
+  name: wt32-eth01-2
 
 esp32:
   board: esp32dev
@@ -20,8 +20,8 @@ ethernet:
     dns1: !secret dns1
 
 substitutions:
-  static_ip: 192.168.1.57
-  friendly_name: "WT32-ETH01"
+  static_ip: 192.168.1.76
+  friendly_name: "WT32-ETH01-2"
 
 logger:
 api:
