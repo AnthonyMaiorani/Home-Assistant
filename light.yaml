@@ -9,7 +9,6 @@
     - light.desk_lights
     - light.light_switch
     - light.light_switch_corner
-    - light.wyze_bulb_1
 - platform: group
   unique_id: led_strips
   name: LED Strips
@@ -24,4 +23,3 @@
     - light.smart_bulb_1
     - light.smart_bulb_2
     - light.smart_bulb_3
-    - light.wyze_bulb_1
