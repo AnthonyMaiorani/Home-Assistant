@@ -1768,6 +1768,7 @@
     from: 'on'
     to: 'off'
     id: turnedoff
+    alias: Turned Off
   - platform: homeassistant
     event: start
     id: restart
@@ -2371,7 +2372,7 @@
       \n        'last_triggered').day|int(now().day) < now().day %}\n          {%
       if states('input_select.anthony') in ['Home', \n          'Just Arrived'] %}
       {% set trigger = 'true' %}\n          {% elif distance(states.device_tracker.iphone)
-      is not none %}\n            {% if distance(states.device_tracker.iphone) < 0.7
+      is not none %}\n            {% if distance(states.device_tracker.iphone) < 1.2
       %}\n              {% set trigger = 'true' %}\n            {% endif %}\n          {%
       endif %}\n        {% endif %}\n      {% endif %}\n    {% endif %}\n  {% endif
       %}\n{% endif %}\n{{ trigger }}"

@@ -110,6 +110,12 @@
       - "False"
   - platform: state
     entity_id:
+      - media_player.owntone_output_desk
+    to: 
+      - "on"
+      - "off"
+  - platform: state
+    entity_id:
       - media_player.spotify_anthony221121
     attribute: media_playlist
   sensor:
@@ -125,7 +131,8 @@
         {% set scenes = ['Webcam'] %}
         {# Music #}
         {% elif is_state('switch.desktop', 'off') 
-        and is_state('media_player.owntone_output_desk', 'on') or 
+        and (is_state('media_player.owntone_output_desk', 'on') and
+        is_state('media_player.owntone_server', 'playing')) or 
         (is_state('pyscript.airport_playing', 'True') and 
         is_state('media_player.spotify_anthony221121', 'playing')) and not 
         state_attr('light.bed_lights', 'rgb_color')| join(' ') == '0 255 255'-%} 

@@ -2,8 +2,8 @@
 substitutions:
   static_ip: 192.168.1.75
   systemName: "alarm"
-  accessCode: "4112800"
-  keypadAddr: "16" #set this to an unused keypad address slot. Make sure to enable it in  your vista panel programming
+  accessCode: "4112"
+  keypadAddr: "17" #set this to an unused keypad address slot. Make sure to enable it in  your vista panel programming
   #esp32
   rxPin: "5" #GPIO pin to use for data receive (yellow line) 
   txPin: "17" #GPIO pin to use for data transmit (green line)
@@ -144,13 +144,6 @@ custom_component:
         case 4: id(z4).publish_state(open); break;
         case 5: id(z5).publish_state(open); break;
         case 6: id(z6).publish_state(open); break;
-        case 7: id(z7).publish_state(open); break;
-        case 8: id(z8).publish_state(open); break;
-        
-        case 9: id(z9).publish_state(open); break;
-        case 10: id(z10).publish_state(open); break;
-       
-        case 17: id(z17).publish_state(open); break;
       }
     }); //you can add more zones above . Also add the text sensor entry below
     
@@ -255,48 +248,48 @@ text_sensor:
     #zone definitions
   - platform: template
     id: z1
-    name: "$systemName Front door"
+    name: "$systemName Front/Garage door"
 
   - platform: template
     id: z2
-    name: "$systemName Garage door"
+    name: "$systemName Living/Dining/Bedroom Windows"
 
   - platform: template
     id: z3
-    name: "$systemName Back door"
+    name: "$systemName Kitchen/Nook/Den/Ba"
 
   - platform: template
     id: z4
-    name: "$systemName Living room window"
+    name: "$systemName Master Windows"
 
   - platform: template
     id: z5
-    name: "$systemName Dining room window"
+    name: "$systemName Bedroom Window"
 
   - platform: template
     id: z6
-    name: "$systemName Family room window LF"
+    name: "$systemName Motion"
 
-  - platform: template
-    id: z7
-    name: "$systemName Family room window RF"
+#  - platform: template
+#    id: z7
+#    name: "$systemName Family room window RF"
 
-  - platform: template
-    id: z8
-    name: "$systemName Basement windows"
+#  - platform: template
+#    id: z8
+#    name: "$systemName Basement windows"
     
-  - platform: template
-    id: z9
-    name: "$systemName Basement windows9"
+#  - platform: template
+#    id: z9
+#    name: "$systemName Basement windows9"
     
-  - platform: template
-    id: z10
-    name: "$systemName Basement windows10"
+#  - platform: template
+#    id: z10
+#    name: "$systemName Basement windows10"
  
 
-  - platform: template
-    id: z17
-    name: "$systemName zone 17"
+#  - platform: template
+#    id: z17
+#    name: "$systemName zone 17"
 
     #system status 
   - platform: template

@@ -14,8 +14,8 @@ template: !include template.yaml
 mqtt: !include mqtt.yaml
 wake_on_lan:
 
-homeassistant:
-  customize: !include customize.yaml
+#homeassistant:
+#  customize: !include customize.yaml
 
 #reduce db size
 recorder:
