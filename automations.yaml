@@ -1757,7 +1757,7 @@
     alias: When timer finishes
   - platform: state
     entity_id:
-    - input_boolean.shower
+    - binary_sensor.shower
     from: 'off'
     to: 'on'
     alias: When shower is turned on
