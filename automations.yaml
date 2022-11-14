@@ -212,6 +212,10 @@
       data: {}
       target:
         entity_id: automation.ping_z_wave_devices
+    - service: input_boolean.turn_off
+      data: {}
+      target:
+        entity_id: input_boolean.alexa_notification_sent
   - service: automation.turn_on
     data: {}
     target:
@@ -641,56 +645,6 @@
           entity_id: light.closet_lights
     default: []
   mode: single
-- id: '1635104348023'
-  alias: Camera Notifications
-  description: ''
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.front_porch_motion
-    to: 'on'
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 1
-    id: fp
-  - platform: state
-    entity_id: binary_sensor.backyard_motion
-    to: 'on'
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 1
-    id: by
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: fp
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: input_select.riana
-          state: Just Arrived
-      sequence:
-      - service: notify.mobile_app_iphone
-        data:
-          message: Person detected at Front Porch
-          data:
-            image: /local/FP.jpg
-    - conditions:
-      - condition: trigger
-        id: by
-      - condition: template
-        value_template: '{{states(''person.riana'') != ''home''}}'
-      sequence:
-      - service: notify.mobile_app_iphone
-        data:
-          message: Person detected at Backyard
-          data:
-            image: /local/backyard.jpg
-    default: []
-  mode: single
 - id: '1644476253725'
   alias: Bed Occupancy Detected
   description: If motion detected in bed under certain circumstances, turn off overhead
@@ -743,9 +697,9 @@
       - condition: state
         entity_id: input_select.anthony
         state: Home
-      - condition: state
+      - condition: numeric_state
         entity_id: zone.home
-        state: '1'
+        below: 2
       then:
       - service: light.turn_off
         data: {}
@@ -763,6 +717,8 @@
           - switch.guesttv
           - switch.laundry_room_light
           - switch.gym_fan
+          - switch.dining_room_light
+          - switch.master_hallway_light
     - service: input_boolean.turn_off
       data: {}
       target:
@@ -1266,10 +1222,18 @@
       entity_id:
       - light.kitchen_lights
       - light.hallway_lights
-  - service: switch.turn_on
-    data: {}
-    target:
-      entity_id: switch.living_room_fan
+  - if:
+    - type: is_temperature
+      condition: device
+      device_id: a2fc25d35733afab37fd7be1a943cdcf
+      entity_id: sensor.home_current_temperature
+      domain: sensor
+      above: 70
+    then:
+    - service: switch.turn_on
+      data: {}
+      target:
+        entity_id: switch.living_room_fan
   - wait_for_trigger:
     - platform: state
       entity_id:
@@ -1616,9 +1580,6 @@
     - condition: state
       entity_id: input_select.anthony
       state: Just Arrived
-  - condition: state
-    entity_id: light.kitchen_lights
-    state: 'off'
   action:
   - service: light.turn_on
     data:
@@ -1627,6 +1588,28 @@
       entity_id:
       - light.kitchen_lights
       - light.hallway_lights
+  - if:
+    - condition: state
+      entity_id: light.kitchen_lights
+      state: 'off'
+    then:
+    - service: light.turn_on
+      data:
+        brightness_pct: 15
+      target:
+        entity_id:
+        - light.kitchen_lights
+  - if:
+    - condition: state
+      entity_id: light.kitchen_lights
+      state: 'off'
+    then:
+    - service: light.turn_on
+      data:
+        brightness_pct: 15
+      target:
+        entity_id:
+        - light.hallway_lights
   mode: single
 - id: '1665630463210'
   alias: Turn off AC when not in room
@@ -2102,6 +2085,8 @@
     - switch.porch_light
     - switch.laundry_room_light
     - light.bathroom_lights
+    - switch.dining_room_light
+    - switch.master_hallway_light
     to: unavailable
   condition: []
   action:
@@ -2117,7 +2102,6 @@
         data: {}
         target:
           entity_id:
-          - button.node_25_ping
           - button.node_18_ping
           - button.node_19_ping
           - button.node_26_ping
@@ -2127,6 +2111,9 @@
           - button.laundry_room_light_ping
           - button.gym_fan_ping
           - button.node_32_ping
+          - button.dining_room_light_ping
+          - button.node_25_ping
+          - button.master_hallway_light_ping
       - delay:
           hours: 0
           minutes: 0
@@ -2164,6 +2151,19 @@
         when: '{{trigger.payload_json["after"]["start_time"]|int}}'
         entity_id: camera.{{trigger.payload_json["after"]["camera"]}}
     enabled: false
+  - if:
+    - condition: state
+      entity_id: input_boolean.alexa_notification_sent
+      for:
+        hours: 0
+        minutes: 1
+        seconds: 0
+      state: 'on'
+    then:
+    - service: input_boolean.turn_off
+      data: {}
+      target:
+        entity_id: input_boolean.alexa_notification_sent
   - choose:
     - conditions:
       - condition: template
@@ -2183,11 +2183,19 @@
         data: {}
         target:
           entity_id: camera.elitedesk_front_porch
+      - condition: template
+        value_template: "{{ is_state('input_boolean.alexa_notification_sent', 'off')
+          and not \n(is_state('binary_sensor.front_door', 'on') and\n(now() - states.binary_sensor.front_door.last_changed).total_seconds()
+          < 5) }}"
       - service: notify.alexa_media_anthony_s_2nd_echo_show_5_2nd_gen
         data:
           message: Someone is at the front door
           data:
             type: tts
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id: input_boolean.alexa_notification_sent
     - conditions:
       - condition: template
         value_template: '{{ trigger.payload_json[''after''][''camera''] == ''backyard''
@@ -2208,7 +2216,8 @@
         target:
           entity_id:
           - camera.elitedesk_garage
-  mode: single
+  mode: parallel
+  max: 10
 - id: '1666854622989'
   alias: Porch Notification
   description: ''
@@ -2391,32 +2400,6 @@
             critical: 1
             volume: 0.3
   mode: single
-- id: '1666941460103'
-  alias: PSU Safety
-  description: ''
-  trigger:
-  - type: unsafe
-    platform: device
-    device_id: 0d8385157604101c280ca9507b833fc9
-    entity_id: binary_sensor.z_wave_plug_power_management_over_current_detected
-    domain: binary_sensor
-  - type: unsafe
-    platform: device
-    device_id: 0d8385157604101c280ca9507b833fc9
-    entity_id: binary_sensor.z_wave_plug_power_management_over_load_detected
-    domain: binary_sensor
-  - type: unsafe
-    platform: device
-    device_id: 0d8385157604101c280ca9507b833fc9
-    entity_id: binary_sensor.z_wave_plug_power_management_over_voltage_detected
-    domain: binary_sensor
-  condition: []
-  action:
-  - type: turn_off
-    device_id: 0d8385157604101c280ca9507b833fc9
-    entity_id: switch.psu
-    domain: switch
-  mode: single
 - id: '1667124189208'
   alias: Bathroom Lights
   description: ''
@@ -2464,6 +2447,20 @@
   - platform: event
     event_type: automation_reloaded
     id: reload
+  - platform: state
+    entity_id:
+    - binary_sensor.aqara_lumi_motion_ac01_occupancy
+    to: 'off'
+    from: 'on'
+    alias: fp1
+    id: fp1
+  - platform: state
+    entity_id:
+    - binary_sensor.shower
+    from: 'on'
+    to: 'off'
+    alias: shower stopped
+    id: shower stopped
   condition: []
   action:
   - choose:
@@ -2556,18 +2553,34 @@
           entity_id: timer.bathroom_light
         alias: Cancel Timer, room occupied
     - conditions:
-      - condition: trigger
-        id: timer finished
-        alias: Timer Finished
       - condition: state
         entity_id: binary_sensor.shower
         state: 'off'
         alias: Not showering
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: timer finished
+        - condition: trigger
+          id: fp1
+        - condition: trigger
+          id: shower stopped
+      - condition: state
+        entity_id: binary_sensor.bathroom_multi_sensor_motion
+        state: 'off'
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 20
       sequence:
       - type: turn_off
         device_id: 624405d34a0a0bc8df3990c131a31bd2
         entity_id: light.bathroom_lights
         domain: light
+      - service: timer.cancel
+        data: {}
+        target:
+          entity_id: timer.bathroom_light
     - conditions:
       - condition: or
         conditions:

@@ -3,9 +3,9 @@
   unique_id: bedroom_lights
   entities:
     - light.bed_lights
-    - light.smart_bulb_1
-    - light.smart_bulb_2
-    - light.smart_bulb_3
+    - light.wyze_bulb_1
+    - light.wyze_bulb_2
+    - light.wyze_bulb_3
     - light.desk_lights
     - light.light_switch
     - light.light_switch_corner
@@ -20,6 +20,6 @@
   unique_id: fan_lights
   name: Fan Lights
   entities:
-    - light.smart_bulb_1
-    - light.smart_bulb_2
-    - light.smart_bulb_3
+    - light.wyze_bulb_1
+    - light.wyze_bulb_2
+    - light.wyze_bulb_3

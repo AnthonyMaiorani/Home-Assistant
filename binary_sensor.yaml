@@ -12,5 +12,5 @@
   min_on_time: 30
   max_on_time: 1800
   sample_interval: 5
-  min_humidity: 65
+  min_humidity: 55
   unique_id: shower

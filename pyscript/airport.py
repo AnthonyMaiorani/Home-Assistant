@@ -4,7 +4,7 @@ import plistlib
 state.persist("pyscript.airport_playing")
 
 
-@time_trigger("period(2020/01/01, 4sec)")
+@time_trigger("period(2020/01/01, 5sec)")
 async def get_giga_state():
     async with aiohttp.ClientSession() as session:
         try:

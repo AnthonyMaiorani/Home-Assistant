@@ -234,11 +234,12 @@ morning:
           entity_id:
           - light.glide
         data: {}
-    - data:
-        brightness: 255
-        effect: None
-        color_temp: 500
-      service: light.turn_on
+    - service: light.turn_on
+      data:
+        brightness_pct: 100
+        hs_color:
+        - 30.236
+        - 49.804
       target:
         entity_id: light.fan_lights
     - data: {}
@@ -376,7 +377,7 @@ start_car:
   mode: single
   icon: mdi:car
 test:
-  alias: Music
+  alias: Play Music
   sequence:
   - service: media_player.select_source
     data:
@@ -420,10 +421,9 @@ test:
       entity_id: media_player.owntone_output_desk
   - service: media_player.volume_set
     data:
-      volume_level: 0.05
+      volume_level: 0.85
     target:
       entity_id: media_player.owntone_output_front
-    enabled: true
   - service: media_player.volume_set
     data:
       volume_level: 0.45
@@ -444,6 +444,8 @@ test:
     data: {}
     target:
       entity_id: media_player.owntone_server
+  - event: event_change_nanoleaf
+    event_data: {}
   - delay:
       hours: 0
       minutes: 0
@@ -501,7 +503,7 @@ lofi:
       entity_id: media_player.owntone_output_desk
   - service: media_player.volume_set
     data:
-      volume_level: 0.05
+      volume_level: 0.8
     target:
       entity_id: media_player.owntone_output_front
   - service: media_player.volume_set
@@ -519,5 +521,7 @@ lofi:
     data: {}
     target:
       entity_id: media_player.owntone_server
+  - event: event_change_nanoleaf
+    event_data: {}
   mode: single
   icon: mdi:meditation

@@ -116,6 +116,12 @@
       - "off"
   - platform: state
     entity_id:
+      - media_player.owntone_server
+    to: 
+      - "paused"
+      - "playing"
+  - platform: state
+    entity_id:
       - media_player.spotify_anthony221121
     attribute: media_playlist
   sensor:
