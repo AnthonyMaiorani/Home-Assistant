@@ -216,16 +216,13 @@ action:
                 clickAction: '{{base_url}}/api/frigate/notifications/{{id}}/{{camera}}/clip.mp4'
                 ttl: '{{ iif(critical, 0, 3600000) }}'
                 priority: '{{ iif(critical, ''high'', ''normal'') }}'
-                url: '{{base_url}}/api/frigate/notifications/{{id}}/{{camera}}/clip.mp4'
+                url: "http://elitedesk:81/ui3.htm?cam=FP"
                 attachment:
                   url: /api/frigate/notifications/{{id}}/snapshot.jpg
                 push:
                   interruption-level: '{{ iif(critical, ''critical'', ''active'')
                     }}'
                 actions:
-                - action: URI
-                  title: View Clip
-                  uri: '{{base_url}}/api/frigate/notifications/{{id}}/{{camera}}/clip.mp4'
                 - action: silence-{{ camera }}
                   title: Silence New Notifications
                   destructive: true
@@ -240,16 +237,13 @@ action:
                 clickAction: '{{base_url}}/api/frigate/notifications/{{id}}/{{camera}}/clip.mp4'
                 ttl: '{{ iif(critical, 0, 3600000) }}'
                 priority: '{{ iif(critical, ''high'', ''normal'') }}'
-                url: '{{base_url}}/api/frigate/notifications/{{id}}/{{camera}}/clip.mp4'
+                url: "http://elitedesk:81/ui3.htm?cam=FP"
                 attachment:
                   url: /api/frigate/notifications/{{id}}/snapshot.jpg
                 push:
                   interruption-level: '{{ iif(critical, ''critical'', ''active'')
                     }}'
                 actions:
-                - action: URI
-                  title: View Clip
-                  uri: '{{base_url}}/api/frigate/notifications/{{id}}/{{camera}}/clip.mp4'
                 - action: silence-{{ camera }}
                   title: Silence New Notifications
                   destructive: true
@@ -307,7 +301,7 @@ action:
                     clickAction: '{{base_url}}/api/frigate/notifications/{{id}}/{{camera}}/clip.mp4'
                     ttl: '{{ iif(critical, 0, 3600000) }}'
                     priority: '{{ iif(critical, ''high'', ''normal'') }}'
-                    url: '{{base_url}}/api/frigate/notifications/{{id}}/{{camera}}/clip.mp4'
+                    url: "http://elitedesk:81/ui3.htm?cam=FP"
                     attachment:
                       url: /api/frigate/notifications/{{id}}/snapshot.jpg
                     sound: '{{ iif(update, ''none'', ''default'') }}'
@@ -315,9 +309,6 @@ action:
                       interruption-level: '{{ iif(critical, ''critical'', ''active'')
                         }}'
                     actions:
-                    - action: URI
-                      title: View Clip
-                      uri: '{{base_url}}/api/frigate/notifications/{{id}}/{{camera}}/clip.mp4'
                     - action: silence-{{ camera }}
                       title: Silence New Notifications
                       destructive: true
@@ -333,7 +324,7 @@ action:
                     clickAction: '{{base_url}}/api/frigate/notifications/{{id}}/{{camera}}/clip.mp4'
                     ttl: '{{ iif(critical, 0, 3600000) }}'
                     priority: '{{ iif(critical, ''high'', ''normal'') }}'
-                    url: '{{base_url}}/api/frigate/notifications/{{id}}/{{camera}}/clip.mp4'
+                    url: "http://elitedesk:81/ui3.htm?cam=FP"
                     attachment:
                       url: /api/frigate/notifications/{{id}}/snapshot.jpg
                     sound: '{{ iif(update, ''none'', ''default'') }}'
@@ -341,9 +332,6 @@ action:
                       interruption-level: '{{ iif(critical, ''critical'', ''active'')
                         }}'
                     actions:
-                    - action: URI
-                      title: View Clip
-                      uri: '{{base_url}}/api/frigate/notifications/{{id}}/{{camera}}/clip.mp4'
                     - action: silence-{{ camera }}
                       title: Silence New Notifications
                       destructive: true
