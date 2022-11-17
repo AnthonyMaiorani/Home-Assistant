@@ -79,3 +79,11 @@ logger:
   default: info
   logs:
     yalexs: debug
+
+notify:
+  - name: anthonys_devices
+    platform: group
+    services:
+      - service: mobile_app_iphone
+      - service: mobile_app_ipad_pro
+      - service: mobile_app_macbook

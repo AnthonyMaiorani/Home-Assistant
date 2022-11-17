@@ -31,15 +31,20 @@
       data:
         transition: 45
         effect: None
-        color_temp: 500
         brightness: 255
+        hs_color:
+        - 30.353
+        - 33.597
       target:
-        entity_id: light.fan_lights
+        entity_id:
+        - light.fan_lights
+        - light.desk_lights
+        - light.bed_lights
     - service: light.turn_on
       data:
         effect: Vibrant Sunrise
-        transition: 45
         brightness_pct: 100
+        transition: 45
       target:
         entity_id:
         - light.shapes_007f
@@ -1339,6 +1344,11 @@
       sequence:
       - service: notify.mobile_app_iphone
         data:
+          message: clear_notification
+          data:
+            tag: dog-food
+      - service: notify.mobile_app_iphone
+        data:
           message: Lola hasn't eaten breakfast yet
           data:
             push:
@@ -1353,6 +1363,11 @@
         entity_id: input_boolean.dinner
         state: 'off'
       sequence:
+      - service: notify.mobile_app_iphone
+        data:
+          message: clear_notification
+          data:
+            tag: dog-food
       - service: notify.mobile_app_iphone
         data:
           message: Lola hasn't eaten dinner yet
@@ -1431,6 +1446,11 @@
                       critical: 1
                       volume: 0.3
               enabled: false
+      - service: notify.mobile_app_iphone
+        data:
+          message: clear_notification
+          data:
+            tag: dog-food
       - delay:
           hours: 0
           minutes: 5
@@ -1514,6 +1534,11 @@
       sequence:
       - service: notify.mobile_app_iphone
         data:
+          message: clear_notification
+          data:
+            tag: dog-medicine
+      - service: notify.mobile_app_iphone
+        data:
           message: Lola hasn't gotten her medicine yet
           data:
             push:
@@ -1528,6 +1553,11 @@
         entity_id: input_boolean.night_medicine
         state: 'off'
       sequence:
+      - service: notify.mobile_app_iphone
+        data:
+          message: clear_notification
+          data:
+            tag: dog-medicine
       - service: notify.mobile_app_iphone
         data:
           message: Lola hasn't gotten her medicine yet
@@ -1582,6 +1612,11 @@
               target:
                 entity_id: input_boolean.night_medicine
             else: []
+      - service: notify.mobile_app_iphone
+        data:
+          message: clear_notification
+          data:
+            tag: dog-medicine
     - conditions:
       - condition: trigger
         id: night medicine reminder
@@ -1592,6 +1627,11 @@
         entity_id: input_boolean.night_medicine
         state: 'off'
       sequence:
+      - service: notify.mobile_app_iphone
+        data:
+          message: clear_notification
+          data:
+            tag: dog-medicine
       - service: notify.mobile_app_iphone
         data:
           message: It's time to give Lola her medicine
@@ -2259,7 +2299,6 @@
     path: hunterjm/frigate_0.10_notification.yaml
     input:
       camera: porch
-      notify_device: 2f9895582e5a0adcb1c85c73c972294a
       base_url: https://maioranihome.duckdns.org
       update_thumbnail: false
       labels:
@@ -2267,6 +2306,7 @@
       cooldown: 100
       silence_timer: 60
       loiter_timer: 0
+      notify_group: anthonys_devices
 - id: '1666891695746'
   alias: Camera Triggers
   description: ''
@@ -2480,6 +2520,11 @@
     to: 'off'
     alias: shower stopped
     id: shower stopped
+  - platform: state
+    entity_id:
+    - binary_sensor.shower
+    to: 'on'
+    id: shower started
   condition: []
   action:
   - choose:
@@ -2517,11 +2562,9 @@
           id: door opened
         - condition: trigger
           id: motion detected
+        - condition: trigger
+          id: shower started
         alias: Presence Detected
-      - condition: state
-        entity_id: light.bathroom_lights
-        state: 'off'
-        alias: Lights are off
       sequence:
       - if:
         - condition: device
@@ -2557,20 +2600,10 @@
       sequence:
       - service: timer.start
         data:
-          duration: 00:01:00
+          duration: 00:03:00
         target:
           entity_id: timer.bathroom_light
         alias: Start timer
-    - conditions:
-      - condition: trigger
-        id: motion detected
-        alias: Motion detected
-      sequence:
-      - service: timer.cancel
-        data: {}
-        target:
-          entity_id: timer.bathroom_light
-        alias: Cancel Timer, room occupied
     - conditions:
       - condition: state
         entity_id: binary_sensor.shower
@@ -2729,72 +2762,114 @@
 - id: '1668535366974'
   alias: Connected to Car
   description: ''
-  trigger: []
+  trigger:
+  - platform: homeassistant
+    event: start
+    id: home assistant started
+  - platform: time
+    at: 00:00:00
+    id: reset
+  - platform: event
+    event_type: automation_reloaded
+    id: reload
   condition: []
   action:
-  - if:
-    - condition: or
-      conditions:
+  - choose:
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: home assistant started
+        - condition: trigger
+          id: reload
+      sequence:
       - condition: state
-        entity_id: binary_sensor.front_door
-        state: ''
-      - condition: state
-        entity_id: binary_sensor.back_door
-        state: ''
-      - condition: state
-        entity_id: lock.front_door
-        state: ''
-      - condition: state
-        entity_id: lock.back_door
-        state: ''
-      - condition: numeric_state
-        entity_id: weather.dark_sky
-        below: 51
-        attribute: temperature
-    then:
-    - service: notify.mobile_app_iphone
-      data:
-        message: '{% if is_state(''binary_sensor.front_door'', ''on'') or is_state(''lock.front_door'',
-          ''unlocked'') %}The front door is open.{% endif %}{% if is_state(''binary_sensor.back_door'',
-          ''on'') or is_state(''lock.back_door'', ''unlocked'') %}The back door is
-          open.{% endif %} {% if state_attr(''weather.dark_sky'', ''temperature'')
-          is defined %}{% if state_attr(''weather.dark_sky'', ''temperature'')|float(51)
-          < 51 %}It is {{state_attr(''weather.dark_sky'', ''temperature'')}}°.{% endif
-          %}{% endif %}'
+        entity_id: input_boolean.weather_notification_sent
+        state: 'off'
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: input_select.anthony
+          state: Away
+        - condition: state
+          entity_id: input_select.anthony
+          state: Just Left
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id: input_boolean.weather_notification_sent
+    - conditions:
+      - condition: trigger
+        id: reset
+      sequence:
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id: input_boolean.weather_notification_sent
+    default:
+    - if:
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: binary_sensor.front_door
+          state: 'on'
+        - condition: state
+          entity_id: binary_sensor.back_door
+          state: 'on'
+        - condition: state
+          entity_id: lock.front_door
+          state: unlocked
+        - condition: state
+          entity_id: lock.back_door
+          state: unlocked
+        - condition: and
+          conditions:
+          - condition: numeric_state
+            entity_id: weather.dark_sky
+            below: 51
+            attribute: temperature
+          - condition: state
+            entity_id: input_boolean.weather_notification_sent
+            state: 'off'
+      then:
+      - service: notify.mobile_app_iphone
         data:
-          push:
-            sound:
-              name: default
-              critical: 1
-              volume: 0.3
-  - service: media_player.turn_off
-    data: {}
-    target:
-      entity_id:
-      - media_player.owntone_output_bathroom
-      - media_player.owntone_output_desk
-      - media_player.owntone_output_front
-      - media_player.owntone_output_guest_bedroom_tv
-      - media_player.owntone_output_living_room
-      - media_player.owntone_output_tv
-      - media_player.owntone_output_master_bedroom_tv
-      - media_player.owntone_server
+          message: '{% if is_state(''binary_sensor.front_door'', ''on'') or is_state(''lock.front_door'',
+            ''unlocked'') %}The front door is unlocked.{% endif %}{% if is_state(''binary_sensor.back_door'',
+            ''on'') or is_state(''lock.back_door'', ''unlocked'') %}The back door
+            is unlocked.{% endif %} {% if state_attr(''weather.dark_sky'', ''temperature'')
+            is defined %}{% if state_attr(''weather.dark_sky'', ''temperature'')|float(51)
+            < 51 %}It is {{state_attr(''weather.dark_sky'', ''temperature'')}}°.{%
+            endif %}{% endif %}'
+          data:
+            tag: car-reminder
+            push:
+              sound:
+                name: default
+                critical: 1
+                volume: 0.3
+      - service: notify.mobile_app_iphone
+        data:
+          message: clear_notification
+          data:
+            tag: car-reminder
+    - service: media_player.turn_off
+      data: {}
+      target:
+        entity_id:
+        - media_player.owntone_output_bathroom
+        - media_player.owntone_output_desk
+        - media_player.owntone_output_front
+        - media_player.owntone_output_guest_bedroom_tv
+        - media_player.owntone_output_living_room
+        - media_player.owntone_output_tv
+        - media_player.owntone_output_master_bedroom_tv
+        - media_player.owntone_server
+    - service: input_boolean.turn_on
+      data: {}
+      target:
+        entity_id: input_boolean.weather_notification_sent
   mode: single
-- id: '1668563279818'
-  alias: Macbook Front Porch Notification
-  description: ''
-  use_blueprint:
-    path: hunterjm/frigate_0.10_notification.yaml
-    input:
-      camera: porch
-      notify_device: fb38c66a51a198b6c0e25e128887031d
-      base_url: https://maioranihome.duckdns.org
-      update_thumbnail: false
-      labels:
-      - person
-      cooldown: 100
-      silence_timer: 60
-      loiter_timer: 0
 - id: '1668564599073'
   alias: Reboot AirPort
   description: ''
