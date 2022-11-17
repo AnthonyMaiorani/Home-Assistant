@@ -1643,6 +1643,12 @@
   - platform: sun
     event: sunset
     offset: -00:45:00
+    id: sunset
+  - platform: sun
+    event: sunrise
+    offset: '+45'
+    alias: Sunrise
+    id: Sunrise
   condition:
   - condition: or
     conditions:
@@ -1652,36 +1658,67 @@
     - condition: state
       entity_id: input_select.anthony
       state: Just Arrived
+    - condition: state
+      entity_id: input_select.riana
+      state: Home
+    - condition: state
+      entity_id: input_select.riana
+      state: Just Arrived
   action:
-  - service: light.turn_on
-    data:
-      brightness_pct: 15
-    target:
-      entity_id:
-      - light.kitchen_lights
-      - light.hallway_lights
-  - if:
-    - condition: state
-      entity_id: light.kitchen_lights
-      state: 'off'
-    then:
-    - service: light.turn_on
-      data:
-        brightness_pct: 15
-      target:
-        entity_id:
-        - light.kitchen_lights
-  - if:
-    - condition: state
-      entity_id: light.kitchen_lights
-      state: 'off'
-    then:
-    - service: light.turn_on
-      data:
-        brightness_pct: 15
-      target:
-        entity_id:
-        - light.hallway_lights
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: sunset
+      sequence:
+      - if:
+        - condition: state
+          entity_id: light.kitchen_lights
+          state: 'off'
+        then:
+        - service: light.turn_on
+          data:
+            brightness_pct: 15
+          target:
+            entity_id:
+            - light.kitchen_lights
+        alias: Kitchen Lights
+      - if:
+        - condition: state
+          entity_id: light.hallway_lights
+          state: 'off'
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: input_select.anthony
+            state: Home
+          - condition: state
+            entity_id: input_select.anthony
+            state: Just Arrived
+        then:
+        - service: light.turn_on
+          data:
+            brightness_pct: 15
+          target:
+            entity_id:
+            - light.hallway_lights
+        alias: Hallway Lights
+    - conditions:
+      - condition: trigger
+        id: Sunrise
+      - condition: state
+        entity_id: weather.dark_sky
+        state: sunny
+      sequence:
+      - service: light.turn_off
+        data: {}
+        target:
+          entity_id:
+          - light.kitchen_lights
+          - light.hallway_lights
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id: switch.porch_light
   mode: single
 - id: '1665630463210'
   alias: Turn off AC when not in room
@@ -2450,7 +2487,8 @@
   - service: notify.mobile_app_iphone
     data:
       message: '{{ states(''sensor.mail_usps_mail'') }} {% if states(''sensor.mail_usps_mail'')|float(0)
-        == 1 %}peice{%else%}peices{%endif%} of mail were delivered.'
+        == 1 %}peice{%else%}peices{%endif%} of mail {% if states(''sensor.mail_usps_mail'')|float(0)
+        == 1 %}was{%else%}were{%endif%} delivered.'
       data:
         entity_id: camera.mail_usps_camera
         push:
