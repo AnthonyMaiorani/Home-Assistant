@@ -12,7 +12,7 @@ wifi:
   ssid: !secret ssid
   password: !secret password
   fast_connect: on
-  output_power: 18dB
+  output_power: 20dB
   manual_ip:
     static_ip: ${static_ip}
     gateway: !secret gateway

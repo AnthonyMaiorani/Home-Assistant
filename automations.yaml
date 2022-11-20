@@ -1137,6 +1137,9 @@
         - condition: state
           entity_id: input_select.anthony
           state: Just Arrived
+      - condition: state
+        entity_id: pyscript.airport_playing
+        state: 'True'
       sequence:
       - service: homeassistant.update_entity
         data: {}
