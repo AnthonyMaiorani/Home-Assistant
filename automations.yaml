@@ -3022,10 +3022,11 @@
   description: ''
   trigger:
   - platform: time_pattern
-    minutes: '5'
+    minutes: /5
   condition:
   - condition: time
     before: 04:00:00
+    after: '23:55:00'
   - condition: state
     entity_id: light.kitchen_lights
     state: 'on'
@@ -3034,7 +3035,7 @@
     state: 'off'
     for:
       hours: 0
-      minutes: 20
+      minutes: 25
       seconds: 0
   action:
   - service: light.turn_off
@@ -3087,7 +3088,7 @@
           - media_player.owntone_output_bathroom
       - service: media_player.volume_set
         data:
-          volume_level: 0.5
+          volume_level: 0.3
         target:
           entity_id: media_player.owntone_output_bathroom
     - conditions:
@@ -3115,13 +3116,6 @@
     id: door opened
   - platform: state
     entity_id:
-    - binary_sensor.bathroom_multi_sensor_motion
-    from: 'off'
-    to: 'on'
-    alias: motion detected
-    id: motion detected
-  - platform: state
-    entity_id:
     - binary_sensor.bathroom_door
     to: 'off'
     from: 'on'
@@ -3132,30 +3126,12 @@
       entity_id: timer.bathroom_light
     alias: timer finished
     id: timer finished
-  - platform: state
-    entity_id:
-    - binary_sensor.bathroom_multi_sensor_motion
-    to: 'off'
-    from: 'on'
-    for:
-      hours: 0
-      minutes: 3
-      seconds: 0
-    alias: no motion detected
-    id: no motion detected
   - platform: homeassistant
     event: start
     id: startup
   - platform: event
     event_type: automation_reloaded
     id: reload
-  - platform: state
-    entity_id:
-    - binary_sensor.aqara_lumi_motion_ac01_occupancy
-    to: 'off'
-    from: 'on'
-    alias: fp1
-    id: fp1
   - platform: state
     entity_id:
     - binary_sensor.shower
@@ -3175,46 +3151,15 @@
     subtype: sensor
     alias: fp1 enter
     id: fp1 enter
-  - type: not_occupied
+  - device_id: e016de0f5a668458b727b4b8e2d4db6c
+    domain: zha
     platform: device
-    device_id: e016de0f5a668458b727b4b8e2d4db6c
-    entity_id: binary_sensor.aqara_lumi_motion_ac01_occupancy
-    domain: binary_sensor
+    type: Leave
+    subtype: sensor
     id: occupancy clear
   condition: []
   action:
   - choose:
-    - conditions:
-      - condition: sun
-        before: sunrise
-        alias: Dark Outside
-        after: sunset
-      - condition: state
-        entity_id: light.fan_lights
-        state: 'off'
-        alias: Bedroom Lights are off
-      - condition: state
-        entity_id: light.bathroom_lights
-        state: 'off'
-        alias: Lights are off
-        for:
-          hours: 0
-          minutes: 0
-          seconds: 2
-      - condition: or
-        conditions:
-        - condition: trigger
-          id: door opened
-        - condition: trigger
-          id: fp1 enter
-        alias: Presence Detected
-      sequence:
-      - type: turn_on
-        device_id: 624405d34a0a0bc8df3990c131a31bd2
-        entity_id: light.bathroom_lights
-        domain: light
-        brightness_pct: 4
-        alias: Turn on bathroom lights dimly
     - conditions:
       - condition: or
         conditions:
@@ -3237,11 +3182,45 @@
             minutes: 0
             seconds: 2
         then:
-        - type: turn_on
-          device_id: 624405d34a0a0bc8df3990c131a31bd2
-          entity_id: light.bathroom_lights
-          domain: light
-          brightness_pct: 100
+        - choose:
+          - conditions:
+            - condition: sun
+              before: sunrise
+              alias: Dark Outside
+              after: sunset
+            - condition: state
+              entity_id: light.bedroom_lights
+              state: 'off'
+              alias: Bedroom Lights are off
+            sequence:
+            - type: turn_on
+              device_id: 624405d34a0a0bc8df3990c131a31bd2
+              entity_id: light.bathroom_lights
+              domain: light
+              brightness_pct: 4
+              alias: Turn on bathroom lights dimly
+          - conditions:
+            - condition: sun
+              before: sunrise
+              alias: Dark Outside
+              after: sunset
+            - condition: state
+              entity_id: light.fan_lights
+              state: 'off'
+              alias: Fan Lights are off
+            sequence:
+            - type: turn_on
+              device_id: 624405d34a0a0bc8df3990c131a31bd2
+              entity_id: light.bathroom_lights
+              domain: light
+              brightness_pct: 30
+              alias: Turn on bathroom lights less dimly
+          default:
+          - type: turn_on
+            device_id: 624405d34a0a0bc8df3990c131a31bd2
+            entity_id: light.bathroom_lights
+            domain: light
+            brightness_pct: 100
       - service: timer.cancel
         data: {}
         target:
