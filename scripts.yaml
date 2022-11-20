@@ -240,6 +240,7 @@ morning:
         hs_color:
         - 30.353
         - 33.597
+        effect: None
       target:
         entity_id: light.fan_lights
     - data: {}
@@ -379,6 +380,14 @@ start_car:
 test:
   alias: Play Music
   sequence:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_select.anthony
+      state: Just Arrived
+    - condition: state
+      entity_id: input_select.anthony
+      state: Home
   - service: media_player.select_source
     data:
       source: Music (playlist)
@@ -401,43 +410,6 @@ test:
         entity_id: media_player.owntone_server
     - if:
       - condition: state
-        entity_id: switch.lrtv
-        state: 'off'
-      then:
-      - service: switch.turn_on
-        data: {}
-        target:
-          entity_id: switch.lrtv
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 40
-          milliseconds: 0
-      - service: media_player.volume_set
-        data:
-          volume_level: 0.5
-        target:
-          entity_id: media_player.living_room_denon
-      - service: media_player.turn_on
-        data: {}
-        target:
-          entity_id: media_player.owntone_output_tv
-      - service: media_player.volume_set
-        data:
-          volume_level: 0.35
-        target:
-          entity_id: media_player.owntone_output_tv
-      - service: media_player.turn_off
-        data: {}
-        target:
-          entity_id: media_player.owntone_output_living_room
-      - service: media_player.turn_on
-        data: {}
-        target:
-          entity_id: media_player.owntone_output_living_room
-      alias: Turn on Living Room TV
-    - if:
-      - condition: state
         entity_id: media_player.owntone_output_desk
         state: 'off'
       then:
@@ -454,58 +426,110 @@ test:
         event_data: {}
       alias: Turn on Desk Speakers
     - if:
-      - condition: state
-        entity_id: media_player.owntone_output_bathroom
-        state: 'off'
+      - condition: template
+        value_template: '{{ not is_state(''person.riana'', ''home'')
+
+          and not is_state(''person.dana'', ''home'')
+
+          and states(''zone.home'') < 2
+
+          and is_state(''binary_sensor.bed_occupancy'', ''off'')
+
+          }}'
+        alias: Nobody else home
       then:
-      - service: media_player.turn_on
-        data: {}
-        target:
-          entity_id:
-          - media_player.owntone_output_bathroom
-      - service: media_player.volume_set
-        data:
-          volume_level: 0.5
-        target:
-          entity_id: media_player.owntone_output_bathroom
-      alias: Turn on Bathroom HomePod
-    - if:
-      - condition: state
-        entity_id: switch.fronttv
-        state: 'off'
-      then:
-      - service: media_player.turn_on
-        data: {}
-        target:
-          entity_id: media_player.owntone_output_front
-      - service: media_player.volume_set
-        data:
-          volume_level: 0.85
-        target:
-          entity_id:
-          - media_player.owntone_output_front
-      - service: media_player.volume_set
-        data:
-          volume_level: 0.25
-        target:
-          entity_id: media_player.gym_tv
-      alias: Turn on Front TV
-    - if:
-      - condition: state
-        entity_id: media_player.owntone_output_living_room
-        state: 'off'
-      then:
-      - service: media_player.turn_on
-        data: {}
-        target:
-          entity_id:
-          - media_player.owntone_output_living_room
-      - service: media_player.volume_set
-        data:
-          volume_level: 0.45
-        target:
-          entity_id: media_player.owntone_output_living_room
-      alias: Turn on Kitchen HomePod
+      - parallel:
+        - if:
+          - condition: state
+            entity_id: switch.lrtv
+            state: 'off'
+          then:
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id: switch.lrtv
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 40
+              milliseconds: 0
+          - service: media_player.volume_set
+            data:
+              volume_level: 0.5
+            target:
+              entity_id: media_player.living_room_denon
+          - service: media_player.turn_on
+            data: {}
+            target:
+              entity_id: media_player.owntone_output_tv
+          - service: media_player.volume_set
+            data:
+              volume_level: 0.35
+            target:
+              entity_id: media_player.owntone_output_tv
+          - service: media_player.turn_off
+            data: {}
+            target:
+              entity_id: media_player.owntone_output_living_room
+          - service: media_player.turn_on
+            data: {}
+            target:
+              entity_id: media_player.owntone_output_living_room
+          alias: Turn on Living Room TV
+        - if:
+          - condition: state
+            entity_id: media_player.owntone_output_bathroom
+            state: 'off'
+          then:
+          - service: media_player.turn_on
+            data: {}
+            target:
+              entity_id:
+              - media_player.owntone_output_bathroom
+          - service: media_player.volume_set
+            data:
+              volume_level: 0.5
+            target:
+              entity_id: media_player.owntone_output_bathroom
+          alias: Turn on Bathroom HomePod
+        - if:
+          - condition: state
+            entity_id: switch.fronttv
+            state: 'off'
+          then:
+          - service: media_player.turn_on
+            data: {}
+            target:
+              entity_id: media_player.owntone_output_front
+          - service: media_player.volume_set
+            data:
+              volume_level: 0.85
+            target:
+              entity_id:
+              - media_player.owntone_output_front
+          - service: media_player.volume_set
+            data:
+              volume_level: 0.25
+            target:
+              entity_id: media_player.gym_tv
+          alias: Turn on Front TV
+        - if:
+          - condition: state
+            entity_id: media_player.owntone_output_living_room
+            state: 'off'
+          then:
+          - service: media_player.turn_on
+            data: {}
+            target:
+              entity_id:
+              - media_player.owntone_output_living_room
+          - service: media_player.volume_set
+            data:
+              volume_level: 0.45
+            target:
+              entity_id: media_player.owntone_output_living_room
+          alias: Turn on Kitchen HomePod
+        alias: Turn on other speakers
   mode: single
   icon: mdi:music
 lofi:
@@ -542,16 +566,24 @@ lofi:
           entity_id: media_player.owntone_output_desk
       - service: media_player.volume_set
         data:
-          volume_level: 0.15
+          volume_level: 0.1
         target:
           entity_id: media_player.owntone_output_desk
       - event: event_change_nanoleaf
         event_data: {}
       alias: Turn on Desk Speakers
     - if:
-      - condition: state
-        entity_id: binary_sensor.bed_occupancy
-        state: 'off'
+      - condition: template
+        value_template: '{{ not is_state(''person.riana'', ''home'')
+
+          and not is_state(''person.dana'', ''home'')
+
+          and states(''zone.home'') < 2
+
+          and is_state(''binary_sensor.bed_occupancy'', ''off'')
+
+          }}'
+        alias: Nobody else home
       then:
       - parallel:
         - if:
@@ -566,11 +598,11 @@ lofi:
           - delay:
               hours: 0
               minutes: 0
-              seconds: 20
+              seconds: 40
               milliseconds: 0
           - service: media_player.volume_set
             data:
-              volume_level: 0.5
+              volume_level: 0.35
             target:
               entity_id: media_player.living_room_denon
           - service: media_player.turn_on
@@ -582,6 +614,14 @@ lofi:
               volume_level: 0.35
             target:
               entity_id: media_player.owntone_output_tv
+          - service: media_player.turn_off
+            data: {}
+            target:
+              entity_id: media_player.owntone_output_living_room
+          - service: media_player.turn_on
+            data: {}
+            target:
+              entity_id: media_player.owntone_output_living_room
           alias: Turn on Living Room TV
         - if:
           - condition: state
@@ -595,7 +635,7 @@ lofi:
               - media_player.owntone_output_bathroom
           - service: media_player.volume_set
             data:
-              volume_level: 0.4
+              volume_level: 0.5
             target:
               entity_id: media_player.owntone_output_bathroom
           alias: Turn on Bathroom HomePod
@@ -610,7 +650,7 @@ lofi:
               entity_id: media_player.owntone_output_front
           - service: media_player.volume_set
             data:
-              volume_level: 0.5
+              volume_level: 0.4
             target:
               entity_id:
               - media_player.owntone_output_front
@@ -636,5 +676,6 @@ lofi:
             target:
               entity_id: media_player.owntone_output_living_room
           alias: Turn on Kitchen HomePod
+        alias: Turn on other speakers
   mode: single
   icon: mdi:meditation

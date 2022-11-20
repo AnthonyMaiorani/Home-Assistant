@@ -16,6 +16,10 @@
     state: >
       {{ is_state('light.bedroom_lights', 'on') }}
     unique_id: bedroom_on
+  - name: "Entry Doors"
+    state: > 
+      {{ is_state('sensor.alarm_front_garage_door', 'O') }}
+    unique_id: entry_doors
 - sensor:
   - name: "AC Thermostat Temperature"
     unique_id: ac_thermostat_temperature
@@ -116,6 +120,10 @@
       - "off"
   - platform: state
     entity_id:
+      - media_player.owntone_output_desk
+    attribute: volume_level
+  - platform: state
+    entity_id:
       - media_player.owntone_server
     to: 
       - "paused"
@@ -138,7 +146,8 @@
         {# Music #}
         {% elif is_state('switch.desktop', 'off') 
         and (is_state('media_player.owntone_output_desk', 'on') and
-        is_state('media_player.owntone_server', 'playing')) or 
+        is_state('media_player.owntone_server', 'playing') and 
+        state_attr('media_player.owntone_output_desk', 'volume_level') > 0.14) or 
         (is_state('pyscript.airport_playing', 'True') and 
         is_state('media_player.spotify_anthony221121', 'playing')) and not 
         state_attr('light.bed_lights', 'rgb_color')| join(' ') == '0 255 255'-%} 
