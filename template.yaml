@@ -9,8 +9,10 @@
   - name: "Expand Card"
     unique_id: expand_card
     state: > 
-      {% if states('switch.ac') is defined and states('switch.lrtv') is defined %} 
-      {{ not (states('switch.ac') == "on" or  states('switch.lrtv') == "on") }}
+      {% if states('switch.ac') is defined and states('switch.lrtv') is defined 
+      and states('media_player.owntone_server') is defined %} 
+      {{ not is_state('switch.ac', 'on') and not is_state('switch.lrtv', 'on') 
+      and not is_state('media_player.owntone_server', 'playing') }}
       {% endif %}
   - name: "Bedroom On"
     state: >
@@ -20,6 +22,10 @@
     state: > 
       {{ is_state('sensor.alarm_front_garage_door', 'O') }}
     unique_id: entry_doors
+  - name: "Master Hall Motion"
+    state: > 
+      {{ is_state('sensor.alarm_motion', 'O') }}
+    unique_id: master_hall_motion
 - sensor:
   - name: "AC Thermostat Temperature"
     unique_id: ac_thermostat_temperature

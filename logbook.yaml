@@ -4,7 +4,7 @@ exclude:
     - sensor.date*
     - sensor.time*
     - sensor.*node_status
-    - sensor.alarm_*
+    - sensor.alarm_line*
   domains:
     - input_number
     - group

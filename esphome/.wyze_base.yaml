@@ -30,7 +30,7 @@ light:
     green: output_green
     blue: output_blue
     white: white_output
-    restore_mode: RESTORE_ALWAYS_ON
+    restore_mode: RESTORE_DEFAULT_ON
     effects:
       - random:
           name: Music

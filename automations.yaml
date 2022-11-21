@@ -345,6 +345,10 @@
           entity_id: timer.exhaust
         alias: Start timer
       alias: Start exhaust fan timer if not running
+    - service: switch.turn_on
+      data: {}
+      target:
+        entity_id: switch.bed_manual_tare_action
   mode: single
 - id: '1627443167507'
   alias: Bedroom Alerts
@@ -1351,6 +1355,7 @@
         data:
           message: Lola hasn't eaten breakfast yet
           data:
+            tag: dog-food
             push:
               sound:
                 name: default
@@ -1372,6 +1377,7 @@
         data:
           message: Lola hasn't eaten dinner yet
           data:
+            tag: dog-food
             push:
               sound:
                 name: default
@@ -1540,6 +1546,7 @@
       - service: notify.mobile_app_iphone
         data:
           message: Lola hasn't gotten her medicine yet
+          tag: dog-medicine
           data:
             push:
               sound:
@@ -1562,6 +1569,7 @@
         data:
           message: Lola hasn't gotten her medicine yet
           data:
+            tag: dog-medicine
             push:
               sound:
                 name: default
@@ -1635,6 +1643,8 @@
       - service: notify.mobile_app_iphone
         data:
           message: It's time to give Lola her medicine
+          data:
+            tag: dog-medicine
   mode: single
 - id: '1665630167045'
   alias: Turn on home lights at night
@@ -2366,7 +2376,7 @@
     alias: back door opened
   - platform: state
     entity_id:
-    - lock.front_door
+    - binary_sensor.entry_doors
     from: 'off'
     to: 'on'
     id: front door opened
@@ -2425,7 +2435,7 @@
           alias: record front porch and living room and pet and gym
         - if:
           - condition: state
-            entity_id: binary_sensor.front_door
+            entity_id: binary_sensor.entry_doors
             state: 'on'
           then:
           - service: automation.turn_off
@@ -2768,6 +2778,9 @@
   - platform: event
     event_type: automation_reloaded
     id: reload
+  - platform: state
+    entity_id:
+    - zone.home
   condition: []
   action:
   - choose:
@@ -2786,12 +2799,10 @@
         - condition: state
           entity_id: input_select.riana
           state: Just Arrived
+        - condition: numeric_state
+          entity_id: zone.home
+          above: 0
       sequence:
-      - service: select.select_option
-        data:
-          option: home
-        target:
-          entity_id: select.home_current_mode
       - service: button.press
         data: {}
         target:
@@ -2817,6 +2828,9 @@
             entity_id: input_select.riana
             state: Just Left
           alias: riana away
+        - condition: numeric_state
+          entity_id: zone.home
+          below: 1
         alias: Nobody Home
       sequence:
       - service: select.select_option
@@ -2824,7 +2838,8 @@
           option: away
         target:
           entity_id: select.home_current_mode
-  mode: single
+  mode: queued
+  max: 10
 - id: '1668535366974'
   alias: Connected to Car
   description: ''
@@ -3001,6 +3016,10 @@
       - condition: state
         entity_id: media_player.owntone_output_tv
         state: 'on'
+      - condition: template
+        value_template: "{{ as_local(state_attr('script.lofi', \n        'last_triggered'))
+          > now() - timedelta( minutes = 1 ) \nor as_local(state_attr('script.test',
+          \n        'last_triggered')) > now() - timedelta( minutes = 1 )\n}}"
   - wait_for_trigger:
     - platform: state
       entity_id:
@@ -3016,6 +3035,8 @@
     data: {}
     target:
       entity_id: media_player.owntone_output_desk
+  - event: event_change_nanoleaf
+    event_data: {}
   mode: single
 - id: '1668917163074'
   alias: Turn off lights at night
@@ -3032,6 +3053,13 @@
     state: 'on'
   - condition: state
     entity_id: binary_sensor.kitchen_2
+    state: 'off'
+    for:
+      hours: 0
+      minutes: 25
+      seconds: 0
+  - condition: state
+    entity_id: binary_sensor.master_hall_motion
     state: 'off'
     for:
       hours: 0
@@ -3061,12 +3089,18 @@
     entity_id: binary_sensor.aqara_lumi_motion_ac01_occupancy
     domain: binary_sensor
     id: bathroom left
+  - platform: event
+    event_type: ''
+  - platform: device
+    type: turned_on
+    device_id: 624405d34a0a0bc8df3990c131a31bd2
+    entity_id: light.bathroom_lights
+    domain: light
+    id: light turned on
   condition: []
   action:
   - choose:
     - conditions:
-      - condition: trigger
-        id: bathroom entered
       - condition: state
         entity_id: media_player.owntone_output_bathroom
         state: 'off'
@@ -3080,6 +3114,12 @@
       - condition: state
         entity_id: media_player.owntone_output_desk
         state: 'on'
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: bathroom entered
+        - condition: trigger
+          id: light turned on
       sequence:
       - service: media_player.turn_on
         data: {}
@@ -3213,7 +3253,7 @@
               device_id: 624405d34a0a0bc8df3990c131a31bd2
               entity_id: light.bathroom_lights
               domain: light
-              brightness_pct: 30
+              brightness_pct: 20
               alias: Turn on bathroom lights less dimly
           default:
           - type: turn_on
