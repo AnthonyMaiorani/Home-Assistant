@@ -80,6 +80,8 @@ binary_sensor:
   - platform: template
     name: "Bed Occupancy"
     device_class: occupancy
+    filters:
+      delayed_off: 5s #avoid shifting being reported as clear
     lambda: |-
       if (id(bed_weight).state >= (id(zero) + 20000) ) {
         return true;
