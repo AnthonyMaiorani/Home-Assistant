@@ -59,7 +59,7 @@
     target:
       entity_id:
       - script.morning
-      - script.test
+      - script.lofi
   - service: input_boolean.turn_on
     data: {}
     target:
@@ -526,13 +526,21 @@
   action:
   - choose:
     - conditions:
-      - condition: state
-        entity_id: input_select.anthony
-        state: Just Arrived
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: binary_sensor.shower
+          state: 'on'
+        - condition: state
+          entity_id: input_select.anthony
+          state: Just Arrived
       sequence:
       - parallel:
-        - service: script.morning
+        - service: script.turn_on
           data: {}
+          target:
+            entity_id:
+            - script.morning
         - service: input_boolean.turn_on
           data: {}
           target:
@@ -549,6 +557,21 @@
                 name: LoFi
                 ignore_result: ignore
           enabled: false
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id: switch.bed_manual_tare_action
+        - if:
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: media_player.owntone_server
+              state: playing
+          then:
+          - service: script.turn_on
+            data: {}
+            target:
+              entity_id: script.lofi
     - conditions:
       - condition: state
         entity_id: input_select.anthony
@@ -803,8 +826,8 @@
       sequence:
       - delay:
           hours: 0
-          minutes: 0
-          seconds: 5
+          minutes: 1
+          seconds: 0
           milliseconds: 0
       - service: automation.turn_off
         data: {}
@@ -1252,6 +1275,10 @@
       - lock.front_door
     continue_on_timeout: false
     timeout: 00:30:00
+  - service: button.press
+    data: {}
+    target:
+      entity_id: button.tare
   - condition: sun
     before: sunrise
     after: sunset
@@ -1356,11 +1383,6 @@
           message: Lola hasn't eaten breakfast yet
           data:
             tag: dog-food
-            push:
-              sound:
-                name: default
-                critical: 1
-                volume: 0.3
     - conditions:
       - condition: trigger
         id: Dinner
@@ -1378,11 +1400,6 @@
           message: Lola hasn't eaten dinner yet
           data:
             tag: dog-food
-            push:
-              sound:
-                name: default
-                critical: 1
-                volume: 0.3
     - conditions:
       - condition: trigger
         id: Reset
@@ -2510,231 +2527,7 @@
         == 1 %}was{%else%}were{%endif%} delivered.'
       data:
         entity_id: camera.mail_usps_camera
-        push:
-          sound:
-            name: default
-            critical: 1
-            volume: 0.3
   mode: single
-- id: '1667124189208'
-  alias: Bathroom Lights
-  description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - binary_sensor.bathroom_door
-    from: 'off'
-    to: 'on'
-    alias: door opened
-    id: door opened
-  - platform: state
-    entity_id:
-    - binary_sensor.bathroom_multi_sensor_motion
-    from: 'off'
-    to: 'on'
-    alias: motion detected
-    id: motion detected
-  - platform: state
-    entity_id:
-    - binary_sensor.bathroom_door
-    to: 'off'
-    from: 'on'
-    id: door closed
-  - platform: event
-    event_type: timer.finished
-    event_data:
-      entity_id: timer.bathroom_light
-    alias: timer finished
-    id: timer finished
-  - platform: state
-    entity_id:
-    - binary_sensor.bathroom_multi_sensor_motion
-    to: 'off'
-    from: 'on'
-    for:
-      hours: 0
-      minutes: 3
-      seconds: 0
-    alias: no motion detected
-    id: no motion detected
-  - platform: homeassistant
-    event: start
-    id: startup
-  - platform: event
-    event_type: automation_reloaded
-    id: reload
-  - platform: state
-    entity_id:
-    - binary_sensor.aqara_lumi_motion_ac01_occupancy
-    to: 'off'
-    from: 'on'
-    alias: fp1
-    id: fp1
-  - platform: state
-    entity_id:
-    - binary_sensor.shower
-    from: 'on'
-    to: 'off'
-    alias: shower stopped
-    id: shower stopped
-  - platform: state
-    entity_id:
-    - binary_sensor.shower
-    to: 'on'
-    id: shower started
-  - device_id: e016de0f5a668458b727b4b8e2d4db6c
-    domain: zha
-    platform: device
-    type: Enter
-    subtype: sensor
-    alias: fp1 enter
-    id: fp1 enter
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: sun
-        before: sunrise
-        alias: Dark Outside
-        after: sunset
-      - condition: state
-        entity_id: light.fan_lights
-        state: 'off'
-        alias: Bedroom Lights are off
-      - condition: state
-        entity_id: light.bathroom_lights
-        state: 'off'
-        alias: Lights are off
-        for:
-          hours: 0
-          minutes: 0
-          seconds: 2
-      - condition: or
-        conditions:
-        - condition: trigger
-          id: door opened
-        - condition: trigger
-          id: motion detected
-        - condition: trigger
-          id: fp1 enter
-        alias: Presence Detected
-      sequence:
-      - type: turn_on
-        device_id: 624405d34a0a0bc8df3990c131a31bd2
-        entity_id: light.bathroom_lights
-        domain: light
-        brightness_pct: 4
-        alias: Turn on bathroom lights dimly
-    - conditions:
-      - condition: or
-        conditions:
-        - condition: trigger
-          id: door opened
-        - condition: trigger
-          id: motion detected
-        - condition: trigger
-          id: shower started
-        - condition: trigger
-          id: fp1 enter
-        alias: Presence Detected
-      sequence:
-      - if:
-        - condition: device
-          type: is_off
-          device_id: 624405d34a0a0bc8df3990c131a31bd2
-          entity_id: light.bathroom_lights
-          domain: light
-          for:
-            hours: 0
-            minutes: 0
-            seconds: 2
-        then:
-        - type: turn_on
-          device_id: 624405d34a0a0bc8df3990c131a31bd2
-          entity_id: light.bathroom_lights
-          domain: light
-          brightness_pct: 100
-      - service: timer.cancel
-        data: {}
-        target:
-          entity_id: timer.bathroom_light
-    - conditions:
-      - condition: state
-        entity_id: binary_sensor.shower
-        state: 'off'
-      - condition: or
-        conditions:
-        - condition: trigger
-          id: door closed
-        - condition: trigger
-          id: no motion detected
-      - condition: device
-        type: is_on
-        device_id: 624405d34a0a0bc8df3990c131a31bd2
-        entity_id: light.bathroom_lights
-        domain: light
-      sequence:
-      - service: timer.start
-        data:
-          duration: 00:03:00
-        target:
-          entity_id: timer.bathroom_light
-        alias: Start timer
-    - conditions:
-      - condition: state
-        entity_id: binary_sensor.shower
-        state: 'off'
-        alias: Not showering
-      - condition: or
-        conditions:
-        - condition: trigger
-          id: timer finished
-        - condition: trigger
-          id: fp1
-        - condition: trigger
-          id: shower stopped
-      - condition: state
-        entity_id: binary_sensor.bathroom_multi_sensor_motion
-        state: 'off'
-        for:
-          hours: 0
-          minutes: 0
-          seconds: 20
-      sequence:
-      - type: turn_off
-        device_id: 624405d34a0a0bc8df3990c131a31bd2
-        entity_id: light.bathroom_lights
-        domain: light
-      - service: timer.cancel
-        data: {}
-        target:
-          entity_id: timer.bathroom_light
-    - conditions:
-      - condition: or
-        conditions:
-        - condition: trigger
-          id: reload
-        - condition: trigger
-          id: startup
-      - condition: state
-        entity_id: light.bathroom_lights
-        state: 'on'
-      - condition: state
-        entity_id: timer.bathroom_light
-        state: idle
-      - condition: state
-        entity_id: binary_sensor.bathroom_multi_sensor_motion
-        state: 'off'
-      - condition: state
-        entity_id: binary_sensor.shower
-        state: 'off'
-      sequence:
-      - service: timer.start
-        data: {}
-        target:
-          entity_id: timer.bathroom_light
-  mode: parallel
-  max: 10
 - id: '1667193576124'
   alias: Alarm Reminder
   description: ''
@@ -2807,6 +2600,7 @@
         data: {}
         target:
           entity_id: button.home_clear_hold
+        enabled: false
     - conditions:
       - condition: and
         conditions:
@@ -2912,12 +2706,57 @@
           - condition: state
             entity_id: input_boolean.weather_notification_sent
             state: 'off'
+          enabled: false
       then:
-      - service: notify.mobile_app_iphone
-        data:
-          message: clear_notification
+      - parallel:
+        - service: button.press
+          data: {}
+          target:
+            entity_id:
+            - button.back_door_wake
+            - button.front_door_wake
+        - service: notify.mobile_app_iphone
           data:
-            tag: car-reminder
+            message: clear_notification
+            data:
+              tag: car-reminder
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 2
+          milliseconds: 500
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: binary_sensor.front_door
+          state: 'on'
+        - condition: state
+          entity_id: binary_sensor.back_door
+          state: 'on'
+        - condition: state
+          entity_id: lock.front_door
+          state: unlocked
+        - condition: state
+          entity_id: lock.back_door
+          state: unlocked
+        - condition: and
+          conditions:
+          - condition: numeric_state
+            entity_id: weather.dark_sky
+            below: 48
+            attribute: temperature
+          - condition: state
+            entity_id: input_boolean.weather_notification_sent
+            state: 'off'
+          enabled: false
+      - condition: template
+        value_template: '{{ not is_state(''person.riana'', ''home'')
+
+          and not is_state(''person.dana'', ''home'')
+
+          and states(''zone.home'')|int < 2
+
+          }}'
       - service: notify.mobile_app_iphone
         data:
           message: '{% if is_state(''binary_sensor.front_door'', ''on'') or is_state(''lock.front_door'',
@@ -3065,6 +2904,13 @@
       hours: 0
       minutes: 25
       seconds: 0
+  - condition: state
+    entity_id: binary_sensor.laundry_room_motion
+    state: 'off'
+    for:
+      hours: 0
+      minutes: 25
+      seconds: 0
   action:
   - service: light.turn_off
     data: {}
@@ -3077,26 +2923,18 @@
   alias: Bathroom Music
   description: ''
   trigger:
-  - device_id: e016de0f5a668458b727b4b8e2d4db6c
-    domain: zha
-    platform: device
-    type: Enter
-    subtype: sensor
-    id: bathroom entered
-  - type: not_occupied
-    platform: device
-    device_id: e016de0f5a668458b727b4b8e2d4db6c
-    entity_id: binary_sensor.aqara_lumi_motion_ac01_occupancy
-    domain: binary_sensor
-    id: bathroom left
-  - platform: event
-    event_type: ''
   - platform: device
     type: turned_on
     device_id: 624405d34a0a0bc8df3990c131a31bd2
     entity_id: light.bathroom_lights
     domain: light
     id: light turned on
+  - platform: device
+    type: turned_off
+    device_id: 624405d34a0a0bc8df3990c131a31bd2
+    entity_id: light.bathroom_lights
+    domain: light
+    id: light turned off
   condition: []
   action:
   - choose:
@@ -3105,21 +2943,32 @@
         entity_id: media_player.owntone_output_bathroom
         state: 'off'
       - condition: state
-        entity_id: binary_sensor.bed_occupancy
-        state: 'off'
-        alias: confirm probably anthony
-      - condition: state
         entity_id: media_player.owntone_server
         state: playing
-      - condition: state
-        entity_id: media_player.owntone_output_desk
-        state: 'on'
+      - condition: trigger
+        id: light turned on
+      - condition: and
+        conditions:
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: input_select.anthony
+            state: Home
+          - condition: state
+            entity_id: input_select.anthony
+            state: Just Arrived
+        - condition: state
+          entity_id: binary_sensor.bed_occupancy
+          state: 'off'
+        alias: probably anthony
       - condition: or
         conditions:
-        - condition: trigger
-          id: bathroom entered
-        - condition: trigger
-          id: light turned on
+        - condition: state
+          entity_id: media_player.owntone_output_desk
+          state: 'on'
+        - condition: state
+          entity_id: media_player.owntone_output_anthony_s
+          state: 'on'
       sequence:
       - service: media_player.turn_on
         data: {}
@@ -3128,15 +2977,15 @@
           - media_player.owntone_output_bathroom
       - service: media_player.volume_set
         data:
-          volume_level: 0.3
+          volume_level: 0.1
         target:
           entity_id: media_player.owntone_output_bathroom
     - conditions:
-      - condition: trigger
-        id: bathroom left
       - condition: state
         entity_id: media_player.owntone_output_bathroom
         state: 'on'
+      - condition: trigger
+        id: light turned off
       sequence:
       - service: media_player.turn_off
         data: {}
@@ -3144,7 +2993,7 @@
           entity_id: media_player.owntone_output_bathroom
   mode: single
 - id: '1668919655434'
-  alias: Bathroom Lights without the multisensor
+  alias: Bathroom Lights
   description: ''
   trigger:
   - platform: state
@@ -3160,12 +3009,7 @@
     to: 'off'
     from: 'on'
     id: door closed
-  - platform: event
-    event_type: timer.finished
-    event_data:
-      entity_id: timer.bathroom_light
-    alias: timer finished
-    id: timer finished
+    alias: door closed
   - platform: homeassistant
     event: start
     id: startup
@@ -3184,12 +3028,13 @@
     - binary_sensor.shower
     to: 'on'
     id: shower started
+    alias: shower started
   - device_id: e016de0f5a668458b727b4b8e2d4db6c
     domain: zha
     platform: device
     type: Enter
     subtype: sensor
-    alias: fp1 enter
+    alias: occupancy detected
     id: fp1 enter
   - device_id: e016de0f5a668458b727b4b8e2d4db6c
     domain: zha
@@ -3197,6 +3042,14 @@
     type: Leave
     subtype: sensor
     id: occupancy clear
+    alias: occupancy clear
+  - platform: state
+    entity_id:
+    - light.bathroom_lights
+    from: 'on'
+    to: 'off'
+    alias: lights turned off
+    id: lights turned off
   condition: []
   action:
   - choose:
@@ -3204,67 +3057,72 @@
       - condition: or
         conditions:
         - condition: trigger
-          id: door opened
-        - condition: trigger
           id: shower started
         - condition: trigger
           id: fp1 enter
+        - condition: and
+          conditions:
+          - condition: state
+            entity_id: light.bathroom_lights
+            state: 'off'
+            for:
+              hours: 0
+              minutes: 0
+              seconds: 7
+          - condition: trigger
+            id: door opened
         alias: Presence Detected
+      - condition: state
+        entity_id: light.bathroom_lights
+        state: 'off'
       sequence:
-      - if:
-        - condition: device
-          type: is_off
-          device_id: 624405d34a0a0bc8df3990c131a31bd2
-          entity_id: light.bathroom_lights
-          domain: light
-          for:
-            hours: 0
-            minutes: 0
-            seconds: 2
-        then:
-        - choose:
-          - conditions:
-            - condition: sun
-              before: sunrise
-              alias: Dark Outside
-              after: sunset
-            - condition: state
-              entity_id: light.bedroom_lights
-              state: 'off'
-              alias: Bedroom Lights are off
-            sequence:
-            - type: turn_on
-              device_id: 624405d34a0a0bc8df3990c131a31bd2
-              entity_id: light.bathroom_lights
-              domain: light
-              brightness_pct: 4
-              alias: Turn on bathroom lights dimly
-          - conditions:
-            - condition: sun
-              before: sunrise
-              alias: Dark Outside
-              after: sunset
-            - condition: state
-              entity_id: light.fan_lights
-              state: 'off'
-              alias: Fan Lights are off
-            sequence:
-            - type: turn_on
-              device_id: 624405d34a0a0bc8df3990c131a31bd2
-              entity_id: light.bathroom_lights
-              domain: light
-              brightness_pct: 20
-              alias: Turn on bathroom lights less dimly
-          default:
+      - choose:
+        - conditions:
+          - condition: sun
+            before: sunrise
+            alias: Dark Outside
+            after: sunset
+          - condition: state
+            entity_id: light.bedroom_lights
+            state: 'off'
+            alias: Bedroom Lights are off
+          - condition: state
+            entity_id: binary_sensor.bed_occupancy
+            state: 'off'
+            alias: probably anthony
+          sequence:
           - type: turn_on
             device_id: 624405d34a0a0bc8df3990c131a31bd2
             entity_id: light.bathroom_lights
             domain: light
-            brightness_pct: 100
-      - service: timer.cancel
-        data: {}
-        target:
-          entity_id: timer.bathroom_light
+            brightness_pct: 4
+            alias: Turn on bathroom lights dimly
+        - conditions:
+          - condition: sun
+            before: sunrise
+            alias: Dark Outside
+            after: sunset
+          - condition: state
+            entity_id: light.fan_lights
+            state: 'off'
+            alias: Fan Lights are off
+          - condition: state
+            entity_id: binary_sensor.bed_occupancy
+            state: 'off'
+            alias: probably anthony
+          sequence:
+          - type: turn_on
+            device_id: 624405d34a0a0bc8df3990c131a31bd2
+            entity_id: light.bathroom_lights
+            domain: light
+            brightness_pct: 35
+            alias: Turn on bathroom lights less dimly
+        default:
+        - type: turn_on
+          device_id: 624405d34a0a0bc8df3990c131a31bd2
+          entity_id: light.bathroom_lights
+          domain: light
+          brightness_pct: 100
     - conditions:
       - condition: state
         entity_id: binary_sensor.shower
@@ -3272,71 +3130,53 @@
       - condition: or
         conditions:
         - condition: trigger
-          id: door closed
-        - condition: trigger
           id: occupancy clear
+        - condition: and
+          conditions:
+          - condition: state
+            entity_id: binary_sensor.aqara_lumi_motion_ac01_occupancy
+            state: 'off'
+          - condition: or
+            conditions:
+            - condition: trigger
+              id: shower stopped
+            - condition: trigger
+              id: reload
+            - condition: trigger
+              id: startup
+            - condition: and
+              conditions:
+              - condition: trigger
+                id: door closed
+              - condition: state
+                entity_id: light.bathroom_lights
+                state: 'on'
+                for:
+                  hours: 0
+                  minutes: 0
+                  seconds: 20
       - condition: device
         type: is_on
         device_id: 624405d34a0a0bc8df3990c131a31bd2
         entity_id: light.bathroom_lights
         domain: light
       sequence:
-      - service: timer.start
-        data:
-          duration: 00:01:00
-        target:
-          entity_id: timer.bathroom_light
-        alias: Start timer
-    - conditions:
-      - condition: state
-        entity_id: binary_sensor.shower
-        state: 'off'
-        alias: Not showering
-      - condition: or
-        conditions:
-        - condition: trigger
-          id: timer finished
-        - condition: trigger
-          id: shower stopped
-      - type: is_not_occupied
-        condition: device
-        device_id: e016de0f5a668458b727b4b8e2d4db6c
-        entity_id: binary_sensor.aqara_lumi_motion_ac01_occupancy
-        domain: binary_sensor
-      sequence:
       - type: turn_off
         device_id: 624405d34a0a0bc8df3990c131a31bd2
         entity_id: light.bathroom_lights
         domain: light
-      - service: timer.cancel
-        data: {}
-        target:
-          entity_id: timer.bathroom_light
     - conditions:
-      - condition: or
-        conditions:
-        - condition: trigger
-          id: reload
-        - condition: trigger
-          id: startup
-      - condition: state
-        entity_id: light.bathroom_lights
-        state: 'on'
-      - condition: state
-        entity_id: timer.bathroom_light
-        state: idle
-      - condition: state
-        entity_id: binary_sensor.shower
-        state: 'off'
-      - type: is_not_occupied
-        condition: device
-        device_id: e016de0f5a668458b727b4b8e2d4db6c
-        entity_id: binary_sensor.aqara_lumi_motion_ac01_occupancy
-        domain: binary_sensor
+      - condition: trigger
+        id: lights turned off
       sequence:
-      - service: timer.start
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 3
+          milliseconds: 0
+      - service: button.press
         data: {}
         target:
-          entity_id: timer.bathroom_light
+          entity_id: button.aqara_lumi_motion_ac01_presence_status_reset
   mode: parallel
   max: 10

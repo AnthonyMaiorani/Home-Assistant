@@ -3,9 +3,6 @@
     state: >
       {{ states('sensor.discord')|float(-1) > 0}}
     unique_id: discord_active
-  # - name: "Shower"
-  #   state: >
-  #     {{ states('sensor.acurite_humidity')|float(0) > 67.1}}
   - name: "Expand Card"
     unique_id: expand_card
     state: > 
@@ -153,10 +150,12 @@
         {% elif is_state('switch.desktop', 'off') 
         and (is_state('media_player.owntone_output_desk', 'on') and
         is_state('media_player.owntone_server', 'playing') and 
-        state_attr('media_player.owntone_output_desk', 'volume_level') > 0.14) or 
+        state_attr('media_player.owntone_output_desk', 'volume_level') > 0.29) or 
         (is_state('pyscript.airport_playing', 'True') and 
         is_state('media_player.spotify_anthony221121', 'playing')) and not 
-        state_attr('light.bed_lights', 'rgb_color')| join(' ') == '0 255 255'-%} 
+        state_attr('light.bed_lights', 'rgb_color')| join(' ') == '0 255 255'
+        and not is_state('binary_sensor.macbook_audio_input_in_use', 'on') 
+        and not is_state('binary_sensor.macbook_camera_in_use', 'on') -%} 
         {% set scenes = ['Shooting Stars', 'Cotton Candy', 'Pop Rocks',
         'Rhythmic Northern Lights', 'Meteor Shower', 'Soda', 
         'Pulse Pop Beats', 'Energize', 'Electric purple', 'Mood Movie', 
