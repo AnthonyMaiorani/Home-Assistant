@@ -44,6 +44,11 @@
       turn_off:
         - parallel:
           - service: script.night
+          - service: media_player.turn_off
+            target:
+              entity_id:
+                - media_player.owntone_output_desk
+                - media_player.owntone_output_anthony_s
           - service: climate.turn_off
             target:
               entity_id:
