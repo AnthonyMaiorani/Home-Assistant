@@ -25,6 +25,22 @@ ota:
 logger:
   baud_rate: 0
 
+button:
+  platform: template
+  name: "Display Toggle"
+  on_press:
+    - midea_ac.display_toggle:
+
+switch:
+  - platform: template
+    name: Beeper
+    icon: mdi:volume-source
+    optimistic: true
+    turn_on_action:
+      midea_ac.beeper_on:
+    turn_off_action:
+      midea_ac.beeper_off:
+
 # UART settings for Midea dongle (required)
 uart:
   tx_pin: 1         # hardware dependant

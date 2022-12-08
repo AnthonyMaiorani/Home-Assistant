@@ -144,3 +144,27 @@ binary_sensor:
             then: 
               - light.turn_off: closetleds
     lambda: 'return id(closetleds).current_values.is_on();'
+
+remote_transmitter:
+  pin: GPIO32
+  carrier_duty_percent: 100
+
+switch:
+  - platform: template
+    name: Case Lights
+    assumed_state: true
+    optimistic: true
+    lambda: |-
+      return {};
+    turn_on_action:
+      - delay: 200ms
+      - remote_transmitter.transmit_rc_switch_raw:
+          code: '0100001110100100000000011'
+          protocol: 1
+          repeat: 3
+    turn_off_action:
+      - delay: 500ms
+      - remote_transmitter.transmit_rc_switch_raw:
+          code: '0100001110100100000000111'
+          protocol: 1
+          repeat: 5

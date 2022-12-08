@@ -150,9 +150,10 @@
         {% elif is_state('switch.desktop', 'off') 
         and (is_state('media_player.owntone_output_desk', 'on') and
         is_state('media_player.owntone_server', 'playing') and 
-        state_attr('media_player.owntone_output_desk', 'volume_level') > 0.29) or 
+        state_attr('media_player.owntone_output_desk', 'volume_level') > 0.4) or 
         (is_state('pyscript.airport_playing', 'True') and 
-        is_state('media_player.spotify_anthony221121', 'playing')) and not 
+        is_state('media_player.spotify_anthony221121', 'playing')
+        and state_attr('media_player.spotify_anthony221121', 'volume_level') > 0.6) and not 
         state_attr('light.bed_lights', 'rgb_color')| join(' ') == '0 255 255'
         and not is_state('binary_sensor.macbook_audio_input_in_use', 'on') 
         and not is_state('binary_sensor.macbook_camera_in_use', 'on') -%} 
