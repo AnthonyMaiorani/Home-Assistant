@@ -49,6 +49,7 @@
               entity_id:
                 - media_player.owntone_output_desk
                 - media_player.owntone_output_nightstand
+                - media_player.owntone_output_bathroom
           - service: climate.turn_off
             target:
               entity_id:

@@ -26,6 +26,7 @@ fan_off:
         - input_boolean.govee_cyan
         - light.shapes_007f
         - light.shapes_ee82
+        - light.wled
     - data:
         brightness: 255
         effect: Color Loop
@@ -70,6 +71,7 @@ color_loop:
         entity_id:
         - light.shapes_007f
         - light.shapes_ee82
+        - light.wled
     - data:
         brightness: 255
         effect: Color Loop
@@ -101,6 +103,12 @@ music:
     - service: light.turn_on
       data:
         effect: Music
+        brightness_pct: 100
+        rgbw_color:
+        - 0
+        - 0
+        - 255
+        - 0
       target:
         entity_id:
         - light.bedroom_lights
@@ -190,6 +198,7 @@ night:
         - light.closet_lights
         - light.glide
         - light.shapes_ee82
+        - light.wled
     - service: cover.close_cover
       data: {}
       target:
@@ -253,6 +262,7 @@ morning:
         entity_id:
         - light.shapes_007f
         - light.shapes_ee82
+        - light.wled
     - data:
         brightness: 255
         effect: Color Loop
@@ -389,11 +399,20 @@ lofi:
       source: librespot-java (pipe)
     target:
       entity_id: media_player.owntone_server
-  - service: media_player.select_source
-    data:
-      source: Home Assistant
+  - service: media_player.turn_off
+    data: {}
     target:
-      entity_id: media_player.spotify_anthony221121
+      entity_id:
+      - media_player.owntone_output_bathroom
+      - media_player.owntone_output_desk
+      - media_player.owntone_output_front
+      - media_player.owntone_output_garage
+      - media_player.owntone_output_guest_bedroom_tv
+      - media_player.owntone_output_kitchen_homepod
+      - media_player.owntone_output_living_room
+      - media_player.owntone_output_living_room_tv
+      - media_player.owntone_output_master_bedroom_tv
+      - media_player.owntone_output_nightstand
   - repeat:
       while:
       - condition: not
@@ -403,6 +422,11 @@ lofi:
           attribute: source
           state: Home Assistant
       sequence:
+      - service: media_player.select_source
+        data:
+          source: Home Assistant
+        target:
+          entity_id: media_player.spotify_anthony221121
       - service: homeassistant.update_entity
         data: {}
         target:
@@ -418,22 +442,6 @@ lofi:
           minutes: 0
           seconds: 2
           milliseconds: 0
-  - service: media_player.shuffle_set
-    data:
-      shuffle: true
-    target:
-      entity_id: media_player.spotify_anthony221121
-  - service: media_player.play_media
-    data:
-      media_content_type: playlist
-      media_content_id: https://open.spotify.com/playlist/0vvXsWCC9xrXsKd4FyS8kM
-      enqueue: play
-    target:
-      entity_id: media_player.spotify_anthony221121
-  - service: media_player.media_play
-    data: {}
-    target:
-      entity_id: media_player.spotify_anthony221121
   - service: media_player.volume_set
     data:
       volume_level: 0.25
@@ -441,11 +449,19 @@ lofi:
       entity_id:
       - media_player.spotify_anthony221121
       - media_player.owntone_server
+  - service: media_player.shuffle_set
+    data:
+      shuffle: true
+    target:
+      entity_id: media_player.spotify_anthony221121
   - parallel:
-    - service: media_player.media_play
-      data: {}
+    - service: media_player.play_media
+      data:
+        media_content_type: playlist
+        media_content_id: https://open.spotify.com/playlist/0vvXsWCC9xrXsKd4FyS8kM
+        enqueue: play
       target:
-        entity_id: media_player.owntone_server
+        entity_id: media_player.spotify_anthony221121
     - if:
       - condition: state
         entity_id: media_player.owntone_output_desk
@@ -510,6 +526,9 @@ lofi:
 
           }}'
         alias: Nobody else home
+      - condition: state
+        entity_id: binary_sensor.evan_home
+        state: 'off'
       then:
       - parallel:
         - if:
@@ -590,22 +609,6 @@ lofi:
             target:
               entity_id: media_player.gym_tv
           alias: Turn on Front TV
-        - if:
-          - condition: state
-            entity_id: media_player.owntone_output_living_room
-            state: 'off'
-          then:
-          - service: media_player.turn_on
-            data: {}
-            target:
-              entity_id:
-              - media_player.owntone_output_living_room
-          - service: media_player.volume_set
-            data:
-              volume_level: 0.45
-            target:
-              entity_id: media_player.owntone_output_living_room
-          alias: Turn on Living Room HomePod
         - if:
           - condition: state
             entity_id: media_player.owntone_output_kitchen_homepod
@@ -638,7 +641,7 @@ lofi:
               volume_level: 0.45
             target:
               entity_id: media_player.owntone_output_garage
-          alias: Turn on Kitchen HomePod
+          alias: Turn on Garage Speaker
         alias: Turn on other speakers
       else:
       - condition: state
@@ -665,6 +668,7 @@ lofi:
           target:
             entity_id: media_player.owntone_output_bathroom
         alias: Turn on Bathroom HomePod
+      enabled: true
   mode: single
   icon: mdi:meditation
 play_music:
@@ -675,11 +679,20 @@ play_music:
       source: librespot-java (pipe)
     target:
       entity_id: media_player.owntone_server
-  - service: media_player.select_source
-    data:
-      source: Home Assistant
+  - service: media_player.turn_off
+    data: {}
     target:
-      entity_id: media_player.spotify_anthony221121
+      entity_id:
+      - media_player.owntone_output_bathroom
+      - media_player.owntone_output_desk
+      - media_player.owntone_output_front
+      - media_player.owntone_output_garage
+      - media_player.owntone_output_guest_bedroom_tv
+      - media_player.owntone_output_kitchen_homepod
+      - media_player.owntone_output_living_room
+      - media_player.owntone_output_living_room_tv
+      - media_player.owntone_output_master_bedroom_tv
+      - media_player.owntone_output_nightstand
   - repeat:
       while:
       - condition: not
@@ -689,6 +702,11 @@ play_music:
           attribute: source
           state: Home Assistant
       sequence:
+      - service: media_player.select_source
+        data:
+          source: Home Assistant
+        target:
+          entity_id: media_player.spotify_anthony221121
       - service: homeassistant.update_entity
         data: {}
         target:
@@ -704,30 +722,26 @@ play_music:
           minutes: 0
           seconds: 2
           milliseconds: 0
+  - service: media_player.volume_set
+    data:
+      volume_level: 0.3
+    target:
+      entity_id:
+      - media_player.spotify_anthony221121
+      - media_player.owntone_server
   - service: media_player.shuffle_set
     data:
       shuffle: true
     target:
       entity_id: media_player.spotify_anthony221121
-  - service: media_player.play_media
-    data:
-      media_content_type: playlist
-      media_content_id: https://open.spotify.com/playlist/1FXZPGh51QQyNUmADd5ssN
-      enqueue: play
-    target:
-      entity_id: media_player.spotify_anthony221121
-  - service: media_player.volume_set
-    data:
-      volume_level: 0.4
-    target:
-      entity_id:
-      - media_player.spotify_anthony221121
-      - media_player.owntone_server
   - parallel:
-    - service: media_player.media_play
-      data: {}
+    - service: media_player.play_media
+      data:
+        media_content_type: playlist
+        media_content_id: https://open.spotify.com/playlist/1FXZPGh51QQyNUmADd5ssN
+        enqueue: play
       target:
-        entity_id: media_player.owntone_server
+        entity_id: media_player.spotify_anthony221121
     - if:
       - condition: state
         entity_id: media_player.owntone_output_desk
@@ -754,7 +768,7 @@ play_music:
         then:
         - service: media_player.volume_set
           data:
-            volume_level: 0.4
+            volume_level: 0.29
           target:
             entity_id: media_player.owntone_output_desk
         else:
@@ -773,9 +787,19 @@ play_music:
         target:
           entity_id:
           - media_player.owntone_output_nightstand
+      - wait_for_trigger:
+        - platform: state
+          entity_id:
+          - media_player.owntone_output_nightstand
+          to: 'on'
+        timeout:
+          hours: 0
+          minutes: 0
+          seconds: 5
+          milliseconds: 0
       - service: media_player.volume_set
         data:
-          volume_level: 0.4
+          volume_level: 0.3
         target:
           entity_id:
           - media_player.owntone_output_nightstand
@@ -792,6 +816,9 @@ play_music:
 
           }}'
         alias: Nobody else home
+      - condition: state
+        entity_id: binary_sensor.evan_home
+        state: 'off'
       then:
       - parallel:
         - if:
@@ -874,22 +901,6 @@ play_music:
           alias: Turn on Front TV
         - if:
           - condition: state
-            entity_id: media_player.owntone_output_living_room
-            state: 'off'
-          then:
-          - service: media_player.turn_on
-            data: {}
-            target:
-              entity_id:
-              - media_player.owntone_output_living_room
-          - service: media_player.volume_set
-            data:
-              volume_level: 0.45
-            target:
-              entity_id: media_player.owntone_output_living_room
-          alias: Turn on Living Room HomePod
-        - if:
-          - condition: state
             entity_id: media_player.owntone_output_kitchen_homepod
             state: 'off'
           then:
@@ -905,6 +916,22 @@ play_music:
               entity_id:
               - media_player.owntone_output_kitchen_homepod
           alias: Turn on Kitchen HomePod
+        - if:
+          - condition: state
+            entity_id: media_player.owntone_output_garage
+            state: 'off'
+          then:
+          - service: media_player.turn_on
+            data: {}
+            target:
+              entity_id:
+              - media_player.owntone_output_garage
+          - service: media_player.volume_set
+            data:
+              volume_level: 0.45
+            target:
+              entity_id: media_player.owntone_output_garage
+          alias: Turn on Garage Speaker
         alias: Turn on other speakers
       else:
       - condition: state
@@ -931,6 +958,7 @@ play_music:
           target:
             entity_id: media_player.owntone_output_bathroom
         alias: Turn on Bathroom HomePod
+      enabled: true
   mode: single
   icon: mdi:music-note
 stop_music:
@@ -954,25 +982,36 @@ stop_music:
       - media_player.owntone_output_front
       - media_player.owntone_output_guest_bedroom_tv
       - media_player.owntone_output_kitchen_homepod
-      - media_player.owntone_output_living_room
       - media_player.owntone_output_living_room_tv
       - media_player.owntone_output_master_bedroom_tv
       - media_player.owntone_output_nightstand
       - media_player.owntone_output_garage
-  - service: media_player.turn_off
-    data: {}
-    target:
+  - wait_for_trigger:
+    - platform: state
       entity_id:
-      - media_player.owntone_server
       - media_player.owntone_output_bathroom
-      - media_player.owntone_output_desk
-      - media_player.owntone_output_front
-      - media_player.owntone_output_guest_bedroom_tv
-      - media_player.owntone_output_kitchen_homepod
-      - media_player.owntone_output_living_room
-      - media_player.owntone_output_living_room_tv
-      - media_player.owntone_output_master_bedroom_tv
-      - media_player.owntone_output_nightstand
-      - media_player.owntone_output_garage
+      from: unavailable
+    timeout:
+      hours: 0
+      minutes: 0
+      seconds: 45
+      milliseconds: 0
+  - repeat:
+      count: 2
+      sequence:
+      - service: media_player.turn_off
+        data: {}
+        target:
+          entity_id:
+          - media_player.owntone_server
+          - media_player.owntone_output_bathroom
+          - media_player.owntone_output_desk
+          - media_player.owntone_output_front
+          - media_player.owntone_output_guest_bedroom_tv
+          - media_player.owntone_output_kitchen_homepod
+          - media_player.owntone_output_living_room_tv
+          - media_player.owntone_output_master_bedroom_tv
+          - media_player.owntone_output_nightstand
+          - media_player.owntone_output_garage
   mode: single
   icon: mdi:stop

@@ -1,4 +1,11 @@
 - binary_sensor:
+  - name: "Showering"
+    unique_id: showering
+    state: >
+      {{ is_state('binary_sensor.shower', 'on') and 
+      is_state('binary_sensor.bathroom_door_zigbee', 'off') and
+      is_state('input_boolean.bathroom_occupied', 'on') and
+      is_state('light.bathroom_lights', 'on') }}
   - name: "Discord Active"
     state: >
       {{ states('sensor.discord')|float(-1) > 0}}
@@ -15,6 +22,10 @@
     state: >
       {{ is_state('light.bedroom_lights', 'on') }}
     unique_id: bedroom_on
+  - name: "Evan Home"
+    state: >
+      {{ is_state('input_boolean.toggle', 'on') }}
+    unique_id: evan_home
   - name: "Entry Doors"
     state: > 
       {{ is_state('sensor.alarm_front_garage_door', 'O') }}
@@ -71,6 +82,9 @@
       {# At desk with lights on #}
       {% elif is_state('switch.desktop', 'on') and 
       is_state('light.fan_lights', 'on') -%} 153
+      {# Window open #}
+      {% elif is_state('cover.bedroom_blinds', 'open') and 
+      is_state('sun.sun', 'above_horizon') -%} 153
       {# At desk with lights off #}
       {% elif is_state('switch.desktop', 'on') -%} 102
       {# Normal #}
@@ -111,26 +125,31 @@
     to: "on"
   - platform: state
     entity_id:
-      - pyscript.airport_playing
-    to: 
-      - "True"
-      - "False"
+      - light.shapes_ee82
+    from: "off"
+    to: "on"
   - platform: state
     entity_id:
       - media_player.owntone_output_desk
     to: 
       - "on"
       - "off"
-  - platform: state
-    entity_id:
-      - media_player.owntone_output_desk
+  - platform: numeric_state
+    entity_id: media_player.owntone_output_desk
+    above: 0.24
     attribute: volume_level
-  - platform: state
-    entity_id:
-      - media_player.owntone_server
-    to: 
-      - "paused"
-      - "playing"
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 2
+  - platform: numeric_state
+    entity_id: media_player.owntone_output_desk
+    below: 0.25
+    attribute: volume_level
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 2
   - platform: state
     entity_id:
       - media_player.spotify_anthony221121
@@ -139,48 +158,76 @@
     - name: "Nanoleaf Scene"
       unique_id: nanoleaf_scene
       state: >
+        {# Define Scenes #}
+
+        {# Regular Scenes #}
+        {% set defaultScenes = ['Cosmos', 'Dynamic Blue', 'Ocean', 
+        'Vaporwave', 'Rainbow', 'energy'] %}
+        {% set nightScenes = ['moonlight', 'Lightscape', 'Night light', 
+        'Tron Legacy', 'Pink To Blue', 'Rain', 'TRON CITY', 'Waterfall', 
+        'Playstation Blue', 'Bedtime', 'Aurora magic', 'Holodek'] %}
+        {% set holidayScenes = ['Christmas', 'Christmas Candy Cane', 
+        'Christmas Flow', 'Christmas Tree'] %}
+        {% set musicScenes = ['Shooting Stars', 'Cotton Candy', 'Pop Rocks',
+        'Rhythmic Northern Lights', 'Meteor Shower', 'Soda', 
+        'Pulse Pop Beats', 'Energize', 'Electric purple', 'Mood Movie', 
+        'Water Cooler', 'Clubbing', 'Snowy Holiday', 'Lofi Sound'] %}
+        {% set lessChillMusicScenes = ['cool thing', 'Hip Hop', 'Prism',
+        'Tachyon Light2', 'Oceanworks'] %}
+
+        {# Build List of Scenes #}
+        {% set sceneChoices = defaultScenes %}
+        {% set unnecessaryTrigger = false %}
+
+        {# Night Scenes #}
+        {% if now().hour < 7 and is_state('switch.desktop', 'off') %}  
+        {% set sceneChoices = sceneChoices + nightScenes %}
+        {%- endif %}  
+
+        {# Holiday Scenes #}
+        {% if now().date().month == 12 %}
+        {% set sceneChoices = sceneChoices + holidayScenes %}
+        {%- endif %} 
+
         {# Off #}
         {% if is_state('light.bedroom_lights', 'off') and expand('light.bedroom_lights')
         |selectattr('state','in',['unavailable','unknown','none'])|list|count < 1 -%}
-        {% set scenes = ['unknown'] %}
+        {% set sceneChoices = ['unknown'] %}
+
         {# In call #}
         {% elif is_state("binary_sensor.webcam", 'on') -%}
-        {% set scenes = ['Webcam'] %}
+        {% set sceneChoices = ['Webcam'] %}
+
         {# Music #}
         {% elif is_state('switch.desktop', 'off') 
         and (is_state('media_player.owntone_output_desk', 'on') and
-        is_state('media_player.owntone_server', 'playing') and 
-        state_attr('media_player.owntone_output_desk', 'volume_level') > 0.4) or 
-        (is_state('pyscript.airport_playing', 'True') and 
+        state_attr('media_player.owntone_output_desk', 'volume_level') >= 0.25 and 
         is_state('media_player.spotify_anthony221121', 'playing')
-        and state_attr('media_player.spotify_anthony221121', 'volume_level') > 0.6) and not 
+        and state_attr('media_player.spotify_anthony221121', 'volume_level') >= 0.42) and not 
         state_attr('light.bed_lights', 'rgb_color')| join(' ') == '0 255 255'
         and not is_state('binary_sensor.macbook_audio_input_in_use', 'on') 
-        and not is_state('binary_sensor.macbook_camera_in_use', 'on') -%} 
-        {% set scenes = ['Shooting Stars', 'Cotton Candy', 'Pop Rocks',
-        'Rhythmic Northern Lights', 'Meteor Shower', 'Soda', 
-        'Pulse Pop Beats', 'Energize', 'Electric purple', 'Mood Movie', 
-        'Water Cooler', 'Clubbing', 'Snowy Holiday', 'Lofi Sound'] | 
-        reject('in', [state_attr('light.shapes_007f', 'effect')]) | list %}
-        {% if not is_state_attr('media_player.spotify_anthony221121', 
-        "media_playlist", "lofi hip hop music - beats to relax/study to") -%} 
-        {% set scenes = scenes + ['cool thing', 'Hip Hop', 'Prism',
-        'Tachyon Light2', 'Oceanworks'] %} {%- endif %} 
-        {# Unnecessary Trigger #}
-        {% elif now().minute != 30 and now().minute != 0 and 
-        is_state('light.shapes_007f', 'on') and 
-        state_attr('light.shapes_007f', 'effect') in ['Cosmos', 
-        'Dynamic Blue', 'Ocean', 'Vaporwave', 'Rainbow', 'energy'] -%}
-        {% set scenes = [state_attr('light.shapes_007f', 'effect')] %}
-        {% else %} {# Normal #}
-        {% set scenes = ['Cosmos', 'Dynamic Blue', 'Ocean', 
-        'Vaporwave', 'Rainbow', 'energy'] | 
-        reject('in', [state_attr('light.shapes_007f', 'effect')]) | list %}
-        {% if now().hour < 7 and 
-        is_state('switch.desktop', 'off') %}  {% set scenes = scenes + 
-        ['moonlight', 'Lightscape', 'Night light', 'Tron Legacy',
-        'Pink To Blue', 'Rain', 'TRON CITY', 'Waterfall', 
-        'Playstation Blue', 'Bedtime', 'Aurora magic', 'Holodek'] %}
-        {%- endif %}  
+        and not is_state('binary_sensor.macbook_camera_in_use', 'on')  -%} 
+        {% set sceneChoices = musicScenes %}
+        {% if state_attr('media_player.spotify_anthony221121', 'media_playlist') 
+        is defined and 
+        state_attr('media_player.spotify_anthony221121', 'media_playlist') 
+        is not none and not 'lofi' in 
+        state_attr('media_player.spotify_anthony221121', 'media_playlist') -%} 
+        {% set sceneChoices = sceneChoices + lessChillMusicScenes %} {%- endif %} 
         {%- endif %} 
-        {{ scenes | random }}
+
+        {# Unnecessary Trigger #}
+        {% if now().minute != 30 and now().minute != 0 and 
+        state_attr('light.shapes_007f', 'effect') is defined and 
+        state_attr('light.shapes_007f', 'effect') in sceneChoices -%}
+        {% set sceneChoices = [state_attr('light.shapes_007f', 'effect')] %}
+        {% set unnecessaryTrigger = true %}
+        {%- endif %} 
+
+        {# Exclude active scene #}
+        {% if not unnecessaryTrigger %} {% set sceneChoices = sceneChoices | 
+        reject('in', [state_attr('light.shapes_007f', 'effect'),
+        state_attr('light.shapes_ee82', 'effect')]) | list %} {% endif %}
+
+        {# Pick a scene #}
+        {{ sceneChoices | random }}
