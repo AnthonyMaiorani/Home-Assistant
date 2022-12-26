@@ -226,6 +226,32 @@
     data: {}
     target:
       entity_id: automation.ac_controls
+  - service: homeassistant.reload_config_entry
+    data: {}
+    target:
+      entity_id:
+      - media_player.owntone_server
+      - media_player.owntone_output_bathroom
+      - media_player.owntone_output_desk
+      - media_player.owntone_output_front
+      - media_player.owntone_output_guest_bedroom_tv
+      - media_player.owntone_output_kitchen_homepod
+      - media_player.owntone_output_living_room_tv
+      - media_player.owntone_output_master_bedroom_tv
+      - media_player.owntone_output_nightstand
+      - media_player.owntone_output_garage
+  - if:
+    - condition: state
+      entity_id: media_player.owntone_output_bathroom
+      state: 'On'
+    - condition: state
+      entity_id: light.bathroom_lights
+      state: 'off'
+    then:
+    - service: media_player.turn_off
+      data: {}
+      target:
+        entity_id: media_player.owntone_output_bathroom
   initial_state: true
   mode: single
 - id: '1620642299524'
@@ -315,8 +341,6 @@
           - media_player.owntone_output_desk
           - media_player.owntone_output_front
           - media_player.owntone_output_guest_bedroom_tv
-          - media_player.owntone_output_living_room
-          - media_player.owntone_output_living_room_tv
           - media_player.owntone_output_master_bedroom_tv
           - switch.fronttv
           - switch.lrtv
@@ -324,7 +348,7 @@
           - switch.porch_light
           - switch.laundry_room_light
           - switch.dining_room_light
-          - switch.master_hallway_light
+          - light.master_hallway_light
       - service: media_player.turn_off
         data: {}
         target:
@@ -346,10 +370,6 @@
           entity_id: timer.exhaust
         alias: Start timer
       alias: Start exhaust fan timer if not running
-    - service: button.press
-      data: {}
-      target:
-        entity_id: button.tare
   mode: single
 - id: '1627443167507'
   alias: Bedroom Alerts
@@ -558,10 +578,6 @@
                 name: LoFi
                 ignore_result: ignore
           enabled: false
-        - service: button.press
-          data: {}
-          target:
-            entity_id: button.tare
         - if:
           - condition: not
             conditions:
@@ -777,13 +793,11 @@
           - switch.laundry_room_light
           - switch.gym_fan
           - switch.dining_room_light
-          - switch.master_hallway_light
+          - light.master_hallway_light
       - service: media_player.turn_off
         data: {}
         target:
           entity_id:
-          - media_player.owntone_output_living_room
-          - media_player.owntone_output_living_room_homepod
           - media_player.owntone_output_bathroom
     - service: input_boolean.turn_off
       data: {}
@@ -794,7 +808,6 @@
       target:
         entity_id:
         - media_player.owntone_output_bathroom
-        - media_player.owntone_output_living_room
         - media_player.owntone_output_front
         - media_player.owntone_output_guest_bedroom_tv
         - media_player.owntone_output_master_bedroom_tv
@@ -1110,49 +1123,90 @@
     event_type: event_template_reloaded
   - platform: event
     event_type: automation_reloaded
-  condition:
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: light.shapes_007f
-      state: 'on'
-    - condition: state
-      entity_id: light.shapes_ee82
-      state: 'on'
+    id: reloaded
+  condition: []
   action:
+  - if:
+    - condition: trigger
+      id: reloaded
+    - condition: state
+      entity_id: light.bedroom_lights
+      state: 'off'
+    then:
+    - service: light.turn_off
+      data: {}
+      target:
+        entity_id:
+        - light.shapes_007f
+        - light.shapes_ee82
+    - stop: ''
   - wait_template: "  {{ (not states('sensor.nanoleaf_scene') in (\"unavailable\",
       \"unknown\") and not \n\n  is_state_attr('light.shapes_007f', \"effect\", states('sensor.nanoleaf_scene')))\n\n
       \ or \n\n  (not states('sensor.nanoleaf_auto_brightness') in (\"unavailable\",
       \"unknown\")\n  and not \n\n  is_state_attr('light.shapes_007f', \"brightness\",\n
-      \ states('sensor.nanoleaf_auto_brightness')|int - 2)) }}"
+      \ states('sensor.nanoleaf_auto_brightness')|int - 2))\n\nor \n\n(not states('sensor.nanoleaf_scene')
+      in (\"unavailable\", \"unknown\") and not \n\n  is_state_attr('light.shapes_ee82',
+      \"effect\", states('sensor.nanoleaf_scene')))\n\n  or \n\n  (not states('sensor.nanoleaf_auto_brightness')
+      in (\"unavailable\", \"unknown\")\n  and not \n\n  is_state_attr('light.shapes_ee82',
+      \"brightness\",\n  states('sensor.nanoleaf_auto_brightness')|int - 2))\n\n\n\n}}"
     continue_on_timeout: false
     timeout: 00:05:00
-  - if:
-    - condition: template
-      value_template: "{{ not states('sensor.nanoleaf_scene') in (\"unavailable\",
-        \"unknown\") and not \nis_state_attr('light.shapes_007f', \"effect\", states('sensor.nanoleaf_scene'))}}"
-    then:
-    - service: light.turn_on
-      target:
-        entity_id:
-        - light.shapes_007f
-        - light.shapes_ee82
-      data:
-        effect: '{{ states(''sensor.nanoleaf_scene'') }}'
-  - if:
-    - condition: template
-      value_template: "{{not states('sensor.nanoleaf_auto_brightness') in (\"unavailable\",
-        \"unknown\") and not \nis_state_attr('light.shapes_007f', \"brightness\",
-        states('sensor.nanoleaf_auto_brightness')|int - 2) }}"
-    then:
-    - service: light.turn_on
-      target:
-        entity_id:
-        - light.shapes_007f
-        - light.shapes_ee82
-      data:
-        brightness: '{{ states(''sensor.nanoleaf_auto_brightness'') }}'
-  mode: queued
+  - parallel:
+    - repeat:
+        until:
+        - condition: template
+          value_template: "      {{  \n\n      (is_state_attr('light.shapes_007f',
+            \"effect\",\n      states('sensor.nanoleaf_scene'))\n\n      and\n\n      is_state_attr('light.shapes_ee82',
+            \"effect\",\n      states('sensor.nanoleaf_scene'))\n\n      )}}"
+        sequence:
+        - if:
+          - condition: template
+            value_template: "{{ not states('sensor.nanoleaf_scene') in (\"unavailable\",
+              \"unknown\") and not \n\n(is_state_attr('light.shapes_007f', \"effect\",
+              states('sensor.nanoleaf_scene'))\nand\nis_state_attr('light.shapes_ee82',
+              \"effect\", states('sensor.nanoleaf_scene'))\n)}}"
+          then:
+          - service: light.turn_on
+            continue_on_error: true
+            target:
+              entity_id:
+              - light.shapes_007f
+              - light.shapes_ee82
+            data:
+              effect: '{{ states(''sensor.nanoleaf_scene'') }}'
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 10
+            milliseconds: 0
+    - repeat:
+        until:
+        - condition: template
+          value_template: "{{ \n(is_state_attr('light.shapes_007f', \"brightness\",
+            states('sensor.nanoleaf_auto_brightness')|int - 2) \nand \nis_state_attr('light.shapes_ee82',
+            \"brightness\", states('sensor.nanoleaf_auto_brightness')|int - 2) )}}"
+        sequence:
+        - if:
+          - condition: template
+            value_template: "{{not states('sensor.nanoleaf_auto_brightness') in (\"unavailable\",
+              \"unknown\") and not \n(is_state_attr('light.shapes_007f', \"brightness\",
+              states('sensor.nanoleaf_auto_brightness')|int - 2) \nand \nis_state_attr('light.shapes_ee82',
+              \"brightness\", states('sensor.nanoleaf_auto_brightness')|int - 2) )}}"
+          then:
+          - service: light.turn_on
+            continue_on_error: true
+            target:
+              entity_id:
+              - light.shapes_007f
+              - light.shapes_ee82
+            data:
+              brightness: '{{ states(''sensor.nanoleaf_auto_brightness'') }}'
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 10
+            milliseconds: 0
+  mode: restart
 - id: '1661505890362'
   alias: Spotify Refresh
   description: ''
@@ -1310,10 +1364,6 @@
       - lock.front_door
     continue_on_timeout: false
     timeout: 00:30:00
-  - service: button.press
-    data: {}
-    target:
-      entity_id: button.tare
   - condition: sun
     before: sunrise
     after: sunset
@@ -1599,12 +1649,6 @@
         data:
           message: Lola hasn't gotten her medicine yet
           tag: dog-medicine
-          data:
-            push:
-              sound:
-                name: default
-                critical: 1
-                volume: 0.3
     - conditions:
       - condition: trigger
         id: Night
@@ -1622,11 +1666,6 @@
           message: Lola hasn't gotten her medicine yet
           data:
             tag: dog-medicine
-            push:
-              sound:
-                name: default
-                critical: 1
-                volume: 0.3
     - conditions:
       - condition: trigger
         id: Reset
@@ -1726,6 +1765,12 @@
     - condition: state
       entity_id: input_select.riana
       state: Just Arrived
+    - condition: numeric_state
+      entity_id: zone.home
+      above: 0
+    - condition: state
+      entity_id: binary_sensor.evan_home
+      state: ''
   action:
   - choose:
     - conditions:
@@ -1764,6 +1809,10 @@
             entity_id:
             - light.hallway_lights
         alias: Hallway Lights
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id: switch.christmas_lights
     - conditions:
       - condition: trigger
         id: Sunrise
@@ -1816,17 +1865,25 @@
     entity_id: zone.home
     state: '1'
   - condition: state
-    entity_id: binary_sensor.bed_occupancy
-    state: 'off'
-  - condition: state
     entity_id: input_select.anthony
     state: Home
-  - condition: state
-    entity_id: switch.desktop
-    state: 'off'
-  - condition: state
-    entity_id: input_boolean.ac_boost
-    state: 'off'
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: input_select.riana
+      state: Home
+    - condition: state
+      entity_id: input_select.riana
+      state: Just Arrived
+    - condition: state
+      entity_id: switch.desktop
+      state: 'on'
+    - condition: state
+      entity_id: input_boolean.ac_boost
+      state: 'on'
+    - condition: state
+      entity_id: binary_sensor.bed_occupancy
+      state: 'on'
   action:
   - service: switch.turn_off
     data: {}
@@ -1888,7 +1945,7 @@
   trigger:
   - platform: state
     entity_id:
-    - binary_sensor.shower
+    - binary_sensor.showering
     to: 'off'
     for:
       hours: 0
@@ -1911,7 +1968,7 @@
     alias: When timer finishes
   - platform: state
     entity_id:
-    - binary_sensor.shower
+    - binary_sensor.showering
     from: 'off'
     to: 'on'
     alias: When shower is turned on
@@ -1938,6 +1995,16 @@
       - (3600) }}\n  {%endif%}\n{%endif%}"
     alias: turn off
     id: turn off
+  - platform: device
+    device_id: 7c247296aac3c00b267bb165baab5a7c
+    domain: zwave_js
+    type: event.value_notification.central_scene
+    property: scene
+    property_key: '001'
+    endpoint: 0
+    command_class: 91
+    subtype: Endpoint 0 Scene 001
+    id: turned on
   condition: []
   action:
   - choose:
@@ -1947,23 +2014,25 @@
         - condition: trigger
           id: manually
         - condition: trigger
-          id: showerdone
+          id: turned on
+        - condition: and
+          conditions:
+          - condition: trigger
+            id: showerdone
+          - condition: state
+            entity_id: switch.exhaust_fan
+            state: 'on'
         alias: Shower turned off or Fan turned on
       - condition: not
         conditions:
         - condition: state
-          entity_id: timer.exhaust
-          state: active
-        - condition: state
-          entity_id: binary_sensor.shower
+          entity_id: binary_sensor.showering
           state: 'on'
-        - condition: state
-          entity_id: switch.exhaust_fan
-          state: 'off'
         alias: Confirm fan is off, shower is off, timer is off
       sequence:
       - service: timer.start
-        data: {}
+        data:
+          duration: 00:20:00
         target:
           entity_id: timer.exhaust
     - conditions:
@@ -1975,10 +2044,13 @@
           entity_id: timer.exhaust
           state: active
         - condition: state
-          entity_id: binary_sensor.shower
+          entity_id: binary_sensor.showering
           state: 'on'
         - condition: state
           entity_id: switch.exhaust_fan
+          state: 'off'
+        - condition: state
+          entity_id: input_boolean.bathroom_occupied
           state: 'off'
         alias: Confirm fan is off, shower is off, timer is off
       sequence:
@@ -2024,7 +2096,7 @@
       - condition: or
         conditions:
         - condition: state
-          entity_id: binary_sensor.shower
+          entity_id: binary_sensor.showering
           state: 'on'
         - condition: state
           entity_id: switch.exhaust_fan
@@ -2033,7 +2105,7 @@
       sequence:
       - if:
         - condition: state
-          entity_id: binary_sensor.shower
+          entity_id: binary_sensor.showering
           state: 'on'
         - condition: device
           type: is_on
@@ -2052,7 +2124,7 @@
             entity_id: switch.exhaust_fan
         else:
         - condition: state
-          entity_id: binary_sensor.shower
+          entity_id: binary_sensor.showering
           state: 'off'
         - condition: not
           conditions:
@@ -2128,6 +2200,12 @@
     to: 'off'
     alias: door closed
     id: door closed
+  - device_id: 646618a4497e6564b3f03617283d2a35
+    domain: zha
+    platform: device
+    type: Leave
+    subtype: sensor
+    id: fp1 leave
   condition: []
   action:
   - choose:
@@ -2214,8 +2292,17 @@
         target:
           entity_id: timer.laundry_room_light
     - conditions:
-      - condition: trigger
-        id: door closed
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: fp1 leave
+        - condition: and
+          conditions:
+          - condition: trigger
+            id: door closed
+          - condition: state
+            entity_id: binary_sensor.laundry_room_occupancy
+            state: 'off'
       sequence:
       - service: switch.turn_off
         data: {}
@@ -2244,11 +2331,12 @@
     - switch.laundry_room_light
     - light.bathroom_lights
     - switch.dining_room_light
-    - switch.master_hallway_light
+    - light.master_hallway_light
     - switch.airport_express
     - switch.rotunda_lights
     - light.living_room_fan
     - light.kitchen_cabinet_lights
+    - switch.garage_light
     to: unavailable
   condition: []
   action:
@@ -2275,10 +2363,10 @@
           - button.node_32_ping
           - button.dining_room_light_ping
           - button.node_25_ping
-          - button.master_hallway_light_ping
           - button.z_wave_plug_ping
           - button.node_17_ping
           - button.living_room_fan_ping
+          - button.garage_light_ping
       - delay:
           hours: 0
           minutes: 0
@@ -2533,17 +2621,18 @@
   description: ''
   trigger:
   - platform: template
-    value_template: "{% set trigger = 'false' %}\n{% if now().hour|float(0) > 17 %}\n
+    value_template: "{% set trigger = 'false' %}\n{% if now().hour|float(0) > 16 %}\n
       \ {% if state_attr('automation.mail_notification', \n      'last_triggered')
-      is not none %}\n    {% if states('sensor.mail_usps_mail') is not none %}\n      {%
-      if states('sensor.mail_usps_mail')|int(0) > 0 %}\n        {% if as_local(state_attr('automation.mail_notification',
-      \n        'last_triggered')).day|int(now().day) < now().day %}\n          {%
-      if states('input_select.anthony') in ['Home', \n          'Just Arrived'] %}
-      {% set trigger = 'true' %}\n          {% elif distance(states.device_tracker.iphone)
-      is not none %}\n            {% if distance(states.device_tracker.iphone) < 1.5
-      %}\n              {% set trigger = 'true' %}\n            {% endif %}\n          {%
-      endif %}\n        {% endif %}\n      {% endif %}\n    {% endif %}\n  {% endif
-      %}\n{% endif %}\n{{ trigger }}"
+      is not none %} \n    {% if states('sensor.mail_usps_mail') is not none %}\n
+      \     {% if states('sensor.mail_usps_mail')|int(0) > 0 %}\n        {% if ((now()
+      - timedelta( days = 1 )) - \n           as_local(state_attr('automation.mail_notification',
+      \n          'last_triggered'))).days > 0 %}\n          {% if states('input_select.anthony')
+      in ['Home', \n          'Just Arrived'] %} {% set trigger = 'true' %}\n          {%
+      elif distance(states.device_tracker.iphone) is not none %}\n            {% if
+      distance(states.device_tracker.iphone) < 1.5 %}\n              {% set trigger
+      = 'true' %}\n            {% endif %}\n          {% endif %}\n        {% endif
+      %}\n      {% endif %}\n    {% endif %}\n  {% endif %}\n{% endif %}\n{{ trigger
+      }}"
     id: send notification
   condition: []
   action:
@@ -2583,84 +2672,6 @@
         - action: Open Alexa App
           title: Open Alexa App
   mode: single
-- id: '1667745697711'
-  alias: Ecobee
-  description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - input_select.riana
-  - platform: state
-    entity_id:
-    - input_select.anthony
-  - platform: homeassistant
-    event: start
-  - platform: event
-    event_type: automation_reloaded
-    id: reload
-  - platform: state
-    entity_id:
-    - zone.home
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: or
-        conditions:
-        - condition: state
-          entity_id: input_select.anthony
-          state: Home
-        - condition: state
-          entity_id: input_select.anthony
-          state: Just Arrived
-        - condition: state
-          entity_id: input_select.riana
-          state: Home
-        - condition: state
-          entity_id: input_select.riana
-          state: Just Arrived
-        - condition: numeric_state
-          entity_id: zone.home
-          above: 0
-      sequence:
-      - service: button.press
-        data: {}
-        target:
-          entity_id: button.home_clear_hold
-        enabled: false
-    - conditions:
-      - condition: and
-        conditions:
-        - condition: or
-          conditions:
-          - condition: state
-            entity_id: input_select.anthony
-            state: Just Left
-          - condition: state
-            entity_id: input_select.anthony
-            state: Away
-          alias: anthony away
-        - condition: or
-          conditions:
-          - condition: state
-            entity_id: input_select.riana
-            state: Away
-          - condition: state
-            entity_id: input_select.riana
-            state: Just Left
-          alias: riana away
-        - condition: numeric_state
-          entity_id: zone.home
-          below: 1
-        alias: Nobody Home
-      sequence:
-      - service: select.select_option
-        data:
-          option: away
-        target:
-          entity_id: select.home_current_mode
-  mode: queued
-  max: 10
 - id: '1668535366974'
   alias: Connected to Car
   description: ''
@@ -2668,12 +2679,15 @@
   - platform: homeassistant
     event: start
     id: home assistant started
+    enabled: false
   - platform: time
     at: 00:00:00
     id: reset
+    enabled: false
   - platform: event
     event_type: automation_reloaded
     id: reload
+    enabled: false
   condition: []
   action:
   - choose:
@@ -2684,10 +2698,12 @@
           id: home assistant started
         - condition: trigger
           id: reload
+        enabled: false
       sequence:
       - condition: state
         entity_id: input_boolean.weather_notification_sent
         state: 'off'
+        enabled: false
       - condition: or
         conditions:
         - condition: state
@@ -2696,23 +2712,33 @@
         - condition: state
           entity_id: input_select.anthony
           state: Just Left
+        enabled: false
       - service: input_boolean.turn_on
         data: {}
         target:
           entity_id: input_boolean.weather_notification_sent
+        enabled: false
     - conditions:
       - condition: trigger
         id: reset
+        enabled: false
       sequence:
       - service: input_boolean.turn_off
         data: {}
         target:
           entity_id: input_boolean.weather_notification_sent
+        enabled: false
     default:
-    - service: script.turn_on
-      data: {}
-      target:
-        entity_id: script.stop_music
+    - if:
+      - condition: state
+        entity_id: media_player.spotify_anthony221121
+        attribute: source
+        state: Home Assistant
+      then:
+      - service: script.turn_on
+        data: {}
+        target:
+          entity_id: script.stop_music
     - if:
       - condition: or
         conditions:
@@ -2808,6 +2834,113 @@
       data: {}
       target:
         entity_id: input_boolean.weather_notification_sent
+      enabled: false
+    enabled: false
+  - if:
+    - condition: state
+      entity_id: media_player.spotify_anthony221121
+      attribute: source
+      state: Home Assistant
+    then:
+    - service: script.turn_on
+      data: {}
+      target:
+        entity_id: script.stop_music
+  - if:
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: binary_sensor.front_door
+        state: 'on'
+      - condition: state
+        entity_id: binary_sensor.back_door
+        state: 'on'
+      - condition: state
+        entity_id: lock.front_door
+        state: unlocked
+      - condition: state
+        entity_id: lock.back_door
+        state: unlocked
+      - condition: and
+        conditions:
+        - condition: numeric_state
+          entity_id: weather.dark_sky
+          below: 48
+          attribute: temperature
+        - condition: state
+          entity_id: input_boolean.weather_notification_sent
+          state: 'off'
+        enabled: false
+    then:
+    - parallel:
+      - service: button.press
+        data: {}
+        target:
+          entity_id:
+          - button.back_door_wake
+          - button.front_door_wake
+      - service: notify.mobile_app_iphone
+        data:
+          message: clear_notification
+          data:
+            tag: car-reminder
+    - delay:
+        hours: 0
+        minutes: 0
+        seconds: 2
+        milliseconds: 500
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: binary_sensor.front_door
+        state: 'on'
+      - condition: state
+        entity_id: binary_sensor.back_door
+        state: 'on'
+      - condition: state
+        entity_id: lock.front_door
+        state: unlocked
+      - condition: state
+        entity_id: lock.back_door
+        state: unlocked
+      - condition: and
+        conditions:
+        - condition: numeric_state
+          entity_id: weather.dark_sky
+          below: 48
+          attribute: temperature
+        - condition: state
+          entity_id: input_boolean.weather_notification_sent
+          state: 'off'
+        enabled: false
+    - condition: template
+      value_template: '{{ not is_state(''person.riana'', ''home'')
+
+        and not is_state(''person.dana'', ''home'')
+
+        and states(''zone.home'')|int < 2
+
+        }}'
+    - service: notify.mobile_app_iphone
+      data:
+        message: '{% if is_state(''binary_sensor.front_door'', ''on'') or is_state(''lock.front_door'',
+          ''unlocked'') %}The front door is unlocked.{% endif %}{% if is_state(''binary_sensor.back_door'',
+          ''on'') or is_state(''lock.back_door'', ''unlocked'') %}The back door is
+          unlocked.{% endif %} {% if state_attr(''weather.dark_sky'', ''temperature'')
+          is defined %}{% if state_attr(''weather.dark_sky'', ''temperature'')|float(48)
+          < 48 %}It is {{state_attr(''weather.dark_sky'', ''temperature'')}}°.{% endif
+          %}{% endif %}'
+        data:
+          tag: car-reminder
+          push:
+            sound:
+              name: default
+              critical: 1
+              volume: 0.3
+  - service: button.press
+    data: {}
+    target:
+      entity_id: button.tare
   mode: single
 - id: '1668564599073'
   alias: Reboot AirPort
@@ -2931,21 +3064,21 @@
     state: 'off'
     for:
       hours: 0
-      minutes: 25
+      minutes: 20
       seconds: 0
   - condition: state
     entity_id: binary_sensor.master_hall_motion
     state: 'off'
     for:
       hours: 0
-      minutes: 25
+      minutes: 20
       seconds: 0
   - condition: state
     entity_id: binary_sensor.laundry_room_motion
     state: 'off'
     for:
       hours: 0
-      minutes: 25
+      minutes: 20
       seconds: 0
   action:
   - service: light.turn_off
@@ -2953,7 +3086,11 @@
     target:
       entity_id:
       - light.kitchen_lights
-      - light.hallway_lights
+      - light.kitchen_cabinet_lights
+  - service: switch.turn_off
+    data: {}
+    target:
+      entity_id: switch.christmas_lights
   mode: single
 - id: '1668919603349'
   alias: Bathroom Music
@@ -3061,18 +3198,22 @@
   trigger:
   - platform: state
     entity_id:
-    - binary_sensor.bathroom_door
+    - binary_sensor.bathroom_door_zigbee
     from: 'off'
     to: 'on'
     alias: door opened
     id: door opened
   - platform: state
     entity_id:
-    - binary_sensor.bathroom_door
+    - binary_sensor.bathroom_door_zigbee
     to: 'off'
     from: 'on'
     id: door closed
     alias: door closed
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 3
   - platform: homeassistant
     event: start
     id: startup
@@ -3081,14 +3222,15 @@
     id: reload
   - platform: state
     entity_id:
-    - binary_sensor.shower
+    - binary_sensor.showering
     from: 'on'
     to: 'off'
     alias: shower stopped
     id: shower stopped
+    enabled: false
   - platform: state
     entity_id:
-    - binary_sensor.shower
+    - binary_sensor.showering
     to: 'on'
     id: shower started
     alias: shower started
@@ -3119,9 +3261,51 @@
     to: 'on'
     from: 'off'
     id: motion detected
+  - platform: state
+    entity_id:
+    - binary_sensor.bathroom_multi_sensor_motion
+    to: 'off'
+    from: 'on'
+    id: motion clear
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 30
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.bathroom_light
+    alias: timer finished
+    id: timer finished
+  - platform: state
+    entity_id:
+    - input_boolean.bathroom_occupied
+    to: 'on'
+    from: 'off'
+    id: occupied_boolean
   condition: []
   action:
   - choose:
+    - conditions:
+      - condition: trigger
+        id: occupied_boolean
+      sequence:
+      - if:
+        - condition: device
+          type: is_off
+          device_id: 624405d34a0a0bc8df3990c131a31bd2
+          entity_id: light.bathroom_lights
+          domain: light
+        then:
+        - type: turn_on
+          device_id: 624405d34a0a0bc8df3990c131a31bd2
+          entity_id: light.bathroom_lights
+          domain: light
+          brightness_pct: 100
+      - service: timer.cancel
+        data: {}
+        target:
+          entity_id: timer.bathroom_light
     - conditions:
       - condition: or
         conditions:
@@ -3149,8 +3333,17 @@
               entity_id: switch.exhaust_fan
               state: 'on'
           alias: fp1
-        - condition: trigger
-          id: motion detected
+        - condition: and
+          conditions:
+          - condition: trigger
+            id: motion detected
+          - condition: state
+            entity_id: light.bathroom_lights
+            state: 'off'
+            for:
+              hours: 0
+              minutes: 0
+              seconds: 4
         alias: Presence Detected
       - condition: state
         entity_id: light.bathroom_lights
@@ -3162,14 +3355,19 @@
             before: sunrise
             alias: Dark Outside
             after: sunset
+            enabled: true
           - condition: state
             entity_id: light.bedroom_lights
             state: 'off'
             alias: Bedroom Lights are off
+            enabled: true
           - condition: state
             entity_id: binary_sensor.bed_occupancy
             state: 'off'
             alias: probably anthony
+          - condition: state
+            entity_id: binary_sensor.evan_home
+            state: 'off'
           sequence:
           - type: turn_on
             device_id: 624405d34a0a0bc8df3990c131a31bd2
@@ -3190,6 +3388,10 @@
             entity_id: binary_sensor.bed_occupancy
             state: 'off'
             alias: probably anthony
+            enabled: true
+          - condition: state
+            entity_id: light.evan_fan
+            state: 'off'
           sequence:
           - type: turn_on
             device_id: 624405d34a0a0bc8df3990c131a31bd2
@@ -3203,9 +3405,13 @@
           entity_id: light.bathroom_lights
           domain: light
           brightness_pct: 100
+      - service: timer.cancel
+        data: {}
+        target:
+          entity_id: timer.bathroom_light
     - conditions:
       - condition: state
-        entity_id: binary_sensor.shower
+        entity_id: binary_sensor.showering
         state: 'off'
       - condition: or
         conditions:
@@ -3214,7 +3420,7 @@
         - condition: and
           conditions:
           - condition: state
-            entity_id: binary_sensor.aqara_lumi_motion_ac01_occupancy
+            entity_id: binary_sensor.bathroom_occupancy
             state: 'off'
           - condition: or
             conditions:
@@ -3235,6 +3441,13 @@
                   hours: 0
                   minutes: 0
                   seconds: 20
+              - condition: state
+                entity_id: binary_sensor.bathroom_multi_sensor_motion
+                state: 'off'
+            - condition: trigger
+              id: motion clear
+        - condition: trigger
+          id: timer finished
       - condition: device
         type: is_on
         device_id: 624405d34a0a0bc8df3990c131a31bd2
@@ -3245,6 +3458,10 @@
         device_id: 624405d34a0a0bc8df3990c131a31bd2
         entity_id: light.bathroom_lights
         domain: light
+      - service: timer.cancel
+        data: {}
+        target:
+          entity_id: timer.bathroom_light
     - conditions:
       - condition: trigger
         id: lights turned off
@@ -3262,7 +3479,33 @@
       - service: button.press
         data: {}
         target:
-          entity_id: button.aqara_lumi_motion_ac01_presence_status_reset
+          entity_id: button.bathroom_presence_status_reset
+    - conditions:
+      - condition: trigger
+        id: motion clear
+      - condition: state
+        entity_id: light.bathroom_lights
+        state: 'on'
+      - condition: state
+        entity_id: binary_sensor.showering
+        state: 'off'
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: binary_sensor.bathroom_occupancy
+          state: 'off'
+        - condition: state
+          entity_id: switch.exhaust_fan
+          state: 'on'
+      - condition: state
+        entity_id: input_boolean.bathroom_occupied
+        state: 'off'
+      sequence:
+      - service: timer.start
+        data:
+          duration: 00:01:30
+        target:
+          entity_id: timer.bathroom_light
   mode: parallel
   max: 10
 - id: fp
@@ -3500,3 +3743,622 @@
         brightness_pct: 40
       entity:
       - light.kitchen_cabinet_lights
+- id: '1670729021317'
+  alias: Christmas Lights
+  description: Sync with Kitchen Lights
+  trigger:
+  - platform: state
+    entity_id:
+    - light.kitchen_lights
+  - platform: state
+    entity_id:
+    - switch.christmas_lights
+    from: unavailable
+  - platform: homeassistant
+    event: start
+  - platform: event
+    event_type: automation_reloaded
+    id: reload
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: switch.christmas_lights
+        state: 'off'
+      - condition: state
+        entity_id: light.kitchen_lights
+        state: 'on'
+      sequence:
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id: switch.christmas_lights
+    - conditions:
+      - condition: state
+        entity_id: switch.christmas_lights
+        state: 'on'
+      - condition: state
+        entity_id: light.kitchen_lights
+        state: 'off'
+      sequence:
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id: switch.christmas_lights
+  mode: single
+- id: '1670745513720'
+  alias: Hallway Lights Off
+  description: ''
+  trigger:
+  - platform: time_pattern
+    minutes: /5
+  condition:
+  - condition: time
+    before: 04:00:00
+    after: '23:55:00'
+  - condition: state
+    entity_id: light.hallway_lights
+    state: 'on'
+  - condition: state
+    entity_id: binary_sensor.nest_protect_hallway_occupancy
+    state: 'off'
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+  action:
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id:
+      - light.hallway_lights
+  mode: single
+- id: '1670794990971'
+  alias: Living Room Fan Pico
+  description: ''
+  trigger:
+  - platform: device
+    device_id: e0d82cb7ed45e4184f837d8ee379f63e
+    domain: lutron_caseta
+    type: press
+    subtype: 'on'
+    id: on_pressed
+  - platform: device
+    device_id: e0d82cb7ed45e4184f837d8ee379f63e
+    domain: lutron_caseta
+    type: press
+    subtype: 'off'
+    id: off_pressed
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: on_pressed
+      sequence:
+      - type: turn_on
+        device_id: 12f08520bdd6649730246bea3568917f
+        entity_id: switch.living_room_fan
+        domain: switch
+    - conditions:
+      - condition: trigger
+        id: off_pressed
+      sequence:
+      - type: turn_off
+        device_id: 12f08520bdd6649730246bea3568917f
+        entity_id: switch.living_room_fan
+        domain: switch
+  mode: queued
+  max: 10
+- id: '1670799817434'
+  alias: Riana Arrived Home
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_select.riana
+    to: Just Arrived
+  condition: []
+  action:
+  - if:
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: media_player.owntone_output_master_bedroom_tv
+        state: 'on'
+      - condition: state
+        entity_id: media_player.owntone_output_guest_bedroom_tv
+        state: 'on'
+      - condition: state
+        entity_id: media_player.owntone_output_kitchen_homepod
+        state: 'on'
+      - condition: state
+        entity_id: media_player.owntone_output_living_room_tv
+        state: 'on'
+      - condition: state
+        entity_id: media_player.owntone_output_living_room
+        state: 'on'
+      - condition: state
+        entity_id: media_player.owntone_output_front
+        state: 'on'
+      - condition: state
+        entity_id: media_player.owntone_output_garage
+        state: 'on'
+    then:
+    - service: media_player.turn_off
+      data: {}
+      target:
+        entity_id:
+        - media_player.owntone_output_front
+        - media_player.owntone_output_guest_bedroom_tv
+        - media_player.owntone_output_kitchen_homepod
+        - media_player.owntone_output_living_room_tv
+        - media_player.owntone_output_master_bedroom_tv
+        - media_player.owntone_output_garage
+  mode: single
+- id: '1670894312639'
+  alias: Notification
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_boolean.toggle
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_select.anthony
+      state: Home
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: cover.garage_door
+      state: open
+    - condition: state
+      entity_id: cover.garage_door
+      state: opening
+  action:
+  - service: notify.anthonys_devices
+    data:
+      message: Notification
+      data:
+        push:
+          sound:
+            name: default
+            critical: 1
+            volume: 0.6
+  mode: single
+- id: '1671419998725'
+  alias: Dana's Bedroom Pico
+  description: ''
+  use_blueprint:
+    path: stephack/core-pico.yaml
+    input:
+      pico_remote: df24bd878efc1f29899ba74213c4b124
+      auto_mode: queued
+      top_on:
+      - parallel:
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_east_wall_rope_lights
+            - switch.dana_s_north_wall_rope_lights
+            - switch.dana_s_west_wall_rope_lights
+            - switch.dana_s_south_wall_rope_lights
+            - switch.dana_s_south_wall_incandescent_string_lights
+        - service: light.turn_on
+          data:
+            rgb_color:
+            - 141
+            - 45
+            - 245
+            brightness_pct: 100
+          target:
+            entity_id: light.evan_fan
+      down_lower:
+      - if:
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: switch.dana_s_south_wall_rope_lights
+            state: 'off'
+          - condition: state
+            entity_id: switch.dana_s_west_wall_rope_lights
+            state: 'off'
+        then:
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_west_wall_rope_lights
+            - switch.dana_s_south_wall_rope_lights
+        else:
+        - service: switch.turn_off
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_west_wall_rope_lights
+            - switch.dana_s_south_wall_rope_lights
+      bottom_off:
+      - parallel:
+        - service: switch.turn_off
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_east_wall_rope_lights
+            - switch.dana_s_north_wall_rope_lights
+            - switch.dana_s_west_wall_rope_lights
+            - switch.dana_s_south_wall_rope_lights
+            - switch.dana_s_south_wall_incandescent_string_lights
+        - service: light.turn_off
+          data: {}
+          target:
+            entity_id:
+            - light.evan_fan
+      up_raise:
+      - if:
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: switch.dana_s_north_wall_rope_lights
+            state: 'on'
+          - condition: state
+            entity_id: switch.dana_s_east_wall_rope_lights
+            state: 'on'
+          - condition: state
+            entity_id: switch.dana_s_south_wall_incandescent_string_lights
+            state: 'on'
+        then:
+        - service: switch.turn_off
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_north_wall_rope_lights
+            - switch.dana_s_east_wall_rope_lights
+            - switch.dana_s_south_wall_incandescent_string_lights
+        else:
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_north_wall_rope_lights
+            - switch.dana_s_east_wall_rope_lights
+            - switch.dana_s_south_wall_incandescent_string_lights
+      top_on_release: []
+      up_raise_release:
+      down_lower_release: []
+      middle_stop_release: []
+      middle_stop:
+      - if:
+        - condition: state
+          entity_id: light.evan_fan
+          state: 'on'
+        then:
+        - service: light.turn_off
+          data: {}
+          target:
+            entity_id: light.evan_fan
+        else:
+        - service: light.turn_on
+          data:
+            rgb_color:
+            - 141
+            - 45
+            - 245
+            brightness_pct: 100
+          target:
+            entity_id: light.evan_fan
+- id: '1671430225021'
+  alias: Dana's Wall Pico
+  description: ''
+  use_blueprint:
+    path: stephack/core-pico.yaml
+    input:
+      pico_remote: c51c176058dad4748b6065d54c93bec5
+      auto_mode: queued
+      top_on:
+      - parallel:
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_east_wall_rope_lights
+            - switch.dana_s_north_wall_rope_lights
+            - switch.dana_s_west_wall_rope_lights
+            - switch.dana_s_south_wall_rope_lights
+            - switch.dana_s_south_wall_incandescent_string_lights
+        - service: light.turn_on
+          data:
+            rgb_color:
+            - 141
+            - 45
+            - 245
+            brightness_pct: 100
+          target:
+            entity_id: light.evan_fan
+        - service: media_player.turn_on
+          data: {}
+          target:
+            entity_id: media_player.evan
+      down_lower:
+      - if:
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: switch.dana_s_south_wall_rope_lights
+            state: 'off'
+          - condition: state
+            entity_id: switch.dana_s_west_wall_rope_lights
+            state: 'off'
+        then:
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_west_wall_rope_lights
+            - switch.dana_s_south_wall_rope_lights
+        else:
+        - service: switch.turn_off
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_west_wall_rope_lights
+            - switch.dana_s_south_wall_rope_lights
+      bottom_off:
+      - parallel:
+        - service: switch.turn_off
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_east_wall_rope_lights
+            - switch.dana_s_north_wall_rope_lights
+            - switch.dana_s_west_wall_rope_lights
+            - switch.dana_s_south_wall_rope_lights
+            - switch.dana_s_south_wall_incandescent_string_lights
+        - service: light.turn_off
+          data: {}
+          target:
+            entity_id:
+            - light.evan_fan
+        - service: media_player.turn_off
+          data: {}
+          target:
+            entity_id: media_player.evan
+      up_raise:
+      - if:
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: switch.dana_s_north_wall_rope_lights
+            state: 'on'
+          - condition: state
+            entity_id: switch.dana_s_east_wall_rope_lights
+            state: 'on'
+          - condition: state
+            entity_id: switch.dana_s_south_wall_incandescent_string_lights
+            state: ''
+        then:
+        - service: switch.turn_off
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_north_wall_rope_lights
+            - switch.dana_s_east_wall_rope_lights
+            - switch.dana_s_south_wall_incandescent_string_lights
+        else:
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_north_wall_rope_lights
+            - switch.dana_s_east_wall_rope_lights
+            - switch.dana_s_south_wall_incandescent_string_lights
+      top_on_release: []
+      up_raise_release:
+      down_lower_release: []
+      middle_stop_release: []
+      middle_stop:
+      - if:
+        - condition: state
+          entity_id: light.evan_fan
+          state: 'on'
+        then:
+        - service: light.turn_off
+          data: {}
+          target:
+            entity_id: light.evan_fan
+        else:
+        - service: light.turn_on
+          data:
+            rgb_color:
+            - 141
+            - 45
+            - 245
+            brightness_pct: 100
+          target:
+            entity_id: light.evan_fan
+- id: '1671606640908'
+  alias: Bathroom Occupancy Override
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.bathroom_multi_sensor_motion
+    to: 'on'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    id: 'on'
+  - platform: state
+    entity_id:
+    - binary_sensor.bathroom_door_zigbee
+    to: 'on'
+    from: 'off'
+    id: 'off'
+  - platform: event
+    event_type: automation_reloaded
+    id: reload
+  - platform: homeassistant
+    event: start
+    id: start
+  - platform: device
+    type: turned_off
+    device_id: 624405d34a0a0bc8df3990c131a31bd2
+    entity_id: light.bathroom_lights
+    domain: light
+    id: lights turned off
+  - platform: state
+    entity_id:
+    - light.bathroom_lights
+    to: 'on'
+    from: 'off'
+    id: wave
+  - platform: device
+    device_id: 7c247296aac3c00b267bb165baab5a7c
+    domain: zwave_js
+    type: event.value_notification.central_scene
+    property: scene
+    property_key: '001'
+    endpoint: 0
+    command_class: 91
+    subtype: Endpoint 0 Scene 001
+    id: turned on
+  - platform: state
+    entity_id:
+    - binary_sensor.showering
+    to: 'on'
+    from: 'off'
+    id: showering
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.bathroom_door_zigbee
+        state: 'off'
+      - condition: state
+        entity_id: input_boolean.bathroom_occupied
+        state: 'off'
+      - condition: or
+        conditions:
+        - condition: and
+          conditions:
+          - condition: trigger
+            id: wave
+          - condition: state
+            entity_id: binary_sensor.bathroom_door_zigbee
+            state: 'off'
+            for:
+              hours: 0
+              minutes: 1
+              seconds: 0
+        - condition: trigger
+          id: 'on'
+        - condition: trigger
+          id: turned on
+        - condition: trigger
+          id: showering
+      sequence:
+      - condition: state
+        entity_id: binary_sensor.bathroom_door_zigbee
+        state: 'off'
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id: input_boolean.bathroom_occupied
+    - conditions:
+      - condition: state
+        entity_id: input_boolean.bathroom_occupied
+        state: 'on'
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: 'off'
+        - condition: and
+          conditions:
+          - condition: or
+            conditions:
+            - condition: trigger
+              id: reload
+            - condition: trigger
+              id: start
+          - condition: device
+            type: is_off
+            device_id: 624405d34a0a0bc8df3990c131a31bd2
+            entity_id: light.bathroom_lights
+            domain: light
+        - condition: trigger
+          id: lights turned off
+      sequence:
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id: input_boolean.bathroom_occupied
+  mode: queued
+  max: 10
+- id: '1671705394450'
+  alias: Evan
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_boolean.toggle
+    to: 'on'
+    from: 'off'
+    id: 'on'
+  - platform: state
+    entity_id:
+    - input_boolean.toggle
+    from: 'on'
+    to: 'off'
+    id: 'off'
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: 'on'
+      sequence:
+      - service: media_player.turn_on
+        data: {}
+        target:
+          entity_id: media_player.evan
+    - conditions:
+      - condition: trigger
+        id: 'off'
+      sequence:
+      - service: media_player.turn_off
+        data: {}
+        target:
+          entity_id: media_player.evan
+  mode: single
+- id: '1671929632563'
+  alias: Dining Room Light
+  description: ''
+  trigger:
+  - device_id: 767effc5535cb9c6264f0419d61cfeb7
+    domain: zha
+    platform: device
+    type: Leave
+    subtype: sensor
+    id: sensor leave
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: sensor leave
+      - condition: state
+        entity_id: switch.dining_room_light
+        state: 'on'
+      sequence:
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id: switch.dining_room_light
+  mode: single
