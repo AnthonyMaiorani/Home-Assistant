@@ -220,8 +220,22 @@ night:
       data: {}
       target:
         entity_id: input_boolean.bedmotion
+    - repeat:
+        count: '60'
+        sequence:
+        - service: light.turn_off
+          data: {}
+          target:
+            entity_id:
+            - light.shapes_007f
+            - light.shapes_ee82
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 1
+            milliseconds: 0
   alias: Night
-  mode: single
+  mode: restart
   icon: mdi:weather-night
 morning:
   alias: Morning
@@ -409,10 +423,11 @@ lofi:
       - media_player.owntone_output_garage
       - media_player.owntone_output_guest_bedroom_tv
       - media_player.owntone_output_kitchen_homepod
-      - media_player.owntone_output_living_room
       - media_player.owntone_output_living_room_tv
       - media_player.owntone_output_master_bedroom_tv
       - media_player.owntone_output_nightstand
+      - media_player.owntone_output_danas
+      - media_player.owntone_output_danas_2
   - repeat:
       while:
       - condition: not
@@ -444,17 +459,32 @@ lofi:
           milliseconds: 0
   - service: media_player.volume_set
     data:
-      volume_level: 0.25
+      volume_level: "{% if states('binary_sensor.bed_occupancy') is defined and is_state('binary_sensor.bed_occupancy',
+        'on') %}\n    {% set vol =  0.13 %}\n{% elif now().hour >= 23 or now().hour
+        < 6 %}\n    {% set vol = 0.13 %}\n{% else %}\n    {% set vol = 0.25 %}\n{%
+        endif %} {{ vol }}\n"
     target:
       entity_id:
       - media_player.spotify_anthony221121
       - media_player.owntone_server
-  - service: media_player.shuffle_set
-    data:
-      shuffle: true
-    target:
-      entity_id: media_player.spotify_anthony221121
-  - parallel:
+  - if:
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: binary_sensor.bed_occupancy
+        state: 'on'
+      - condition: time
+        before: 06:00:00
+        after: 00:00:00
+    then:
+    - service: media_player.play_media
+      data:
+        media_content_type: playlist
+        media_content_id: https://open.spotify.com/playlist/5FmmxErJczcrEwIFGIviYo
+        enqueue: play
+      target:
+        entity_id: media_player.spotify_anthony221121
+    else:
     - service: media_player.play_media
       data:
         media_content_type: playlist
@@ -462,6 +492,16 @@ lofi:
         enqueue: play
       target:
         entity_id: media_player.spotify_anthony221121
+  - service: media_player.shuffle_set
+    data:
+      shuffle: true
+    target:
+      entity_id: media_player.spotify_anthony221121
+  - service: media_player.media_next_track
+    data: {}
+    target:
+      entity_id: media_player.spotify_anthony221121
+  - parallel:
     - if:
       - condition: state
         entity_id: media_player.owntone_output_desk
@@ -486,11 +526,23 @@ lofi:
           entity_id: media_player.owntone_output_desk
           state: 'on'
         then:
-        - service: media_player.volume_set
-          data:
-            volume_level: 0.2
-          target:
-            entity_id: media_player.owntone_output_desk
+        - repeat:
+            until:
+            - condition: template
+              value_template: '{{ state_attr(''media_player.owntone_output_desk'',
+                ''volume_level'') == state_attr(''media_player.spotify_anthony221121'',
+                ''volume_level'') }}
+
+                '
+            sequence:
+            - service: media_player.volume_set
+              data:
+                volume_level: '{{ state_attr(''media_player.spotify_anthony221121'',
+                  ''volume_level'') }}
+
+                  '
+              target:
+                entity_id: media_player.owntone_output_desk
         else:
         - service: automation.trigger
           data: {}
@@ -507,12 +559,33 @@ lofi:
         target:
           entity_id:
           - media_player.owntone_output_nightstand
-      - service: media_player.volume_set
-        data:
-          volume_level: 0.15
-        target:
+      - wait_for_trigger:
+        - platform: state
           entity_id:
           - media_player.owntone_output_nightstand
+          to: 'on'
+        timeout:
+          hours: 0
+          minutes: 0
+          seconds: 5
+          milliseconds: 0
+      - repeat:
+          until:
+          - condition: template
+            value_template: '{{ state_attr(''media_player.owntone_output_nightstand'',
+              ''volume_level'') == state_attr(''media_player.spotify_anthony221121'',
+              ''volume_level'') }}
+
+              '
+          sequence:
+          - service: media_player.volume_set
+            data:
+              volume_level: '{{ state_attr(''media_player.spotify_anthony221121'',
+                ''volume_level'') }}
+
+                '
+            target:
+              entity_id: media_player.owntone_output_nightstand
       alias: Turn on Nightstand Speaker
     - if:
       - condition: template
@@ -662,11 +735,33 @@ lofi:
           target:
             entity_id:
             - media_player.owntone_output_bathroom
-        - service: media_player.volume_set
-          data:
-            volume_level: 0.15
-          target:
-            entity_id: media_player.owntone_output_bathroom
+        - wait_for_trigger:
+          - platform: state
+            entity_id:
+            - media_player.owntone_output_bathroom
+            to: 'on'
+          timeout:
+            hours: 0
+            minutes: 0
+            seconds: 5
+            milliseconds: 0
+        - repeat:
+            until:
+            - condition: template
+              value_template: '{{ state_attr(''media_player.owntone_output_bathroom'',
+                ''volume_level'') == state_attr(''media_player.spotify_anthony221121'',
+                ''volume_level'') }}
+
+                '
+            sequence:
+            - service: media_player.volume_set
+              data:
+                volume_level: '{{ state_attr(''media_player.spotify_anthony221121'',
+                  ''volume_level'') }}
+
+                  '
+              target:
+                entity_id: media_player.owntone_output_bathroom
         alias: Turn on Bathroom HomePod
       enabled: true
   mode: single
@@ -689,10 +784,11 @@ play_music:
       - media_player.owntone_output_garage
       - media_player.owntone_output_guest_bedroom_tv
       - media_player.owntone_output_kitchen_homepod
-      - media_player.owntone_output_living_room
       - media_player.owntone_output_living_room_tv
       - media_player.owntone_output_master_bedroom_tv
       - media_player.owntone_output_nightstand
+      - media_player.owntone_output_danas
+      - media_player.owntone_output_danas_2
   - repeat:
       while:
       - condition: not
@@ -729,19 +825,23 @@ play_music:
       entity_id:
       - media_player.spotify_anthony221121
       - media_player.owntone_server
+  - service: media_player.play_media
+    data:
+      media_content_type: playlist
+      media_content_id: https://open.spotify.com/playlist/1FXZPGh51QQyNUmADd5ssN
+      enqueue: play
+    target:
+      entity_id: media_player.spotify_anthony221121
   - service: media_player.shuffle_set
     data:
       shuffle: true
     target:
       entity_id: media_player.spotify_anthony221121
+  - service: media_player.media_next_track
+    data: {}
+    target:
+      entity_id: media_player.spotify_anthony221121
   - parallel:
-    - service: media_player.play_media
-      data:
-        media_content_type: playlist
-        media_content_id: https://open.spotify.com/playlist/1FXZPGh51QQyNUmADd5ssN
-        enqueue: play
-      target:
-        entity_id: media_player.spotify_anthony221121
     - if:
       - condition: state
         entity_id: media_player.owntone_output_desk
@@ -952,11 +1052,41 @@ play_music:
           target:
             entity_id:
             - media_player.owntone_output_bathroom
-        - service: media_player.volume_set
-          data:
-            volume_level: 0.15
-          target:
-            entity_id: media_player.owntone_output_bathroom
+        - wait_for_trigger:
+          - platform: state
+            entity_id:
+            - media_player.owntone_output_bathroom
+            to: 'on'
+          timeout:
+            hours: 0
+            minutes: 0
+            seconds: 5
+            milliseconds: 0
+        - repeat:
+            until:
+            - condition: template
+              value_template: '{% if states(''binary_sensor.showering'') is defined
+                and is_state(''binary_sensor.showering'', ''on'')  %}  {% set vol
+                =  0.55 %} {% else %} {% set vol = state_attr(''media_player.spotify_anthony221121'',
+                ''volume_level'') %} {% endif %}
+
+                {{ state_attr(''media_player.owntone_output_bathroom'', ''volume_level'')
+                == vol }}
+
+                '
+            sequence:
+            - service: media_player.volume_set
+              data:
+                volume_level: '{% if states(''binary_sensor.showering'') is defined
+                  and is_state(''binary_sensor.showering'', ''on'')  %}  {% set vol
+                  =  0.55 %} {% else %} {% set vol = state_attr(''media_player.spotify_anthony221121'',
+                  ''volume_level'') %} {% endif %}
+
+                  {{ vol }}
+
+                  '
+              target:
+                entity_id: media_player.owntone_output_bathroom
         alias: Turn on Bathroom HomePod
       enabled: true
   mode: single
@@ -986,6 +1116,8 @@ stop_music:
       - media_player.owntone_output_master_bedroom_tv
       - media_player.owntone_output_nightstand
       - media_player.owntone_output_garage
+      - media_player.owntone_output_danas
+      - media_player.owntone_output_danas_2
   - wait_for_trigger:
     - platform: state
       entity_id:
@@ -1013,5 +1145,7 @@ stop_music:
           - media_player.owntone_output_master_bedroom_tv
           - media_player.owntone_output_nightstand
           - media_player.owntone_output_garage
+          - media_player.owntone_output_danas
+          - media_player.owntone_output_danas_2
   mode: single
   icon: mdi:stop

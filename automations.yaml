@@ -550,9 +550,6 @@
       - condition: or
         conditions:
         - condition: state
-          entity_id: binary_sensor.shower
-          state: 'on'
-        - condition: state
           entity_id: input_select.anthony
           state: Just Arrived
       sequence:
@@ -1124,6 +1121,16 @@
   - platform: event
     event_type: automation_reloaded
     id: reloaded
+  - platform: state
+    entity_id:
+    - light.shapes_007f
+    from: unavailable
+    to: 'on'
+  - platform: state
+    entity_id:
+    - light.shapes_ee82
+    from: unavailable
+    to: 'on'
   condition: []
   action:
   - if:
@@ -1953,13 +1960,6 @@
       seconds: 0
     alias: When shower is turned off
     id: showerdone
-  - platform: state
-    entity_id:
-    - switch.exhaust_fan
-    from: 'off'
-    to: 'on'
-    id: manually
-    alias: When exhaust fan is turned on
   - platform: event
     event_type: timer.finished
     event_data:
@@ -1973,13 +1973,6 @@
     to: 'on'
     alias: When shower is turned on
     id: showerstart
-  - platform: state
-    entity_id:
-    - switch.exhaust_fan
-    from: 'on'
-    to: 'off'
-    id: turnedoff
-    alias: Turned Off
   - platform: homeassistant
     event: start
     id: restart
@@ -2005,14 +1998,22 @@
     command_class: 91
     subtype: Endpoint 0 Scene 001
     id: turned on
+  - platform: device
+    device_id: 7c247296aac3c00b267bb165baab5a7c
+    domain: zwave_js
+    type: event.value_notification.central_scene
+    property: scene
+    property_key: '002'
+    endpoint: 0
+    command_class: 91
+    subtype: Endpoint 0 Scene 002
+    id: turned off
   condition: []
   action:
   - choose:
     - conditions:
       - condition: or
         conditions:
-        - condition: trigger
-          id: manually
         - condition: trigger
           id: turned on
         - condition: and
@@ -2051,7 +2052,7 @@
           state: 'off'
         - condition: state
           entity_id: input_boolean.bathroom_occupied
-          state: 'off'
+          state: 'on'
         alias: Confirm fan is off, shower is off, timer is off
       sequence:
       - service: switch.turn_off
@@ -2077,14 +2078,6 @@
         target:
           entity_id: switch.ac_boost
         enabled: false
-    - conditions:
-      - condition: trigger
-        id: turnedoff
-      sequence:
-      - service: timer.cancel
-        data: {}
-        target:
-          entity_id: timer.exhaust
     - conditions:
       - condition: or
         conditions:
@@ -2126,18 +2119,20 @@
         - condition: state
           entity_id: binary_sensor.showering
           state: 'off'
-        - condition: not
-          conditions:
-          - condition: state
-            entity_id: timer.exhaust
-            state: active
+        - condition: state
+          entity_id: timer.exhaust
+          state: idle
         - service: timer.start
           data: {}
           target:
             entity_id: timer.exhaust
     - conditions:
-      - condition: trigger
-        id: turn off
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: turn off
+        - condition: trigger
+          id: turned off
       sequence:
       - service: switch.turn_off
         data: {}
@@ -2206,6 +2201,13 @@
     type: Leave
     subtype: sensor
     id: fp1 leave
+  - device_id: 646618a4497e6564b3f03617283d2a35
+    domain: zha
+    platform: device
+    type: Enter
+    subtype: sensor
+    id: fp1 enter
+    enabled: false
   condition: []
   action:
   - choose:
@@ -2214,8 +2216,24 @@
         conditions:
         - condition: trigger
           id: detected
-        - condition: trigger
-          id: door opened
+        - condition: and
+          conditions:
+          - condition: trigger
+            id: fp1 enter
+          - condition: state
+            entity_id: binary_sensor.laundry_room_door
+            state: 'on'
+        - condition: and
+          conditions:
+          - condition: trigger
+            id: door opened
+          - condition: state
+            entity_id: switch.laundry_room_light
+            state: 'off'
+            for:
+              hours: 0
+              minutes: 0
+              seconds: 6
         alias: door opened or motion detected
       sequence:
       - if:
@@ -2237,54 +2255,25 @@
           target:
             entity_id: timer.laundry_room_light
     - conditions:
-      - condition: trigger
-        id: cleared
       - condition: state
         entity_id: switch.laundry_room_light
         state: 'on'
-      sequence:
-      - service: timer.start
-        data:
-          duration: 00:02:00
-        target:
-          entity_id: timer.laundry_room_light
-    - conditions:
-      - condition: trigger
-        id: timer finished
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: switch.laundry_room_light
-          state: 'off'
-        - condition: state
-          entity_id: binary_sensor.laundry_room_motion
-          state: 'on'
-      sequence:
-      - service: switch.turn_off
-        data: {}
-        target:
-          entity_id: switch.laundry_room_light
-    - conditions:
-      - condition: trigger
-        id: manually turned off
-      sequence:
-      - service: timer.cancel
-        data: {}
-        target:
-          entity_id: timer.laundry_room_light
-    - conditions:
       - condition: or
         conditions:
         - condition: trigger
-          id: reload
-        - condition: trigger
-          id: startup
-      - condition: state
-        entity_id: switch.laundry_room_light
-        state: 'on'
-      - condition: state
-        entity_id: timer.laundry_room_light
-        state: idle
+          id: cleared
+        - condition: and
+          conditions:
+          - condition: or
+            conditions:
+            - condition: trigger
+              id: reload
+            - condition: trigger
+              id: startup
+          - condition: state
+            entity_id: timer.laundry_room_light
+            state: idle
+        alias: no motion or home assistant/automations reloaded
       sequence:
       - service: timer.start
         data:
@@ -2303,6 +2292,27 @@
           - condition: state
             entity_id: binary_sensor.laundry_room_occupancy
             state: 'off'
+          - condition: state
+            entity_id: switch.laundry_room_light
+            state: 'on'
+            for:
+              hours: 0
+              minutes: 0
+              seconds: 7
+        - condition: trigger
+          id: manually turned off
+        - condition: and
+          conditions:
+          - condition: trigger
+            id: timer finished
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: switch.laundry_room_light
+              state: 'off'
+            - condition: state
+              entity_id: binary_sensor.laundry_room_motion
+              state: 'on'
       sequence:
       - service: switch.turn_off
         data: {}
@@ -3039,10 +3049,38 @@
       minutes: 2
       seconds: 0
       milliseconds: 0
-  - service: media_player.turn_on
-    data: {}
-    target:
-      entity_id: media_player.owntone_output_desk
+  - repeat:
+      until:
+      - condition: state
+        entity_id: media_player.owntone_output_desk
+        state: 'On'
+      sequence:
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 4
+          milliseconds: 0
+      - service: media_player.turn_on
+        data: {}
+        target:
+          entity_id: media_player.owntone_output_desk
+  - repeat:
+      until:
+      - condition: template
+        value_template: '{{ state_attr(''media_player.owntone_output_desk'', ''volume_level'')
+          == state_attr(''media_player.spotify_anthony221121'', ''volume_level'')
+          }}
+
+          '
+      sequence:
+      - service: media_player.volume_set
+        data:
+          volume_level: '{{ state_attr(''media_player.spotify_anthony221121'', ''volume_level'')
+            }}
+
+            '
+        target:
+          entity_id: media_player.owntone_output_desk
   - event: event_change_nanoleaf
     event_data: {}
   mode: single
@@ -3148,17 +3186,54 @@
         - condition: state
           entity_id: media_player.owntone_output_nightstand
           state: 'on'
+        - condition: state
+          entity_id: media_player.owntone_output_danas
+          state: 'on'
+        - condition: state
+          entity_id: media_player.owntone_output_garage
+          state: playing
       sequence:
       - service: media_player.turn_on
         data: {}
         target:
           entity_id:
           - media_player.owntone_output_bathroom
-      - service: media_player.volume_set
-        data:
-          volume_level: 0.1
-        target:
-          entity_id: media_player.owntone_output_bathroom
+      - wait_for_trigger:
+        - platform: state
+          entity_id:
+          - media_player.owntone_output_bathroom
+          to: 'on'
+        timeout:
+          hours: 0
+          minutes: 0
+          seconds: 5
+          milliseconds: 0
+      - repeat:
+          until:
+          - condition: template
+            value_template: "    {% if state_attr('media_player.owntone_output_nightstand',
+              'volume_level')\n    is defined and state_attr('media_player.owntone_output_nightstand',\n
+              \   'volume_level') is not none %} \n    {% set vol =  state_attr('media_player.owntone_output_danas',
+              'volume_level') %}\n    {% elif state_attr('media_player.owntone_output_danas',
+              'volume_level')\n    is defined and state_attr('media_player.owntone_output_danas',\n
+              \   'volume_level') is not none %} \n    {% set vol = state_attr('media_player.owntone_output_danas',
+              'volume_level') %}\n    {% else %} {% set vol = 0.11 %} {% endif %}\n\n{{
+              state_attr('media_player.owntone_output_bathroom', 'volume_level') ==
+              vol }}"
+          sequence:
+          - service: media_player.volume_set
+            data:
+              volume_level: '{% if state_attr(''media_player.owntone_output_nightstand'',
+                ''volume_level'') is defined and state_attr(''media_player.owntone_output_nightstand'',
+                ''volume_level'') is not none %}  {{ state_attr(''media_player.owntone_output_danas'',
+                ''volume_level'') }} {% elif state_attr(''media_player.owntone_output_danas'',
+                ''volume_level'') is defined and state_attr(''media_player.owntone_output_danas'',
+                ''volume_level'') is not none %}  {{ state_attr(''media_player.owntone_output_danas'',
+                ''volume_level'') }} {% else %} 0.11 {% endif %}
+
+                '
+            target:
+              entity_id: media_player.owntone_output_bathroom
     - conditions:
       - condition: state
         entity_id: media_player.owntone_output_bathroom
@@ -3481,8 +3556,6 @@
         target:
           entity_id: button.bathroom_presence_status_reset
     - conditions:
-      - condition: trigger
-        id: motion clear
       - condition: state
         entity_id: light.bathroom_lights
         state: 'on'
@@ -3500,6 +3573,23 @@
       - condition: state
         entity_id: input_boolean.bathroom_occupied
         state: 'off'
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: motion clear
+        - condition: trigger
+          id: door opened
+        - condition: and
+          conditions:
+          - condition: or
+            conditions:
+            - condition: trigger
+              id: startup
+            - condition: trigger
+              id: reload
+          - condition: state
+            entity_id: timer.bathroom_light
+            state: idle
       sequence:
       - service: timer.start
         data:
@@ -4127,7 +4217,10 @@
         - service: media_player.turn_off
           data: {}
           target:
-            entity_id: media_player.evan
+            entity_id:
+            - media_player.evan
+            - media_player.owntone_output_danas
+            - media_player.owntone_output_garage
       up_raise:
       - if:
         - condition: or
@@ -4362,3 +4455,17 @@
         target:
           entity_id: switch.dining_room_light
   mode: single
+- id: '1672034605114'
+  alias: Master Bedroom Kitchen Light Pico
+  description: ''
+  use_blueprint:
+    path: stephack/core-pico.yaml
+    input:
+      pico_remote: 71473ec4967297f4adc37260dfb2d76a
+      auto_mode: single
+      down_lower: []
+      bottom_off:
+      - service: light.turn_off
+        data: {}
+        target:
+          entity_id: light.kitchen_cabinet_lights

@@ -27,10 +27,10 @@
   unique_id: evan_fan
   name: Evan Fan
   entities:
-    - light.hue_color_lamp_1
-    - light.hue_color_lamp_2
-    - light.smart_bulb_1
     - light.smart_bulb_2
     - light.smart_bulb_3
     - light.wyze_bulb_5
     - light.wyze_bulb_4
+    - light.wyze_bulb_6
+    - light.wyze_bulb_7
+    - light.smart_bulb_1
