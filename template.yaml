@@ -3,7 +3,7 @@
     unique_id: showering
     state: >
       {{ is_state('binary_sensor.shower', 'on') and 
-      is_state('binary_sensor.bathroom_door_zigbee', 'off') and
+      is_state('binary_sensor.bathroom_door', 'off') and
       is_state('input_boolean.bathroom_occupied', 'on') and
       is_state('light.bathroom_lights', 'on') and 
       is_state_attr('light.bathroom_lights', 'brightness', 255) and 
@@ -24,10 +24,6 @@
     state: >
       {{ is_state('light.bedroom_lights', 'on') }}
     unique_id: bedroom_on
-  - name: "Evan Home"
-    state: >
-      {{ is_state('input_boolean.toggle', 'on') }}
-    unique_id: evan_home
   - name: "Entry Doors"
     state: > 
       {{ is_state('sensor.alarm_front_garage_door', 'O') }}

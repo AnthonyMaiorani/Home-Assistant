@@ -234,12 +234,14 @@
       - media_player.owntone_output_bathroom
       - media_player.owntone_output_desk
       - media_player.owntone_output_front
-      - media_player.owntone_output_guest_bedroom_tv
       - media_player.owntone_output_kitchen_homepod
       - media_player.owntone_output_living_room_tv
       - media_player.owntone_output_master_bedroom_tv
       - media_player.owntone_output_nightstand
       - media_player.owntone_output_garage
+      - media_player.owntone_output_guest_tv
+      - media_player.owntone_output_guest_left
+      - media_player.owntone_output_guest_right
   - if:
     - condition: state
       entity_id: media_player.owntone_output_bathroom
@@ -337,11 +339,6 @@
           - light.kitchen_lights
           - light.hallway_lights
           - light.bathroom_lights
-          - media_player.owntone_output_bathroom
-          - media_player.owntone_output_desk
-          - media_player.owntone_output_front
-          - media_player.owntone_output_guest_bedroom_tv
-          - media_player.owntone_output_master_bedroom_tv
           - switch.fronttv
           - switch.lrtv
           - switch.living_room_fan
@@ -349,10 +346,13 @@
           - switch.laundry_room_light
           - switch.dining_room_light
           - light.master_hallway_light
-      - service: media_player.turn_off
-        data: {}
-        target:
+      - if:
+        - condition: state
           entity_id: media_player.owntone_server
+          state: playing
+        then:
+        - service: script.stop_music
+          data: {}
       alias: If home empty, turn off
     - if:
       - condition: state
@@ -800,17 +800,20 @@
       data: {}
       target:
         entity_id: input_boolean.privacy
-    - service: media_player.turn_off
+    - service: homeassistant.reload_config_entry
       data: {}
       target:
         entity_id:
+        - media_player.owntone_server
         - media_player.owntone_output_bathroom
         - media_player.owntone_output_front
-        - media_player.owntone_output_guest_bedroom_tv
-        - media_player.owntone_output_master_bedroom_tv
-        - media_player.owntone_output_living_room_tv
         - media_player.owntone_output_kitchen_homepod
+        - media_player.owntone_output_living_room_tv
+        - media_player.owntone_output_master_bedroom_tv
         - media_player.owntone_output_garage
+        - media_player.owntone_output_guest_tv
+        - media_player.owntone_output_guest_left
+        - media_player.owntone_output_guest_right
   - if:
     - condition: time
       before: 05:00:00
@@ -1775,9 +1778,6 @@
     - condition: numeric_state
       entity_id: zone.home
       above: 0
-    - condition: state
-      entity_id: binary_sensor.evan_home
-      state: ''
   action:
   - choose:
     - conditions:
@@ -2967,20 +2967,41 @@
       minutes: 0
       seconds: 5
   condition:
-  - condition: and
+  - condition: or
     conditions:
-    - condition: not
+    - condition: and
       conditions:
       - condition: state
-        entity_id: media_player.owntone_server
+        entity_id: media_player.owntone_output_nightstand
+        state: 'On'
+        for:
+          hours: 0
+          minutes: 1
+          seconds: 0
+      - condition: state
+        entity_id: media_player.owntone_output_desk
+        state: 'off'
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 5
+      - condition: state
+        entity_id: media_player.spotify_anthony221121
+        state: playing
+    - condition: and
+      conditions:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.owntone_server
+          state: unavailable
+      - condition: state
+        entity_id: media_player.owntone_output_desk
         state: unavailable
-    - condition: state
-      entity_id: media_player.owntone_output_desk
-      state: unavailable
-      for:
-        hours: 0
-        minutes: 0
-        seconds: 5
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 5
   action:
   - service: switch.turn_off
     data: {}
@@ -3012,10 +3033,10 @@
             entity_id: media_player.owntone_output_front
             state: 'on'
           - condition: state
-            entity_id: media_player.owntone_output_guest_bedroom_tv
+            entity_id: media_player.owntone_output_guest_tv
             state: 'on'
           - condition: state
-            entity_id: media_player.owntone_output_living_room
+            entity_id: media_player.owntone_output_guest_left
             state: 'on'
           - condition: state
             entity_id: media_player.owntone_output_living_room_tv
@@ -3028,7 +3049,7 @@
             entity_id: media_player.owntone_output_nightstand
             state: 'on'
           - condition: state
-            entity_id: media_player.owntone_output_living_room_homepod
+            entity_id: media_player.owntone_output_guest_right
             state: 'on'
       alias: If not currently playing
     then:
@@ -3043,7 +3064,7 @@
       entity_id:
       - media_player.owntone_output_desk
       from: unavailable
-    continue_on_timeout: false
+    continue_on_timeout: true
     timeout:
       hours: 0
       minutes: 2
@@ -3081,8 +3102,6 @@
             '
         target:
           entity_id: media_player.owntone_output_desk
-  - event: event_change_nanoleaf
-    event_data: {}
   mode: single
 - id: '1668917163074'
   alias: Turn off lights at night
@@ -3141,43 +3160,24 @@
     domain: light
     id: light turned on
   - platform: device
-    type: turned_off
-    device_id: 624405d34a0a0bc8df3990c131a31bd2
-    entity_id: light.bathroom_lights
-    domain: light
-    id: light turned off
-  - platform: device
     type: turned_on
     device_id: 7c247296aac3c00b267bb165baab5a7c
     entity_id: switch.exhaust_fan
     domain: switch
     id: fan on
+  - platform: device
+    type: turned_off
+    device_id: 624405d34a0a0bc8df3990c131a31bd2
+    entity_id: light.bathroom_lights
+    domain: light
+    id: lights turned off
   condition: []
   action:
   - choose:
     - conditions:
       - condition: state
-        entity_id: media_player.owntone_output_bathroom
-        state: 'off'
-      - condition: state
-        entity_id: media_player.owntone_server
+        entity_id: media_player.spotify_anthony221121
         state: playing
-      - condition: trigger
-        id: light turned on
-      - condition: and
-        conditions:
-        - condition: or
-          conditions:
-          - condition: state
-            entity_id: input_select.anthony
-            state: Home
-          - condition: state
-            entity_id: input_select.anthony
-            state: Just Arrived
-        - condition: state
-          entity_id: binary_sensor.bed_occupancy
-          state: 'off'
-        alias: probably anthony
       - condition: or
         conditions:
         - condition: state
@@ -3186,101 +3186,103 @@
         - condition: state
           entity_id: media_player.owntone_output_nightstand
           state: 'on'
-        - condition: state
-          entity_id: media_player.owntone_output_danas
-          state: 'on'
-        - condition: state
-          entity_id: media_player.owntone_output_garage
-          state: playing
-      sequence:
-      - service: media_player.turn_on
-        data: {}
-        target:
-          entity_id:
-          - media_player.owntone_output_bathroom
-      - wait_for_trigger:
-        - platform: state
-          entity_id:
-          - media_player.owntone_output_bathroom
-          to: 'on'
-        timeout:
-          hours: 0
-          minutes: 0
-          seconds: 5
-          milliseconds: 0
-      - repeat:
-          until:
-          - condition: template
-            value_template: "    {% if state_attr('media_player.owntone_output_nightstand',
-              'volume_level')\n    is defined and state_attr('media_player.owntone_output_nightstand',\n
-              \   'volume_level') is not none %} \n    {% set vol =  state_attr('media_player.owntone_output_danas',
-              'volume_level') %}\n    {% elif state_attr('media_player.owntone_output_danas',
-              'volume_level')\n    is defined and state_attr('media_player.owntone_output_danas',\n
-              \   'volume_level') is not none %} \n    {% set vol = state_attr('media_player.owntone_output_danas',
-              'volume_level') %}\n    {% else %} {% set vol = 0.11 %} {% endif %}\n\n{{
-              state_attr('media_player.owntone_output_bathroom', 'volume_level') ==
-              vol }}"
-          sequence:
-          - service: media_player.volume_set
-            data:
-              volume_level: '{% if state_attr(''media_player.owntone_output_nightstand'',
-                ''volume_level'') is defined and state_attr(''media_player.owntone_output_nightstand'',
-                ''volume_level'') is not none %}  {{ state_attr(''media_player.owntone_output_danas'',
-                ''volume_level'') }} {% elif state_attr(''media_player.owntone_output_danas'',
-                ''volume_level'') is defined and state_attr(''media_player.owntone_output_danas'',
-                ''volume_level'') is not none %}  {{ state_attr(''media_player.owntone_output_danas'',
-                ''volume_level'') }} {% else %} 0.11 {% endif %}
-
-                '
-            target:
-              entity_id: media_player.owntone_output_bathroom
-    - conditions:
-      - condition: state
-        entity_id: media_player.owntone_output_bathroom
-        state: 'on'
-      - condition: trigger
-        id: light turned off
-      sequence:
-      - service: media_player.turn_off
-        data: {}
-        target:
-          entity_id: media_player.owntone_output_bathroom
-    - conditions:
-      - condition: trigger
-        id: fan on
-      - condition: state
-        entity_id: media_player.owntone_output_bathroom
-        state: 'on'
-      - condition: numeric_state
-        entity_id: media_player.owntone_output_bathroom
-        below: 0.5
-        attribute: volume_level
       - condition: device
         type: is_on
         device_id: 624405d34a0a0bc8df3990c131a31bd2
         entity_id: light.bathroom_lights
         domain: light
+      - condition: state
+        entity_id: binary_sensor.bed_occupancy
+        state: 'off'
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: input_select.anthony
+          state: Home
+        - condition: state
+          entity_id: input_select.anthony
+          state: Just Arrived
+      - condition: state
+        entity_id: media_player.owntone_server
+        state: playing
       sequence:
-      - service: media_player.volume_set
-        data:
-          volume_level: 0.5
+      - if:
+        - condition: state
+          entity_id: media_player.owntone_output_bathroom
+          state: 'off'
+        then:
+        - service: media_player.turn_on
+          data: {}
+          target:
+            entity_id: media_player.owntone_output_bathroom
+        - wait_for_trigger:
+          - platform: state
+            entity_id:
+            - media_player.owntone_output_bathroom
+            to: 'on'
+          timeout:
+            hours: 0
+            minutes: 0
+            seconds: 5
+            milliseconds: 0
+      - repeat:
+          until:
+          - condition: template
+            value_template: "    {% if state_attr('media_player.owntone_output_nightstand',
+              'volume_level')\n    is defined and state_attr('media_player.owntone_output_nightstand',\n
+              \   'volume_level') is not none %} \n    {% set vol =  state_attr('media_player.owntone_output_nightstand',
+              'volume_level') %}\n    {% elif state_attr('media_player.owntone_output_danas',
+              'volume_level')\n    is defined and state_attr('media_player.owntone_output_danas',\n
+              \   'volume_level') is not none %} \n    {% set vol = state_attr('media_player.owntone_output_danas',
+              'volume_level') %}\n    {% elif states('switch.exhaust_fan') is defined
+              and\n    is_state('switch.exhaust_fan', 'on') %} {% set vol = 0.5 %}\n
+              \   {% else %} {% set vol = 0.11 %} {% endif %}\n\n{{ vol is not none
+              and state_attr('media_player.owntone_output_bathroom', 'volume_level')
+              is defined and  \n  state_attr('media_player.owntone_output_bathroom',
+              'volume_level') == vol }}"
+          sequence:
+          - service: media_player.volume_set
+            data:
+              volume_level: '{% if state_attr(''media_player.owntone_output_nightstand'',
+                ''volume_level'') is defined and state_attr(''media_player.owntone_output_nightstand'',
+                ''volume_level'') is not none %}  {% set vol =  state_attr(''media_player.owntone_output_nightstand'',
+                ''volume_level'') %} {% elif state_attr(''media_player.owntone_output_danas'',
+                ''volume_level'') is defined and state_attr(''media_player.owntone_output_danas'',
+                ''volume_level'') is not none %}  {% set vol = state_attr(''media_player.owntone_output_danas'',
+                ''volume_level'') %} {% elif states(''switch.exhaust_fan'') is defined
+                and is_state(''switch.exhaust_fan'', ''on'') %} {% set vol = 0.5 %}
+                {% else %} {% set vol = 0.11 %} {% endif %} {{ vol }}
+
+                '
+            target:
+              entity_id: media_player.owntone_output_bathroom
+    - conditions:
+      - condition: device
+        type: is_off
+        device_id: 624405d34a0a0bc8df3990c131a31bd2
+        entity_id: light.bathroom_lights
+        domain: light
+      sequence:
+      - service: media_player.turn_off
+        data: {}
         target:
           entity_id: media_player.owntone_output_bathroom
-  mode: single
+  mode: queued
+  max: 10
 - id: '1668919655434'
   alias: Bathroom Lights
   description: ''
   trigger:
   - platform: state
     entity_id:
-    - binary_sensor.bathroom_door_zigbee
+    - binary_sensor.bathroom_door
     from: 'off'
     to: 'on'
     alias: door opened
     id: door opened
   - platform: state
     entity_id:
-    - binary_sensor.bathroom_door_zigbee
+    - binary_sensor.bathroom_door
     to: 'off'
     from: 'on'
     id: door closed
@@ -3435,14 +3437,10 @@
             entity_id: light.bedroom_lights
             state: 'off'
             alias: Bedroom Lights are off
-            enabled: true
           - condition: state
             entity_id: binary_sensor.bed_occupancy
             state: 'off'
             alias: probably anthony
-          - condition: state
-            entity_id: binary_sensor.evan_home
-            state: 'off'
           sequence:
           - type: turn_on
             device_id: 624405d34a0a0bc8df3990c131a31bd2
@@ -3464,9 +3462,6 @@
             state: 'off'
             alias: probably anthony
             enabled: true
-          - condition: state
-            entity_id: light.evan_fan
-            state: 'off'
           sequence:
           - type: turn_on
             device_id: 624405d34a0a0bc8df3990c131a31bd2
@@ -3958,7 +3953,7 @@
         entity_id: media_player.owntone_output_master_bedroom_tv
         state: 'on'
       - condition: state
-        entity_id: media_player.owntone_output_guest_bedroom_tv
+        entity_id: media_player.owntone_output_guest_tv
         state: 'on'
       - condition: state
         entity_id: media_player.owntone_output_kitchen_homepod
@@ -3967,7 +3962,7 @@
         entity_id: media_player.owntone_output_living_room_tv
         state: 'on'
       - condition: state
-        entity_id: media_player.owntone_output_living_room
+        entity_id: media_player.owntone_output_guest_left
         state: 'on'
       - condition: state
         entity_id: media_player.owntone_output_front
@@ -3975,17 +3970,24 @@
       - condition: state
         entity_id: media_player.owntone_output_garage
         state: 'on'
+      - condition: state
+        entity_id: media_player.owntone_output_guest_right
+        state: 'on'
     then:
-    - service: media_player.turn_off
+    - service: homeassistant.reload_config_entry
       data: {}
       target:
         entity_id:
+        - media_player.owntone_server
+        - media_player.owntone_output_bathroom
         - media_player.owntone_output_front
-        - media_player.owntone_output_guest_bedroom_tv
         - media_player.owntone_output_kitchen_homepod
         - media_player.owntone_output_living_room_tv
         - media_player.owntone_output_master_bedroom_tv
         - media_player.owntone_output_garage
+        - media_player.owntone_output_guest_tv
+        - media_player.owntone_output_guest_left
+        - media_player.owntone_output_guest_right
   mode: single
 - id: '1670894312639'
   alias: Notification
@@ -4022,7 +4024,7 @@
             volume: 0.6
   mode: single
 - id: '1671419998725'
-  alias: Dana's Bedroom Pico
+  alias: Bedroom Pico
   description: ''
   use_blueprint:
     path: stephack/core-pico.yaml
@@ -4289,7 +4291,7 @@
     id: 'on'
   - platform: state
     entity_id:
-    - binary_sensor.bathroom_door_zigbee
+    - binary_sensor.bathroom_door
     to: 'on'
     from: 'off'
     id: 'off'
@@ -4332,7 +4334,7 @@
   - choose:
     - conditions:
       - condition: state
-        entity_id: binary_sensor.bathroom_door_zigbee
+        entity_id: binary_sensor.bathroom_door
         state: 'off'
       - condition: state
         entity_id: input_boolean.bathroom_occupied
@@ -4344,7 +4346,7 @@
           - condition: trigger
             id: wave
           - condition: state
-            entity_id: binary_sensor.bathroom_door_zigbee
+            entity_id: binary_sensor.bathroom_door
             state: 'off'
             for:
               hours: 0
@@ -4358,7 +4360,7 @@
           id: showering
       sequence:
       - condition: state
-        entity_id: binary_sensor.bathroom_door_zigbee
+        entity_id: binary_sensor.bathroom_door
         state: 'off'
       - service: input_boolean.turn_on
         data: {}
@@ -4394,42 +4396,6 @@
           entity_id: input_boolean.bathroom_occupied
   mode: queued
   max: 10
-- id: '1671705394450'
-  alias: Evan
-  description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - input_boolean.toggle
-    to: 'on'
-    from: 'off'
-    id: 'on'
-  - platform: state
-    entity_id:
-    - input_boolean.toggle
-    from: 'on'
-    to: 'off'
-    id: 'off'
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: 'on'
-      sequence:
-      - service: media_player.turn_on
-        data: {}
-        target:
-          entity_id: media_player.evan
-    - conditions:
-      - condition: trigger
-        id: 'off'
-      sequence:
-      - service: media_player.turn_off
-        data: {}
-        target:
-          entity_id: media_player.evan
-  mode: single
 - id: '1671929632563'
   alias: Dining Room Light
   description: ''
@@ -4469,3 +4435,58 @@
         data: {}
         target:
           entity_id: light.kitchen_cabinet_lights
+- id: '1672543042441'
+  alias: Bathroom Exhaust Pico
+  description: ''
+  trigger:
+  - platform: device
+    device_id: f7083fcff763724ef4d397a51acc5cf9
+    domain: lutron_caseta
+    type: press
+    subtype: 'on'
+    id: 'on'
+  - platform: device
+    device_id: f7083fcff763724ef4d397a51acc5cf9
+    domain: lutron_caseta
+    type: press
+    subtype: 'off'
+    id: 'off'
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: 'on'
+      sequence:
+      - type: turn_on
+        device_id: 7c247296aac3c00b267bb165baab5a7c
+        entity_id: switch.exhaust_fan
+        domain: switch
+      - if:
+        - type: is_not_open
+          condition: device
+          device_id: c60a9d63fe5b8ab239e2b5e6e544b39a
+          entity_id: binary_sensor.bathroom_door
+          domain: binary_sensor
+        - condition: state
+          entity_id: input_boolean.bathroom_occupied
+          state: 'off'
+        then:
+        - service: input_boolean.turn_on
+          data: {}
+          target:
+            entity_id: input_boolean.bathroom_occupied
+    - conditions:
+      - condition: trigger
+        id: 'off'
+      sequence:
+      - type: turn_off
+        device_id: 7c247296aac3c00b267bb165baab5a7c
+        entity_id: switch.exhaust_fan
+        domain: switch
+      - service: timer.cancel
+        data: {}
+        target:
+          entity_id: timer.exhaust
+  mode: queued
+  max: 10

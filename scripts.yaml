@@ -221,7 +221,7 @@ night:
       target:
         entity_id: input_boolean.bedmotion
     - repeat:
-        count: '60'
+        count: '300'
         sequence:
         - service: light.turn_off
           data: {}
@@ -232,8 +232,8 @@ night:
         - delay:
             hours: 0
             minutes: 0
-            seconds: 1
-            milliseconds: 0
+            seconds: 0
+            milliseconds: 200
   alias: Night
   mode: restart
   icon: mdi:weather-night
@@ -417,17 +417,18 @@ lofi:
     data: {}
     target:
       entity_id:
+      - media_player.owntone_server
       - media_player.owntone_output_bathroom
       - media_player.owntone_output_desk
       - media_player.owntone_output_front
-      - media_player.owntone_output_garage
-      - media_player.owntone_output_guest_bedroom_tv
       - media_player.owntone_output_kitchen_homepod
       - media_player.owntone_output_living_room_tv
       - media_player.owntone_output_master_bedroom_tv
       - media_player.owntone_output_nightstand
-      - media_player.owntone_output_danas
-      - media_player.owntone_output_danas_2
+      - media_player.owntone_output_garage
+      - media_player.owntone_output_guest_left
+      - media_player.owntone_output_guest_right
+      - media_player.owntone_output_guest_tv
   - repeat:
       while:
       - condition: not
@@ -511,16 +512,21 @@ lofi:
         data: {}
         target:
           entity_id: media_player.owntone_output_desk
-      - wait_for_trigger:
-        - platform: state
-          entity_id:
-          - media_player.owntone_output_desk
-          to: 'on'
-        timeout:
-          hours: 0
-          minutes: 0
-          seconds: 5
-          milliseconds: 0
+      - repeat:
+          until:
+          - condition: state
+            entity_id: media_player.owntone_output_desk
+            state: 'On'
+          sequence:
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 2
+              milliseconds: 0
+          - service: media_player.turn_on
+            data: {}
+            target:
+              entity_id: media_player.owntone_output_desk
       - if:
         - condition: state
           entity_id: media_player.owntone_output_desk
@@ -559,16 +565,22 @@ lofi:
         target:
           entity_id:
           - media_player.owntone_output_nightstand
-      - wait_for_trigger:
-        - platform: state
-          entity_id:
-          - media_player.owntone_output_nightstand
-          to: 'on'
-        timeout:
-          hours: 0
-          minutes: 0
-          seconds: 5
-          milliseconds: 0
+      - repeat:
+          until:
+          - condition: state
+            entity_id: media_player.owntone_output_nightstand
+            state: 'On'
+          sequence:
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 2
+              milliseconds: 0
+          - service: media_player.turn_on
+            data: {}
+            target:
+              entity_id:
+              - media_player.owntone_output_nightstand
       - repeat:
           until:
           - condition: template
@@ -599,9 +611,6 @@ lofi:
 
           }}'
         alias: Nobody else home
-      - condition: state
-        entity_id: binary_sensor.evan_home
-        state: 'off'
       then:
       - parallel:
         - if:
@@ -769,6 +778,10 @@ lofi:
 play_music:
   alias: Play Music
   sequence:
+  - service: script.turn_off
+    data: {}
+    target:
+      entity_id: script.lofi
   - service: media_player.select_source
     data:
       source: librespot-java (pipe)
@@ -778,17 +791,18 @@ play_music:
     data: {}
     target:
       entity_id:
+      - media_player.owntone_server
       - media_player.owntone_output_bathroom
       - media_player.owntone_output_desk
       - media_player.owntone_output_front
-      - media_player.owntone_output_garage
-      - media_player.owntone_output_guest_bedroom_tv
       - media_player.owntone_output_kitchen_homepod
       - media_player.owntone_output_living_room_tv
       - media_player.owntone_output_master_bedroom_tv
       - media_player.owntone_output_nightstand
-      - media_player.owntone_output_danas
-      - media_player.owntone_output_danas_2
+      - media_player.owntone_output_garage
+      - media_player.owntone_output_guest_left
+      - media_player.owntone_output_guest_right
+      - media_player.owntone_output_guest_tv
   - repeat:
       while:
       - condition: not
@@ -916,9 +930,6 @@ play_music:
 
           }}'
         alias: Nobody else home
-      - condition: state
-        entity_id: binary_sensor.evan_home
-        state: 'off'
       then:
       - parallel:
         - if:
@@ -1110,14 +1121,14 @@ stop_music:
       - media_player.owntone_output_bathroom
       - media_player.owntone_output_desk
       - media_player.owntone_output_front
-      - media_player.owntone_output_guest_bedroom_tv
       - media_player.owntone_output_kitchen_homepod
       - media_player.owntone_output_living_room_tv
       - media_player.owntone_output_master_bedroom_tv
       - media_player.owntone_output_nightstand
       - media_player.owntone_output_garage
-      - media_player.owntone_output_danas
-      - media_player.owntone_output_danas_2
+      - media_player.owntone_output_guest_tv
+      - media_player.owntone_output_guest_left
+      - media_player.owntone_output_guest_right
   - wait_for_trigger:
     - platform: state
       entity_id:
@@ -1139,13 +1150,13 @@ stop_music:
           - media_player.owntone_output_bathroom
           - media_player.owntone_output_desk
           - media_player.owntone_output_front
-          - media_player.owntone_output_guest_bedroom_tv
           - media_player.owntone_output_kitchen_homepod
           - media_player.owntone_output_living_room_tv
           - media_player.owntone_output_master_bedroom_tv
           - media_player.owntone_output_nightstand
           - media_player.owntone_output_garage
-          - media_player.owntone_output_danas
-          - media_player.owntone_output_danas_2
+          - media_player.owntone_output_guest_left
+          - media_player.owntone_output_guest_right
+          - media_player.owntone_output_guest_tv
   mode: single
   icon: mdi:stop
