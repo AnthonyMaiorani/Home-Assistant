@@ -398,7 +398,7 @@ start_car:
       conditions:
       - condition: state
         entity_id: sensor.accord_ignitionstatus
-        state: 'On'
+        state: 'on'
     then:
     - service: notify.mobile_app_iphone
       data:
@@ -408,6 +408,10 @@ start_car:
 lofi:
   alias: LoFi
   sequence:
+  - service: script.turn_off
+    data: {}
+    target:
+      entity_id: script.play_music
   - service: media_player.select_source
     data:
       source: librespot-java (pipe)
@@ -498,6 +502,11 @@ lofi:
       shuffle: true
     target:
       entity_id: media_player.spotify_anthony221121
+  - service: media_player.repeat_set
+    data:
+      repeat: all
+    target:
+      entity_id: media_player.spotify_anthony221121
   - service: media_player.media_next_track
     data: {}
     target:
@@ -516,7 +525,7 @@ lofi:
           until:
           - condition: state
             entity_id: media_player.owntone_output_desk
-            state: 'On'
+            state: 'on'
           sequence:
           - delay:
               hours: 0
@@ -569,7 +578,7 @@ lofi:
           until:
           - condition: state
             entity_id: media_player.owntone_output_nightstand
-            state: 'On'
+            state: 'on'
           sequence:
           - delay:
               hours: 0
@@ -599,6 +608,25 @@ lofi:
             target:
               entity_id: media_player.owntone_output_nightstand
       alias: Turn on Nightstand Speaker
+    - if:
+      - condition: state
+        state: 'off'
+        entity_id: media_player.owntone_output_bathroom
+      - condition: state
+        entity_id: binary_sensor.bed_occupancy
+        state: 'off'
+      - condition: device
+        type: is_on
+        device_id: 624405d34a0a0bc8df3990c131a31bd2
+        entity_id: light.bathroom_lights
+        domain: light
+      then:
+      - service: automation.trigger
+        data:
+          skip_condition: false
+        target:
+          entity_id: automation.bathroom_music
+      alias: Turn on Bathroom Speaker
     - if:
       - condition: template
         value_template: '{{ not is_state(''person.riana'', ''home'')
@@ -725,54 +753,8 @@ lofi:
               entity_id: media_player.owntone_output_garage
           alias: Turn on Garage Speaker
         alias: Turn on other speakers
-      else:
-      - condition: state
-        entity_id: binary_sensor.bed_occupancy
-        state: 'off'
-      - condition: device
-        type: is_on
-        device_id: 624405d34a0a0bc8df3990c131a31bd2
-        entity_id: light.bathroom_lights
-        domain: light
-      - if:
-        - condition: state
-          entity_id: media_player.owntone_output_bathroom
-          state: 'off'
-        then:
-        - service: media_player.turn_on
-          data: {}
-          target:
-            entity_id:
-            - media_player.owntone_output_bathroom
-        - wait_for_trigger:
-          - platform: state
-            entity_id:
-            - media_player.owntone_output_bathroom
-            to: 'on'
-          timeout:
-            hours: 0
-            minutes: 0
-            seconds: 5
-            milliseconds: 0
-        - repeat:
-            until:
-            - condition: template
-              value_template: '{{ state_attr(''media_player.owntone_output_bathroom'',
-                ''volume_level'') == state_attr(''media_player.spotify_anthony221121'',
-                ''volume_level'') }}
-
-                '
-            sequence:
-            - service: media_player.volume_set
-              data:
-                volume_level: '{{ state_attr(''media_player.spotify_anthony221121'',
-                  ''volume_level'') }}
-
-                  '
-              target:
-                entity_id: media_player.owntone_output_bathroom
-        alias: Turn on Bathroom HomePod
-      enabled: true
+      else: []
+      enabled: false
   mode: single
   icon: mdi:meditation
 play_music:
@@ -851,6 +833,11 @@ play_music:
       shuffle: true
     target:
       entity_id: media_player.spotify_anthony221121
+  - service: media_player.repeat_set
+    data:
+      repeat: all
+    target:
+      entity_id: media_player.spotify_anthony221121
   - service: media_player.media_next_track
     data: {}
     target:
@@ -865,26 +852,43 @@ play_music:
         data: {}
         target:
           entity_id: media_player.owntone_output_desk
-      - wait_for_trigger:
-        - platform: state
-          entity_id:
-          - media_player.owntone_output_desk
-          to: 'on'
-        timeout:
-          hours: 0
-          minutes: 0
-          seconds: 5
-          milliseconds: 0
+      - repeat:
+          until:
+          - condition: state
+            entity_id: media_player.owntone_output_desk
+            state: 'on'
+          sequence:
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 2
+              milliseconds: 0
+          - service: media_player.turn_on
+            data: {}
+            target:
+              entity_id: media_player.owntone_output_desk
       - if:
         - condition: state
           entity_id: media_player.owntone_output_desk
           state: 'on'
         then:
-        - service: media_player.volume_set
-          data:
-            volume_level: 0.29
-          target:
-            entity_id: media_player.owntone_output_desk
+        - repeat:
+            until:
+            - condition: template
+              value_template: '{{ state_attr(''media_player.owntone_output_desk'',
+                ''volume_level'') == state_attr(''media_player.spotify_anthony221121'',
+                ''volume_level'') }}
+
+                '
+            sequence:
+            - service: media_player.volume_set
+              data:
+                volume_level: '{{ state_attr(''media_player.spotify_anthony221121'',
+                  ''volume_level'') }}
+
+                  '
+              target:
+                entity_id: media_player.owntone_output_desk
         else:
         - service: automation.trigger
           data: {}
@@ -901,23 +905,59 @@ play_music:
         target:
           entity_id:
           - media_player.owntone_output_nightstand
-      - wait_for_trigger:
-        - platform: state
-          entity_id:
-          - media_player.owntone_output_nightstand
-          to: 'on'
-        timeout:
-          hours: 0
-          minutes: 0
-          seconds: 5
-          milliseconds: 0
-      - service: media_player.volume_set
-        data:
-          volume_level: 0.3
-        target:
-          entity_id:
-          - media_player.owntone_output_nightstand
+      - repeat:
+          until:
+          - condition: state
+            entity_id: media_player.owntone_output_nightstand
+            state: 'on'
+          sequence:
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 2
+              milliseconds: 0
+          - service: media_player.turn_on
+            data: {}
+            target:
+              entity_id:
+              - media_player.owntone_output_nightstand
+      - repeat:
+          until:
+          - condition: template
+            value_template: '{{ state_attr(''media_player.owntone_output_nightstand'',
+              ''volume_level'') == state_attr(''media_player.spotify_anthony221121'',
+              ''volume_level'') }}
+
+              '
+          sequence:
+          - service: media_player.volume_set
+            data:
+              volume_level: '{{ state_attr(''media_player.spotify_anthony221121'',
+                ''volume_level'') }}
+
+                '
+            target:
+              entity_id: media_player.owntone_output_nightstand
       alias: Turn on Nightstand Speaker
+    - if:
+      - condition: state
+        state: 'off'
+        entity_id: media_player.owntone_output_bathroom
+      - condition: state
+        entity_id: binary_sensor.bed_occupancy
+        state: 'off'
+      - condition: device
+        type: is_on
+        device_id: 624405d34a0a0bc8df3990c131a31bd2
+        entity_id: light.bathroom_lights
+        domain: light
+      then:
+      - service: automation.trigger
+        data:
+          skip_condition: false
+        target:
+          entity_id: automation.bathroom_music
+      alias: Turn on Bathroom Speaker
     - if:
       - condition: template
         value_template: '{{ not is_state(''person.riana'', ''home'')
@@ -1099,7 +1139,8 @@ play_music:
               target:
                 entity_id: media_player.owntone_output_bathroom
         alias: Turn on Bathroom HomePod
-      enabled: true
+      enabled: false
+      alias: Turn on other speakers if nobody else home
   mode: single
   icon: mdi:music-note
 stop_music:

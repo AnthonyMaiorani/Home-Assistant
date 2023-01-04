@@ -245,7 +245,7 @@
   - if:
     - condition: state
       entity_id: media_player.owntone_output_bathroom
-      state: 'On'
+      state: 'on'
     - condition: state
       entity_id: light.bathroom_lights
       state: 'off'
@@ -791,29 +791,22 @@
           - switch.gym_fan
           - switch.dining_room_light
           - light.master_hallway_light
-      - service: media_player.turn_off
-        data: {}
-        target:
-          entity_id:
-          - media_player.owntone_output_bathroom
     - service: input_boolean.turn_off
       data: {}
       target:
         entity_id: input_boolean.privacy
-    - service: homeassistant.reload_config_entry
+    - service: media_player.turn_off
       data: {}
       target:
         entity_id:
-        - media_player.owntone_server
         - media_player.owntone_output_bathroom
         - media_player.owntone_output_front
+        - media_player.owntone_output_garage
         - media_player.owntone_output_kitchen_homepod
         - media_player.owntone_output_living_room_tv
-        - media_player.owntone_output_master_bedroom_tv
-        - media_player.owntone_output_garage
-        - media_player.owntone_output_guest_tv
-        - media_player.owntone_output_guest_left
         - media_player.owntone_output_guest_right
+        - media_player.owntone_output_guest_left
+        - media_player.owntone_output_guest_tv
   - if:
     - condition: time
       before: 05:00:00
@@ -2973,7 +2966,7 @@
       conditions:
       - condition: state
         entity_id: media_player.owntone_output_nightstand
-        state: 'On'
+        state: 'on'
         for:
           hours: 0
           minutes: 1
@@ -3074,7 +3067,7 @@
       until:
       - condition: state
         entity_id: media_player.owntone_output_desk
-        state: 'On'
+        state: 'on'
       sequence:
       - delay:
           hours: 0
