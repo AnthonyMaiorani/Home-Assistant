@@ -7,7 +7,7 @@
       is_state('input_boolean.bathroom_occupied', 'on') and
       is_state('light.bathroom_lights', 'on') and 
       is_state_attr('light.bathroom_lights', 'brightness', 255) and 
-      (utcnow() > states.light.bathroom_lights.last_changed + timedelta(minutes=3))}}
+      (utcnow() > states.light.bathroom_lights.last_changed + timedelta(minutes=2))}}
   - name: "Discord Active"
     state: >
       {{ states('sensor.discord')|float(-1) > 0}}
@@ -84,7 +84,8 @@
       {% elif is_state('cover.bedroom_blinds', 'open') and 
       is_state('sun.sun', 'above_horizon') -%} 153
       {# At desk with lights off #}
-      {% elif is_state('switch.desktop', 'on') -%} 102
+      {% elif is_state('switch.desktop', 'on') and 
+      is_state('binary_sensor.bed_occupancy', 'off')-%} 102
       {# Normal #}
       {% elif is_state('light.fan_lights', 'on') -%} 254
       {# In bed #}

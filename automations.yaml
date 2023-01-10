@@ -586,6 +586,25 @@
             data: {}
             target:
               entity_id: script.lofi
+        - if:
+          - condition: template
+            value_template: "{{ not (state_attr('media_player.spotify_anthony221121',
+              'media_playlist') \n        is defined and \n        state_attr('media_player.spotify_anthony221121',
+              'media_playlist') \n        is not none and not 'lofi' in \n        state_attr('media_player.spotify_anthony221121',
+              'media_playlist')) \n    and state_attr('media_player.spotify_anthony221121',
+              'volume_level') < 0.16}}"
+          then:
+          - repeat:
+              count: '3'
+              sequence:
+              - service: media_player.volume_set
+                data:
+                  volume_level: 0.16
+                target:
+                  entity_id:
+                  - media_player.owntone_output_nightstand
+                  - media_player.owntone_output_desk
+                  - media_player.spotify_anthony221121
     - conditions:
       - condition: state
         entity_id: input_select.anthony
@@ -807,6 +826,34 @@
         - media_player.owntone_output_guest_right
         - media_player.owntone_output_guest_left
         - media_player.owntone_output_guest_tv
+    - if:
+      - condition: or
+        conditions:
+        - condition: numeric_state
+          entity_id: media_player.owntone_output_desk
+          attribute: volume_level
+          above: 0.15
+        - condition: numeric_state
+          entity_id: media_player.owntone_output_nightstand
+          attribute: volume_level
+          above: 0.15
+      then:
+      - repeat:
+          count: '3'
+          sequence:
+          - service: media_player.volume_set
+            data:
+              volume_level: 0.13
+            target:
+              entity_id:
+              - media_player.spotify_anthony221121
+              - media_player.owntone_output_desk
+              - media_player.owntone_output_nightstand
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
   - if:
     - condition: time
       before: 05:00:00
@@ -1127,7 +1174,12 @@
     - light.shapes_ee82
     from: unavailable
     to: 'on'
-  condition: []
+  condition:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: script.night
+      state: 'on'
   action:
   - if:
     - condition: trigger
@@ -1943,16 +1995,6 @@
   alias: Exhaust Fan
   description: ''
   trigger:
-  - platform: state
-    entity_id:
-    - binary_sensor.showering
-    to: 'off'
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 0
-    alias: When shower is turned off
-    id: showerdone
   - platform: event
     event_type: timer.finished
     event_data:
@@ -2001,32 +2043,48 @@
     command_class: 91
     subtype: Endpoint 0 Scene 002
     id: turned off
+  - platform: device
+    type: turned_off
+    device_id: 624405d34a0a0bc8df3990c131a31bd2
+    entity_id: light.bathroom_lights
+    domain: light
+    id: lights turned off
+  - platform: device
+    type: turned_on
+    device_id: 7c247296aac3c00b267bb165baab5a7c
+    entity_id: switch.exhaust_fan
+    domain: switch
+    id: turned on
+  - platform: device
+    type: turned_off
+    device_id: 7c247296aac3c00b267bb165baab5a7c
+    entity_id: switch.exhaust_fan
+    domain: switch
+    id: turned off
   condition: []
   action:
   - choose:
     - conditions:
+      - condition: device
+        type: is_on
+        device_id: 7c247296aac3c00b267bb165baab5a7c
+        entity_id: switch.exhaust_fan
+        domain: switch
+      - condition: device
+        type: is_off
+        device_id: 624405d34a0a0bc8df3990c131a31bd2
+        entity_id: light.bathroom_lights
+        domain: light
       - condition: or
         conditions:
         - condition: trigger
+          id: lights turned off
+        - condition: trigger
           id: turned on
-        - condition: and
-          conditions:
-          - condition: trigger
-            id: showerdone
-          - condition: state
-            entity_id: switch.exhaust_fan
-            state: 'on'
-        alias: Shower turned off or Fan turned on
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: binary_sensor.showering
-          state: 'on'
-        alias: Confirm fan is off, shower is off, timer is off
       sequence:
       - service: timer.start
         data:
-          duration: 00:20:00
+          duration: 00:15:00
         target:
           entity_id: timer.exhaust
     - conditions:
@@ -2055,22 +2113,21 @@
     - conditions:
       - condition: trigger
         id: showerstart
-      - condition: device
-        type: is_on
-        device_id: 624405d34a0a0bc8df3990c131a31bd2
-        entity_id: light.bathroom_lights
-        domain: light
       sequence:
       - service: switch.turn_on
         data: {}
         target:
           entity_id:
           - switch.exhaust_fan
-      - service: switch.turn_on
-        data: {}
-        target:
-          entity_id: switch.ac_boost
-        enabled: false
+      - if:
+        - condition: numeric_state
+          entity_id: sensor.bedroom_acurite_temperature
+          above: 72
+        then:
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id: switch.ac_boost
     - conditions:
       - condition: or
         conditions:
@@ -2093,12 +2150,6 @@
         - condition: state
           entity_id: binary_sensor.showering
           state: 'on'
-        - condition: device
-          type: is_on
-          device_id: 624405d34a0a0bc8df3990c131a31bd2
-          entity_id: light.bathroom_lights
-          domain: light
-          enabled: true
         then:
         - service: timer.cancel
           data: {}
@@ -2115,6 +2166,11 @@
         - condition: state
           entity_id: timer.exhaust
           state: idle
+        - condition: device
+          type: is_off
+          device_id: 624405d34a0a0bc8df3990c131a31bd2
+          entity_id: light.bathroom_lights
+          domain: light
         - service: timer.start
           data: {}
           target:
@@ -2324,8 +2380,6 @@
   - platform: state
     entity_id:
     - light.hallway_lights
-    - light.living_room_lights
-    - light.kitchen_lights
     - switch.exhaust_fan
     - switch.katchy
     - switch.gym_fan
@@ -2337,11 +2391,55 @@
     - light.master_hallway_light
     - switch.airport_express
     - switch.rotunda_lights
-    - light.living_room_fan
     - light.kitchen_cabinet_lights
     - switch.garage_light
     to: unavailable
-  condition: []
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: light.hallway_lights
+      state: unavailable
+    - condition: state
+      entity_id: switch.exhaust_fan
+      state: unavailable
+    - condition: state
+      entity_id: switch.katchy
+      state: unavailable
+    - condition: state
+      entity_id: switch.gym_fan
+      state: unavailable
+    - condition: state
+      entity_id: switch.living_room_fan
+      state: unavailable
+    - condition: state
+      entity_id: switch.porch_light
+      state: unavailable
+    - condition: state
+      entity_id: switch.laundry_room_light
+      state: unavailable
+    - condition: state
+      entity_id: light.bathroom_lights
+      state: unavailable
+    - condition: state
+      entity_id: switch.dining_room_light
+      state: unavailable
+    - condition: state
+      entity_id: light.master_hallway_light
+      state: unavailable
+    - condition: state
+      entity_id: switch.airport_express
+      state: unavailable
+    - condition: state
+      entity_id: switch.rotunda_lights
+      state: unavailable
+    - condition: state
+      entity_id: light.kitchen_cabinet_lights
+      state: unavailable
+    - condition: state
+      entity_id: switch.garage_light
+      state: unavailable
+    alias: Any device unavailable
   action:
   - delay:
       hours: 0
@@ -2349,31 +2447,199 @@
       seconds: 3
       milliseconds: 0
   - repeat:
-      count: '7'
+      until:
+      - condition: not
+        conditions:
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: light.hallway_lights
+            state: unavailable
+          - condition: state
+            entity_id: switch.exhaust_fan
+            state: unavailable
+          - condition: state
+            entity_id: switch.katchy
+            state: unavailable
+          - condition: state
+            entity_id: switch.gym_fan
+            state: unavailable
+          - condition: state
+            entity_id: switch.living_room_fan
+            state: unavailable
+          - condition: state
+            entity_id: switch.porch_light
+            state: unavailable
+          - condition: state
+            entity_id: switch.laundry_room_light
+            state: unavailable
+          - condition: state
+            entity_id: light.bathroom_lights
+            state: unavailable
+          - condition: state
+            entity_id: switch.dining_room_light
+            state: unavailable
+          - condition: state
+            entity_id: light.master_hallway_light
+            state: unavailable
+          - condition: state
+            entity_id: switch.airport_express
+            state: unavailable
+          - condition: state
+            entity_id: switch.rotunda_lights
+            state: unavailable
+          - condition: state
+            entity_id: light.kitchen_cabinet_lights
+            state: unavailable
+          - condition: state
+            entity_id: switch.garage_light
+            state: unavailable
+        alias: Until all devices available
       sequence:
-      - service: button.press
-        data: {}
-        target:
-          entity_id:
-          - button.node_18_ping
-          - button.node_19_ping
-          - button.node_26_ping
-          - button.node_22_ping
-          - button.node_17_ping
-          - button.node_10_ping
-          - button.laundry_room_light_ping
-          - button.gym_fan_ping
-          - button.node_32_ping
-          - button.dining_room_light_ping
-          - button.node_25_ping
-          - button.z_wave_plug_ping
-          - button.node_17_ping
-          - button.living_room_fan_ping
-          - button.garage_light_ping
+      - parallel:
+        - if:
+          - condition: state
+            entity_id: light.hallway_lights
+            state: unavailable
+          then:
+          - service: button.press
+            data: {}
+            target:
+              entity_id: button.node_18_ping
+        - if:
+          - condition: state
+            entity_id: switch.exhaust_fan
+            state: unavailable
+          then:
+          - service: button.press
+            data: {}
+            target:
+              entity_id:
+              - button.node_26_ping
+        - if:
+          - condition: state
+            entity_id: switch.katchy
+            state: unavailable
+          then:
+          - service: button.press
+            data: {}
+            target:
+              entity_id:
+              - button.node_22_ping
+        - if:
+          - condition: state
+            entity_id: switch.gym_fan
+            state: unavailable
+          then:
+          - service: button.press
+            data: {}
+            target:
+              entity_id:
+              - button.gym_fan_ping
+        - if:
+          - condition: state
+            entity_id: switch.living_room_fan
+            state: unavailable
+          then:
+          - service: button.press
+            data: {}
+            target:
+              entity_id:
+              - button.living_room_fan_ping
+        - if:
+          - condition: state
+            entity_id: switch.porch_light
+            state: unavailable
+          then:
+          - service: button.press
+            data: {}
+            target:
+              entity_id:
+              - button.node_10_ping
+        - if:
+          - condition: state
+            entity_id: switch.laundry_room_light
+            state: unavailable
+          then:
+          - service: button.press
+            data: {}
+            target:
+              entity_id:
+              - button.laundry_room_light_ping
+        - if:
+          - condition: state
+            entity_id: light.bathroom_lights
+            state: unavailable
+          then:
+          - service: button.press
+            data: {}
+            target:
+              entity_id:
+              - button.node_32_ping
+        - if:
+          - condition: state
+            entity_id: switch.dining_room_light
+            state: unavailable
+          then:
+          - service: button.press
+            data: {}
+            target:
+              entity_id:
+              - button.dining_room_light_ping
+        - if:
+          - condition: state
+            entity_id: light.master_hallway_light
+            state: unavailable
+          then:
+          - service: button.press
+            data: {}
+            target:
+              entity_id:
+              - button.node_25_ping
+        - if:
+          - condition: state
+            entity_id: switch.airport_express
+            state: unavailable
+          then:
+          - service: button.press
+            data: {}
+            target:
+              entity_id:
+              - button.z_wave_plug_ping
+        - if:
+          - condition: state
+            entity_id: switch.rotunda_lights
+            state: unavailable
+          then:
+          - service: button.press
+            data: {}
+            target:
+              entity_id:
+              - button.node_17_ping
+        - if:
+          - condition: state
+            entity_id: light.kitchen_cabinet_lights
+            state: unavailable
+          then:
+          - service: button.press
+            data: {}
+            target:
+              entity_id:
+              - button.node_19_ping
+        - if:
+          - condition: state
+            entity_id: switch.garage_light
+            state: unavailable
+          then:
+          - service: button.press
+            data: {}
+            target:
+              entity_id:
+              - button.garage_light_ping
       - delay:
           hours: 0
           minutes: 0
-          seconds: 7
+          seconds: 4
           milliseconds: 0
   mode: queued
   max: 10
@@ -3164,6 +3430,23 @@
     entity_id: light.bathroom_lights
     domain: light
     id: lights turned off
+  - platform: state
+    entity_id:
+    - media_player.owntone_output_nightstand
+    from: 'off'
+    to: 'on'
+  - platform: state
+    entity_id:
+    - binary_sensor.showering
+    from: 'off'
+    to: 'on'
+    id: showering on
+  - platform: state
+    entity_id:
+    - binary_sensor.showering
+    from: 'on'
+    to: 'off'
+    id: showering off
   condition: []
   action:
   - choose:
@@ -3204,51 +3487,131 @@
           entity_id: media_player.owntone_output_bathroom
           state: 'off'
         then:
-        - service: media_player.turn_on
-          data: {}
-          target:
-            entity_id: media_player.owntone_output_bathroom
-        - wait_for_trigger:
-          - platform: state
-            entity_id:
-            - media_player.owntone_output_bathroom
-            to: 'on'
-          timeout:
-            hours: 0
-            minutes: 0
-            seconds: 5
-            milliseconds: 0
+        - repeat:
+            until:
+            - condition: state
+              entity_id: media_player.owntone_output_bathroom
+              state: 'on'
+            sequence:
+            - service: media_player.turn_on
+              data: {}
+              target:
+                entity_id: media_player.owntone_output_bathroom
+            - wait_for_trigger:
+              - platform: state
+                entity_id:
+                - media_player.owntone_output_bathroom
+                to: 'on'
+              timeout:
+                hours: 0
+                minutes: 0
+                seconds: 1
+                milliseconds: 0
+          alias: Turn on HomePod
       - repeat:
           until:
           - condition: template
-            value_template: "    {% if state_attr('media_player.owntone_output_nightstand',
+            value_template: "    {% if states('binary_sensor.showering') is defined
+              and\n    is_state('binary_sensor.showering', 'on') %} {% set vol = 0.65
+              %}\n    {% elif states('switch.exhaust_fan') is defined and\n    is_state('switch.exhaust_fan',
+              'on') %} {% set vol = 0.5 %}\n    {% elif state_attr('media_player.owntone_output_nightstand',
               'volume_level')\n    is defined and state_attr('media_player.owntone_output_nightstand',\n
               \   'volume_level') is not none %} \n    {% set vol =  state_attr('media_player.owntone_output_nightstand',
               'volume_level') %}\n    {% elif state_attr('media_player.owntone_output_danas',
               'volume_level')\n    is defined and state_attr('media_player.owntone_output_danas',\n
               \   'volume_level') is not none %} \n    {% set vol = state_attr('media_player.owntone_output_danas',
-              'volume_level') %}\n    {% elif states('switch.exhaust_fan') is defined
-              and\n    is_state('switch.exhaust_fan', 'on') %} {% set vol = 0.5 %}\n
-              \   {% else %} {% set vol = 0.11 %} {% endif %}\n\n{{ vol is not none
-              and state_attr('media_player.owntone_output_bathroom', 'volume_level')
-              is defined and  \n  state_attr('media_player.owntone_output_bathroom',
+              'volume_level') %}\n    {% else %} {% set vol = 0.11 %} {% endif %}\n\n
+              \   {{ vol is not none and state_attr('media_player.owntone_output_bathroom',
+              'volume_level') is defined and  \n    state_attr('media_player.owntone_output_bathroom',
               'volume_level') == vol }}"
           sequence:
           - service: media_player.volume_set
             data:
-              volume_level: '{% if state_attr(''media_player.owntone_output_nightstand'',
+              volume_level: '{% if states(''binary_sensor.showering'') is defined
+                and is_state(''binary_sensor.showering'', ''on'') %} {% set vol =
+                0.65 %} {% elif states(''switch.exhaust_fan'') is defined and is_state(''switch.exhaust_fan'',
+                ''on'') %} {% set vol = 0.5 %} {% elif state_attr(''media_player.owntone_output_nightstand'',
                 ''volume_level'') is defined and state_attr(''media_player.owntone_output_nightstand'',
                 ''volume_level'') is not none %}  {% set vol =  state_attr(''media_player.owntone_output_nightstand'',
                 ''volume_level'') %} {% elif state_attr(''media_player.owntone_output_danas'',
                 ''volume_level'') is defined and state_attr(''media_player.owntone_output_danas'',
                 ''volume_level'') is not none %}  {% set vol = state_attr(''media_player.owntone_output_danas'',
-                ''volume_level'') %} {% elif states(''switch.exhaust_fan'') is defined
-                and is_state(''switch.exhaust_fan'', ''on'') %} {% set vol = 0.5 %}
-                {% else %} {% set vol = 0.11 %} {% endif %} {{ vol }}
+                ''volume_level'') %} {% else %} {% set vol = 0.11 %} {% endif %} {{
+                vol }}
 
                 '
             target:
               entity_id: media_player.owntone_output_bathroom
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
+        alias: Set Volume
+      - if:
+        - condition: trigger
+          id: showering on
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: media_player.owntone_output_nightstand
+            state: 'on'
+          - condition: state
+            entity_id: media_player.owntone_output_desk
+            state: 'on'
+        then:
+        - service: media_player.volume_set
+          data:
+            volume_level: 0.13
+          target:
+            entity_id:
+            - media_player.owntone_output_desk
+            - media_player.owntone_output_nightstand
+        - if:
+          - condition: template
+            value_template: "{{ not (state_attr('media_player.spotify_anthony221121',
+              'media_playlist') \n        is defined and \n        state_attr('media_player.spotify_anthony221121',
+              'media_playlist') \n        is not none and not 'lofi' in \n        state_attr('media_player.spotify_anthony221121',
+              'media_playlist')) }}"
+          then:
+          - service: media_player.play_media
+            data:
+              media_content_type: playlist
+              media_content_id: https://open.spotify.com/playlist/1FXZPGh51QQyNUmADd5ssN
+              enqueue: play
+            target:
+              entity_id: media_player.spotify_anthony221121
+        else:
+        - condition: trigger
+          id: showering off
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: media_player.owntone_output_nightstand
+            state: 'on'
+          - condition: state
+            entity_id: media_player.owntone_output_desk
+            state: 'on'
+        - repeat:
+            count: '3'
+            sequence:
+            - service: media_player.volume_set
+              data:
+                volume_level: 0.27
+              target:
+                entity_id:
+                - media_player.owntone_output_desk
+                - media_player.owntone_output_nightstand
+                - media_player.spotify_anthony221121
+            - delay:
+                hours: 0
+                minutes: 0
+                seconds: 1
+                milliseconds: 0
+        - service: input_boolean.turn_on
+          data: {}
+          target:
+            entity_id: input_boolean.bedmotion
     - conditions:
       - condition: device
         type: is_off
@@ -3260,6 +3623,14 @@
         data: {}
         target:
           entity_id: media_player.owntone_output_bathroom
+    - conditions:
+      - condition: trigger
+        id: showering on
+      sequence:
+      - service: script.turn_on
+        data: {}
+        target:
+          entity_id: script.play_music
   mode: queued
   max: 10
 - id: '1668919655434'
@@ -3290,14 +3661,6 @@
   - platform: event
     event_type: automation_reloaded
     id: reload
-  - platform: state
-    entity_id:
-    - binary_sensor.showering
-    from: 'on'
-    to: 'off'
-    alias: shower stopped
-    id: shower stopped
-    enabled: false
   - platform: state
     entity_id:
     - binary_sensor.showering
@@ -4025,118 +4388,34 @@
       pico_remote: df24bd878efc1f29899ba74213c4b124
       auto_mode: queued
       top_on:
-      - parallel:
-        - service: switch.turn_on
-          data: {}
-          target:
-            entity_id:
-            - switch.dana_s_east_wall_rope_lights
-            - switch.dana_s_north_wall_rope_lights
-            - switch.dana_s_west_wall_rope_lights
-            - switch.dana_s_south_wall_rope_lights
-            - switch.dana_s_south_wall_incandescent_string_lights
-        - service: light.turn_on
-          data:
-            rgb_color:
-            - 141
-            - 45
-            - 245
-            brightness_pct: 100
-          target:
-            entity_id: light.evan_fan
+      - service: script.turn_on
+        data: {}
+        target:
+          entity_id: script.morning
       down_lower:
-      - if:
-        - condition: or
-          conditions:
-          - condition: state
-            entity_id: switch.dana_s_south_wall_rope_lights
-            state: 'off'
-          - condition: state
-            entity_id: switch.dana_s_west_wall_rope_lights
-            state: 'off'
-        then:
-        - service: switch.turn_on
-          data: {}
-          target:
-            entity_id:
-            - switch.dana_s_west_wall_rope_lights
-            - switch.dana_s_south_wall_rope_lights
-        else:
-        - service: switch.turn_off
-          data: {}
-          target:
-            entity_id:
-            - switch.dana_s_west_wall_rope_lights
-            - switch.dana_s_south_wall_rope_lights
+      - service: script.turn_on
+        data: {}
+        target:
+          entity_id: script.fan_off
       bottom_off:
-      - parallel:
-        - service: switch.turn_off
-          data: {}
-          target:
-            entity_id:
-            - switch.dana_s_east_wall_rope_lights
-            - switch.dana_s_north_wall_rope_lights
-            - switch.dana_s_west_wall_rope_lights
-            - switch.dana_s_south_wall_rope_lights
-            - switch.dana_s_south_wall_incandescent_string_lights
-        - service: light.turn_off
-          data: {}
-          target:
-            entity_id:
-            - light.evan_fan
+      - service: script.turn_on
+        data: {}
+        target:
+          entity_id: script.color_loop
       up_raise:
-      - if:
-        - condition: or
-          conditions:
-          - condition: state
-            entity_id: switch.dana_s_north_wall_rope_lights
-            state: 'on'
-          - condition: state
-            entity_id: switch.dana_s_east_wall_rope_lights
-            state: 'on'
-          - condition: state
-            entity_id: switch.dana_s_south_wall_incandescent_string_lights
-            state: 'on'
-        then:
-        - service: switch.turn_off
-          data: {}
-          target:
-            entity_id:
-            - switch.dana_s_north_wall_rope_lights
-            - switch.dana_s_east_wall_rope_lights
-            - switch.dana_s_south_wall_incandescent_string_lights
-        else:
-        - service: switch.turn_on
-          data: {}
-          target:
-            entity_id:
-            - switch.dana_s_north_wall_rope_lights
-            - switch.dana_s_east_wall_rope_lights
-            - switch.dana_s_south_wall_incandescent_string_lights
+      - service: input_boolean.toggle
+        data: {}
+        target:
+          entity_id: input_boolean.ac_boost
       top_on_release: []
       up_raise_release:
       down_lower_release: []
       middle_stop_release: []
       middle_stop:
-      - if:
-        - condition: state
-          entity_id: light.evan_fan
-          state: 'on'
-        then:
-        - service: light.turn_off
-          data: {}
-          target:
-            entity_id: light.evan_fan
-        else:
-        - service: light.turn_on
-          data:
-            rgb_color:
-            - 141
-            - 45
-            - 245
-            brightness_pct: 100
-          target:
-            entity_id: light.evan_fan
+      - service: switch.toggle
+        data: {}
+        target:
+          entity_id: switch.desktop
 - id: '1671430225021'
   alias: Dana's Wall Pico
   description: ''

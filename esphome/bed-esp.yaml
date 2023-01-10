@@ -60,7 +60,7 @@ binary_sensor:
       - delayed_on: 700ms #avoid bump/press being reported as detected
       - delayed_off: 6s #avoid shifting being reported as clear
     lambda: |-
-      if (id(bed_weight).state >= (id(zero) + 18000) ) {
+      if (id(bed_weight).state >= (id(zero) + 30000) ) {
         return true;
       } else {
         return false;
@@ -70,7 +70,7 @@ globals:
   - id: zero
     type: float
     restore_value: yes
-    initial_value: '310000'
+    initial_value: '326000'
 
 light:
   - platform: rgb

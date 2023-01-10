@@ -6,6 +6,25 @@
 #       command_off: !secret u6_pro_off
 - platform: template
   switches:
+    case_rgb:
+      unique_id: case_rgb
+      friendly_name: "Case RGB"
+      turn_on:
+        - service: remote.send_command
+          data:
+            device: case
+            command: "on"
+          target:
+            entity_id: remote.broadlink
+      turn_off:
+        - service: remote.send_command
+          data:
+            device: case
+            command: "off"
+            num_repeats: 5
+            delay_secs: 0.4
+          target:
+            entity_id: remote.broadlink
     ac_boost:
       unique_id: ac_boost
       friendly_name: "AC Boost"
@@ -36,6 +55,9 @@
       turn_on:
         - parallel:
           - service: script.morning
+          - service: switch.turn_on
+            target:
+              entity_id: switch.light_switch_relay
           # - service: climate.set_hvac_mode
           #   data:
           #     hvac_mode: cool

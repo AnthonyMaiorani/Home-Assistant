@@ -952,6 +952,16 @@ play_music:
         entity_id: light.bathroom_lights
         domain: light
       then:
+      - wait_for_trigger:
+        - platform: state
+          entity_id:
+          - media_player.owntone_output_nightstand
+          to: 'on'
+        timeout:
+          hours: 0
+          minutes: 0
+          seconds: 10
+          milliseconds: 0
       - service: automation.trigger
         data:
           skip_condition: false

@@ -55,9 +55,15 @@ binary_sensor:
               entity_id: switch.bedroomtoggle
     - timing:
         - ON for at least .301s
+        - OFF for at least .1s
       then:
       - homeassistant.service:
           service: script.morning
+    - timing:
+        - ON for at least 3s
+        - OFF for at least .1s
+      then:
+        - switch.toggle: relay1
           
 light:
   - platform: rgb
@@ -129,10 +135,10 @@ light:
 
 switch:
   - platform: gpio
-    #name: "${name}"
+    name: "${name} Relay"
     pin: GPIO15
     id: 'relay1'
-    restore_mode: ALWAYS_OFF
+    restore_mode: ALWAYS_ON
 
 output:
   - platform: esp8266_pwm

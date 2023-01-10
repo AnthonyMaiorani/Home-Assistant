@@ -1,6 +1,7 @@
 - platform: ping
   host: !secret host
   name: Desktop Power
+  scan_interval: 15
 - platform: workday
   country: US
   days_offset: 1
