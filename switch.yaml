@@ -112,7 +112,7 @@
     fronttv:
       unique_id: fronttv
       friendly_name: Front TV
-      value_template: "{{ not states('media_player.front') in ['standby', 'unavailable'] }}"
+      value_template: "{{ not states('media_player.gym_tv') in ['standby', 'unavailable'] }}"
       turn_on:
         - service: media_player.turn_on
           entity_id:

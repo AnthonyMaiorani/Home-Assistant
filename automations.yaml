@@ -1210,9 +1210,10 @@
     - repeat:
         until:
         - condition: template
-          value_template: "      {{  \n\n      (is_state_attr('light.shapes_007f',
-            \"effect\",\n      states('sensor.nanoleaf_scene'))\n\n      and\n\n      is_state_attr('light.shapes_ee82',
-            \"effect\",\n      states('sensor.nanoleaf_scene'))\n\n      )}}"
+          value_template: "      {{  is_state('sensor.nanoleaf_auto_brightness', '0')
+            or\n      (\n      (is_state_attr('light.shapes_007f', \"effect\",\n      states('sensor.nanoleaf_scene'))\n\n
+            \     and\n\n      is_state_attr('light.shapes_ee82', \"effect\",\n      states('sensor.nanoleaf_scene')))\n\n
+            \     )}}"
         sequence:
         - if:
           - condition: template
@@ -2830,8 +2831,6 @@
             entity_id:
             - camera.elitedesk_front_porch
             - camera.elitedesk_living_room
-            - camera.elitedesk_pet
-            - camera.elitedesk_gym
           alias: record front porch and living room and pet and gym
         - if:
           - condition: state
@@ -3546,7 +3545,7 @@
               hours: 0
               minutes: 0
               seconds: 1
-              milliseconds: 0
+              milliseconds: 500
         alias: Set Volume
       - if:
         - condition: trigger
@@ -4762,3 +4761,62 @@
           entity_id: timer.exhaust
   mode: queued
   max: 10
+- id: '1673433463589'
+  alias: Night Light
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.closet
+    from: 'off'
+    to: 'on'
+    id: closet opened
+  - platform: state
+    entity_id:
+    - binary_sensor.bed_occupancy
+    from: 'off'
+    to: 'on'
+    id: bed entered
+  - type: opened
+    platform: device
+    device_id: 40b6acb50076a1f15ff0e73120d2f04e
+    entity_id: binary_sensor.bedroom_door
+    domain: binary_sensor
+    id: door opened
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: closet opened
+        - condition: trigger
+          id: door opened
+      - condition: state
+        entity_id: switch.bedroomtoggle
+        state: 'off'
+      - condition: sun
+        after: sunset
+        before: sunrise
+      sequence:
+      - service: light.turn_on
+        data:
+          rgb_color:
+          - 255
+          - 255
+          - 255
+          effect: None
+          transition: 2
+          brightness_pct: 18
+        target:
+          entity_id: light.bed_lights
+    - conditions:
+      - condition: trigger
+        id: bed entered
+      sequence:
+      - type: turn_off
+        device_id: e88ef9e31b97cb86c917bfd035861b2f
+        entity_id: light.bed_lights
+        domain: light
+  mode: single

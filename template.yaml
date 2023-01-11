@@ -89,7 +89,8 @@
       {# Normal #}
       {% elif is_state('light.fan_lights', 'on') -%} 254
       {# In bed #}
-      {% elif is_state('light.bedroom_lights', 'on') -%} 63
+      {% elif is_state('light.bedroom_lights', 'on') and not
+      is_state_attr('light.bed_lights', 'effect', 'None') -%} 63
       {%- else -%} 0
       {%- endif %} 
 - trigger:
