@@ -220,20 +220,80 @@ night:
       data: {}
       target:
         entity_id: input_boolean.bedmotion
-    - repeat:
-        count: '300'
-        sequence:
-        - service: light.turn_off
-          data: {}
-          target:
-            entity_id:
-            - light.shapes_007f
-            - light.shapes_ee82
-        - delay:
-            hours: 0
-            minutes: 0
-            seconds: 0
-            milliseconds: 200
+    - if:
+      - condition: state
+        entity_id: media_player.spotify_anthony221121
+        state: playing
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: media_player.owntone_output_desk
+          state: 'on'
+        - condition: state
+          entity_id: media_player.owntone_output_nightstand
+          state: 'on'
+      - condition: state
+        entity_id: media_player.spotify_anthony221121
+        attribute: media_playlist
+        state: Music
+      - condition: state
+        entity_id: binary_sensor.bed_occupancy
+        state: 'on'
+      - condition: time
+        before: 08:00:00
+        after: '22:00:00'
+      then:
+      - service: media_player.turn_on
+        data: {}
+        target:
+          entity_id:
+          - media_player.owntone_output_nightstand
+          - media_player.owntone_output_desk
+      - service: media_player.shuffle_set
+        data:
+          shuffle: true
+        target:
+          entity_id: media_player.spotify_anthony221121
+      - service: media_player.play_media
+        data:
+          media_content_type: playlist
+          media_content_id: https://open.spotify.com/playlist/3j3uK2xjqyD1nvAaBX5YRa
+          enqueue: play
+        target:
+          entity_id: media_player.spotify_anthony221121
+      - repeat:
+          count: '5'
+          sequence:
+          - service: media_player.volume_set
+            data:
+              volume_level: 0.07
+            target:
+              entity_id:
+              - media_player.spotify_anthony221121
+              - media_player.owntone_output_desk
+              - media_player.owntone_output_nightstand
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
+      else:
+      - repeat:
+          count: '5'
+          sequence:
+          - service: media_player.volume_set
+            data:
+              volume_level: 0.07
+            target:
+              entity_id:
+              - media_player.spotify_anthony221121
+              - media_player.owntone_output_desk
+              - media_player.owntone_output_nightstand
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
   alias: Night
   mode: restart
   icon: mdi:weather-night
@@ -425,13 +485,12 @@ lofi:
       - media_player.owntone_output_bathroom
       - media_player.owntone_output_desk
       - media_player.owntone_output_front
-      - media_player.owntone_output_kitchen_homepod
+      - media_player.kitchen_homepods
       - media_player.owntone_output_living_room_tv
       - media_player.owntone_output_master_bedroom_tv
       - media_player.owntone_output_nightstand
       - media_player.owntone_output_garage
-      - media_player.owntone_output_guest_left
-      - media_player.owntone_output_guest_right
+      - media_player.guest_homepods
       - media_player.owntone_output_guest_tv
   - repeat:
       while:
@@ -472,31 +531,13 @@ lofi:
       entity_id:
       - media_player.spotify_anthony221121
       - media_player.owntone_server
-  - if:
-    - condition: or
-      conditions:
-      - condition: state
-        entity_id: binary_sensor.bed_occupancy
-        state: 'on'
-      - condition: time
-        before: 06:00:00
-        after: 00:00:00
-    then:
-    - service: media_player.play_media
-      data:
-        media_content_type: playlist
-        media_content_id: https://open.spotify.com/playlist/5FmmxErJczcrEwIFGIviYo
-        enqueue: play
-      target:
-        entity_id: media_player.spotify_anthony221121
-    else:
-    - service: media_player.play_media
-      data:
-        media_content_type: playlist
-        media_content_id: https://open.spotify.com/playlist/0vvXsWCC9xrXsKd4FyS8kM
-        enqueue: play
-      target:
-        entity_id: media_player.spotify_anthony221121
+  - service: media_player.play_media
+    data:
+      media_content_type: playlist
+      media_content_id: https://open.spotify.com/playlist/3j3uK2xjqyD1nvAaBX5YRa
+      enqueue: play
+    target:
+      entity_id: media_player.spotify_anthony221121
   - service: media_player.shuffle_set
     data:
       shuffle: true
@@ -591,22 +632,30 @@ lofi:
               entity_id:
               - media_player.owntone_output_nightstand
       - repeat:
-          until:
-          - condition: template
-            value_template: '{{ state_attr(''media_player.owntone_output_nightstand'',
-              ''volume_level'') == state_attr(''media_player.spotify_anthony221121'',
-              ''volume_level'') }}
-
-              '
+          count: '3'
           sequence:
-          - service: media_player.volume_set
-            data:
-              volume_level: '{{ state_attr(''media_player.spotify_anthony221121'',
-                ''volume_level'') }}
+          - repeat:
+              until:
+              - condition: template
+                value_template: '{{ state_attr(''media_player.owntone_output_nightstand'',
+                  ''volume_level'') == state_attr(''media_player.spotify_anthony221121'',
+                  ''volume_level'') }}
 
-                '
-            target:
-              entity_id: media_player.owntone_output_nightstand
+                  '
+              sequence:
+              - service: media_player.volume_set
+                data:
+                  volume_level: '{{ state_attr(''media_player.spotify_anthony221121'',
+                    ''volume_level'') }}
+
+                    '
+                target:
+                  entity_id: media_player.owntone_output_nightstand
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
       alias: Turn on Nightstand Speaker
     - if:
       - condition: state

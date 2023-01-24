@@ -6,6 +6,8 @@ esp32:
   framework:
     type: arduino
 
+web_server:
+
 ethernet:
   type: LAN8720
   mdc_pin: GPIO23

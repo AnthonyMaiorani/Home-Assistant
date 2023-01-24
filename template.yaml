@@ -52,9 +52,9 @@
       (as_datetime(states.sensor.anthony_s_echo_show_next_alarm.state) -
       now()) > as_timedelta("00 22:00:00,000000") -%} 0
       {% elif as_datetime(states.sensor.anthony_s_echo_show_next_alarm.state).day != now().day -%}
-      {{ (as_datetime(states.sensor.anthony_s_echo_show_next_alarm.state).strftime("%s") | int) | timestamp_custom("%A at %-I:%M %p", false) }}
+      {{ (as_datetime(states.sensor.anthony_s_echo_show_next_alarm.state).strftime("%s") | int) | timestamp_custom("%A at %-I:%M %p", true) }}
       {%- else -%} 
-      {{ (as_datetime(states.sensor.anthony_s_echo_show_next_alarm.state).strftime("%s") | int) | timestamp_custom("%-I:%M %p", false) }}
+      {{ (as_datetime(states.sensor.anthony_s_echo_show_next_alarm.state).strftime("%s") | int) | timestamp_custom("%-I:%M %p", true) }}
       {%- endif %}
   - name: "Nanoleaf Auto-Brightness"
     unique_id: nanoleaf_auto_brightness

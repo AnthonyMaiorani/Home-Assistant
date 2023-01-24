@@ -9,7 +9,7 @@
   name: Shower
   sensor: sensor.acurite_humidity
   delta_trigger: 4
-  target_offset: 4
+  target_offset: 5
   min_on_time: 180
   max_on_time: 1200
   sample_interval: 1
