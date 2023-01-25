@@ -56,11 +56,6 @@ timer:
     restore: true
     icon: mdi:alarm-light  
 
-logger:
-  default: info
-  logs:
-    yalexs: debug
-
 notify:
   - name: anthonys_devices
     platform: group
