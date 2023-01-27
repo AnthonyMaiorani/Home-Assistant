@@ -2048,28 +2048,6 @@
     alias: turn off
     id: turn off
   - platform: device
-    device_id: 7c247296aac3c00b267bb165baab5a7c
-    domain: zwave_js
-    type: event.value_notification.central_scene
-    property: scene
-    property_key: '001'
-    endpoint: 0
-    command_class: 91
-    subtype: Endpoint 0 Scene 001
-    id: turned on
-    enabled: false
-  - platform: device
-    device_id: 7c247296aac3c00b267bb165baab5a7c
-    domain: zwave_js
-    type: event.value_notification.central_scene
-    property: scene
-    property_key: '002'
-    endpoint: 0
-    command_class: 91
-    subtype: Endpoint 0 Scene 002
-    id: turned off
-    enabled: false
-  - platform: device
     type: turned_off
     device_id: 3c08610e07933d66eb5347257aae98aa
     entity_id: light.bathroom_lights
@@ -3671,6 +3649,17 @@
           - condition: state
             entity_id: media_player.spotify_anthony221121
             state: playing
+      - condition: state
+        entity_id: binary_sensor.bed_occupancy
+        state: 'off'
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: input_select.anthony
+          state: Home
+        - condition: state
+          entity_id: input_select.anthony
+          state: Just Arrived
       sequence:
       - service: script.turn_on
         data: {}
@@ -4651,6 +4640,12 @@
     to: 'on'
     from: 'off'
     id: showering
+  - platform: state
+    entity_id:
+    - binary_sensor.bathroom_multi_sensor_motion
+    to: 'on'
+    from: 'off'
+    id: other wave
   condition: []
   action:
   - choose:
@@ -4665,8 +4660,6 @@
         conditions:
         - condition: and
           conditions:
-          - condition: trigger
-            id: wave
           - condition: state
             entity_id: binary_sensor.bathroom_door
             state: 'off'
@@ -4674,6 +4667,12 @@
               hours: 0
               minutes: 1
               seconds: 0
+          - condition: or
+            conditions:
+            - condition: trigger
+              id: wave
+            - condition: trigger
+              id: other wave
         - condition: trigger
           id: 'on'
         - condition: trigger
@@ -4837,6 +4836,11 @@
       - condition: sun
         after: sunset
         before: sunrise
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: script.morning
+          state: 'on'
       sequence:
       - service: light.turn_on
         data:

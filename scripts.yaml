@@ -468,6 +468,21 @@ start_car:
 lofi:
   alias: LoFi
   sequence:
+  - if:
+    - condition: state
+      entity_id: script.stop_music
+      state: 'on'
+    then:
+    - wait_for_trigger:
+      - platform: state
+        entity_id:
+        - script.stop_music
+        to: 'off'
+      timeout:
+        hours: 0
+        minutes: 0
+        seconds: 45
+        milliseconds: 0
   - service: script.turn_off
     data: {}
     target:
@@ -809,6 +824,21 @@ lofi:
 play_music:
   alias: Play Music
   sequence:
+  - if:
+    - condition: state
+      entity_id: script.stop_music
+      state: 'on'
+    then:
+    - wait_for_trigger:
+      - platform: state
+        entity_id:
+        - script.stop_music
+        to: 'off'
+      timeout:
+        hours: 0
+        minutes: 0
+        seconds: 45
+        milliseconds: 0
   - service: script.turn_off
     data: {}
     target:
@@ -835,6 +865,45 @@ play_music:
       - media_player.owntone_output_guest_right
       - media_player.owntone_output_guest_tv
   - repeat:
+      count: '10'
+      sequence:
+      - service: homeassistant.update_entity
+        data: {}
+        target:
+          entity_id: media_player.spotify_anthony221121
+      - service: media_player.select_source
+        data:
+          source: Home Assistant
+        target:
+          entity_id: media_player.spotify_anthony221121
+      - service: homeassistant.update_entity
+        data: {}
+        target:
+          entity_id: media_player.spotify_anthony221121
+      - wait_for_trigger:
+        - platform: state
+          entity_id:
+          - media_player.spotify_anthony221121
+          attribute: source
+          to: Home Assistant
+        timeout:
+          hours: 0
+          minutes: 0
+          seconds: 2
+          milliseconds: 0
+  - if:
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: media_player.spotify_anthony221121
+        attribute: source
+        state: Home Assistant
+    then:
+    - service: homeassistant.reload_config_entry
+      data: {}
+      target:
+        entity_id: media_player.spotify_anthony221121
+  - repeat:
       while:
       - condition: not
         conditions:
@@ -843,6 +912,43 @@ play_music:
           attribute: source
           state: Home Assistant
       sequence:
+      - service: homeassistant.update_entity
+        data: {}
+        target:
+          entity_id: media_player.spotify_anthony221121
+      - service: media_player.select_source
+        data:
+          source: Home Assistant
+        target:
+          entity_id: media_player.spotify_anthony221121
+      - service: homeassistant.update_entity
+        data: {}
+        target:
+          entity_id: media_player.spotify_anthony221121
+      - wait_for_trigger:
+        - platform: state
+          entity_id:
+          - media_player.spotify_anthony221121
+          attribute: source
+          to: Home Assistant
+        timeout:
+          hours: 0
+          minutes: 0
+          seconds: 2
+          milliseconds: 0
+  - repeat:
+      while:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.spotify_anthony221121
+          attribute: source
+          state: Home Assistant
+      sequence:
+      - service: homeassistant.update_entity
+        data: {}
+        target:
+          entity_id: media_player.spotify_anthony221121
       - service: media_player.select_source
         data:
           source: Home Assistant
@@ -1205,6 +1311,12 @@ play_music:
 stop_music:
   alias: Stop Music
   sequence:
+  - service: script.turn_off
+    data: {}
+    target:
+      entity_id:
+      - script.lofi
+      - script.play_music
   - service: hassio.addon_restart
     data:
       addon: 63120367_homepod-connect
@@ -1258,5 +1370,9 @@ stop_music:
           - media_player.owntone_output_guest_left
           - media_player.owntone_output_guest_right
           - media_player.owntone_output_guest_tv
+  - service: homeassistant.reload_config_entry
+    data: {}
+    target:
+      entity_id: media_player.spotify_anthony221121
   mode: single
   icon: mdi:stop

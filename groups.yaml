@@ -28,7 +28,4 @@ home:
 indoor_cams:
   name: Indoor Wyze Cams
   entities:
-    - switch.front_cam_power
-    - switch.pet_cam_power
-    - switch.kitchen_cam_power
     - switch.living_room_cam_power
