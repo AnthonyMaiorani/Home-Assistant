@@ -23,3 +23,4 @@ exclude:
     - govee.state
     - sensor.anthony_s_echo_show_next_alarm
     - switch.ac_boost
+    - sensor.desktop_pc_lastactive

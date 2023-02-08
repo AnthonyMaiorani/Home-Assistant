@@ -85,6 +85,57 @@ color_loop:
         entity_id:
         - light.bedroom_lights
         - light.closet_lights
+    - if:
+      - condition: or
+        conditions:
+        - condition: numeric_state
+          entity_id: media_player.owntone_output_desk
+          attribute: volume_level
+          below: 0.1
+        - condition: numeric_state
+          entity_id: media_player.owntone_output_nightstand
+          attribute: volume_level
+          below: 0.1
+      then:
+      - if:
+        - condition: state
+          entity_id: media_player.spotify_anthony221121
+          attribute: media_playlist
+          state: Music
+        then:
+        - repeat:
+            count: '3'
+            sequence:
+            - service: media_player.volume_set
+              data:
+                volume_level: 0.18
+              target:
+                entity_id:
+                - media_player.spotify_anthony221121
+                - media_player.owntone_output_desk
+                - media_player.owntone_output_nightstand
+            - delay:
+                hours: 0
+                minutes: 0
+                seconds: 1
+                milliseconds: 0
+        else:
+        - repeat:
+            count: '3'
+            sequence:
+            - service: media_player.volume_set
+              data:
+                volume_level: 0.13
+              target:
+                entity_id:
+                - media_player.spotify_anthony221121
+                - media_player.owntone_output_desk
+                - media_player.owntone_output_nightstand
+            - delay:
+                hours: 0
+                minutes: 0
+                seconds: 1
+                milliseconds: 0
   mode: single
   icon: mdi:lightbulb-on
 music:
@@ -354,6 +405,57 @@ morning:
         option: Home
       target:
         entity_id: input_select.anthony
+    - if:
+      - condition: or
+        conditions:
+        - condition: numeric_state
+          entity_id: media_player.owntone_output_desk
+          attribute: volume_level
+          below: 0.1
+        - condition: numeric_state
+          entity_id: media_player.owntone_output_nightstand
+          attribute: volume_level
+          below: 0.1
+      then:
+      - if:
+        - condition: state
+          entity_id: media_player.spotify_anthony221121
+          attribute: media_playlist
+          state: Music
+        then:
+        - repeat:
+            count: '3'
+            sequence:
+            - service: media_player.volume_set
+              data:
+                volume_level: 0.18
+              target:
+                entity_id:
+                - media_player.spotify_anthony221121
+                - media_player.owntone_output_desk
+                - media_player.owntone_output_nightstand
+            - delay:
+                hours: 0
+                minutes: 0
+                seconds: 1
+                milliseconds: 0
+        else:
+        - repeat:
+            count: '3'
+            sequence:
+            - service: media_player.volume_set
+              data:
+                volume_level: 0.13
+              target:
+                entity_id:
+                - media_player.spotify_anthony221121
+                - media_player.owntone_output_desk
+                - media_player.owntone_output_nightstand
+            - delay:
+                hours: 0
+                minutes: 0
+                seconds: 1
+                milliseconds: 0
   mode: single
   icon: mdi:white-balance-sunny
 start_car:

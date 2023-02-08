@@ -19,7 +19,8 @@
       seconds: 9
       milliseconds: 0
   - service: automation.turn_off
-    data: {}
+    data:
+      stop_actions: true
     target:
       entity_id: automation.bed_occupancy
   - service: light.turn_off
@@ -40,7 +41,9 @@
         - light.fan_lights
         - light.desk_lights
         - light.bed_lights
+        - light.wled
     - service: light.turn_on
+      continue_on_error: true
       data:
         effect: Vibrant Sunrise
         brightness_pct: 100
@@ -165,6 +168,7 @@
   - parallel:
     - data:
         name: ios-dark-mode-dark-blue
+        mode: light
       service: frontend.set_theme
     - service: input_boolean.turn_on
       data: {}
@@ -198,7 +202,8 @@
         state: 'on'
       then:
       - service: timer.start
-        data: {}
+        data:
+          duration: 0
         target:
           entity_id: timer.ac
       else:
@@ -211,7 +216,8 @@
         target:
           entity_id: timer.ac
     - service: automation.trigger
-      data: {}
+      data:
+        skip_condition: true
       target:
         entity_id: automation.ping_z_wave_devices
     - service: input_boolean.turn_off
@@ -221,7 +227,9 @@
     - service: switch.turn_on
       data: {}
       target:
-        entity_id: switch.airport_express
+        entity_id:
+        - switch.airport_express
+        - switch.lumi_lumi_plug_maus01_switch_3
   - service: automation.turn_on
     data: {}
     target:
@@ -2085,6 +2093,21 @@
           id: lights turned off
         - condition: trigger
           id: turned on
+      - condition: or
+        conditions:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: timer.exhaust
+            state: active
+          alias: Timer not active
+        - condition: template
+          value_template: '{{ is_state(''input_boolean.bathroom_occupied'', ''off'')
+            and
+
+            (now() - states.input_boolean.bathroom_occupied.last_changed).total_seconds()
+            < 5 }}'
+          alias: Bathroom Occupied was on prior to light turning off
       sequence:
       - service: timer.start
         data:
@@ -4431,21 +4454,33 @@
         data: {}
         target:
           entity_id: script.morning
+      - service: button.press
+        data: {}
+        target:
+          entity_id: button.white
       down_lower:
       - service: script.turn_on
         data: {}
         target:
           entity_id: script.fan_off
+      - service: button.press
+        data: {}
+        target:
+          entity_id: button.off
       bottom_off:
       - service: script.turn_on
         data: {}
         target:
           entity_id: script.color_loop
-      up_raise:
-      - service: input_boolean.toggle
+      - service: button.press
         data: {}
         target:
-          entity_id: input_boolean.ac_boost
+          entity_id: button.color
+      up_raise:
+      - service: switch.toggle
+        data: {}
+        target:
+          entity_id: switch.ac
       top_on_release: []
       up_raise_release:
       down_lower_release: []

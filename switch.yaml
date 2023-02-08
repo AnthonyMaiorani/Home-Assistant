@@ -4,6 +4,13 @@
 #       friendly_name: "U6-Pro LED"
 #       command_on: !secret u6_pro_on
 #       command_off: !secret u6_pro_off
+- platform: rest
+  resource: http://192.168.1.57/json/state
+  name: WLED
+  body_on: '{"bri": "255"}'
+  body_off: '{"bri": "0"}'
+  is_on_template: "{{ value_json.on }}"
+  unique_id: wled
 - platform: template
   switches:
     # case_rgb:

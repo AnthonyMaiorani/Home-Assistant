@@ -63,3 +63,7 @@ notify:
       - service: mobile_app_iphone
       - service: mobile_app_ipad_pro
       - service: mobile_app_macbook
+
+rest_command:
+  set_wled_brightness:
+    url: http://192.168.1.57/win&A={{ states("input_number.wled_brightness") }}

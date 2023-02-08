@@ -23,3 +23,23 @@
     - light.wyze_bulb_1
     - light.wyze_bulb_2
     - light.wyze_bulb_3
+- platform: template
+  lights:
+    wled:
+      friendly_name: WLED
+      level_template: "{{ states('input_number.wled_brightness') }}"
+      value_template: "{{ is_state('switch.wled', 'on') }}"
+      turn_on:
+        service: switch.turn_on
+        data:
+            entity_id: switch.wled
+      turn_off:
+        service: switch.turn_off
+        data:
+            entity_id: switch.wled
+      set_level:
+        - service: input_number.set_value
+          data:
+            value: "{{ brightness }}"
+            entity_id: input_number.wled_brightness
+        - service: rest_command.set_wled_brightness
