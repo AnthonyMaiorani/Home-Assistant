@@ -642,7 +642,7 @@ lofi:
     data:
       volume_level: "{% if states('binary_sensor.bed_occupancy') is defined and is_state('binary_sensor.bed_occupancy',
         'on') %}\n    {% set vol =  0.13 %}\n{% elif now().hour >= 23 or now().hour
-        < 6 %}\n    {% set vol = 0.13 %}\n{% else %}\n    {% set vol = 0.25 %}\n{%
+        < 6 %}\n    {% set vol = 0.13 %}\n{% else %}\n    {% set vol = 0.19 %}\n{%
         endif %} {{ vol }}\n"
     target:
       entity_id:
@@ -718,7 +718,8 @@ lofi:
                 entity_id: media_player.owntone_output_desk
         else:
         - service: automation.trigger
-          data: {}
+          data:
+            skip_condition: true
           target:
             entity_id: automation.reboot_airport
       alias: Turn on Desk Speakers
