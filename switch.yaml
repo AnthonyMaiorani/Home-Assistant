@@ -110,7 +110,7 @@
       turn_on:
         - service: media_player.turn_on
           entity_id:
-            - media_player.living_room
+            - media_player.living_room_tv
       turn_off:
         - service: media_player.turn_off
           entity_id:
