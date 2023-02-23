@@ -114,21 +114,26 @@
       turn_off:
         - service: media_player.turn_off
           entity_id:
-            - media_player.living_room
+            - media_player.living_room_tv
+            - media_player.living_room_denon
             - media_player.owntone_output_living_room_tv
     fronttv:
       unique_id: fronttv
       friendly_name: Front TV
-      value_template: "{{ not states('media_player.gym_tv') in ['standby', 'unavailable'] }}"
+      value_template: "{{ states('switch.hisense_tv') }}"
       turn_on:
-        - service: media_player.turn_on
-          entity_id:
-            - media_player.front
+        - service: switch.turn_on
+          target:
+            entity_id:
+              - switch.hisense_tv
       turn_off:
         - service: media_player.turn_off
           entity_id:
-            - media_player.front
             - media_player.owntone_output_front
+        - service: switch.turn_off
+          target:
+            entity_id:
+              - switch.hisense_tv
     guesttv:
       unique_id: guesttv
       friendly_name: Guest TV

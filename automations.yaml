@@ -286,8 +286,9 @@
   trigger:
   - platform: state
     entity_id:
-    - person.anthony
-    from: home
+    - input_select.anthony
+    from: Home
+    to: Just Left
   condition:
   - condition: template
     value_template: '{{states(''person.anthony'') != ''home''}}'
@@ -355,6 +356,7 @@
           - switch.laundry_room_light
           - switch.dining_room_light
           - light.master_hallway_light
+          - media_player.living_room_denon
       - if:
         - condition: state
           entity_id: media_player.owntone_server
@@ -374,7 +376,8 @@
         alias: And Timer not running
       then:
       - service: timer.start
-        data: {}
+        data:
+          duration: 0
         target:
           entity_id: timer.exhaust
         alias: Start timer
@@ -614,6 +617,15 @@
                   - media_player.owntone_output_nightstand
                   - media_player.owntone_output_desk
                   - media_player.spotify_anthony221121
+        - if:
+          - condition: numeric_state
+            entity_id: sensor.acurite_temperature
+            above: 68
+          then:
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id: switch.ac
     - conditions:
       - condition: state
         entity_id: input_select.anthony
@@ -830,7 +842,7 @@
         - media_player.owntone_output_bathroom
         - media_player.owntone_output_front
         - media_player.owntone_output_garage
-        - media_player.kitchen_homepods
+        - media_player.kitchen_speakers
         - media_player.owntone_output_living_room_tv
         - media_player.guest_homepods
         - media_player.owntone_output_guest_tv
@@ -1410,7 +1422,7 @@
       data: {}
       target:
         entity_id: switch.porch_light
-      enabled: false
+      enabled: true
     else:
     - condition: state
       entity_id: binary_sensor.back_door
@@ -1474,6 +1486,7 @@
       data: {}
       target:
         entity_id: switch.living_room_fan
+    enabled: false
   - wait_for_trigger:
     - platform: state
       entity_id:
@@ -1735,7 +1748,8 @@
       - service: notify.mobile_app_iphone
         data:
           message: Lola hasn't gotten her medicine yet
-          tag: dog-medicine
+          data:
+            tag: dog-medicine
     - conditions:
       - condition: trigger
         id: Night
@@ -1893,10 +1907,6 @@
             entity_id:
             - light.hallway_lights
         alias: Hallway Lights
-      - service: switch.turn_on
-        data: {}
-        target:
-          entity_id: switch.christmas_lights
     - conditions:
       - condition: trigger
         id: Sunrise
@@ -3166,6 +3176,10 @@
           message: clear_notification
           data:
             tag: car-reminder
+    - service: homeassistant.update_entity
+      data: {}
+      target:
+        entity_id: lock.back_door
     - delay:
         hours: 0
         minutes: 0
@@ -3318,7 +3332,7 @@
             entity_id: media_player.owntone_output_nightstand
             state: 'on'
           - condition: state
-            entity_id: media_player.kitchen_homepods
+            entity_id: media_player.kitchen_speakers
             state: 'on'
       alias: If not currently playing
     then:
@@ -3429,7 +3443,7 @@
     domain: light
     id: light turned on
   - platform: device
-    type: turned_on
+    type: changed_states
     device_id: c63a794911c38d9e98cbf969b2bc471b
     entity_id: switch.exhaust_fan
     domain: switch
@@ -3547,7 +3561,7 @@
                 data:
                   volume_level: '{% if states(''binary_sensor.showering'') is defined
                     and is_state(''binary_sensor.showering'', ''on'') %} {% set vol
-                    = 0.65 %} {% elif states(''switch.exhaust_fan'') is defined and
+                    = 0.55 %} {% elif states(''switch.exhaust_fan'') is defined and
                     is_state(''switch.exhaust_fan'', ''on'') %} {% set vol = 0.5 %}
                     {% elif state_attr(''media_player.owntone_output_nightstand'',
                     ''volume_level'') is defined and state_attr(''media_player.owntone_output_nightstand'',
@@ -3607,6 +3621,12 @@
                 entity_id:
                 - media_player.spotify_anthony221121
                 - media_player.owntone_output_bathroom
+            - service: media_player.turn_off
+              data: {}
+              target:
+                entity_id:
+                - media_player.owntone_output_desk
+                - media_player.owntone_output_nightstand
             - delay:
                 hours: 0
                 minutes: 0
@@ -3645,6 +3665,8 @@
           data: {}
           target:
             entity_id: input_boolean.bedmotion
+        - service: script.morning
+          data: {}
     - conditions:
       - condition: device
         type: is_off
@@ -3652,10 +3674,51 @@
         entity_id: light.bathroom_lights
         domain: light
       sequence:
+      - service: media_player.volume_set
+        data:
+          volume_level: 0.11
+        target:
+          entity_id: media_player.owntone_output_bathroom
       - service: media_player.turn_off
         data: {}
         target:
           entity_id: media_player.owntone_output_bathroom
+      - if:
+        - condition: trigger
+          id: showering off
+        - condition: state
+          entity_id: media_player.spotify_anthony221121
+          attribute: source
+          state: Home Assistant
+        then:
+        - repeat:
+            count: '5'
+            sequence:
+            - service: media_player.turn_on
+              data: {}
+              target:
+                entity_id:
+                - media_player.owntone_output_nightstand
+                - media_player.owntone_output_desk
+            - service: media_player.volume_set
+              data:
+                volume_level: 0.25
+              target:
+                entity_id:
+                - media_player.owntone_output_desk
+                - media_player.owntone_output_nightstand
+                - media_player.spotify_anthony221121
+            - delay:
+                hours: 0
+                minutes: 0
+                seconds: 1
+                milliseconds: 0
+        - service: input_boolean.turn_on
+          data: {}
+          target:
+            entity_id: input_boolean.bedmotion
+        - service: script.morning
+          data: {}
     - conditions:
       - condition: trigger
         id: showering on
@@ -3855,8 +3918,8 @@
             state: 'off'
             alias: probably anthony
           - condition: state
-            entity_id: person.anthony
-            state: home
+            entity_id: input_select.anthony
+            state: Home
           sequence:
           - type: turn_on
             device_id: 624405d34a0a0bc8df3990c131a31bd2
@@ -3878,8 +3941,8 @@
             state: 'off'
             alias: probably anthony
           - condition: state
-            entity_id: person.anthony
-            state: home
+            entity_id: input_select.anthony
+            state: Home
           sequence:
           - type: turn_on
             device_id: 624405d34a0a0bc8df3990c131a31bd2
@@ -4377,7 +4440,7 @@
         entity_id: media_player.owntone_output_guest_tv
         state: 'on'
       - condition: state
-        entity_id: media_player.kitchen_homepods
+        entity_id: media_player.kitchen_speakers
         state: 'on'
       - condition: state
         entity_id: media_player.owntone_output_living_room_tv
@@ -4406,6 +4469,30 @@
         - media_player.owntone_output_guest_tv
         - media_player.owntone_output_guest_left
         - media_player.owntone_output_guest_right
+  - if:
+    - condition: device
+      type: is_off
+      device_id: aa29287a53774cb599c5658e30e48d9d
+      entity_id: light.kitchen_lights
+      domain: light
+    - condition: sun
+      after: sunset
+      after_offset: -00:25:00
+    then:
+    - wait_for_trigger:
+      - platform: state
+        entity_id:
+        - cover.garage_door
+      - platform: state
+        entity_id:
+        - lock.front_door
+      continue_on_timeout: false
+      timeout: 00:30:00
+    - type: turn_on
+      device_id: aa29287a53774cb599c5658e30e48d9d
+      entity_id: light.kitchen_lights
+      domain: light
+      brightness_pct: 18
   mode: single
 - id: '1670894312639'
   alias: Notification
@@ -4919,4 +5006,205 @@
         enabled: false
       - service: script.night
         data: {}
+  mode: single
+- id: '1677100682580'
+  alias: Auto-update
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - person.anthony
+    to:
+    - utd
+    - raytheon
+    - collin
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: update.alarm_firmware
+      state: 'on'
+    - condition: state
+      entity_id: update.bed_esp_firmware
+      state: 'on'
+    - condition: state
+      entity_id: update.desklights_firmware
+      state: 'on'
+    - condition: state
+      entity_id: update.lightswitch_firmware
+      state: 'on'
+    - condition: state
+      entity_id: update.midea_firmware
+      state: 'on'
+    - condition: state
+      entity_id: update.usbswitch_firmware
+      state: 'on'
+    - condition: state
+      entity_id: update.wyzebulb1_firmware
+      state: 'on'
+    - condition: state
+      entity_id: update.wyzebulb2_firmware
+      state: 'on'
+    - condition: state
+      entity_id: update.wyzebulb3_firmware
+      state: 'on'
+    - condition: state
+      entity_id: update.z_wave_js_to_mqtt_update
+      state: 'on'
+    - condition: state
+      entity_id: update.esphome_update
+      state: 'on'
+    - condition: state
+      entity_id: update.studio_code_server_update
+      state: 'on'
+  action:
+  - parallel:
+    - if:
+      - condition: state
+        entity_id: update.z_wave_js_to_mqtt_update
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id: update.z_wave_js_to_mqtt_update
+    - if:
+      - condition: state
+        entity_id: update.esphome_update
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id: update.esphome_update
+    - if:
+      - condition: state
+        entity_id: update.studio_code_server_update
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id: update.studio_code_server_update
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - parallel:
+    - if:
+      - condition: state
+        entity_id: update.alarm_firmware
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id: update.alarm_firmware
+    - if:
+      - condition: state
+        entity_id: update.bed_esp_firmware
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id: update.bed_esp_firmware
+    - if:
+      - condition: state
+        entity_id: update.desklights_firmware
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id: update.desklights_firmware
+    - if:
+      - condition: state
+        entity_id: update.lightswitch_firmware
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id: update.lightswitch_firmware
+    - if:
+      - condition: state
+        entity_id: update.midea_firmware
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id: update.midea_firmware
+    - if:
+      - condition: state
+        entity_id: update.usbswitch_firmware
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id: update.usbswitch_firmware
+    - if:
+      - condition: state
+        entity_id: update.wyzebulb1_firmware
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id: update.wyzebulb1_firmware
+    - if:
+      - condition: state
+        entity_id: update.wyzebulb2_firmware
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id: update.wyzebulb2_firmware
+    - if:
+      - condition: state
+        entity_id: update.wyzebulb3_firmware
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id: update.wyzebulb3_firmware
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - service: script.night
+    data: {}
+  mode: single
+- id: '1677121828248'
+  alias: Turn off TVs
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - media_player.spotify_anthony221121
+    attribute: source
+    to: DESKTOP-PC
+    from: Home Assistant
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: media_player.owntone_output_front
+      state: 'on'
+    - condition: state
+      entity_id: media_player.owntone_output_living_room_tv
+      state: 'on'
+  action:
+  - service: switch.turn_off
+    data: {}
+    target:
+      entity_id:
+      - switch.lrtv
+      - switch.fronttv
   mode: single

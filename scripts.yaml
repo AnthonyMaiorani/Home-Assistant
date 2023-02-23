@@ -250,6 +250,7 @@ night:
         - light.glide
         - light.shapes_ee82
         - light.wled
+        - light.hallway_lights
     - service: cover.close_cover
       data: {}
       target:
@@ -602,13 +603,14 @@ lofi:
       - media_player.owntone_output_bathroom
       - media_player.owntone_output_desk
       - media_player.owntone_output_front
-      - media_player.kitchen_homepods
       - media_player.owntone_output_living_room_tv
       - media_player.owntone_output_master_bedroom_tv
       - media_player.owntone_output_nightstand
       - media_player.owntone_output_garage
       - media_player.guest_homepods
       - media_player.owntone_output_guest_tv
+      - media_player.owntone_output_kitchen_homepod
+      - media_player.owntone_output_kitchen_right
   - repeat:
       while:
       - condition: not
@@ -641,8 +643,8 @@ lofi:
   - service: media_player.volume_set
     data:
       volume_level: "{% if states('binary_sensor.bed_occupancy') is defined and is_state('binary_sensor.bed_occupancy',
-        'on') %}\n    {% set vol =  0.13 %}\n{% elif now().hour >= 23 or now().hour
-        < 6 %}\n    {% set vol = 0.13 %}\n{% else %}\n    {% set vol = 0.19 %}\n{%
+        'on') %}\n    {% set vol =  0.10 %}\n{% elif now().hour >= 23 or now().hour
+        < 6 %}\n    {% set vol = 0.10 %}\n{% else %}\n    {% set vol = 0.19 %}\n{%
         endif %} {{ vol }}\n"
     target:
       entity_id:
@@ -655,11 +657,24 @@ lofi:
       enqueue: play
     target:
       entity_id: media_player.spotify_anthony221121
-  - service: media_player.shuffle_set
-    data:
-      shuffle: true
-    target:
-      entity_id: media_player.spotify_anthony221121
+  - repeat:
+      until:
+      - condition: state
+        entity_id: media_player.spotify_anthony221121
+        attribute: shuffle
+        state: true
+      sequence:
+      - service: media_player.shuffle_set
+        continue_on_error: true
+        data:
+          shuffle: true
+        target:
+          entity_id: media_player.spotify_anthony221121
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 1
+          milliseconds: 0
   - service: media_player.repeat_set
     data:
       repeat: all
@@ -728,47 +743,30 @@ lofi:
         state: 'off'
         entity_id: media_player.owntone_output_nightstand
       then:
-      - service: media_player.turn_on
-        data: {}
-        target:
-          entity_id:
-          - media_player.owntone_output_nightstand
       - repeat:
           until:
+          - condition: template
+            value_template: '{{ state_attr(''media_player.owntone_output_nightstand'',
+              ''volume_level'') == state_attr(''media_player.spotify_anthony221121'',
+              ''volume_level'') }}
+
+              '
           - condition: state
             entity_id: media_player.owntone_output_nightstand
             state: 'on'
           sequence:
-          - delay:
-              hours: 0
-              minutes: 0
-              seconds: 2
-              milliseconds: 0
           - service: media_player.turn_on
             data: {}
             target:
-              entity_id:
-              - media_player.owntone_output_nightstand
-      - repeat:
-          count: '3'
-          sequence:
-          - repeat:
-              until:
-              - condition: template
-                value_template: '{{ state_attr(''media_player.owntone_output_nightstand'',
-                  ''volume_level'') == state_attr(''media_player.spotify_anthony221121'',
-                  ''volume_level'') }}
+              entity_id: media_player.owntone_output_nightstand
+          - service: media_player.volume_set
+            data:
+              volume_level: '{{ state_attr(''media_player.spotify_anthony221121'',
+                ''volume_level'') }}
 
-                  '
-              sequence:
-              - service: media_player.volume_set
-                data:
-                  volume_level: '{{ state_attr(''media_player.spotify_anthony221121'',
-                    ''volume_level'') }}
-
-                    '
-                target:
-                  entity_id: media_player.owntone_output_nightstand
+                '
+            target:
+              entity_id: media_player.owntone_output_nightstand
           - delay:
               hours: 0
               minutes: 0
@@ -810,8 +808,8 @@ lofi:
       - parallel:
         - if:
           - condition: state
-            entity_id: switch.lrtv
             state: 'off'
+            entity_id: switch.lrtv
           then:
           - service: switch.turn_on
             data: {}
@@ -820,11 +818,20 @@ lofi:
           - delay:
               hours: 0
               minutes: 0
-              seconds: 40
+              seconds: 2
+              milliseconds: 0
+          - service: media_player.turn_on
+            data: {}
+            target:
+              entity_id: media_player.living_room_denon
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 38
               milliseconds: 0
           - service: media_player.volume_set
             data:
-              volume_level: 0.35
+              volume_level: 0.49
             target:
               entity_id: media_player.living_room_denon
           - service: media_player.turn_on
@@ -836,23 +843,40 @@ lofi:
               volume_level: 0.35
             target:
               entity_id: media_player.owntone_output_living_room_tv
-          - service: media_player.turn_off
-            data: {}
-            target:
-              entity_id:
-              - media_player.owntone_output_living_room
-              - media_player.owntone_output_living_room_homepod
+          alias: Turn on Living Room TV
+          else:
           - service: media_player.turn_on
             data: {}
             target:
-              entity_id:
-              - media_player.owntone_output_living_room
-              - media_player.owntone_output_living_room_homepod
-          alias: Turn on Living Room TV
+              entity_id: media_player.living_room_denon
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 2
+              milliseconds: 0
+          - service: media_player.volume_set
+            data:
+              volume_level: 0.5
+            target:
+              entity_id: media_player.living_room_denon
+          - service: media_player.turn_on
+            data: {}
+            target:
+              entity_id: media_player.owntone_output_living_room_tv
+          - service: media_player.volume_set
+            data:
+              volume_level: 0.35
+            target:
+              entity_id: media_player.owntone_output_living_room_tv
         - if:
           - condition: state
             entity_id: media_player.owntone_output_bathroom
             state: 'off'
+          - condition: device
+            type: is_on
+            device_id: 3c08610e07933d66eb5347257aae98aa
+            entity_id: light.bathroom_lights
+            domain: light
           then:
           - service: media_player.turn_on
             data: {}
@@ -867,41 +891,70 @@ lofi:
           alias: Turn on Bathroom HomePod
         - if:
           - condition: state
-            entity_id: switch.fronttv
+            entity_id: media_player.owntone_output_front
             state: 'off'
           then:
-          - service: media_player.turn_on
-            data: {}
-            target:
-              entity_id: media_player.owntone_output_front
-          - service: media_player.volume_set
-            data:
-              volume_level: 0.4
-            target:
-              entity_id:
-              - media_player.owntone_output_front
-          - service: media_player.volume_set
-            data:
-              volume_level: 0.25
-            target:
-              entity_id: media_player.gym_tv
+          - repeat:
+              count: '3'
+              sequence:
+              - service: switch.turn_on
+                data: {}
+                target:
+                  entity_id: switch.fronttv
+              - service: media_player.turn_on
+                data: {}
+                target:
+                  entity_id: media_player.owntone_output_front
+              - service: media_player.volume_set
+                data:
+                  volume_level: 0.4
+                target:
+                  entity_id:
+                  - media_player.owntone_output_front
+              - service: media_player.volume_set
+                data:
+                  volume_level: 0.4
+                target:
+                  entity_id: media_player.gym_tv
+              - delay:
+                  hours: 0
+                  minutes: 0
+                  seconds: 1
+                  milliseconds: 0
           alias: Turn on Front TV
         - if:
-          - condition: state
-            entity_id: media_player.owntone_output_kitchen_homepod
-            state: 'off'
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: media_player.owntone_output_kitchen_homepod
+              state: 'off'
+            - condition: state
+              entity_id: media_player.owntone_output_kitchen_right
+              state: 'off'
           then:
-          - service: media_player.turn_on
-            data: {}
-            target:
-              entity_id:
-              - media_player.owntone_output_kitchen_homepod
-          - service: media_player.volume_set
-            data:
-              volume_level: 0.45
-            target:
-              entity_id:
-              - media_player.owntone_output_kitchen_homepod
+          - repeat:
+              count: '7'
+              sequence:
+              - service: media_player.turn_on
+                data: {}
+                target:
+                  entity_id:
+                  - media_player.kitchen_speakers
+                  - media_player.owntone_output_kitchen_homepod
+                  - media_player.owntone_output_kitchen_right
+              - service: media_player.volume_set
+                data:
+                  volume_level: 0.45
+                target:
+                  entity_id:
+                  - media_player.kitchen_speakers
+                  - media_player.owntone_output_kitchen_homepod
+                  - media_player.owntone_output_kitchen_right
+              - delay:
+                  hours: 0
+                  minutes: 0
+                  seconds: 1
+                  milliseconds: 0
           alias: Turn on Kitchen HomePod
         - if:
           - condition: state
@@ -919,9 +972,10 @@ lofi:
             target:
               entity_id: media_player.owntone_output_garage
           alias: Turn on Garage Speaker
+          enabled: false
         alias: Turn on other speakers
       else: []
-      enabled: false
+      enabled: true
   mode: single
   icon: mdi:meditation
 play_music:
@@ -967,6 +1021,7 @@ play_music:
       - media_player.owntone_output_guest_left
       - media_player.owntone_output_guest_right
       - media_player.owntone_output_guest_tv
+      - media_player.owntone_output_kitchen_right
   - repeat:
       count: '10'
       sequence:
@@ -1086,11 +1141,24 @@ play_music:
       enqueue: play
     target:
       entity_id: media_player.spotify_anthony221121
-  - service: media_player.shuffle_set
-    data:
-      shuffle: true
-    target:
-      entity_id: media_player.spotify_anthony221121
+  - repeat:
+      until:
+      - condition: state
+        entity_id: media_player.spotify_anthony221121
+        attribute: shuffle
+        state: true
+      sequence:
+      - service: media_player.shuffle_set
+        continue_on_error: true
+        data:
+          shuffle: true
+        target:
+          entity_id: media_player.spotify_anthony221121
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 1
+          milliseconds: 0
   - service: media_player.repeat_set
     data:
       repeat: all
@@ -1149,7 +1217,8 @@ play_music:
                 entity_id: media_player.owntone_output_desk
         else:
         - service: automation.trigger
-          data: {}
+          data:
+            skip_condition: true
           target:
             entity_id: automation.reboot_airport
       alias: Turn on Desk Speakers
@@ -1158,27 +1227,6 @@ play_music:
         state: 'off'
         entity_id: media_player.owntone_output_nightstand
       then:
-      - service: media_player.turn_on
-        data: {}
-        target:
-          entity_id:
-          - media_player.owntone_output_nightstand
-      - repeat:
-          until:
-          - condition: state
-            entity_id: media_player.owntone_output_nightstand
-            state: 'on'
-          sequence:
-          - delay:
-              hours: 0
-              minutes: 0
-              seconds: 2
-              milliseconds: 0
-          - service: media_player.turn_on
-            data: {}
-            target:
-              entity_id:
-              - media_player.owntone_output_nightstand
       - repeat:
           until:
           - condition: template
@@ -1187,7 +1235,14 @@ play_music:
               ''volume_level'') }}
 
               '
+          - condition: state
+            entity_id: media_player.owntone_output_nightstand
+            state: 'on'
           sequence:
+          - service: media_player.turn_on
+            data: {}
+            target:
+              entity_id: media_player.owntone_output_nightstand
           - service: media_player.volume_set
             data:
               volume_level: '{{ state_attr(''media_player.spotify_anthony221121'',
@@ -1196,6 +1251,11 @@ play_music:
                 '
             target:
               entity_id: media_player.owntone_output_nightstand
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
       alias: Turn on Nightstand Speaker
     - if:
       - condition: state
@@ -1239,119 +1299,190 @@ play_music:
           }}'
         alias: Nobody else home
       then:
-      - parallel:
-        - if:
-          - condition: state
-            entity_id: switch.lrtv
-            state: 'off'
-          then:
-          - service: switch.turn_on
-            data: {}
-            target:
+      - if:
+        - condition: template
+          value_template: '{{ not is_state(''person.riana'', ''home'')
+
+            and not is_state(''person.dana'', ''home'')
+
+            and states(''zone.home'')|int < 2
+
+            and is_state(''binary_sensor.bed_occupancy'', ''off'')
+
+            }}'
+          alias: Nobody else home
+        then:
+        - parallel:
+          - if:
+            - condition: state
+              state: 'off'
               entity_id: switch.lrtv
-          - delay:
-              hours: 0
-              minutes: 0
-              seconds: 40
-              milliseconds: 0
-          - service: media_player.volume_set
-            data:
-              volume_level: 0.35
-            target:
-              entity_id: media_player.living_room_denon
-          - service: media_player.turn_on
-            data: {}
-            target:
-              entity_id: media_player.owntone_output_living_room_tv
-          - service: media_player.volume_set
-            data:
-              volume_level: 0.35
-            target:
-              entity_id: media_player.owntone_output_living_room_tv
-          - service: media_player.turn_off
-            data: {}
-            target:
-              entity_id:
-              - media_player.owntone_output_living_room
-              - media_player.owntone_output_living_room_homepod
-          - service: media_player.turn_on
-            data: {}
-            target:
-              entity_id:
-              - media_player.owntone_output_living_room
-              - media_player.owntone_output_living_room_homepod
-          alias: Turn on Living Room TV
-        - if:
-          - condition: state
-            entity_id: media_player.owntone_output_bathroom
-            state: 'off'
-          then:
-          - service: media_player.turn_on
-            data: {}
-            target:
-              entity_id:
-              - media_player.owntone_output_bathroom
-          - service: media_player.volume_set
-            data:
-              volume_level: 0.5
-            target:
+            then:
+            - service: switch.turn_on
+              data: {}
+              target:
+                entity_id: switch.lrtv
+            - delay:
+                hours: 0
+                minutes: 0
+                seconds: 2
+                milliseconds: 0
+            - service: media_player.turn_on
+              data: {}
+              target:
+                entity_id: media_player.living_room_denon
+            - delay:
+                hours: 0
+                minutes: 0
+                seconds: 38
+                milliseconds: 0
+            - service: media_player.volume_set
+              data:
+                volume_level: 0.49
+              target:
+                entity_id: media_player.living_room_denon
+            - service: media_player.turn_on
+              data: {}
+              target:
+                entity_id: media_player.owntone_output_living_room_tv
+            - service: media_player.volume_set
+              data:
+                volume_level: 0.35
+              target:
+                entity_id: media_player.owntone_output_living_room_tv
+            alias: Turn on Living Room TV
+            else:
+            - service: media_player.turn_on
+              data: {}
+              target:
+                entity_id: media_player.living_room_denon
+            - delay:
+                hours: 0
+                minutes: 0
+                seconds: 2
+                milliseconds: 0
+            - service: media_player.volume_set
+              data:
+                volume_level: 0.5
+              target:
+                entity_id: media_player.living_room_denon
+            - service: media_player.turn_on
+              data: {}
+              target:
+                entity_id: media_player.owntone_output_living_room_tv
+            - service: media_player.volume_set
+              data:
+                volume_level: 0.35
+              target:
+                entity_id: media_player.owntone_output_living_room_tv
+          - if:
+            - condition: state
               entity_id: media_player.owntone_output_bathroom
-          alias: Turn on Bathroom HomePod
-        - if:
-          - condition: state
-            entity_id: switch.fronttv
-            state: 'off'
-          then:
-          - service: media_player.turn_on
-            data: {}
-            target:
+              state: 'off'
+            - condition: device
+              type: is_on
+              device_id: 3c08610e07933d66eb5347257aae98aa
+              entity_id: light.bathroom_lights
+              domain: light
+            then:
+            - service: media_player.turn_on
+              data: {}
+              target:
+                entity_id:
+                - media_player.owntone_output_bathroom
+            - service: media_player.volume_set
+              data:
+                volume_level: 0.5
+              target:
+                entity_id: media_player.owntone_output_bathroom
+            alias: Turn on Bathroom HomePod
+          - if:
+            - condition: state
               entity_id: media_player.owntone_output_front
-          - service: media_player.volume_set
-            data:
-              volume_level: 0.4
-            target:
-              entity_id:
-              - media_player.owntone_output_front
-          - service: media_player.volume_set
-            data:
-              volume_level: 0.25
-            target:
-              entity_id: media_player.gym_tv
-          alias: Turn on Front TV
-        - if:
-          - condition: state
-            entity_id: media_player.owntone_output_kitchen_homepod
-            state: 'off'
-          then:
-          - service: media_player.turn_on
-            data: {}
-            target:
-              entity_id:
-              - media_player.owntone_output_kitchen_homepod
-          - service: media_player.volume_set
-            data:
-              volume_level: 0.45
-            target:
-              entity_id:
-              - media_player.owntone_output_kitchen_homepod
-          alias: Turn on Kitchen HomePod
-        - if:
-          - condition: state
-            entity_id: media_player.owntone_output_garage
-            state: 'off'
-          then:
-          - service: media_player.turn_on
-            data: {}
-            target:
-              entity_id:
-              - media_player.owntone_output_garage
-          - service: media_player.volume_set
-            data:
-              volume_level: 0.45
-            target:
+              state: 'off'
+            then:
+            - repeat:
+                count: '3'
+                sequence:
+                - service: switch.turn_on
+                  data: {}
+                  target:
+                    entity_id: switch.fronttv
+                - service: media_player.turn_on
+                  data: {}
+                  target:
+                    entity_id: media_player.owntone_output_front
+                - service: media_player.volume_set
+                  data:
+                    volume_level: 0.4
+                  target:
+                    entity_id:
+                    - media_player.owntone_output_front
+                - service: media_player.volume_set
+                  data:
+                    volume_level: 0.4
+                  target:
+                    entity_id: media_player.gym_tv
+                - delay:
+                    hours: 0
+                    minutes: 0
+                    seconds: 1
+                    milliseconds: 0
+            alias: Turn on Front TV
+          - if:
+            - condition: or
+              conditions:
+              - condition: state
+                entity_id: media_player.owntone_output_kitchen_homepod
+                state: 'off'
+              - condition: state
+                entity_id: media_player.owntone_output_kitchen_right
+                state: 'off'
+            then:
+            - repeat:
+                count: '7'
+                sequence:
+                - service: media_player.turn_on
+                  data: {}
+                  target:
+                    entity_id:
+                    - media_player.kitchen_speakers
+                    - media_player.owntone_output_kitchen_homepod
+                    - media_player.owntone_output_kitchen_right
+                - service: media_player.volume_set
+                  data:
+                    volume_level: 0.45
+                  target:
+                    entity_id:
+                    - media_player.kitchen_speakers
+                    - media_player.owntone_output_kitchen_homepod
+                    - media_player.owntone_output_kitchen_right
+                - delay:
+                    hours: 0
+                    minutes: 0
+                    seconds: 1
+                    milliseconds: 0
+            alias: Turn on Kitchen HomePod
+          - if:
+            - condition: state
               entity_id: media_player.owntone_output_garage
-          alias: Turn on Garage Speaker
-        alias: Turn on other speakers
+              state: 'off'
+            then:
+            - service: media_player.turn_on
+              data: {}
+              target:
+                entity_id:
+                - media_player.owntone_output_garage
+            - service: media_player.volume_set
+              data:
+                volume_level: 0.45
+              target:
+                entity_id: media_player.owntone_output_garage
+            alias: Turn on Garage Speaker
+            enabled: false
+          alias: Turn on other speakers
+        else: []
+        enabled: true
       else:
       - condition: state
         entity_id: binary_sensor.bed_occupancy
@@ -1407,7 +1538,7 @@ play_music:
               target:
                 entity_id: media_player.owntone_output_bathroom
         alias: Turn on Bathroom HomePod
-      enabled: false
+      enabled: true
       alias: Turn on other speakers if nobody else home
   mode: single
   icon: mdi:music-note

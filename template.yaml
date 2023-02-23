@@ -43,7 +43,7 @@
       is_state("person.riana", "home") -%} 76
       {% elif is_state("switch.desktop", "on") -%} 75
       {% elif is_state("light.fan_lights", "on") -%} 73 
-      {%- else -%} 71
+      {%- else -%} 69
       {%- endif %}
   - name: "Alarm Display"
     unique_id: alarm_display
