@@ -346,6 +346,39 @@ night:
               minutes: 0
               seconds: 1
               milliseconds: 0
+    - if:
+      - condition: device
+        type: is_on
+        device_id: aa29287a53774cb599c5658e30e48d9d
+        entity_id: light.kitchen_lights
+        domain: light
+      - condition: time
+        after: '23:00:00'
+        before: 05:00:00
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: input_select.anthony
+          state: Just Arrived
+        - condition: state
+          entity_id: input_select.anthony
+          state: Home
+      - condition: numeric_state
+        entity_id: zone.home
+        below: 2
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: input_select.riana
+          state: Just Left
+        - condition: state
+          entity_id: input_select.riana
+          state: Away
+      then:
+      - type: turn_off
+        device_id: aa29287a53774cb599c5658e30e48d9d
+        entity_id: light.kitchen_lights
+        domain: light
   alias: Night
   mode: restart
   icon: mdi:weather-night
@@ -1181,6 +1214,9 @@ play_music:
       - condition: state
         entity_id: media_player.owntone_output_desk
         state: 'off'
+      - condition: state
+        entity_id: binary_sensor.showering
+        state: 'off'
       then:
       - service: media_player.turn_on
         data: {}
@@ -1234,6 +1270,9 @@ play_music:
       - condition: state
         state: 'off'
         entity_id: media_player.owntone_output_nightstand
+      - condition: state
+        entity_id: binary_sensor.showering
+        state: 'off'
       then:
       - repeat:
           until:
@@ -1308,6 +1347,9 @@ play_music:
         alias: Nobody else home
       - condition: state
         entity_id: binary_sensor.bed_occupancy
+        state: 'off'
+      - condition: state
+        entity_id: binary_sensor.showering
         state: 'off'
       then:
       - if:
