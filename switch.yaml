@@ -109,14 +109,16 @@
       value_template: "{{ not is_state('media_player.living_room_denon', 'off') }}"
       turn_on:
         - service: media_player.turn_on
-          entity_id:
-            - media_player.living_room_tv
+          target:
+            entity_id:
+              - media_player.living_room_tv
       turn_off:
         - service: media_player.turn_off
-          entity_id:
-            - media_player.living_room_tv
-            - media_player.living_room_denon
-            - media_player.owntone_output_living_room_tv
+          target:
+            entity_id:
+              - media_player.living_room_tv
+              - media_player.living_room_denon
+              - media_player.owntone_output_living_room_tv
     fronttv:
       unique_id: fronttv
       friendly_name: Front TV
@@ -128,8 +130,9 @@
               - switch.hisense_tv
       turn_off:
         - service: media_player.turn_off
-          entity_id:
-            - media_player.owntone_output_front
+          target:
+            entity_id:
+              - media_player.owntone_output_front
         - service: switch.turn_off
           target:
             entity_id:
@@ -140,26 +143,30 @@
       value_template: "{{ is_state('media_player.guest_tv', 'on') }}"
       turn_on:
         - service: media_player.turn_on
-          entity_id:
-            - media_player.guest_tv
+          target:
+            entity_id:
+              - media_player.guest_tv
       turn_off:
         - service: media_player.turn_off
-          entity_id:
-            - media_player.guest_tv
-            - media_player.owntone_output_guest_tv
+          target:
+            entity_id:
+              - media_player.guest_tv
+              - media_player.owntone_output_guest_tv
     mastertv:
       unique_id: mastertv
       friendly_name: Master TV
       value_template: "{{ is_state('remote.master_bedroom_tv', 'on') }}"
       turn_on:
         - service: media_player.turn_on
-          entity_id:
-            - media_player.master_bedroom_tv
+          target:
+            entity_id:
+              - media_player.master_bedroom_tv
       turn_off:
         - service: media_player.turn_off
-          entity_id:
-            - media_player.master_bedroom_tv
-            - media_player.owntone_output_master_bedroom_tv
+          target:
+            entity_id:
+              - media_player.master_bedroom_tv
+              - media_player.owntone_output_master_bedroom_tv
     desktop:
       unique_id: desktop
       friendly_name: Desktop

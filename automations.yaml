@@ -819,6 +819,7 @@
           entity_id:
           - light.bathroom_lights
           - light.living_room_lights
+          - light.kitchen_cabinet_lights
       - service: switch.turn_off
         data: {}
         target:
@@ -831,6 +832,8 @@
           - switch.gym_fan
           - switch.dining_room_light
           - light.master_hallway_light
+          - switch.rotunda_lights
+          - switch.garage_light
     - service: input_boolean.turn_off
       data: {}
       target:
@@ -1548,6 +1551,10 @@
     from: 'on'
     to: 'off'
     id: Feeding2
+  - platform: time
+    at: '16:30:00'
+    alias: Dinner Time
+    id: DinnerTime
   condition: []
   action:
   - choose:
@@ -1664,6 +1671,34 @@
           minutes: 5
           seconds: 0
           milliseconds: 0
+    - conditions:
+      - condition: trigger
+        id: DinnerTime
+      - condition: state
+        entity_id: input_boolean.dinner
+        state: 'off'
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: input_select.anthony
+          state: Home
+        - condition: state
+          entity_id: input_select.anthony
+          state: Just Arrived
+      - condition: numeric_state
+        entity_id: zone.home
+        below: 2
+      sequence:
+      - service: notify.mobile_app_iphone
+        data:
+          message: clear_notification
+          data:
+            tag: dog-food
+      - service: notify.mobile_app_iphone
+        data:
+          message: It's time to feed Lola dinner
+          data:
+            tag: dog-food
   mode: single
 - id: '1665170199807'
   alias: Privacy
@@ -3176,6 +3211,10 @@
           message: clear_notification
           data:
             tag: car-reminder
+      - service: homeassistant.update_entity
+        data: {}
+        target:
+          entity_id: lock.back_door
     - service: homeassistant.update_entity
       data: {}
       target:
