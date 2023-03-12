@@ -574,22 +574,6 @@
           target:
             entity_id:
             - script.morning
-        - service: input_boolean.turn_on
-          data: {}
-          target:
-            entity_id: input_boolean.ac_boost
-          enabled: false
-        - service: notify.mobile_app_iphone
-          data:
-            message: Play music?
-            data:
-              tag: music
-              push:
-                interruption-level: passive
-              shortcut:
-                name: LoFi
-                ignore_result: ignore
-          enabled: false
         - if:
           - condition: not
             conditions:
@@ -614,12 +598,22 @@
               sequence:
               - service: media_player.volume_set
                 data:
-                  volume_level: 0.16
+                  volume_level: 0.13
+                target:
+                  entity_id:
+                  - media_player.spotify_anthony221121
+                  - media_player.owntone_output_desk
+              - service: media_player.volume_set
+                data:
+                  volume_level: 0.26
                 target:
                   entity_id:
                   - media_player.owntone_output_nightstand
-                  - media_player.owntone_output_desk
-                  - media_player.spotify_anthony221121
+              - delay:
+                  hours: 0
+                  minutes: 0
+                  seconds: 1
+                  milliseconds: 0
         - if:
           - condition: numeric_state
             entity_id: climate.bedroom_ac
@@ -880,7 +874,6 @@
                 entity_id:
                 - media_player.spotify_anthony221121
                 - media_player.owntone_output_desk
-                - media_player.owntone_output_nightstand
             - service: media_player.volume_set
               data:
                 volume_level: 0.36
