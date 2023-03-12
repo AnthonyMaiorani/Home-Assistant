@@ -274,61 +274,22 @@ night:
         entity_id: input_boolean.bedmotion
     - if:
       - condition: state
-        entity_id: media_player.spotify_anthony221121
-        state: playing
-      - condition: or
-        conditions:
-        - condition: state
-          entity_id: media_player.owntone_output_desk
-          state: 'on'
-        - condition: state
-          entity_id: media_player.owntone_output_nightstand
-          state: 'on'
-      - condition: state
-        entity_id: media_player.spotify_anthony221121
-        attribute: media_playlist
-        state: Music
-      - condition: state
         entity_id: binary_sensor.bed_occupancy
         state: 'on'
       - condition: time
         before: 08:00:00
         after: '22:00:00'
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.spotify_anthony221121
+          attribute: media_playlist
+          state: lofi
       then:
-      - service: media_player.turn_on
+      - service: script.turn_on
         data: {}
         target:
-          entity_id:
-          - media_player.owntone_output_nightstand
-          - media_player.owntone_output_desk
-      - service: media_player.shuffle_set
-        data:
-          shuffle: true
-        target:
-          entity_id: media_player.spotify_anthony221121
-      - service: media_player.play_media
-        data:
-          media_content_type: playlist
-          media_content_id: https://open.spotify.com/playlist/3j3uK2xjqyD1nvAaBX5YRa
-          enqueue: play
-        target:
-          entity_id: media_player.spotify_anthony221121
-      - repeat:
-          count: '5'
-          sequence:
-          - service: media_player.volume_set
-            data:
-              volume_level: 0.07
-            target:
-              entity_id:
-              - media_player.spotify_anthony221121
-              - media_player.owntone_output_desk
-              - media_player.owntone_output_nightstand
-          - delay:
-              hours: 0
-              minutes: 0
-              seconds: 1
-              milliseconds: 0
+          entity_id: script.lofi
       else:
       - repeat:
           count: '5'
@@ -379,6 +340,17 @@ night:
         device_id: aa29287a53774cb599c5658e30e48d9d
         entity_id: light.kitchen_lights
         domain: light
+    - service: light.turn_off
+      data: {}
+      target:
+        entity_id:
+        - light.shapes_007f
+        - light.bedroom_lights
+        - light.closet_lights
+        - light.glide
+        - light.shapes_ee82
+        - light.wled
+        - light.hallway_lights
   alias: Night
   mode: restart
   icon: mdi:weather-night
@@ -779,11 +751,10 @@ lofi:
       - repeat:
           until:
           - condition: template
-            value_template: '{{ state_attr(''media_player.owntone_output_nightstand'',
-              ''volume_level'') == state_attr(''media_player.spotify_anthony221121'',
-              ''volume_level'') }}
-
-              '
+            value_template: "{{ state_attr('media_player.owntone_output_nightstand',
+              'volume_level') == \n2 * (state_attr('media_player.spotify_anthony221121',
+              'volume_level')) \nor state_attr('media_player.owntone_output_nightstand',
+              'volume_level') == 1}}\n"
           - condition: state
             entity_id: media_player.owntone_output_nightstand
             state: 'on'
@@ -794,8 +765,8 @@ lofi:
               entity_id: media_player.owntone_output_nightstand
           - service: media_player.volume_set
             data:
-              volume_level: '{{ state_attr(''media_player.spotify_anthony221121'',
-                ''volume_level'') }}
+              volume_level: '{{ 2 * (state_attr(''media_player.spotify_anthony221121'',
+                ''volume_level'')) }}
 
                 '
             target:
@@ -1166,7 +1137,7 @@ play_music:
         timeout:
           hours: 0
           minutes: 0
-          seconds: 2
+          seconds: 3
           milliseconds: 0
   - service: media_player.volume_set
     data:
@@ -1277,11 +1248,10 @@ play_music:
       - repeat:
           until:
           - condition: template
-            value_template: '{{ state_attr(''media_player.owntone_output_nightstand'',
-              ''volume_level'') == state_attr(''media_player.spotify_anthony221121'',
-              ''volume_level'') }}
-
-              '
+            value_template: "{{ state_attr('media_player.owntone_output_nightstand',
+              'volume_level') == \n2 * (state_attr('media_player.spotify_anthony221121',
+              'volume_level')) \nor state_attr('media_player.owntone_output_nightstand',
+              'volume_level') == 1}}\n"
           - condition: state
             entity_id: media_player.owntone_output_nightstand
             state: 'on'
@@ -1292,8 +1262,8 @@ play_music:
               entity_id: media_player.owntone_output_nightstand
           - service: media_player.volume_set
             data:
-              volume_level: '{{ state_attr(''media_player.spotify_anthony221121'',
-                ''volume_level'') }}
+              volume_level: '{{ 2 * (state_attr(''media_player.spotify_anthony221121'',
+                ''volume_level'')) }}
 
                 '
             target:

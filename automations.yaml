@@ -622,13 +622,14 @@
                   - media_player.spotify_anthony221121
         - if:
           - condition: numeric_state
-            entity_id: sensor.acurite_temperature
+            entity_id: climate.bedroom_ac
             above: 68
           then:
           - service: switch.turn_on
             data: {}
             target:
-              entity_id: switch.ac
+              entity_id:
+              - switch.ac_boost
     - conditions:
       - condition: state
         entity_id: input_select.anthony
@@ -651,7 +652,6 @@
               data: {}
             - condition: state
               entity_id: binary_sensor.webcam
-              attribute: friendly_name
               state: 'off'
             - service: light.turn_on
               target:
@@ -881,6 +881,12 @@
                 - media_player.spotify_anthony221121
                 - media_player.owntone_output_desk
                 - media_player.owntone_output_nightstand
+            - service: media_player.volume_set
+              data:
+                volume_level: 0.36
+              target:
+                entity_id:
+                - media_player.owntone_output_nightstand
             - delay:
                 hours: 0
                 minutes: 0
@@ -897,6 +903,11 @@
                 entity_id:
                 - media_player.spotify_anthony221121
                 - media_player.owntone_output_desk
+            - service: media_player.volume_set
+              data:
+                volume_level: 0.26
+              target:
+                entity_id:
                 - media_player.owntone_output_nightstand
             - delay:
                 hours: 0
@@ -1625,6 +1636,11 @@
     at: '16:30:00'
     alias: Dinner Time
     id: DinnerTime
+  - platform: state
+    entity_id:
+    - input_select.anthony
+    to: Just Arrived
+    id: arrived
   condition: []
   action:
   - choose:
@@ -1640,11 +1656,35 @@
           message: clear_notification
           data:
             tag: dog-food
-      - service: notify.mobile_app_iphone
-        data:
-          message: Lola hasn't eaten breakfast yet
+      - if:
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: input_select.anthony
+            state: Home
+          - condition: state
+            entity_id: input_select.anthony
+            state: Just Arrived
+        - condition: numeric_state
+          entity_id: zone.home
+          below: 2
+        then:
+        - service: notify.mobile_app_iphone
           data:
-            tag: dog-food
+            message: Lola hasn't eaten breakfast yet
+            data:
+              tag: dog-food
+              push:
+                sound:
+                  name: default
+                  critical: 1
+                  volume: 0.3
+        else:
+        - service: notify.mobile_app_iphone
+          data:
+            message: Lola hasn't eaten breakfast yet
+            data:
+              tag: dog-food
     - conditions:
       - condition: trigger
         id: Dinner
@@ -1657,11 +1697,35 @@
           message: clear_notification
           data:
             tag: dog-food
-      - service: notify.mobile_app_iphone
-        data:
-          message: Lola hasn't eaten dinner yet
+      - if:
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: input_select.anthony
+            state: Home
+          - condition: state
+            entity_id: input_select.anthony
+            state: Just Arrived
+        - condition: numeric_state
+          entity_id: zone.home
+          below: 2
+        then:
+        - service: notify.mobile_app_iphone
           data:
-            tag: dog-food
+            message: Lola hasn't eaten dinner yet
+            data:
+              tag: dog-food
+              push:
+                sound:
+                  name: default
+                  critical: 1
+                  volume: 0.3
+        else:
+        - service: notify.mobile_app_iphone
+          data:
+            message: Lola hasn't eaten dinner yet
+            data:
+              tag: dog-food
     - conditions:
       - condition: trigger
         id: Reset
@@ -1764,11 +1828,111 @@
           message: clear_notification
           data:
             tag: dog-food
-      - service: notify.mobile_app_iphone
-        data:
-          message: It's time to feed Lola dinner
+      - if:
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: input_select.anthony
+            state: Home
+          - condition: state
+            entity_id: input_select.anthony
+            state: Just Arrived
+        - condition: numeric_state
+          entity_id: zone.home
+          below: 2
+        then:
+        - service: notify.mobile_app_iphone
           data:
-            tag: dog-food
+            message: It's time to feed Lola dinner
+            data:
+              tag: dog-food
+              push:
+                sound:
+                  name: default
+                  critical: 1
+                  volume: 0.3
+        else:
+        - service: notify.mobile_app_iphone
+          data:
+            message: It's time to feed Lola dinner
+            data:
+              tag: dog-food
+    - conditions:
+      - condition: trigger
+        id: arrived
+      - condition: or
+        conditions:
+        - condition: and
+          conditions:
+          - condition: state
+            entity_id: input_boolean.dinner
+            state: 'off'
+          - condition: time
+            after: '16:30:00'
+          alias: Hasn't eaten dinner
+        - condition: and
+          conditions:
+          - condition: state
+            entity_id: input_boolean.breakfast
+            state: 'off'
+          - condition: time
+            after: 08:00:00
+            before: '15:00:00'
+          alias: Hasn't eaten breakfast
+      - condition: numeric_state
+        entity_id: zone.home
+        below: 2
+      sequence:
+      - if:
+        - condition: and
+          conditions:
+          - condition: state
+            entity_id: input_boolean.dinner
+            state: 'off'
+          - condition: time
+            after: '16:30:00'
+          alias: Hasn't eaten dinner
+        then:
+        - service: notify.mobile_app_iphone
+          data:
+            message: clear_notification
+            data:
+              tag: dog-food
+        - service: notify.mobile_app_iphone
+          data:
+            message: It's time to feed Lola dinner
+            data:
+              tag: dog-food
+              push:
+                sound:
+                  name: default
+                  critical: 1
+                  volume: 0.3
+        else:
+        - condition: and
+          conditions:
+          - condition: state
+            entity_id: input_boolean.breakfast
+            state: 'off'
+          - condition: time
+            after: 08:00:00
+            before: '15:00:00'
+          alias: Hasn't eaten breakfast
+        - service: notify.mobile_app_iphone
+          data:
+            message: clear_notification
+            data:
+              tag: dog-food
+        - service: notify.mobile_app_iphone
+          data:
+            message: It's time to feed Lola breakfast
+            data:
+              tag: dog-food
+              push:
+                sound:
+                  name: default
+                  critical: 1
+                  volume: 0.3
   mode: single
 - id: '1665170199807'
   alias: Privacy
@@ -1850,11 +2014,35 @@
           message: clear_notification
           data:
             tag: dog-medicine
-      - service: notify.mobile_app_iphone
-        data:
-          message: Lola hasn't gotten her medicine yet
+      - if:
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: input_select.anthony
+            state: Home
+          - condition: state
+            entity_id: input_select.anthony
+            state: Just Arrived
+        - condition: numeric_state
+          entity_id: zone.home
+          below: 2
+        then:
+        - service: notify.mobile_app_iphone
           data:
-            tag: dog-medicine
+            message: Lola hasn't gotten her medicine yet
+            data:
+              tag: dog-medicine
+              push:
+                sound:
+                  name: default
+                  critical: 1
+                  volume: 0.3
+        else:
+        - service: notify.mobile_app_iphone
+          data:
+            message: Lola hasn't gotten her medicine yet
+            data:
+              tag: dog-medicine
     - conditions:
       - condition: trigger
         id: Night
@@ -1867,11 +2055,35 @@
           message: clear_notification
           data:
             tag: dog-medicine
-      - service: notify.mobile_app_iphone
-        data:
-          message: Lola hasn't gotten her medicine yet
+      - if:
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: input_select.anthony
+            state: Home
+          - condition: state
+            entity_id: input_select.anthony
+            state: Just Arrived
+        - condition: numeric_state
+          entity_id: zone.home
+          below: 2
+        then:
+        - service: notify.mobile_app_iphone
           data:
-            tag: dog-medicine
+            message: Lola hasn't gotten her medicine yet
+            data:
+              tag: dog-medicine
+              push:
+                sound:
+                  name: default
+                  critical: 1
+                  volume: 0.3
+        else:
+        - service: notify.mobile_app_iphone
+          data:
+            message: Lola hasn't gotten her medicine yet
+            data:
+              tag: dog-medicine
     - conditions:
       - condition: trigger
         id: Reset
@@ -1937,11 +2149,35 @@
           message: clear_notification
           data:
             tag: dog-medicine
-      - service: notify.mobile_app_iphone
-        data:
-          message: It's time to give Lola her medicine
+      - if:
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: input_select.anthony
+            state: Home
+          - condition: state
+            entity_id: input_select.anthony
+            state: Just Arrived
+        - condition: numeric_state
+          entity_id: zone.home
+          below: 2
+        then:
+        - service: notify.mobile_app_iphone
           data:
-            tag: dog-medicine
+            message: It's time to give Lola her medicine
+            data:
+              tag: dog-medicine
+              push:
+                sound:
+                  name: default
+                  critical: 1
+                  volume: 0.3
+        else:
+        - service: notify.mobile_app_iphone
+          data:
+            message: It's time to give Lola her medicine
+            data:
+              tag: dog-medicine
   mode: single
 - id: '1665630167045'
   alias: Turn on home lights at night
@@ -2524,7 +2760,7 @@
         else:
         - service: timer.start
           data:
-            duration: 00:02:00
+            duration: 00:01:00
           target:
             entity_id: timer.laundry_room_light
     - conditions:
@@ -2550,7 +2786,7 @@
       sequence:
       - service: timer.start
         data:
-          duration: 00:02:00
+          duration: 00:01:00
         target:
           entity_id: timer.laundry_room_light
     - conditions:
@@ -3752,7 +3988,9 @@
 
                     '
                 target:
-                  entity_id: media_player.owntone_output_bathroom
+                  entity_id:
+                  - media_player.spotify_anthony221121
+                  - media_player.owntone_output_bathroom
               - delay:
                   hours: 0
                   minutes: 0
@@ -5131,7 +5369,14 @@
     entity_id: binary_sensor.bedroom_door
     domain: binary_sensor
     id: door opened
-  condition: []
+  condition:
+  - condition: state
+    entity_id: script.morning
+    state: 'off'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 5
   action:
   - choose:
     - conditions:
@@ -5396,4 +5641,23 @@
       entity_id:
       - switch.lrtv
       - switch.fronttv
+  mode: single
+- id: '1678008305202'
+  alias: Start music after shutting down computer
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.desktop
+    from: 'on'
+    to: 'off'
+  condition:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: media_player.spotify_anthony221121
+      state: playing
+  action:
+  - service: script.lofi
+    data: {}
   mode: single
