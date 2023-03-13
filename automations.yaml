@@ -593,6 +593,11 @@
               'media_playlist')) \n    and state_attr('media_player.spotify_anthony221121',
               'volume_level') < 0.16}}"
           then:
+          - service: media_player.volume_set
+            data:
+              volume_level: 0.13
+            target:
+              entity_id: media_player.spotify_anthony221121
           - repeat:
               count: '3'
               sequence:
@@ -601,7 +606,6 @@
                   volume_level: 0.13
                 target:
                   entity_id:
-                  - media_player.spotify_anthony221121
                   - media_player.owntone_output_desk
               - service: media_player.volume_set
                 data:
@@ -624,6 +628,13 @@
             target:
               entity_id:
               - switch.ac_boost
+        - service: media_player.turn_off
+          data: {}
+          target:
+            entity_id:
+            - media_player.owntone_output_kitchen_homepod
+            - media_player.owntone_output_kitchen_right
+            - media_player.kitchen_speakers
     - conditions:
       - condition: state
         entity_id: input_select.anthony
@@ -674,6 +685,13 @@
           data: {}
           target:
             entity_id: input_boolean.bedmotion
+        - service: media_player.turn_off
+          data: {}
+          target:
+            entity_id:
+            - media_player.owntone_output_kitchen_homepod
+            - media_player.owntone_output_kitchen_right
+            - media_player.kitchen_speakers
     default: []
   mode: single
 - id: '1627966300438'
@@ -844,7 +862,7 @@
         - media_player.owntone_output_garage
         - media_player.kitchen_speakers
         - media_player.owntone_output_living_room_tv
-        - media_player.guest_homepods
+        - media_player.guest_speakers
         - media_player.owntone_output_guest_tv
     - if:
       - condition: or
@@ -886,15 +904,20 @@
                 seconds: 1
                 milliseconds: 0
         else:
+        - service: media_player.volume_set
+          data:
+            volume_level: 0.13
+          target:
+            entity_id:
+            - media_player.spotify_anthony221121
         - repeat:
-            count: '3'
+            count: '5'
             sequence:
             - service: media_player.volume_set
               data:
                 volume_level: 0.13
               target:
                 entity_id:
-                - media_player.spotify_anthony221121
                 - media_player.owntone_output_desk
             - service: media_player.volume_set
               data:
@@ -1467,6 +1490,9 @@
     - condition: sun
       before: sunrise
       after: sunset
+    - condition: state
+      entity_id: binary_sensor.home_alone
+      state: 'on'
     then:
     - service: switch.turn_on
       data: {}
@@ -1491,99 +1517,74 @@
     entity_id:
     - input_select.anthony
     to: Just Arrived
-  condition:
-  - condition: not
-    conditions:
-    - condition: state
-      entity_id: person.dana
-      state: home
-    - condition: state
-      entity_id: input_select.riana
-      state: Just Arrived
-    - condition: state
-      entity_id: input_select.riana
-      state: Home
-    - condition: numeric_state
-      entity_id: zone.home
-      above: 1
+  condition: []
   action:
-  - wait_for_trigger:
-    - platform: state
-      entity_id:
-      - cover.garage_door
-    - platform: state
-      entity_id:
-      - lock.front_door
-    continue_on_timeout: false
-    timeout: 00:30:00
   - wait_for_trigger:
     - platform: state
       entity_id:
       - binary_sensor.entry_doors
       to: 'on'
     continue_on_timeout: false
-  - if:
-    - type: is_temperature
-      condition: device
-      device_id: a2fc25d35733afab37fd7be1a943cdcf
-      entity_id: sensor.home_current_temperature
-      domain: sensor
-      above: 70
-    then:
-    - service: switch.turn_on
-      data: {}
-      target:
-        entity_id: switch.living_room_fan
-    enabled: true
-  - if:
-    - condition: sun
-      before: sunrise
-      after: sunset
-      after_offset: -00:45:00
-    then:
-    - service: light.turn_on
-      data:
-        brightness_pct: 15
-      target:
-        entity_id:
-        - light.kitchen_lights
-        - light.hallway_lights
+    timeout: 00:30:00
   - parallel:
+    - if:
+      - condition: state
+        entity_id: binary_sensor.home_alone
+        state: 'on'
+      then:
+      - parallel:
+        - if:
+          - type: is_temperature
+            condition: device
+            device_id: a2fc25d35733afab37fd7be1a943cdcf
+            entity_id: sensor.home_current_temperature
+            domain: sensor
+            above: 70
+          then:
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id: switch.living_room_fan
+          enabled: true
+        - service: lock.unlock
+          data: {}
+          target:
+            entity_id: lock.back_door
+        - service: script.turn_on
+          data: {}
+          target:
+            entity_id: script.lofi
     - if:
       - condition: sun
         before: sunrise
         after: sunset
         after_offset: -00:45:00
       then:
-      - service: light.turn_on
-        data:
-          brightness_pct: 15
-        target:
-          entity_id:
-          - light.kitchen_lights
-          - light.hallway_lights
+      - if:
+        - condition: state
+          entity_id: light.kitchen_lights
+          state: 'off'
+        then:
+        - service: light.turn_on
+          data:
+            brightness_pct: 18
+          target:
+            entity_id:
+            - light.kitchen_lights
+        alias: Kitchen Lights
+      - if:
+        - condition: state
+          entity_id: light.hallway_lights
+          state: 'off'
+        then:
+        - service: light.turn_on
+          data:
+            brightness_pct: 22
+          target:
+            entity_id:
+            - light.hallway_lights
+        alias: Hallway Lights
       alias: Turn on Lights
-    - if:
-      - type: is_temperature
-        condition: device
-        device_id: a2fc25d35733afab37fd7be1a943cdcf
-        entity_id: sensor.home_current_temperature
-        domain: sensor
-        above: 70
-      then:
-      - service: switch.turn_on
-        data: {}
-        target:
-          entity_id: switch.living_room_fan
-      enabled: true
-    - service: lock.unlock
-      data: {}
-      target:
-        entity_id: lock.back_door
-    - service: script.turn_on
-      data: {}
-      target:
-        entity_id: script.lofi
   mode: single
 - id: '1664570555449'
   alias: Turn on TV
@@ -1611,7 +1612,7 @@
     at: '18:00:00'
     id: Dinner
   - platform: time
-    at: 02:30:01
+    at: 03:30:01
     id: Reset
   - platform: state
     entity_id:
@@ -1974,7 +1975,7 @@
     at: '22:00:00'
     id: Night
   - platform: time
-    at: 02:30:01
+    at: 03:30:01
     id: Reset
   - platform: state
     entity_id:
@@ -2285,6 +2286,7 @@
     - switch.rotunda_lights
     - switch.gym_fan
     - binary_sensor.dining_room_occupancy
+    - binary_sensor.aqara_lumi_motion_ac01_occupancy_4
     to: 'on'
     from: 'off'
   - platform: state
@@ -2294,16 +2296,10 @@
     to: unlocked
   condition:
   - condition: state
-    entity_id: input_select.anthony
-    state: Home
+    entity_id: binary_sensor.home_alone
+    state: 'on'
   - condition: not
     conditions:
-    - condition: state
-      entity_id: input_select.riana
-      state: Home
-    - condition: state
-      entity_id: input_select.riana
-      state: Just Arrived
     - condition: state
       entity_id: switch.desktop
       state: 'on'
@@ -2313,9 +2309,6 @@
     - condition: state
       entity_id: binary_sensor.bed_occupancy
       state: 'on'
-  - condition: numeric_state
-    entity_id: zone.home
-    below: 2
   - condition: or
     conditions:
     - condition: state
@@ -3745,7 +3738,7 @@
             entity_id: media_player.owntone_output_front
             state: 'on'
           - condition: state
-            entity_id: media_player.guest_homepods
+            entity_id: media_player.guest_speakers
             state: 'on'
           - condition: state
             entity_id: media_player.owntone_output_living_room_tv
@@ -3841,6 +3834,20 @@
       seconds: 0
   - condition: state
     entity_id: binary_sensor.laundry_room_motion
+    state: 'off'
+    for:
+      hours: 0
+      minutes: 20
+      seconds: 0
+  - condition: state
+    entity_id: binary_sensor.nest_protect_hallway_occupancy
+    state: 'off'
+    for:
+      hours: 0
+      minutes: 3
+      seconds: 0
+  - condition: state
+    entity_id: binary_sensor.nest_protect_kitchen_occupancy
     state: 'off'
     for:
       hours: 0
@@ -4012,7 +4019,7 @@
             - media_player.owntone_output_master_bedroom_tv
             - media_player.owntone_output_nightstand
             - media_player.owntone_output_garage
-            - media_player.guest_homepods
+            - media_player.guest_speakers
             - media_player.owntone_output_guest_tv
             - media_player.owntone_output_kitchen_homepod
             - media_player.owntone_output_kitchen_right
@@ -4866,7 +4873,7 @@
         entity_id: media_player.owntone_output_living_room_tv
         state: 'on'
       - condition: state
-        entity_id: media_player.guest_homepods
+        entity_id: media_player.guest_speakers
         state: 'on'
       - condition: state
         entity_id: media_player.owntone_output_front
@@ -4875,12 +4882,11 @@
         entity_id: media_player.owntone_output_garage
         state: 'on'
     then:
-    - service: homeassistant.reload_config_entry
+    - service: media_player.turn_off
       data: {}
       target:
         entity_id:
         - media_player.owntone_server
-        - media_player.owntone_output_bathroom
         - media_player.owntone_output_front
         - media_player.owntone_output_kitchen_homepod
         - media_player.owntone_output_living_room_tv
@@ -4889,6 +4895,7 @@
         - media_player.owntone_output_guest_tv
         - media_player.owntone_output_guest_left
         - media_player.owntone_output_guest_right
+        - media_player.kitchen_speakers
   - if:
     - condition: device
       type: is_off
@@ -4913,6 +4920,10 @@
       entity_id: light.kitchen_lights
       domain: light
       brightness_pct: 18
+  - type: turn_off
+    device_id: 7c247296aac3c00b267bb165baab5a7c
+    entity_id: switch.porch_light
+    domain: switch
   mode: single
 - id: '1670894312639'
   alias: Notification
@@ -5654,3 +5665,165 @@
   - service: script.lofi
     data: {}
   mode: single
+- id: '1678670901601'
+  alias: New Automation
+  description: ''
+  trigger:
+  - platform: device
+    device_id: f2f536764f9014c77571a51ad0cc4eec
+    domain: zwave_js
+    type: event.value_notification.central_scene
+    property: scene
+    property_key: '001'
+    endpoint: 0
+    command_class: 91
+    subtype: Endpoint 0 Scene 001
+    value: 0
+  - platform: device
+    device_id: f2f536764f9014c77571a51ad0cc4eec
+    domain: zwave_js
+    type: event.value_notification.central_scene
+    property: scene
+    property_key: '002'
+    endpoint: 0
+    command_class: 91
+    subtype: Endpoint 0 Scene 002
+    value: 0
+  condition: []
+  action: []
+  mode: single
+- id: '1678685123749'
+  alias: Kitchen Night Light
+  description: ''
+  trigger:
+  - device_id: 73df54d198e3ccede0b9431266ce71c6
+    domain: zha
+    platform: device
+    type: Enter
+    subtype: sensor
+    id: enter
+  - device_id: 73df54d198e3ccede0b9431266ce71c6
+    domain: zha
+    platform: device
+    type: Leave
+    subtype: sensor
+    id: leave
+  - type: not_opened
+    platform: device
+    device_id: 40b6acb50076a1f15ff0e73120d2f04e
+    entity_id: binary_sensor.bedroom_door
+    domain: binary_sensor
+    id: door closed
+  - platform: state
+    entity_id:
+    - binary_sensor.bed_occupancy
+    to: 'on'
+    id: bed
+  condition:
+  - condition: time
+    after: '23:55:00'
+    before: 08:00:00
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.nest_protect_hallway_occupancy
+        state: 'on'
+      - condition: trigger
+        id: enter
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: input_select.anthony
+          state: Home
+        - condition: state
+          entity_id: input_select.anthony
+          state: Just Arrived
+      - condition: device
+        type: is_off
+        device_id: aa29287a53774cb599c5658e30e48d9d
+        entity_id: light.kitchen_lights
+        domain: light
+      - condition: device
+        type: is_off
+        device_id: 12fdf93ade08d994961d501d7730373c
+        entity_id: light.kitchen_cabinet_lights
+        domain: light
+      - condition: state
+        entity_id: binary_sensor.bed_occupancy
+        state: 'off'
+      sequence:
+      - type: turn_on
+        device_id: 12fdf93ade08d994961d501d7730373c
+        entity_id: light.kitchen_cabinet_lights
+        domain: light
+        brightness_pct: 50
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: leave
+        - condition: trigger
+          id: door closed
+        - condition: trigger
+          id: bed
+      sequence:
+      - type: turn_off
+        device_id: 12fdf93ade08d994961d501d7730373c
+        entity_id: light.kitchen_cabinet_lights
+        domain: light
+  mode: single
+- id: '1678704758356'
+  alias: Resume Music After Macbook Stops It
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.macbook_air_active
+    attribute: Screen Off
+    from: 'false'
+    to: 'true'
+  - platform: state
+    entity_id:
+    - binary_sensor.airpods_connected
+    from: 'on'
+    to: 'off'
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: media_player.owntone_output_desk
+      state: 'on'
+    - condition: state
+      entity_id: media_player.owntone_output_nightstand
+      state: 'on'
+  - condition: state
+    entity_id: media_player.spotify_anthony221121
+    attribute: source
+    state: Home Assistant
+  action:
+  - if:
+    - condition: state
+      entity_id: media_player.spotify_anthony221121
+      state: paused
+    then:
+    - service: media_player.media_play
+      data: {}
+      target:
+        entity_id: media_player.spotify_anthony221121
+    else:
+    - wait_for_trigger:
+      - platform: state
+        entity_id:
+        - media_player.spotify_anthony221121
+        from: playing
+      timeout:
+        hours: 0
+        minutes: 1
+        seconds: 0
+        milliseconds: 0
+    - service: media_player.media_play
+      data: {}
+      target:
+        entity_id: media_player.spotify_anthony221121
+  mode: restart

@@ -12,6 +12,12 @@
     state: >
       {{ states('sensor.discord')|float(-1) > 0}}
     unique_id: discord_active
+  - name: "AirPods Connected"
+    state: >
+      {{ "Anthony’s AirPods Pro" in 
+      state_attr('sensor.macbook_air_active_audio_output', 
+      'All Audio Output') }}
+    unique_id: airpods_connected
   - name: "Expand Card"
     unique_id: expand_card
     state: > 
@@ -24,6 +30,14 @@
     state: >
       {{ is_state('light.bedroom_lights', 'on') }}
     unique_id: bedroom_on
+  - name: "Home Alone"
+    state: >
+      {{ (is_state('input_select.anthony', 'Home') or 
+      is_state('input_select.anthony', 'Just Arrived'))
+      and not ((is_state('input_select.riana', 'Home') or
+      is_state('input_select.riana', 'Just Arrived'))
+      or states('zone.home')|int(2) > 1) }}
+    unique_id: home_alone
   - name: "Entry Doors"
     state: > 
       {{ is_state('sensor.alarm_front_garage_door', 'O') }}

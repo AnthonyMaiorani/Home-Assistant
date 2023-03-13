@@ -291,16 +291,26 @@ night:
         target:
           entity_id: script.lofi
       else:
+      - service: media_player.volume_set
+        data:
+          volume_level: 0.07
+        target:
+          entity_id:
+          - media_player.spotify_anthony221121
       - repeat:
-          count: '5'
+          count: '3'
           sequence:
           - service: media_player.volume_set
             data:
               volume_level: 0.07
             target:
               entity_id:
-              - media_player.spotify_anthony221121
               - media_player.owntone_output_desk
+          - service: media_player.volume_set
+            data:
+              volume_level: 0.14
+            target:
+              entity_id:
               - media_player.owntone_output_nightstand
           - delay:
               hours: 0
@@ -612,7 +622,7 @@ lofi:
       - media_player.owntone_output_master_bedroom_tv
       - media_player.owntone_output_nightstand
       - media_player.owntone_output_garage
-      - media_player.guest_homepods
+      - media_player.guest_speakers
       - media_player.owntone_output_guest_tv
       - media_player.owntone_output_kitchen_homepod
       - media_player.owntone_output_kitchen_right
@@ -945,7 +955,7 @@ lofi:
               state: 'off'
           then:
           - repeat:
-              count: '7'
+              count: '15'
               sequence:
               - service: media_player.turn_on
                 data: {}
