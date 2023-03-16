@@ -4103,7 +4103,7 @@
     - conditions:
       - condition: device
         type: is_off
-        device_id: 624405d34a0a0bc8df3990c131a31bd2
+        device_id: 3c08610e07933d66eb5347257aae98aa
         entity_id: light.bathroom_lights
         domain: light
       sequence:
@@ -5617,6 +5617,10 @@
         data: {}
         target:
           entity_id: update.wyzebulb3_firmware
+  - service: button.press
+    data: {}
+    target:
+      entity_id: button.tare
   - delay:
       hours: 0
       minutes: 1

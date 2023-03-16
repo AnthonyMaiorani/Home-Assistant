@@ -37,7 +37,7 @@ sensor:
     dout_pin: GPIO14
     clk_pin: GPIO17
     filters:
-      - delta: 3000
+      - delta: 500
       - lambda: |-
           if (x >= 0 && x < 600000) return x;
           else return {};
@@ -60,7 +60,7 @@ binary_sensor:
     name: "Bed Occupancy"
     device_class: occupancy
     filters:
-      - delayed_on: 700ms #avoid bump/press being reported as detected
+      - delayed_on: 1000ms #avoid bump/press being reported as detected
       - delayed_off: 6s #avoid shifting being reported as clear
     lambda: |-
       if (id(bed_weight).state >= (id(zero) + 30000) ) {
