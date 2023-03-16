@@ -800,6 +800,8 @@
       - condition: state
         entity_id: binary_sensor.webcam
         state: 'on'
+      - condition: template
+        value_template: '{{ false }}'
       sequence:
       - service: script.turn_on
         data: {}
@@ -1585,6 +1587,10 @@
             - light.hallway_lights
         alias: Hallway Lights
       alias: Turn on Lights
+    - service: button.press
+      data: {}
+      target:
+        entity_id: button.tare
   mode: single
 - id: '1664570555449'
   alias: Turn on TV
@@ -5723,6 +5729,9 @@
   - condition: time
     after: '23:55:00'
     before: 08:00:00
+  - condition: sun
+    before: sunrise
+    after: sunset
   action:
   - choose:
     - conditions:

@@ -1149,13 +1149,36 @@ play_music:
           minutes: 0
           seconds: 3
           milliseconds: 0
-  - service: media_player.volume_set
-    data:
-      volume_level: 0.28
-    target:
-      entity_id:
-      - media_player.spotify_anthony221121
-      - media_player.owntone_server
+  - if:
+    - condition: time
+      after: 00:00:00
+      before: 09:00:00
+      alias: morning
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: binary_sensor.home_alone
+        state: 'on'
+      alias: not home alone
+    then:
+    - service: media_player.volume_set
+      data:
+        volume_level: 0.15
+      target:
+        entity_id:
+        - media_player.spotify_anthony221121
+        - media_player.owntone_server
+      alias: set volume quieter
+    else:
+    - service: media_player.volume_set
+      data:
+        volume_level: 0.28
+      target:
+        entity_id:
+        - media_player.spotify_anthony221121
+        - media_player.owntone_server
+      alias: set normal volume
+    alias: set volume
   - service: media_player.play_media
     data:
       media_content_type: playlist
