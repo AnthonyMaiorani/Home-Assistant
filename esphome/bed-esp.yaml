@@ -38,7 +38,10 @@ sensor:
     clk_pin: GPIO17
     filters:
       - delta: 3000
-    update_interval: 380ms
+      - lambda: |-
+          if (x >= 0 && x < 600000) return x;
+          else return {};
+    update_interval: 400ms
     accuracy_decimals: 0
   - platform: homeassistant
     entity_id: sensor.colorloopstate
@@ -50,7 +53,7 @@ button:
     id: tare
     on_press:
       - lambda: |-
-          id(zero) = id(bed_weight).state;
+          if (id(bed_weight).state >= 0 && id(bed_weight).state < 600000) {id(zero) = id(bed_weight).state;}
           
 binary_sensor:
   - platform: template
