@@ -3341,6 +3341,10 @@
       %}\n      {% endif %}\n    {% endif %}\n  {% endif %}\n{% endif %}\n{{ trigger
       }}"
     id: send notification
+  - platform: time
+    at: 00:00:00
+    alias: reset
+    id: reset
   condition: []
   action:
   - service: notify.mobile_app_iphone
@@ -3348,14 +3352,18 @@
       message: clear_notification
       data:
         tag: mail
-  - service: notify.mobile_app_iphone
-    data:
-      message: '{{ states(''sensor.mail_usps_mail'') }} {% if states(''sensor.mail_usps_mail'')|float(0)
-        == 1 %}peice{%else%}peices{%endif%} of mail {% if states(''sensor.mail_usps_mail'')|float(0)
-        == 1 %}was{%else%}were{%endif%} delivered.'
+  - if:
+    - condition: trigger
+      id: send notification
+    then:
+    - service: notify.mobile_app_iphone
       data:
-        entity_id: camera.mail_usps_camera
-        tag: mail
+        message: '{{ states(''sensor.mail_usps_mail'') }} {% if states(''sensor.mail_usps_mail'')|float(0)
+          == 1 %}peice{%else%}peices{%endif%} of mail {% if states(''sensor.mail_usps_mail'')|float(0)
+          == 1 %}was{%else%}were{%endif%} delivered.'
+        data:
+          entity_id: camera.mail_usps_camera
+          tag: mail
   mode: single
 - id: '1667193576124'
   alias: Alarm Reminder
@@ -3891,11 +3899,6 @@
     id: lights turned off
   - platform: state
     entity_id:
-    - media_player.owntone_output_nightstand
-    from: 'off'
-    to: 'on'
-  - platform: state
-    entity_id:
     - binary_sensor.showering
     from: 'off'
     to: 'on'
@@ -3970,16 +3973,13 @@
                 seconds: 1
                 milliseconds: 0
           alias: Turn on HomePod
+        alias: Turn on homepod
       - repeat:
           count: '3'
           sequence:
           - repeat:
               count: '5'
               sequence:
-              - service: media_player.turn_on
-                data: {}
-                target:
-                  entity_id: media_player.owntone_output_bathroom
               - service: media_player.volume_set
                 data:
                   volume_level: '{% if states(''binary_sensor.showering'') is defined
@@ -4003,6 +4003,7 @@
                   seconds: 1
                   milliseconds: 0
             alias: Set Volume
+        alias: Set volume
       - if:
         - condition: trigger
           id: showering on
@@ -4015,56 +4016,57 @@
             entity_id: media_player.owntone_output_desk
             state: 'on'
         then:
-        - service: media_player.turn_off
-          data: {}
-          target:
-            entity_id:
-            - media_player.owntone_output_desk
-            - media_player.owntone_output_front
-            - media_player.owntone_output_living_room_tv
-            - media_player.owntone_output_master_bedroom_tv
-            - media_player.owntone_output_nightstand
-            - media_player.owntone_output_garage
-            - media_player.guest_speakers
-            - media_player.owntone_output_guest_tv
-            - media_player.owntone_output_kitchen_homepod
-            - media_player.owntone_output_kitchen_right
-        - if:
-          - condition: not
-            conditions:
-            - condition: state
-              entity_id: media_player.spotify_anthony221121
-              attribute: media_playlist
-              state: Music
-          then:
-          - service: media_player.play_media
-            data:
-              media_content_type: playlist
-              media_content_id: https://open.spotify.com/playlist/1FXZPGh51QQyNUmADd5ssN
-              enqueue: play
+        - parallel:
+          - service: media_player.turn_off
+            data: {}
             target:
-              entity_id: media_player.spotify_anthony221121
-        - repeat:
-            count: '5'
-            sequence:
-            - service: media_player.volume_set
+              entity_id:
+              - media_player.owntone_output_desk
+              - media_player.owntone_output_front
+              - media_player.owntone_output_living_room_tv
+              - media_player.owntone_output_master_bedroom_tv
+              - media_player.owntone_output_nightstand
+              - media_player.owntone_output_garage
+              - media_player.guest_speakers
+              - media_player.owntone_output_guest_tv
+              - media_player.owntone_output_kitchen_homepod
+              - media_player.owntone_output_kitchen_right
+          - if:
+            - condition: not
+              conditions:
+              - condition: state
+                entity_id: media_player.spotify_anthony221121
+                attribute: media_playlist
+                state: Music
+            then:
+            - service: media_player.play_media
               data:
-                volume_level: 0.6
+                media_content_type: playlist
+                media_content_id: https://open.spotify.com/playlist/1FXZPGh51QQyNUmADd5ssN
+                enqueue: play
               target:
-                entity_id:
-                - media_player.spotify_anthony221121
-                - media_player.owntone_output_bathroom
-            - service: media_player.turn_off
-              data: {}
-              target:
-                entity_id:
-                - media_player.owntone_output_desk
-                - media_player.owntone_output_nightstand
-            - delay:
-                hours: 0
-                minutes: 0
-                seconds: 1
-                milliseconds: 0
+                entity_id: media_player.spotify_anthony221121
+          - repeat:
+              count: '5'
+              sequence:
+              - service: media_player.volume_set
+                data:
+                  volume_level: 0.6
+                target:
+                  entity_id:
+                  - media_player.spotify_anthony221121
+                  - media_player.owntone_output_bathroom
+              - service: media_player.turn_off
+                data: {}
+                target:
+                  entity_id:
+                  - media_player.owntone_output_desk
+                  - media_player.owntone_output_nightstand
+              - delay:
+                  hours: 0
+                  minutes: 0
+                  seconds: 1
+                  milliseconds: 0
         else:
         - condition: trigger
           id: showering off
@@ -4072,34 +4074,35 @@
           entity_id: media_player.spotify_anthony221121
           attribute: source
           state: Home Assistant
-        - repeat:
-            count: '3'
-            sequence:
-            - service: media_player.turn_on
-              data: {}
-              target:
-                entity_id:
-                - media_player.owntone_output_nightstand
-                - media_player.owntone_output_desk
-            - service: media_player.volume_set
-              data:
-                volume_level: 0.27
-              target:
-                entity_id:
-                - media_player.owntone_output_desk
-                - media_player.owntone_output_nightstand
-                - media_player.spotify_anthony221121
-            - delay:
-                hours: 0
-                minutes: 0
-                seconds: 1
-                milliseconds: 0
-        - service: input_boolean.turn_on
-          data: {}
-          target:
-            entity_id: input_boolean.bedmotion
-        - service: script.morning
-          data: {}
+        - parallel:
+          - service: script.morning
+            data: {}
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.bedmotion
+          - repeat:
+              count: '3'
+              sequence:
+              - service: media_player.turn_on
+                data: {}
+                target:
+                  entity_id:
+                  - media_player.owntone_output_nightstand
+                  - media_player.owntone_output_desk
+              - service: media_player.volume_set
+                data:
+                  volume_level: 0.27
+                target:
+                  entity_id:
+                  - media_player.owntone_output_desk
+                  - media_player.owntone_output_nightstand
+                  - media_player.spotify_anthony221121
+              - delay:
+                  hours: 0
+                  minutes: 0
+                  seconds: 1
+                  milliseconds: 0
     - conditions:
       - condition: device
         type: is_off
@@ -4107,51 +4110,57 @@
         entity_id: light.bathroom_lights
         domain: light
       sequence:
-      - service: media_player.volume_set
-        data:
-          volume_level: 0.11
-        target:
-          entity_id: media_player.owntone_output_bathroom
-      - service: media_player.turn_off
-        data: {}
-        target:
-          entity_id: media_player.owntone_output_bathroom
-      - if:
-        - condition: trigger
-          id: showering off
-        - condition: state
-          entity_id: media_player.spotify_anthony221121
-          attribute: source
-          state: Home Assistant
-        then:
-        - repeat:
-            count: '5'
-            sequence:
-            - service: media_player.turn_on
-              data: {}
-              target:
-                entity_id:
-                - media_player.owntone_output_nightstand
-                - media_player.owntone_output_desk
-            - service: media_player.volume_set
-              data:
-                volume_level: 0.25
-              target:
-                entity_id:
-                - media_player.owntone_output_desk
-                - media_player.owntone_output_nightstand
-                - media_player.spotify_anthony221121
-            - delay:
-                hours: 0
-                minutes: 0
-                seconds: 1
-                milliseconds: 0
-        - service: input_boolean.turn_on
-          data: {}
-          target:
-            entity_id: input_boolean.bedmotion
-        - service: script.morning
-          data: {}
+      - parallel:
+        - if:
+          - condition: state
+            entity_id: media_player.owntone_output_bathroom
+            state: 'on'
+          then:
+          - service: media_player.volume_set
+            data:
+              volume_level: 0.11
+            target:
+              entity_id: media_player.owntone_output_bathroom
+          - service: media_player.turn_off
+            data: {}
+            target:
+              entity_id: media_player.owntone_output_bathroom
+        - if:
+          - condition: trigger
+            id: showering off
+          - condition: state
+            entity_id: media_player.spotify_anthony221121
+            attribute: source
+            state: Home Assistant
+          then:
+          - repeat:
+              count: '5'
+              sequence:
+              - service: media_player.turn_on
+                data: {}
+                target:
+                  entity_id:
+                  - media_player.owntone_output_nightstand
+                  - media_player.owntone_output_desk
+              - service: media_player.volume_set
+                data:
+                  volume_level: 0.25
+                target:
+                  entity_id:
+                  - media_player.owntone_output_desk
+                  - media_player.owntone_output_nightstand
+                  - media_player.spotify_anthony221121
+              - delay:
+                  hours: 0
+                  minutes: 0
+                  seconds: 1
+                  milliseconds: 0
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.bedmotion
+          - service: script.morning
+            data: {}
     - conditions:
       - condition: trigger
         id: showering on
@@ -4269,6 +4278,12 @@
     to: 'on'
     from: 'off'
     id: occupied_boolean
+  - platform: state
+    entity_id:
+    - binary_sensor.bathroom_aqara_motion
+    from: 'off'
+    to: 'on'
+    id: motion2
   condition: []
   action:
   - choose:
@@ -4330,6 +4345,8 @@
               hours: 0
               minutes: 0
               seconds: 4
+        - condition: trigger
+          id: motion2
         alias: Presence Detected
       - condition: state
         entity_id: light.bathroom_lights
@@ -5205,6 +5222,12 @@
     to: 'on'
     from: 'off'
     id: other wave
+  - platform: state
+    entity_id:
+    - binary_sensor.bathroom_aqara_motion
+    from: 'off'
+    to: 'on'
+    id: motion2
   condition: []
   action:
   - choose:
@@ -5238,6 +5261,8 @@
           id: turned on
         - condition: trigger
           id: showering
+        - condition: trigger
+          id: motion2
       sequence:
       - condition: state
         entity_id: binary_sensor.bathroom_door
