@@ -73,7 +73,7 @@ globals:
   - id: zero
     type: float
     restore_value: yes
-    initial_value: '326000'
+    initial_value: '90000'
 
 light:
   - platform: rgb
