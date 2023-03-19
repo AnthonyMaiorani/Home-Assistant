@@ -824,19 +824,19 @@
       alias: Fan Lights Off
     - if:
       - condition: state
-        entity_id: input_select.anthony
-        state: Home
-      - condition: numeric_state
-        entity_id: zone.home
-        below: 2
+        entity_id: binary_sensor.home_alone
+        state: 'on'
+      - condition: state
+        entity_id: binary_sensor.bathroom_occupancy
+        state: 'off'
       then:
       - service: light.turn_off
         data: {}
         target:
           entity_id:
-          - light.bathroom_lights
           - light.living_room_lights
           - light.kitchen_cabinet_lights
+          - light.bathroom_lights
       - service: switch.turn_off
         data: {}
         target:
@@ -3156,7 +3156,7 @@
           - condition: state
             entity_id: input_boolean.alexa_notification_sent
             state: 'on'
-      - service: notify.alexa_media_anthony_s_2nd_echo_show_5_2nd_gen
+      - service: notify.alexa_media_anthony_s_echo_show
         data:
           message: Someone is at the front door
           data:
@@ -4541,12 +4541,10 @@
     payload: '{{ camera }}/new'
     value_template: '{{ value_json[''after''][''camera''] }}/{{ value_json[''type'']}}'
     id: frigate-event
-  condition:
-  - condition: not
-    conditions:
-    - condition: state
-      entity_id: binary_sensor.entry_doors
-      state: 'on'
+  - platform: time
+    at: 04:00:00
+    id: reset
+  condition: []
   action:
   - choose:
     - alias: Silence New Object Notifications
@@ -4559,6 +4557,11 @@
           entity_id: '{{ this.entity_id }}'
         data:
           stop_actions: false
+      - service: notify.{{ group_target }}
+        data:
+          message: clear_notification
+          data:
+            tag: porch-person
       - delay:
           minutes: 60
       - service: automation.turn_on
@@ -4616,11 +4619,16 @@
                     title: Silence New Notifications
                     destructive: true
             default:
+            - condition: not
+              conditions:
+              - condition: state
+                entity_id: binary_sensor.entry_doors
+                state: 'on'
             - service: notify.{{ group_target }}
               data:
                 message: A person was detected at the porch.
                 data:
-                  tag: '{{ id }}'
+                  tag: porch-person
                   group: frigate-notification-{{ camera }}
                   image: /api/frigate/notifications/{{id}}/snapshot.jpg
                   clickAction: '{{base_url}}/api/frigate/notifications/{{id}}/{{camera}}/clip.mp4'
@@ -4726,6 +4734,15 @@
                         destructive: true
           until: '{{ not wait.trigger or wait.trigger.payload_json[''type''] == ''end''
             }}'
+    - conditions:
+      - condition: trigger
+        id: reset
+      sequence:
+      - service: notify.{{ group_target }}
+        data:
+          message: clear_notification
+          data:
+            tag: porch-person
   mode: parallel
   trigger_variables:
     camera: porch
