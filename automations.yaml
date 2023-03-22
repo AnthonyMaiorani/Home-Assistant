@@ -52,6 +52,10 @@
         entity_id:
         - light.shapes_007f
         - light.shapes_ee82
+    - service: script.turn_on
+      data: {}
+      target:
+        entity_id: script.play_music
   - delay:
       hours: 0
       minutes: 0
@@ -62,7 +66,6 @@
     target:
       entity_id:
       - script.morning
-      - script.play_music
   - service: input_boolean.turn_on
     data: {}
     target:
@@ -1298,6 +1301,9 @@
     - condition: state
       entity_id: script.night
       state: 'on'
+  - condition: state
+    entity_id: switch.bedroomtoggle
+    state: 'on'
   action:
   - if:
     - condition: trigger
@@ -5781,9 +5787,6 @@
   action:
   - choose:
     - conditions:
-      - condition: state
-        entity_id: binary_sensor.nest_protect_hallway_occupancy
-        state: 'on'
       - condition: trigger
         id: enter
       - condition: or
@@ -5822,6 +5825,11 @@
           id: door closed
         - condition: trigger
           id: bed
+      - condition: device
+        type: is_on
+        device_id: 12fdf93ade08d994961d501d7730373c
+        entity_id: light.kitchen_cabinet_lights
+        domain: light
       sequence:
       - type: turn_off
         device_id: 12fdf93ade08d994961d501d7730373c

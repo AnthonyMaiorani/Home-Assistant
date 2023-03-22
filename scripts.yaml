@@ -350,17 +350,20 @@ night:
         device_id: aa29287a53774cb599c5658e30e48d9d
         entity_id: light.kitchen_lights
         domain: light
-    - service: light.turn_off
-      data: {}
-      target:
-        entity_id:
-        - light.shapes_007f
-        - light.bedroom_lights
-        - light.closet_lights
-        - light.glide
-        - light.shapes_ee82
-        - light.wled
-        - light.hallway_lights
+    - repeat:
+        count: '60'
+        sequence:
+        - service: light.turn_off
+          data: {}
+          target:
+            entity_id:
+            - light.shapes_ee82
+            - light.shapes_007f
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 1
+            milliseconds: 0
   alias: Night
   mode: restart
   icon: mdi:weather-night
