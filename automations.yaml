@@ -622,10 +622,6 @@
                   seconds: 1
                   milliseconds: 0
         - if:
-          - condition: numeric_state
-            entity_id: climate.bedroom_ac
-            above: 68
-            attribute: current_temperature
           - condition: or
             conditions:
             - condition: numeric_state
@@ -4088,19 +4084,47 @@
         else:
         - condition: trigger
           id: showering off
-        - condition: state
-          entity_id: media_player.spotify_anthony221121
-          attribute: source
-          state: Home Assistant
+        - condition: device
+          type: is_off
+          device_id: 3c08610e07933d66eb5347257aae98aa
+          entity_id: light.bathroom_lights
+          domain: light
+        - service: media_player.volume_set
+          data:
+            volume_level: 0.2
+          target:
+            entity_id: media_player.spotify_anthony221121
         - parallel:
-          - service: script.morning
+          - if:
+            - condition: or
+              conditions:
+              - condition: numeric_state
+                entity_id: sensor.bedroom_acurite_temperature
+                above: 68
+              - condition: numeric_state
+                entity_id: climate.bedroom_ac
+                above: 68
+                attribute: current_temperature
+              - condition: numeric_state
+                entity_id: sensor.bedroom_acurite_humidity
+                above: 55
+              alias: Hot
+            then:
+            - service: switch.turn_on
+              data: {}
+              target:
+                entity_id:
+                - switch.ac_boost
+          - service: script.turn_on
             data: {}
+            target:
+              entity_id: script.morning
           - service: input_boolean.turn_on
             data: {}
             target:
               entity_id: input_boolean.bedmotion
           - repeat:
-              count: '3'
+              count: '5'
               sequence:
               - service: media_player.turn_on
                 data: {}
@@ -4110,12 +4134,16 @@
                   - media_player.owntone_output_desk
               - service: media_player.volume_set
                 data:
-                  volume_level: 0.27
+                  volume_level: 0.2
                 target:
                   entity_id:
                   - media_player.owntone_output_desk
+              - service: media_player.volume_set
+                data:
+                  volume_level: 0.4
+                target:
+                  entity_id:
                   - media_player.owntone_output_nightstand
-                  - media_player.spotify_anthony221121
               - delay:
                   hours: 0
                   minutes: 0
@@ -4127,6 +4155,8 @@
         device_id: 3c08610e07933d66eb5347257aae98aa
         entity_id: light.bathroom_lights
         domain: light
+      - condition: trigger
+        id: lights turned off
       sequence:
       - parallel:
         - if:
@@ -4143,42 +4173,91 @@
             data: {}
             target:
               entity_id: media_player.owntone_output_bathroom
+          alias: Turn off homepod
         - if:
-          - condition: trigger
-            id: showering off
           - condition: state
             entity_id: media_player.spotify_anthony221121
             attribute: source
             state: Home Assistant
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: media_player.owntone_output_nightstand
+              state: 'off'
+            - condition: state
+              entity_id: media_player.owntone_output_desk
+              state: 'off'
+          - condition: state
+            entity_id: media_player.spotify_anthony221121
+            attribute: media_playlist
+            state: Music
+          - condition: device
+            type: is_on
+            device_id: c63a794911c38d9e98cbf969b2bc471b
+            entity_id: switch.exhaust_fan
+            domain: switch
           then:
-          - repeat:
-              count: '5'
-              sequence:
-              - service: media_player.turn_on
+          - service: media_player.volume_set
+            data:
+              volume_level: 0.2
+            target:
+              entity_id: media_player.spotify_anthony221121
+          - parallel:
+            - if:
+              - condition: or
+                conditions:
+                - condition: numeric_state
+                  entity_id: sensor.bedroom_acurite_temperature
+                  above: 68
+                - condition: numeric_state
+                  entity_id: climate.bedroom_ac
+                  above: 68
+                  attribute: current_temperature
+                - condition: numeric_state
+                  entity_id: sensor.bedroom_acurite_humidity
+                  above: 55
+                alias: Hot
+              then:
+              - service: switch.turn_on
                 data: {}
                 target:
                   entity_id:
-                  - media_player.owntone_output_nightstand
-                  - media_player.owntone_output_desk
-              - service: media_player.volume_set
-                data:
-                  volume_level: 0.25
-                target:
-                  entity_id:
-                  - media_player.owntone_output_desk
-                  - media_player.owntone_output_nightstand
-                  - media_player.spotify_anthony221121
-              - delay:
-                  hours: 0
-                  minutes: 0
-                  seconds: 1
-                  milliseconds: 0
-          - service: input_boolean.turn_on
-            data: {}
-            target:
-              entity_id: input_boolean.bedmotion
-          - service: script.morning
-            data: {}
+                  - switch.ac_boost
+            - service: script.turn_on
+              data: {}
+              target:
+                entity_id: script.morning
+            - service: input_boolean.turn_on
+              data: {}
+              target:
+                entity_id: input_boolean.bedmotion
+            - repeat:
+                count: '5'
+                sequence:
+                - service: media_player.turn_on
+                  data: {}
+                  target:
+                    entity_id:
+                    - media_player.owntone_output_nightstand
+                    - media_player.owntone_output_desk
+                - service: media_player.volume_set
+                  data:
+                    volume_level: 0.2
+                  target:
+                    entity_id:
+                    - media_player.owntone_output_desk
+                - service: media_player.volume_set
+                  data:
+                    volume_level: 0.4
+                  target:
+                    entity_id:
+                    - media_player.owntone_output_nightstand
+                - delay:
+                    hours: 0
+                    minutes: 0
+                    seconds: 1
+                    milliseconds: 0
+          alias: Turn other speakers on if leaving shower
     - conditions:
       - condition: trigger
         id: showering on
