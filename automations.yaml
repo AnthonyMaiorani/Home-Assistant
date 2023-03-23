@@ -565,11 +565,9 @@
   action:
   - choose:
     - conditions:
-      - condition: or
-        conditions:
-        - condition: state
-          entity_id: input_select.anthony
-          state: Just Arrived
+      - condition: state
+        entity_id: input_select.anthony
+        state: Just Arrived
       sequence:
       - parallel:
         - service: script.turn_on
@@ -583,19 +581,21 @@
             - condition: state
               entity_id: media_player.owntone_server
               state: playing
+            alias: not playing
           then:
           - service: script.turn_on
             data: {}
             target:
               entity_id: script.lofi
-        - if:
+          alias: Play music
+          else:
           - condition: template
             value_template: "{{ not (state_attr('media_player.spotify_anthony221121',
               'media_playlist') \n        is defined and \n        state_attr('media_player.spotify_anthony221121',
               'media_playlist') \n        is not none and not 'lofi' in \n        state_attr('media_player.spotify_anthony221121',
               'media_playlist')) \n    and state_attr('media_player.spotify_anthony221121',
               'volume_level') < 0.16}}"
-          then:
+            alias: If playing
           - service: media_player.volume_set
             data:
               volume_level: 0.13
@@ -625,6 +625,24 @@
           - condition: numeric_state
             entity_id: climate.bedroom_ac
             above: 68
+            attribute: current_temperature
+          - condition: or
+            conditions:
+            - condition: numeric_state
+              entity_id: sensor.bedroom_acurite_temperature
+              above: 68
+            - condition: numeric_state
+              entity_id: climate.bedroom_ac
+              above: 68
+              attribute: current_temperature
+            - condition: numeric_state
+              entity_id: sensor.bedroom_acurite_humidity
+              above: 55
+            - condition: numeric_state
+              entity_id: weather.dark_sky
+              attribute: temperature
+              above: 69
+            alias: Hot
           then:
           - service: switch.turn_on
             data: {}
@@ -1103,12 +1121,7 @@
     entity_id: person.anthony
     zone: zone.home
     event: enter
-  condition:
-  - condition: not
-    conditions:
-    - condition: state
-      entity_id: person.riana
-      state: Just Arrived
+  condition: []
   action:
   - delay:
       hours: 0
@@ -1121,10 +1134,9 @@
   - wait_for_trigger:
     - platform: state
       entity_id:
-      - cover.garage_door
-    - platform: state
-      entity_id:
-      - lock.front_door
+      - binary_sensor.entry_doors
+      from: 'off'
+      to: 'on'
     continue_on_timeout: false
     timeout: 00:30:00
   - service: input_boolean.turn_on
