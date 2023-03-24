@@ -709,6 +709,20 @@
             - media_player.owntone_output_kitchen_homepod
             - media_player.owntone_output_kitchen_right
             - media_player.kitchen_speakers
+        - if:
+          - condition: sun
+            after: sunset
+            after_offset: -00:25:00
+          - condition: state
+            entity_id: light.hallway_lights
+            state: 'off'
+          then:
+          - service: light.turn_on
+            data:
+              brightness_pct: 22
+            target:
+              entity_id:
+              - light.hallway_lights
     default: []
   mode: single
 - id: '1627966300438'
@@ -949,6 +963,10 @@
                 minutes: 0
                 seconds: 1
                 milliseconds: 0
+    - service: light.turn_off
+      data: {}
+      target:
+        entity_id: light.hallway_lights
   - if:
     - condition: time
       before: 05:00:00
@@ -2254,6 +2272,9 @@
           - condition: state
             entity_id: input_select.anthony
             state: Just Arrived
+        - condition: state
+          entity_id: binary_sensor.bed_occupancy
+          state: 'off'
         then:
         - service: light.turn_on
           data:
@@ -4926,10 +4947,16 @@
   trigger:
   - platform: time_pattern
     minutes: /5
+  - platform: state
+    entity_id:
+    - binary_sensor.nest_protect_hallway_occupancy
+    to: 'off'
+    from: 'on'
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
   condition:
-  - condition: time
-    before: 04:00:00
-    after: '23:55:00'
   - condition: state
     entity_id: light.hallway_lights
     state: 'on'
@@ -5132,10 +5159,61 @@
         target:
           entity_id: button.color
       up_raise:
-      - service: switch.toggle
-        data: {}
-        target:
-          entity_id: switch.ac
+      - choose:
+        - conditions:
+          - condition: state
+            entity_id: switch.ac
+            state: 'off'
+          sequence:
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id: switch.ac
+        - conditions:
+          - condition: state
+            entity_id: switch.ac
+            state: 'on'
+          - condition: state
+            entity_id: switch.ac_boost
+            state: 'on'
+          sequence:
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id: switch.ac_boost
+        - conditions:
+          - condition: state
+            entity_id: switch.ac
+            state: 'on'
+          - condition: state
+            entity_id: switch.ac_boost
+            state: 'off'
+          sequence:
+          - wait_for_trigger:
+            - platform: device
+              device_id: df24bd878efc1f29899ba74213c4b124
+              domain: lutron_caseta
+              type: release
+              subtype: raise
+            timeout:
+              hours: 0
+              minutes: 0
+              seconds: 0
+              milliseconds: 800
+          - if:
+            - condition: template
+              value_template: '{{ wait.trigger is none }}'
+              alias: If button hold
+            then:
+            - service: switch.turn_on
+              data: {}
+              target:
+                entity_id: switch.ac_boost
+            else:
+            - service: switch.turn_off
+              data: {}
+              target:
+                entity_id: switch.ac
       top_on_release: []
       up_raise_release:
       down_lower_release: []
@@ -5486,6 +5564,28 @@
           data: {}
           target:
             entity_id: input_boolean.bathroom_occupied
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: media_player.spotify_anthony221121
+            state: playing
+        - condition: state
+          entity_id: binary_sensor.bed_occupancy
+          state: 'off'
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: input_select.anthony
+            state: Just Arrived
+          - condition: state
+            entity_id: input_select.anthony
+            state: Home
+        then:
+        - service: script.turn_on
+          data: {}
+          target:
+            entity_id: script.lofi
     - conditions:
       - condition: trigger
         id: 'off'
@@ -5640,6 +5740,84 @@
     - condition: state
       entity_id: update.studio_code_server_update
       state: 'on'
+    - condition: state
+      entity_id: update.home_assistant_supervisor_update
+      state: 'on'
+    - condition: state
+      entity_id: update.home_assistant_operating_system_update
+      state: 'on'
+    - condition: state
+      entity_id: update.hacs_update
+      state: 'on'
+    - condition: state
+      entity_id: update.blueiris_nvr_update
+      state: 'on'
+    - condition: state
+      entity_id: update.generic_hygrostat_update
+      state: 'on'
+    - condition: state
+      entity_id: update.pyscript_update
+      state: 'on'
+    - condition: state
+      entity_id: update.mail_and_packages_update
+      state: 'on'
+    - condition: state
+      entity_id: update.alexa_media_player_update
+      state: 'on'
+    - condition: state
+      entity_id: update.govee_update
+      state: 'on'
+    - condition: state
+      entity_id: update.wyze_update
+      state: 'on'
+    - condition: state
+      entity_id: update.pirate_weather_update
+      state: 'on'
+    - condition: state
+      entity_id: update.frigate_update_2
+      state: 'on'
+    - condition: state
+      entity_id: update.dronemobile_update
+      state: 'on'
+    - condition: state
+      entity_id: update.nest_protect_update
+      state: 'on'
+    - condition: state
+      entity_id: update.hisense_tv_update
+      state: 'on'
+    - condition: state
+      entity_id: update.frigate_update
+      state: 'on'
+    - condition: state
+      entity_id: update.ftp_update
+      state: 'on'
+    - condition: state
+      entity_id: update.home_assistant_google_drive_backup_update
+      state: 'on'
+    - condition: state
+      entity_id: update.homepod_connect_update
+      state: 'on'
+    - condition: state
+      entity_id: update.mosquitto_broker_update
+      state: 'on'
+    - condition: state
+      entity_id: update.network_ups_tools_update
+      state: 'on'
+    - condition: state
+      entity_id: update.rtl_433_mqtt_auto_discovery_update
+      state: 'on'
+    - condition: state
+      entity_id: update.rtl_433_update
+      state: 'on'
+    - condition: state
+      entity_id: update.samba_share_update
+      state: 'on'
+    - condition: state
+      entity_id: update.terminal_ssh_update
+      state: 'on'
+    - condition: state
+      entity_id: update.vaultwarden_bitwarden_update
+      state: 'on'
   action:
   - parallel:
     - if:
@@ -5669,6 +5847,196 @@
         data: {}
         target:
           entity_id: update.studio_code_server_update
+    - if:
+      - condition: state
+        entity_id: update.card_mod_update
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id:
+          - update.card_mod_update
+    - if:
+      - condition: state
+        entity_id: update.ios_themes_dark_mode_and_light_mode_update
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id:
+          - update.ios_themes_dark_mode_and_light_mode_update
+    - if:
+      - condition: state
+        entity_id: update.mini_graph_card_update
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id:
+          - update.mini_graph_card_update
+    - if:
+      - condition: state
+        entity_id: update.fold_entity_row_update
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id:
+          - update.fold_entity_row_update
+    - if:
+      - condition: state
+        entity_id: update.clock_card_scotte_version_update
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id:
+          - update.clock_card_scotte_version_update
+    - if:
+      - condition: state
+        entity_id: update.button_card_update
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id:
+          - update.button_card_update
+    - if:
+      - condition: state
+        entity_id: update.mini_media_player_update
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id:
+          - update.mini_media_player_update
+    - if:
+      - condition: state
+        entity_id: update.timer_bar_card_update
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id:
+          - update.timer_bar_card_update
+    - if:
+      - condition: state
+        entity_id: update.frigate_update
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id:
+          - update.frigate_update
+    - if:
+      - condition: state
+        entity_id: update.ftp_update
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id:
+          - update.ftp_update
+    - if:
+      - condition: state
+        entity_id: update.home_assistant_google_drive_backup_update
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id:
+          - update.home_assistant_google_drive_backup_update
+    - if:
+      - condition: state
+        entity_id: update.homepod_connect_update
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id:
+          - update.homepod_connect_update
+    - if:
+      - condition: state
+        entity_id: update.mosquitto_broker_update
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id:
+          - update.mosquitto_broker_update
+    - if:
+      - condition: state
+        entity_id: update.network_ups_tools_update
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id:
+          - update.network_ups_tools_update
+    - if:
+      - condition: state
+        entity_id: update.rtl_433_mqtt_auto_discovery_update
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id:
+          - update.rtl_433_mqtt_auto_discovery_update
+    - if:
+      - condition: state
+        entity_id: update.rtl_433_update
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id:
+          - update.rtl_433_update
+    - if:
+      - condition: state
+        entity_id: update.samba_share_update
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id:
+          - update.samba_share_update
+    - if:
+      - condition: state
+        entity_id: update.terminal_ssh_update
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id:
+          - update.terminal_ssh_update
+    - if:
+      - condition: state
+        entity_id: update.vaultwarden_bitwarden_update
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id:
+          - update.vaultwarden_bitwarden_update
   - delay:
       hours: 0
       minutes: 1
@@ -5767,6 +6135,209 @@
       milliseconds: 0
   - service: script.night
     data: {}
+  - if:
+    - condition: state
+      entity_id: update.home_assistant_supervisor_update
+      state: 'on'
+    then:
+    - service: update.install
+      data: {}
+      target:
+        entity_id: update.home_assistant_supervisor_update
+  - if:
+    - condition: state
+      entity_id: update.home_assistant_operating_system_update
+      state: 'on'
+    then:
+    - service: update.install
+      data: {}
+      target:
+        entity_id: update.home_assistant_operating_system_update
+  - if:
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: update.hacs_update
+        state: 'on'
+      - condition: state
+        entity_id: update.blueiris_nvr_update
+        state: 'on'
+      - condition: state
+        entity_id: update.generic_hygrostat_update
+        state: 'on'
+      - condition: state
+        entity_id: update.pyscript_update
+        state: 'on'
+      - condition: state
+        entity_id: update.mail_and_packages_update
+        state: 'on'
+      - condition: state
+        entity_id: update.alexa_media_player_update
+        state: 'on'
+      - condition: state
+        entity_id: update.govee_update
+        state: 'on'
+      - condition: state
+        entity_id: update.wyze_update
+        state: 'on'
+      - condition: state
+        entity_id: update.pirate_weather_update
+        state: 'on'
+      - condition: state
+        entity_id: update.frigate_update_2
+        state: 'on'
+      - condition: state
+        entity_id: update.dronemobile_update
+        state: 'on'
+      - condition: state
+        entity_id: update.nest_protect_update
+        state: 'on'
+      - condition: state
+        entity_id: update.hisense_tv_update
+        state: 'on'
+    then:
+    - parallel:
+      - if:
+        - condition: state
+          entity_id: update.hacs_update
+          state: 'on'
+        then:
+        - service: update.install
+          data: {}
+          target:
+            entity_id:
+            - update.hacs_update
+      - if:
+        - condition: state
+          entity_id: update.blueiris_nvr_update
+          state: 'on'
+        then:
+        - service: update.install
+          data: {}
+          target:
+            entity_id:
+            - update.blueiris_nvr_update
+      - if:
+        - condition: state
+          entity_id: update.generic_hygrostat_update
+          state: 'on'
+        then:
+        - service: update.install
+          data: {}
+          target:
+            entity_id:
+            - update.generic_hygrostat_update
+      - if:
+        - condition: state
+          entity_id: update.pyscript_update
+          state: 'on'
+        then:
+        - service: update.install
+          data: {}
+          target:
+            entity_id:
+            - update.pyscript_update
+      - if:
+        - condition: state
+          entity_id: update.mail_and_packages_update
+          state: 'on'
+        then:
+        - service: update.install
+          data: {}
+          target:
+            entity_id:
+            - update.mail_and_packages_update
+      - if:
+        - condition: state
+          entity_id: update.alexa_media_player_update
+          state: 'on'
+        then:
+        - service: update.install
+          data: {}
+          target:
+            entity_id: update.alexa_media_player_update
+      - if:
+        - condition: state
+          entity_id: update.govee_update
+          state: 'on'
+        then:
+        - service: update.install
+          data: {}
+          target:
+            entity_id:
+            - update.govee_update
+      - if:
+        - condition: state
+          entity_id: update.wyze_update
+          state: 'on'
+        then:
+        - service: update.install
+          data: {}
+          target:
+            entity_id:
+            - update.wyze_update
+      - if:
+        - condition: state
+          entity_id: update.pirate_weather_update
+          state: 'on'
+        then:
+        - service: update.install
+          data: {}
+          target:
+            entity_id:
+            - update.pirate_weather_update
+      - if:
+        - condition: state
+          entity_id: update.frigate_update_2
+          state: 'on'
+        then:
+        - service: update.install
+          data: {}
+          target:
+            entity_id:
+            - update.frigate_update_2
+      - if:
+        - condition: state
+          entity_id: update.dronemobile_update
+          state: 'on'
+        then:
+        - service: update.install
+          data: {}
+          target:
+            entity_id:
+            - update.dronemobile_update
+      - if:
+        - condition: state
+          entity_id: update.nest_protect_update
+          state: 'on'
+        then:
+        - service: update.install
+          data: {}
+          target:
+            entity_id:
+            - update.nest_protect_update
+      - if:
+        - condition: state
+          entity_id: update.hisense_tv_update
+          state: 'on'
+        then:
+        - service: update.install
+          data: {}
+          target:
+            entity_id:
+            - update.hisense_tv_update
+    - condition: not
+      conditions:
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: input_select.anthony
+          state: Just Arrived
+        - condition: state
+          entity_id: input_select.anthony
+          state: Home
+    - service: homeassistant.restart
+      data: {}
   mode: single
 - id: '1677121828248'
   alias: Turn off TVs

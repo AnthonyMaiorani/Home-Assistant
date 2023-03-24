@@ -103,6 +103,11 @@
       - service: timer.cancel
         target:
           entity_id: timer.ac
+      - delay: 
+          seconds: 1
+      - service: climate.turn_off
+        target:
+          entity_id: climate.bedroom_ac
     lrtv:
       unique_id: lrtv
       friendly_name: Living Room TV
