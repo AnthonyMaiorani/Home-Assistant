@@ -4967,6 +4967,11 @@
       hours: 0
       minutes: 5
       seconds: 0
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: input_select.anthony
+      state: Just Arrived
   action:
   - service: light.turn_off
     data: {}
