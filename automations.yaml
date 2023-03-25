@@ -5678,6 +5678,12 @@
     entity_id: binary_sensor.bedroom_door
     domain: binary_sensor
     id: door opened
+  - platform: state
+    entity_id:
+    - binary_sensor.motion_sensor_motion_detection
+    from: 'off'
+    to: 'on'
+    id: closet motion
   condition: []
   action:
   - delay:
@@ -5700,8 +5706,10 @@
           id: closet opened
         - condition: trigger
           id: door opened
+        - condition: trigger
+          id: closet motion
       - condition: state
-        entity_id: light.desk_lights
+        entity_id: binary_sensor.bedroom_on
         state: 'off'
       - condition: sun
         after: sunset
@@ -5743,17 +5751,18 @@
     - conditions:
       - condition: trigger
         id: bed entered
-      - condition: state
-        entity_id: light.desk_lights
-        state: 'off'
+      - condition: template
+        value_template: "{{ \n   is_state('switch.bedroomtoggle', 'off') and \n   is_state('light.bed_lights',
+          'on') and \n   is_state_attr('light.bed_lights', 'effect', 'None') and\n
+          \  is_state_attr('light.bed_lights', 'rgb_color', (255, 255, 255)) and\n
+          \  is_state_attr('light.bed_lights', 'brightness', 46)\n}}"
+        alias: night light
       sequence:
       - type: turn_off
         device_id: e88ef9e31b97cb86c917bfd035861b2f
         entity_id: light.bed_lights
         domain: light
-        enabled: false
-      - service: script.night
-        data: {}
+        enabled: true
   mode: single
 - id: '1677100682580'
   alias: Auto-update

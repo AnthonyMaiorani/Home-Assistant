@@ -28,7 +28,7 @@
       {% endif %}
   - name: "Bedroom On"
     state: >
-      {{ is_state('light.bedroom_lights', 'on') }}
+      {{ is_state('switch.bedroomtoggle', 'on') }}
     unique_id: bedroom_on
   - name: "Home Alone"
     state: >
