@@ -1222,7 +1222,7 @@ play_music:
         entity_id: media_player.owntone_output_desk
         state: 'off'
       - condition: state
-        entity_id: binary_sensor.showering
+        entity_id: input_boolean.showering
         state: 'off'
       then:
       - service: media_player.turn_on
@@ -1278,7 +1278,7 @@ play_music:
         state: 'off'
         entity_id: media_player.owntone_output_nightstand
       - condition: state
-        entity_id: binary_sensor.showering
+        entity_id: input_boolean.showering
         state: 'off'
       then:
       - repeat:
@@ -1355,7 +1355,7 @@ play_music:
         entity_id: binary_sensor.bed_occupancy
         state: 'off'
       - condition: state
-        entity_id: binary_sensor.showering
+        entity_id: input_boolean.showering
         state: 'off'
       then:
       - if:
@@ -1576,8 +1576,8 @@ play_music:
         - repeat:
             until:
             - condition: template
-              value_template: '{% if states(''binary_sensor.showering'') is defined
-                and is_state(''binary_sensor.showering'', ''on'')  %}  {% set vol
+              value_template: '{% if states(''input_boolean.showering'') is defined
+                and is_state(''input_boolean.showering'', ''on'')  %}  {% set vol
                 =  0.55 %} {% else %} {% set vol = state_attr(''media_player.spotify_anthony221121'',
                 ''volume_level'') %} {% endif %}
 
@@ -1588,8 +1588,8 @@ play_music:
             sequence:
             - service: media_player.volume_set
               data:
-                volume_level: '{% if states(''binary_sensor.showering'') is defined
-                  and is_state(''binary_sensor.showering'', ''on'')  %}  {% set vol
+                volume_level: '{% if states(''input_boolean.showering'') is defined
+                  and is_state(''input_boolean.showering'', ''on'')  %}  {% set vol
                   =  0.55 %} {% else %} {% set vol = state_attr(''media_player.spotify_anthony221121'',
                   ''volume_level'') %} {% endif %}
 
