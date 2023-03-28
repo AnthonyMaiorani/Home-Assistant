@@ -4,8 +4,8 @@
     - media_player.owntone_output_kitchen_homepod
     - media_player.owntone_output_kitchen_right
   attributes:
-    state: media_player.owntone_output_kitchen_homepod
-    volume_level: media_player.owntone_output_kitchen_homepod|volume_level
+    state: media_player.owntone_output_kitchen_right
+    volume_level: media_player.owntone_output_kitchen_right|volume_level
   commands:
     turn_on:
       service: media_player.turn_on
