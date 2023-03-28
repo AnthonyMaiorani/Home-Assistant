@@ -22,7 +22,9 @@
     data:
       stop_actions: true
     target:
-      entity_id: automation.bed_occupancy
+      entity_id:
+      - automation.bed_occupancy
+      - automation.nanoleaf_scene_changer_and_auto_brightness
   - service: light.turn_off
     data: {}
     target:
@@ -41,7 +43,6 @@
         - light.fan_lights
         - light.desk_lights
         - light.bed_lights
-        - light.wled
     - service: light.turn_on
       continue_on_error: true
       data:
@@ -73,7 +74,9 @@
   - service: automation.turn_on
     data: {}
     target:
-      entity_id: automation.bed_occupancy
+      entity_id:
+      - automation.bed_occupancy
+      - automation.nanoleaf_scene_changer_and_auto_brightness
   - event: event_change_nanoleaf
     event_data: {}
   - delay:
@@ -4568,7 +4571,7 @@
       - delay:
           hours: 0
           minutes: 0
-          seconds: 7
+          seconds: 8
           milliseconds: 0
       - condition: device
         type: is_off
@@ -4623,7 +4626,7 @@
           duration: 00:01:30
         target:
           entity_id: timer.bathroom_light
-  mode: parallel
+  mode: queued
   max: 10
 - id: fp
   alias: Front Porch Not Blueprint
@@ -5013,7 +5016,7 @@
           before: sunrise
         - condition: numeric_state
           entity_id: sensor.pirateweather_cloud_coverage
-          above: 0.7
+          above: 0.9
         alias: dark
       - condition: or
         conditions:
