@@ -1,3 +1,40 @@
+- button:
+  - name: "Cancel alarms today"
+    unique_id: alexa_cancel_alarms_today
+    press:
+      - service: media_player.play_media
+        data:
+          media_content_type: custom
+          media_content_id: "\"cancel all my alarms today\""
+        target:
+          entity_id: media_player.anthony_s_echo_show
+  - name: "Cancel next alarm"
+    unique_id: alexa_cancel_next_alarm
+    press:
+      - service: media_player.play_media
+        data:
+          media_content_type: custom
+          media_content_id: "\"cancel my {{ states('sensor.alarm_display') }} alarm\""
+        target:
+          entity_id: media_player.anthony_s_echo_show
+  - name: "Alexa Stop"
+    unique_id: alexa_stop
+    press:
+      - service: media_player.play_media
+        data:
+          media_content_type: custom
+          media_content_id: "\"stop\""
+        target:
+          entity_id: media_player.anthony_s_echo_show
+  - name: "One minute alarm"
+    unique_id: alexa_one_minute_alarm
+    press:
+      - service: media_player.play_media
+        data:
+          media_content_type: custom
+          media_content_id: "\"set an alarm for {{ (now() + timedelta( minutes = 1 )).strftime('%I:%M %p') }} \""
+        target:
+          entity_id: media_player.anthony_s_echo_show
 - binary_sensor:
   - name: "Showering"
     unique_id: showering
