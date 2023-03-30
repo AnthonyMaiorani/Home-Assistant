@@ -4941,9 +4941,6 @@
   alias: Hallway Lights
   description: ''
   trigger:
-  - platform: time_pattern
-    minutes: /6
-    id: timer
   - platform: state
     entity_id:
     - binary_sensor.nest_protect_hallway_occupancy
@@ -4972,6 +4969,18 @@
     to: 'on'
     from: 'off'
     id: motion
+  - platform: state
+    entity_id:
+    - automation.hallway_lights_off
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+    id: 5mins
+  - platform: homeassistant
+    event: start
+    id: start
   condition: []
   action:
   - choose:
@@ -4984,9 +4993,11 @@
       - condition: or
         conditions:
         - condition: trigger
-          id: timer
+          id: 5mins
         - condition: trigger
           id: clear
+        - condition: trigger
+          id: start
       - condition: state
         entity_id: binary_sensor.nest_protect_hallway_occupancy
         state: 'off'
