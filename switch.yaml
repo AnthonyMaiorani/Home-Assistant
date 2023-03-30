@@ -127,7 +127,7 @@
     fronttv:
       unique_id: fronttv
       friendly_name: Front TV
-      value_template: "{{ states('switch.hisense_tv') }}"
+      value_template: "{{ states('media_player.hisense_tv') }}"
       turn_on:
         - service: switch.turn_on
           target:
