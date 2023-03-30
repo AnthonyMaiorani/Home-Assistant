@@ -69,11 +69,12 @@
     unique_id: bedroom_on
   - name: "Home Alone"
     state: >
-      {{ (is_state('input_select.anthony', 'Home') or 
+      {{ is_state('input_boolean.guest', 'off') and 
+      ((is_state('input_select.anthony', 'Home') or 
       is_state('input_select.anthony', 'Just Arrived'))
       and not ((is_state('input_select.riana', 'Home') or
       is_state('input_select.riana', 'Just Arrived'))
-      or states('zone.home')|int(2) > 1) }}
+      or states('zone.home')|int(2) > 1)) }}
     unique_id: home_alone
   - name: "Entry Doors"
     state: > 
