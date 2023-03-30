@@ -3905,7 +3905,7 @@
       - light.kitchen_cabinet_lights
   mode: single
 - id: '1668919603349'
-  alias: Bathroom Music
+  alias: Bathroom / Shower Music & Automations
   description: ''
   trigger:
   - platform: device
@@ -4003,34 +4003,28 @@
           alias: Turn on HomePod
         alias: Turn on homepod
       - repeat:
-          count: '3'
+          count: '5'
           sequence:
-          - repeat:
-              count: '5'
-              sequence:
-              - service: media_player.volume_set
-                data:
-                  volume_level: '{% if states(''input_boolean.showering'') is defined
-                    and is_state(''input_boolean.showering'', ''on'') %} {% set vol
-                    = 0.55 %} {% elif states(''switch.exhaust_fan'') is defined and
-                    is_state(''switch.exhaust_fan'', ''on'') %} {% set vol = 0.5 %}
-                    {% elif state_attr(''media_player.owntone_output_nightstand'',
-                    ''volume_level'') is defined and state_attr(''media_player.owntone_output_nightstand'',
-                    ''volume_level'') is not none %}  {% set vol =  state_attr(''media_player.owntone_output_nightstand'',
-                    ''volume_level'') %}  {% else %} {% set vol = 0.11 %} {% endif
-                    %} {{ vol }}
+          - service: media_player.volume_set
+            data:
+              volume_level: '{% if states(''input_boolean.showering'') is defined
+                and is_state(''input_boolean.showering'', ''on'') %} {% set vol =
+                0.55 %} {% elif states(''switch.exhaust_fan'') is defined and is_state(''switch.exhaust_fan'',
+                ''on'') %} {% set vol = 0.5 %} {% elif state_attr(''media_player.owntone_output_nightstand'',
+                ''volume_level'') is defined and state_attr(''media_player.owntone_output_nightstand'',
+                ''volume_level'') is not none %}  {% set vol =  state_attr(''media_player.owntone_output_nightstand'',
+                ''volume_level'') %}  {% else %} {% set vol = 0.11 %} {% endif %}
+                {{ vol }}
 
-                    '
-                target:
-                  entity_id:
-                  - media_player.spotify_anthony221121
-                  - media_player.owntone_output_bathroom
-              - delay:
-                  hours: 0
-                  minutes: 0
-                  seconds: 1
-                  milliseconds: 0
-            alias: Set Volume
+                '
+            target:
+              entity_id:
+              - media_player.owntone_output_bathroom
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
         alias: Set volume
       - if:
         - condition: trigger
@@ -4240,6 +4234,12 @@
                 target:
                   entity_id:
                   - switch.ac_boost
+              else:
+              - service: timer.start
+                data:
+                  duration: 00:10:00
+                target:
+                  entity_id: timer.ac
             - service: script.turn_on
               data: {}
               target:
