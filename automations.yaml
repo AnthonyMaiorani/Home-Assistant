@@ -869,8 +869,9 @@
           - switch.gym_fan
           - switch.dining_room_light
           - light.master_hallway_light
-          - switch.rotunda_lights
+          - light.rotunda_lights
           - switch.garage_light
+      alias: if home alone, turn off stuff
     - service: input_boolean.turn_off
       data: {}
       target:
@@ -968,6 +969,7 @@
       data: {}
       target:
         entity_id: switch.usb_hub
+    alias: turn off mouse dock
   mode: single
 - id: '1645695901319'
   alias: Enable Morning Automation
@@ -1546,7 +1548,6 @@
     - platform: state
       entity_id:
       - binary_sensor.entry_doors
-      to: 'on'
     continue_on_timeout: false
     timeout:
       hours: 0
@@ -2317,10 +2318,13 @@
     - binary_sensor.entry_doors
     - light.kitchen_cabinet_lights
     - switch.dining_room_light
-    - switch.rotunda_lights
+    - light.rotunda_lights
     - switch.gym_fan
     - binary_sensor.dining_room_occupancy
     - binary_sensor.aqara_lumi_motion_ac01_occupancy_4
+    - binary_sensor.nest_protect_kitchen_occupancy
+    - binary_sensor.nest_protect_rotunda_occupancy
+    - binary_sensor.master_hall_motion
     to: 'on'
     from: 'off'
   - platform: state
@@ -2867,7 +2871,7 @@
     - switch.dining_room_light
     - light.master_hallway_light
     - switch.airport_express
-    - switch.rotunda_lights
+    - light.rotunda_lights
     - light.kitchen_cabinet_lights
     - switch.garage_light
     to: unavailable
@@ -2899,7 +2903,7 @@
       entity_id: switch.airport_express
       state: unavailable
     - condition: state
-      entity_id: switch.rotunda_lights
+      entity_id: light.rotunda_lights
       state: unavailable
     - condition: state
       entity_id: light.kitchen_cabinet_lights
@@ -2954,7 +2958,7 @@
             entity_id: switch.airport_express
             state: unavailable
           - condition: state
-            entity_id: switch.rotunda_lights
+            entity_id: light.rotunda_lights
             state: unavailable
           - condition: state
             entity_id: light.kitchen_cabinet_lights
@@ -3076,7 +3080,7 @@
               - button.z_wave_plug_ping
         - if:
           - condition: state
-            entity_id: switch.rotunda_lights
+            entity_id: light.rotunda_lights
             state: unavailable
           then:
           - service: button.press
@@ -3149,15 +3153,6 @@
         value_template: '{{ trigger.payload_json[''after''][''camera''] == ''porch''
           }}'
       sequence:
-      - service: notify.mobile_app_iphone
-        data:
-          message: A {{trigger.payload_json["before"]["label"]}} was detected at the
-            porch at {{ as_timestamp(now()) | timestamp_custom("%I:%M %p") }}
-          data:
-            image: https://maioranihome.duckdns.org/api/frigate/notifications/{{trigger.payload_json["after"]["id"]}}/thumbnail.jpg
-            tag: '{{trigger.payload_json["after"]["id"]}}'
-            when: '{{trigger.payload_json["after"]["start_time"]|int}}'
-        enabled: false
       - service: blueiris.trigger_camera
         data: {}
         target:
@@ -3172,6 +3167,24 @@
           - condition: state
             entity_id: input_boolean.alexa_notification_sent
             state: 'on'
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: input_select.anthony
+            state: Just Arrived
+          - condition: state
+            entity_id: input_select.anthony
+            state: Home
+        - condition: time
+          after: '10:00:00'
+          before: '23:00:00'
+        - condition: state
+          entity_id: binary_sensor.entry_doors
+          state: 'off'
+          for:
+            hours: 0
+            minutes: 1
+            seconds: 0
       - service: notify.alexa_media_anthony_s_echo_show
         data:
           message: Someone is at the front door
@@ -4994,11 +5007,18 @@
       - condition: or
         conditions:
         - condition: trigger
-          id: bed door
-        - condition: trigger
-          id: bath door
-        - condition: trigger
           id: motion
+        - condition: and
+          conditions:
+          - condition: or
+            conditions:
+            - condition: trigger
+              id: bed door
+            - condition: trigger
+              id: bath door
+          - condition: state
+            entity_id: binary_sensor.bedroom_on
+            state: 'on'
         alias: door opened
       - condition: state
         entity_id: light.hallway_lights

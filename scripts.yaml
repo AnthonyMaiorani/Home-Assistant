@@ -250,7 +250,6 @@ night:
         - light.glide
         - light.shapes_ee82
         - light.wled
-        - light.hallway_lights
     - service: cover.close_cover
       data: {}
       target:
@@ -268,6 +267,7 @@ night:
         data: {}
         target:
           entity_id: switch.usb_hub
+      alias: turn off mouse dock
     - service: input_boolean.turn_off
       data: {}
       target:
@@ -317,6 +317,7 @@ night:
               minutes: 0
               seconds: 1
               milliseconds: 0
+      alias: music
     - if:
       - condition: device
         type: is_on
@@ -326,30 +327,19 @@ night:
       - condition: time
         after: '23:00:00'
         before: 05:00:00
-      - condition: or
-        conditions:
-        - condition: state
-          entity_id: input_select.anthony
-          state: Just Arrived
-        - condition: state
-          entity_id: input_select.anthony
-          state: Home
-      - condition: numeric_state
-        entity_id: zone.home
-        below: 2
-      - condition: or
-        conditions:
-        - condition: state
-          entity_id: input_select.riana
-          state: Just Left
-        - condition: state
-          entity_id: input_select.riana
-          state: Away
+        alias: night
+      - condition: state
+        entity_id: binary_sensor.home_alone
+        state: 'on'
+      - condition: state
+        entity_id: binary_sensor.bed_occupancy
+        state: 'on'
       then:
       - type: turn_off
         device_id: aa29287a53774cb599c5658e30e48d9d
         entity_id: light.kitchen_lights
         domain: light
+      alias: turn off kitchen light if home alone and night
     - repeat:
         count: '60'
         sequence:
@@ -364,6 +354,16 @@ night:
             minutes: 0
             seconds: 1
             milliseconds: 0
+      enabled: false
+    - if:
+      - condition: state
+        entity_id: binary_sensor.bed_occupancy
+        state: 'off'
+      then:
+      - service: light.turn_off
+        data: {}
+        target:
+          entity_id: light.hallway_lights
   alias: Night
   mode: restart
   icon: mdi:weather-night
