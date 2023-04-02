@@ -2013,8 +2013,6 @@
     entity_id:
     - binary_sensor.shock
     id: GivingPill
-    from: 'off'
-    to: 'on'
   - platform: state
     entity_id:
     - input_boolean.morning_medicine
@@ -2863,24 +2861,20 @@
   trigger:
   - platform: state
     entity_id:
-    - light.hallway_lights
     - switch.katchy
     - switch.gym_fan
     - switch.living_room_fan
     - switch.porch_light
     - switch.dining_room_light
     - light.master_hallway_light
-    - switch.airport_express
     - light.rotunda_lights
     - light.kitchen_cabinet_lights
     - switch.garage_light
+    - switch.main_hall_light
     to: unavailable
   condition:
   - condition: or
     conditions:
-    - condition: state
-      entity_id: light.hallway_lights
-      state: unavailable
     - condition: state
       entity_id: switch.katchy
       state: unavailable
@@ -2900,9 +2894,6 @@
       entity_id: light.master_hallway_light
       state: unavailable
     - condition: state
-      entity_id: switch.airport_express
-      state: unavailable
-    - condition: state
       entity_id: light.rotunda_lights
       state: unavailable
     - condition: state
@@ -2910,6 +2901,9 @@
       state: unavailable
     - condition: state
       entity_id: switch.garage_light
+      state: unavailable
+    - condition: state
+      entity_id: switch.main_hall_light
       state: unavailable
     alias: Any device unavailable
   action:
@@ -2925,12 +2919,6 @@
         - condition: or
           conditions:
           - condition: state
-            entity_id: light.hallway_lights
-            state: unavailable
-          - condition: state
-            entity_id: switch.exhaust_fan
-            state: unavailable
-          - condition: state
             entity_id: switch.katchy
             state: unavailable
           - condition: state
@@ -2943,19 +2931,10 @@
             entity_id: switch.porch_light
             state: unavailable
           - condition: state
-            entity_id: switch.laundry_room_light
-            state: unavailable
-          - condition: state
-            entity_id: light.bathroom_lights
-            state: unavailable
-          - condition: state
             entity_id: switch.dining_room_light
             state: unavailable
           - condition: state
             entity_id: light.master_hallway_light
-            state: unavailable
-          - condition: state
-            entity_id: switch.airport_express
             state: unavailable
           - condition: state
             entity_id: light.rotunda_lights
@@ -2966,28 +2945,13 @@
           - condition: state
             entity_id: switch.garage_light
             state: unavailable
+          - condition: state
+            entity_id: switch.main_hall_light
+            state: unavailable
+          alias: Any device unavailable
         alias: Until all devices available
       sequence:
       - parallel:
-        - if:
-          - condition: state
-            entity_id: light.hallway_lights
-            state: unavailable
-          then:
-          - service: button.press
-            data: {}
-            target:
-              entity_id: button.node_18_ping
-        - if:
-          - condition: state
-            entity_id: switch.exhaust_fan
-            state: unavailable
-          then:
-          - service: button.press
-            data: {}
-            target:
-              entity_id:
-              - button.node_26_ping
         - if:
           - condition: state
             entity_id: switch.katchy
@@ -3030,26 +2994,6 @@
               - button.node_26_ping
         - if:
           - condition: state
-            entity_id: switch.laundry_room_light
-            state: unavailable
-          then:
-          - service: button.press
-            data: {}
-            target:
-              entity_id:
-              - button.laundry_room_light_ping
-        - if:
-          - condition: state
-            entity_id: light.bathroom_lights
-            state: unavailable
-          then:
-          - service: button.press
-            data: {}
-            target:
-              entity_id:
-              - button.node_32_ping
-        - if:
-          - condition: state
             entity_id: switch.dining_room_light
             state: unavailable
           then:
@@ -3070,16 +3014,6 @@
               - button.node_25_ping
         - if:
           - condition: state
-            entity_id: switch.airport_express
-            state: unavailable
-          then:
-          - service: button.press
-            data: {}
-            target:
-              entity_id:
-              - button.z_wave_plug_ping
-        - if:
-          - condition: state
             entity_id: light.rotunda_lights
             state: unavailable
           then:
@@ -3087,7 +3021,7 @@
             data: {}
             target:
               entity_id:
-              - button.node_17_ping
+              - button.node_64_ping
         - if:
           - condition: state
             entity_id: light.kitchen_cabinet_lights
@@ -3108,6 +3042,16 @@
             target:
               entity_id:
               - button.garage_light_ping
+        - if:
+          - condition: state
+            entity_id: switch.main_hall_light
+            state: unavailable
+          then:
+          - service: button.press
+            data: {}
+            target:
+              entity_id:
+              - button.node_17_ping
       - delay:
           hours: 0
           minutes: 0
@@ -3360,18 +3304,17 @@
     value_template: "{% set trigger = 'false' %}\n{% if now().hour|float(0) > 16 %}\n
       \ {% if state_attr('automation.mail_notification', \n      'last_triggered')
       is not none %} \n    {% if states('sensor.mail_usps_mail') is not none %}\n
-      \     {% if states('sensor.mail_usps_mail')|int(0) > 0 %}\n        {% if ((now()
-      - timedelta( days = 1 )) - \n           as_local(state_attr('automation.mail_notification',
-      \n          'last_triggered'))).days > 0 %}\n          {% if states('input_select.anthony')
-      in ['Home', \n          'Just Arrived'] %} {% set trigger = 'true' %}\n          {%
-      elif distance(states.device_tracker.iphone) is not none %}\n            {% if
-      distance(states.device_tracker.iphone) < 1.5 %}\n              {% set trigger
-      = 'true' %}\n            {% endif %}\n          {% endif %}\n        {% endif
-      %}\n      {% endif %}\n    {% endif %}\n  {% endif %}\n{% endif %}\n{{ trigger
-      }}"
+      \     {% if states('sensor.mail_usps_mail')|int(0) > 0 %}\n        {% if now().strftime(\"%j\")|int(0)
+      > \n        as_local(state_attr('automation.mail_notification', \n        'last_triggered')).strftime(\"%j\")|int(0)
+      %}\n          {% if states('input_select.anthony') in ['Home', \n          'Just
+      Arrived'] %} {% set trigger = 'true' %}\n          {% elif distance(states.device_tracker.iphone)
+      is not none %}\n            {% if distance(states.device_tracker.iphone) < 1.5
+      %}\n              {% set trigger = 'true' %}\n            {% endif %}\n          {%
+      endif %}\n        {% endif %}\n      {% endif %}\n    {% endif %}\n  {% endif
+      %}\n{% endif %}\n{{ trigger }}"
     id: send notification
   - platform: time
-    at: 00:00:00
+    at: '23:59:00'
     alias: reset
     id: reset
   condition: []
@@ -5318,137 +5261,140 @@
         target:
           entity_id: switch.desktop
 - id: '1671430225021'
-  alias: Dana's Wall Pico
+  alias: Dana's Pedestal Pico
   description: ''
   use_blueprint:
     path: stephack/core-pico.yaml
     input:
       pico_remote: c51c176058dad4748b6065d54c93bec5
-      auto_mode: queued
+      auto_mode: parallel
       top_on:
       - parallel:
         - service: switch.turn_on
           data: {}
           target:
             entity_id:
-            - switch.dana_s_east_wall_rope_lights
-            - switch.dana_s_north_wall_rope_lights
-            - switch.dana_s_west_wall_rope_lights
-            - switch.dana_s_south_wall_rope_lights
-            - switch.dana_s_south_wall_incandescent_string_lights
+            - switch.dana_s_color_ropes
+            - switch.dana_s_incandescant_ropes
+            - switch.samsungtv
         - service: light.turn_on
           data:
             rgb_color:
-            - 141
-            - 45
-            - 245
+            - 255
+            - 0
+            - 255
             brightness_pct: 100
           target:
-            entity_id: light.evan_fan
+            entity_id:
+            - light.dana_s_fan_lights
         - service: media_player.turn_on
           data: {}
           target:
-            entity_id: media_player.evan
+            entity_id: media_player.danas_32_tcl_roku_tv
+        - service: button.press
+          data: {}
+          target:
+            entity_id: button.screenon
       down_lower:
       - if:
         - condition: or
           conditions:
           - condition: state
-            entity_id: switch.dana_s_south_wall_rope_lights
+            entity_id: switch.dana_s_south_color_rope
             state: 'off'
           - condition: state
-            entity_id: switch.dana_s_west_wall_rope_lights
+            entity_id: switch.dana_s_west_color_rope
             state: 'off'
         then:
         - service: switch.turn_on
           data: {}
           target:
             entity_id:
-            - switch.dana_s_west_wall_rope_lights
-            - switch.dana_s_south_wall_rope_lights
+            - switch.dana_s_color_ropes
         else:
         - service: switch.turn_off
           data: {}
           target:
             entity_id:
-            - switch.dana_s_west_wall_rope_lights
-            - switch.dana_s_south_wall_rope_lights
+            - switch.dana_s_color_ropes
       bottom_off:
       - parallel:
         - service: switch.turn_off
           data: {}
           target:
             entity_id:
-            - switch.dana_s_east_wall_rope_lights
-            - switch.dana_s_north_wall_rope_lights
-            - switch.dana_s_west_wall_rope_lights
-            - switch.dana_s_south_wall_rope_lights
-            - switch.dana_s_south_wall_incandescent_string_lights
+            - switch.dana_s_color_ropes
+            - switch.dana_s_incandescant_ropes
+            - switch.polk_omni
+            - switch.samsungtv
         - service: light.turn_off
           data: {}
           target:
             entity_id:
-            - light.evan_fan
+            - light.dana_s_fan_lights
         - service: media_player.turn_off
           data: {}
           target:
             entity_id:
-            - media_player.evan
-            - media_player.owntone_output_danas
+            - media_player.danas_32_tcl_roku_tv
+            - media_player.guest_speakers
             - media_player.owntone_output_garage
+        - service: button.press
+          data: {}
+          target:
+            entity_id: button.screenoff_2
       up_raise:
       - if:
         - condition: or
           conditions:
           - condition: state
-            entity_id: switch.dana_s_north_wall_rope_lights
+            entity_id: switch.dana_s_east_incandescent_rope
             state: 'on'
           - condition: state
-            entity_id: switch.dana_s_east_wall_rope_lights
+            entity_id: switch.dana_s_north_incandescent_rope
             state: 'on'
           - condition: state
-            entity_id: switch.dana_s_south_wall_incandescent_string_lights
-            state: ''
+            entity_id: switch.dana_s_south_incandescent_rope
+            state: 'on'
         then:
         - service: switch.turn_off
           data: {}
           target:
             entity_id:
-            - switch.dana_s_north_wall_rope_lights
-            - switch.dana_s_east_wall_rope_lights
-            - switch.dana_s_south_wall_incandescent_string_lights
+            - switch.dana_s_incandescant_ropes
         else:
         - service: switch.turn_on
           data: {}
           target:
             entity_id:
-            - switch.dana_s_north_wall_rope_lights
-            - switch.dana_s_east_wall_rope_lights
-            - switch.dana_s_south_wall_incandescent_string_lights
+            - switch.dana_s_incandescant_ropes
       top_on_release: []
-      up_raise_release:
+      up_raise_release: []
       down_lower_release: []
       middle_stop_release: []
       middle_stop:
       - if:
         - condition: state
-          entity_id: light.evan_fan
+          entity_id: light.dana_s_fan_lights
           state: 'on'
         then:
         - service: light.turn_off
           data: {}
           target:
-            entity_id: light.evan_fan
+            entity_id:
+            - light.dana_s_fan_lights
         else:
         - service: light.turn_on
           data:
             rgb_color:
-            - 141
-            - 45
-            - 245
+            - 255
+            - 0
+            - 255
             brightness_pct: 100
           target:
-            entity_id: light.evan_fan
+            entity_id:
+            - light.dana_s_fan_lights
+      bottom_off_release: []
 - id: '1671606640908'
   alias: Bathroom Occupancy Override
   description: ''
@@ -6578,6 +6524,11 @@
         device_id: 12fdf93ade08d994961d501d7730373c
         entity_id: light.kitchen_cabinet_lights
         domain: light
+      - service: media_player.turn_off
+        data: {}
+        target:
+          entity_id:
+          - media_player.kitchen_speakers
   mode: single
 - id: '1678704758356'
   alias: Resume Music After Macbook Stops It
@@ -6686,3 +6637,150 @@
         target:
           entity_id: input_boolean.showering
   mode: single
+- id: '1680247258391'
+  alias: Soundbar
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - pyscript.airport_2_playing
+  - platform: homeassistant
+    event: start
+  - platform: state
+    entity_id:
+    - media_player.owntone_output_garage
+    from: 'off'
+    to: 'On'
+    id: owntone
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: pyscript.airport_2_playing
+          state: 'True'
+        - condition: state
+          entity_id: media_player.owntone_output_garage
+          state: 'On'
+      sequence:
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id: switch.polk_omni
+    - conditions:
+      - condition: state
+        entity_id: pyscript.airport_2_playing
+        state: 'False'
+      - condition: not
+        conditions:
+        - condition: trigger
+          id: owntone
+      sequence:
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id: switch.polk_omni
+  mode: restart
+- id: '1680252272232'
+  alias: Dana's Bedroom Toggle
+  description: ''
+  trigger:
+  - platform: device
+    device_id: 28929daa383258a930d69cf2af9a4edf
+    domain: lutron_caseta
+    type: press
+    subtype: 'on'
+    id: 'on'
+  - platform: device
+    device_id: 28929daa383258a930d69cf2af9a4edf
+    domain: lutron_caseta
+    type: press
+    subtype: 'off'
+    id: 'off'
+  - platform: state
+    entity_id:
+    - input_boolean.guest_presence
+    from: 'off'
+    to: 'on'
+    id: arrive
+  - platform: state
+    entity_id:
+    - input_boolean.guest_presence
+    from: 'on'
+    to: 'off'
+    id: leave
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: 'on'
+        - condition: trigger
+          id: arrive
+      sequence:
+      - parallel:
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_color_ropes
+            - switch.dana_s_incandescant_ropes
+            - switch.samsungtv
+        - service: light.turn_on
+          data:
+            rgb_color:
+            - 255
+            - 0
+            - 255
+            brightness_pct: 100
+          target:
+            entity_id:
+            - light.dana_s_fan_lights
+        - service: media_player.turn_on
+          data: {}
+          target:
+            entity_id: media_player.danas_32_tcl_roku_tv
+        - service: button.press
+          data: {}
+          target:
+            entity_id:
+            - button.screenon
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: 'off'
+        - condition: trigger
+          id: leave
+      sequence:
+      - parallel:
+        - service: switch.turn_off
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_color_ropes
+            - switch.dana_s_incandescant_ropes
+            - switch.polk_omni
+            - switch.samsungtv
+        - service: light.turn_off
+          data: {}
+          target:
+            entity_id:
+            - light.dana_s_fan_lights
+        - service: media_player.turn_off
+          data: {}
+          target:
+            entity_id:
+            - media_player.danas_32_tcl_roku_tv
+            - media_player.guest_speakers
+            - media_player.owntone_output_garage
+        - service: button.press
+          data: {}
+          target:
+            entity_id: button.screenoff_2
+  mode: parallel
+  max: 10

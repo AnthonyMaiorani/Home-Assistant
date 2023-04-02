@@ -124,6 +124,25 @@
               - media_player.living_room_tv
               - media_player.living_room_denon
               - media_player.owntone_output_living_room_tv
+    samsungtv:
+      unique_id: samsung_tv
+      friendly_name: Samsung TV
+      turn_on:
+        - service: remote.send_command
+          data:
+            command: "on"
+            device: samsung
+            hold_secs: 2
+          target:
+            entity_id: remote.wi_fi_universal_remote
+      turn_off:
+        - service: remote.send_command
+          data:
+            command: "off"
+            device: samsung
+            hold_secs: 2
+          target:
+            entity_id: remote.wi_fi_universal_remote
     fronttv:
       unique_id: fronttv
       friendly_name: Front TV
@@ -175,6 +194,22 @@
             entity_id:
               - media_player.master_bedroom_tv
               - media_player.owntone_output_master_bedroom_tv
+    airport_express:
+      unique_id: airport_express
+      friendly_name: AirPort Express
+      value_template: "{{ is_state('light.caseta_lamp_dimmer', 'on') }}"
+      turn_on:
+        - service: light.turn_on
+          data:
+            brightness_pct: 100
+          target:
+            entity_id:
+              - light.caseta_lamp_dimmer
+      turn_off:
+        - service: light.turn_off
+          target:
+            entity_id:
+              - light.caseta_lamp_dimmer
     desktop:
       unique_id: desktop
       friendly_name: Desktop

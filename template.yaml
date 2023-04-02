@@ -224,7 +224,7 @@
         'Rhythmic Northern Lights', 'Meteor Shower', 'Soda', 
         'Pulse Pop Beats', 'Energize', 'Electric purple', 'Mood Movie', 
         'Water Cooler', 'Clubbing', 'Snowy Holiday', 'Lofi Sound'] %}
-        {% set lessChillMusicScenes = ['cool thing', 'Hip Hop', 'Prism',
+        {% set lessChillMusicScenes = ['cool thing', 'Hip Hop', 
         'Tachyon Light2', 'Oceanworks'] %}
 
         {# Build List of Scenes #}

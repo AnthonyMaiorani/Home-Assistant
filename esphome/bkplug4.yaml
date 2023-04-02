@@ -24,9 +24,9 @@ ota:
 #    id: homeassistant_time
 
 substitutions:
-  name: "Christmas Lights"
+  name: "Polk Omni"
   static_ip: 192.168.1.18
-  restore_mode: RESTORE_DEFAULT_ON
+  restore_mode: RESTORE_DEFAULT_OFF
 #  current_res: "0.0019"
 #  voltage_div: "2150"
     

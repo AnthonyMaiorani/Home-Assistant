@@ -285,6 +285,13 @@ night:
           entity_id: media_player.spotify_anthony221121
           attribute: media_playlist
           state: lofi
+        - condition: state
+          entity_id: media_player.spotify_anthony221121
+          attribute: source
+          state: Home Assistant
+        - condition: state
+          entity_id: media_player.spotify_anthony221121
+          state: playing
       then:
       - service: script.turn_on
         data: {}
@@ -364,7 +371,7 @@ night:
             minutes: 0
             seconds: 1
             milliseconds: 0
-      enabled: false
+      enabled: true
     - if:
       - condition: or
         conditions:
