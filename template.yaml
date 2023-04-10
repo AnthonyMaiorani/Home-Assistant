@@ -123,7 +123,7 @@
       is_state('binary_sensor.webcam', 'on') and
       is_state('light.fan_lights', 'on') -%} 204
       {# Night call #}
-      {% elif is_state('light.fan_lights', 'on') and state_attr('light.bed_lights', 'rgb_color')
+      {% elif is_state('light.fan_lights', 'off') and state_attr('light.bed_lights', 'rgb_color')
       | join(' ') == '0 255 255' and 
       is_state_attr('light.bed_lights', 'effect', 'None')%} 25
       {# Door opened #}

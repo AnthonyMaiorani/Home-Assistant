@@ -19,6 +19,7 @@ fan_off:
         - light.fan_lights
         - input_boolean.bedmotion
         - switch.katchy
+        - light.hallway_lights
     - data: {}
       service: homeassistant.turn_on
       target:
@@ -175,11 +176,6 @@ music:
 call:
   alias: Call
   sequence:
-  - service: input_boolean.turn_on
-    target:
-      entity_id:
-      - input_boolean.govee_cyan
-    data: {}
   - parallel:
     - service: light.turn_on
       target:
@@ -221,6 +217,8 @@ call:
         - light.fan_lights
         - light.closet_lights
         - light.desk_lights
+        - light.wled
+        - light.hallway_lights
     - service: light.turn_on
       data:
         rgbw_color:
@@ -231,6 +229,11 @@ call:
         brightness: 2
       target:
         entity_id: light.glide
+    - service: input_boolean.turn_on
+      target:
+        entity_id:
+        - input_boolean.govee_cyan
+      data: {}
   mode: single
   icon: mdi:phone
 night:
@@ -358,7 +361,7 @@ night:
           - switch.garage_light
       alias: turn off home lights if alone and night
     - repeat:
-        count: '60'
+        count: '120'
         sequence:
         - service: light.turn_off
           data: {}
@@ -609,7 +612,7 @@ start_car:
     - platform: state
       entity_id:
       - sensor.accord_ignitionstatus
-      to: 'on'
+      to: 'On'
     timeout:
       hours: 0
       minutes: 0
@@ -620,7 +623,7 @@ start_car:
       conditions:
       - condition: state
         entity_id: sensor.accord_ignitionstatus
-        state: 'on'
+        state: 'On'
     then:
     - service: notify.mobile_app_iphone
       data:

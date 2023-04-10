@@ -953,10 +953,6 @@
                 minutes: 0
                 seconds: 1
                 milliseconds: 0
-    - service: light.turn_off
-      data: {}
-      target:
-        entity_id: light.hallway_lights
   - if:
     - condition: time
       before: 05:00:00
@@ -3823,10 +3819,10 @@
     state: 'off'
     for:
       hours: 0
-      minutes: 20
+      minutes: 15
       seconds: 0
   - condition: state
-    entity_id: binary_sensor.nest_protect_hallway_occupancy
+    entity_id: binary_sensor.lumi_lumi_motion_ac02_iaszone
     state: 'off'
     for:
       hours: 0
@@ -4504,6 +4500,9 @@
                 state: 'off'
             - condition: trigger
               id: motion clear
+          - condition: state
+            entity_id: input_boolean.bathroom_occupied
+            state: 'off'
         - condition: trigger
           id: timer finished
       - condition: device
@@ -4534,6 +4533,9 @@
         device_id: 624405d34a0a0bc8df3990c131a31bd2
         entity_id: light.bathroom_lights
         domain: light
+      - condition: state
+        entity_id: input_boolean.bathroom_occupied
+        state: 'off'
       - service: button.press
         data: {}
         target:
@@ -4908,7 +4910,7 @@
     id: bath door
   - platform: state
     entity_id:
-    - binary_sensor.nest_protect_hallway_occupancy
+    - binary_sensor.lumi_lumi_motion_ac02_iaszone
     to: 'on'
     from: 'off'
     id: motion
@@ -5177,6 +5179,10 @@
         data: {}
         target:
           entity_id: button.white
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id: switch.usb_hub
       down_lower:
       - service: script.turn_on
         data: {}
@@ -5186,6 +5192,10 @@
         data: {}
         target:
           entity_id: button.off
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id: switch.usb_hub
       bottom_off:
       - service: script.turn_on
         data: {}
@@ -5195,6 +5205,10 @@
         data: {}
         target:
           entity_id: button.color
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id: switch.usb_hub
       up_raise:
       - choose:
         - conditions:
@@ -5251,6 +5265,10 @@
               data: {}
               target:
                 entity_id: switch.ac
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id: switch.usb_hub
       top_on_release: []
       up_raise_release:
       down_lower_release: []
@@ -5260,6 +5278,10 @@
         data: {}
         target:
           entity_id: switch.desktop
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id: switch.usb_hub
 - id: '1671430225021'
   alias: Dana's Pedestal Pico
   description: ''
@@ -5595,6 +5617,11 @@
       - condition: trigger
         id: 'on'
       sequence:
+      - type: turn_on
+        device_id: 3c08610e07933d66eb5347257aae98aa
+        entity_id: light.bathroom_lights
+        domain: light
+        brightness_pct: 100
       - if:
         - condition: state
           entity_id: input_boolean.bathroom_occupied
@@ -6468,7 +6495,7 @@
     id: bed
   condition:
   - condition: time
-    after: '23:55:00'
+    after: '22:30:00'
     before: 08:00:00
   - condition: sun
     before: sunrise
