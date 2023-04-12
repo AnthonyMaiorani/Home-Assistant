@@ -11,7 +11,7 @@ fan_off:
         - 0
         brightness: 2
       target:
-        entity_id: light.glide
+        entity_id: light.glide_lan
     - service: homeassistant.turn_off
       data: {}
       target:
@@ -64,7 +64,7 @@ color_loop:
       - service: light.turn_on
         target:
           entity_id:
-          - light.glide
+          - light.glide_lan
         data: {}
     - service: homeassistant.turn_on
       data: {}
@@ -228,7 +228,7 @@ call:
         - 0
         brightness: 2
       target:
-        entity_id: light.glide
+        entity_id: light.glide_lan
     - service: input_boolean.turn_on
       target:
         entity_id:
@@ -313,7 +313,7 @@ night:
         - light.shapes_007f
         - light.bedroom_lights
         - light.closet_lights
-        - light.glide
+        - light.glide_lan
         - light.shapes_ee82
         - light.wled
     - service: cover.close_cover
@@ -478,7 +478,7 @@ morning:
       - service: light.turn_on
         target:
           entity_id:
-          - light.glide
+          - light.glide_lan
         data: {}
     - service: light.turn_on
       data:

@@ -42,6 +42,11 @@ timer:
     name: "Exhaust"
     restore: true
     icon: mdi:fan-clock
+  guest_exhaust:
+    duration: "00:15:00"
+    name: "Guest Exhaust"
+    restore: true
+    icon: mdi:fan-clock
   ac:
     duration: "00:25:00"
     name: "AC Boost Timer"
