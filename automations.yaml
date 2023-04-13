@@ -2506,6 +2506,7 @@
       - (3600) }}\n  {%endif%}\n{%endif%}"
     alias: turn off
     id: turn off
+    enabled: false
   - platform: device
     type: turned_off
     device_id: 3c08610e07933d66eb5347257aae98aa
@@ -2778,7 +2779,7 @@
         else:
         - service: timer.start
           data:
-            duration: 00:01:00
+            duration: 00:02:00
           target:
             entity_id: timer.laundry_room_light
     - conditions:
@@ -2804,7 +2805,7 @@
       sequence:
       - service: timer.start
         data:
-          duration: 00:01:00
+          duration: 00:02:00
         target:
           entity_id: timer.laundry_room_light
     - conditions:
@@ -5291,131 +5292,30 @@
       pico_remote: c51c176058dad4748b6065d54c93bec5
       auto_mode: parallel
       top_on:
-      - parallel:
-        - service: switch.turn_on
-          data: {}
-          target:
-            entity_id:
-            - switch.dana_s_color_ropes
-            - switch.dana_s_incandescant_ropes
-            - switch.samsungtv
-        - service: light.turn_on
-          data:
-            rgb_color:
-            - 255
-            - 0
-            - 255
-            brightness_pct: 100
-          target:
-            entity_id:
-            - light.dana_s_fan_lights
-        - service: media_player.turn_on
-          data: {}
-          target:
-            entity_id: media_player.danas_32_tcl_roku_tv
-        - service: button.press
-          data: {}
-          target:
-            entity_id: button.screenon
+      - type: turn_on
+        device_id: 1fda2d1cd82b506314f647ad891916e4
+        entity_id: switch.guest_bedroom_light
+        domain: switch
       down_lower:
-      - if:
-        - condition: or
-          conditions:
-          - condition: state
-            entity_id: switch.dana_s_south_color_rope
-            state: 'off'
-          - condition: state
-            entity_id: switch.dana_s_west_color_rope
-            state: 'off'
-        then:
-        - service: switch.turn_on
-          data: {}
-          target:
-            entity_id:
-            - switch.dana_s_color_ropes
-        else:
-        - service: switch.turn_off
-          data: {}
-          target:
-            entity_id:
-            - switch.dana_s_color_ropes
+      - type: turn_off
+        device_id: 1fda2d1cd82b506314f647ad891916e4
+        entity_id: switch.guest_bedroom_fan
+        domain: switch
       bottom_off:
-      - parallel:
-        - service: switch.turn_off
-          data: {}
-          target:
-            entity_id:
-            - switch.dana_s_color_ropes
-            - switch.dana_s_incandescant_ropes
-            - switch.polk_omni
-            - switch.samsungtv
-        - service: light.turn_off
-          data: {}
-          target:
-            entity_id:
-            - light.dana_s_fan_lights
-        - service: media_player.turn_off
-          data: {}
-          target:
-            entity_id:
-            - media_player.danas_32_tcl_roku_tv
-            - media_player.guest_speakers
-            - media_player.owntone_output_garage
-        - service: button.press
-          data: {}
-          target:
-            entity_id: button.screenoff_2
+      - type: turn_off
+        device_id: 1fda2d1cd82b506314f647ad891916e4
+        entity_id: switch.guest_bedroom_light
+        domain: switch
       up_raise:
-      - if:
-        - condition: or
-          conditions:
-          - condition: state
-            entity_id: switch.dana_s_east_incandescent_rope
-            state: 'on'
-          - condition: state
-            entity_id: switch.dana_s_north_incandescent_rope
-            state: 'on'
-          - condition: state
-            entity_id: switch.dana_s_south_incandescent_rope
-            state: 'on'
-        then:
-        - service: switch.turn_off
-          data: {}
-          target:
-            entity_id:
-            - switch.dana_s_incandescant_ropes
-        else:
-        - service: switch.turn_on
-          data: {}
-          target:
-            entity_id:
-            - switch.dana_s_incandescant_ropes
+      - type: turn_on
+        device_id: 1fda2d1cd82b506314f647ad891916e4
+        entity_id: switch.guest_bedroom_fan
+        domain: switch
       top_on_release: []
       up_raise_release: []
       down_lower_release: []
       middle_stop_release: []
-      middle_stop:
-      - if:
-        - condition: state
-          entity_id: light.dana_s_fan_lights
-          state: 'on'
-        then:
-        - service: light.turn_off
-          data: {}
-          target:
-            entity_id:
-            - light.dana_s_fan_lights
-        else:
-        - service: light.turn_on
-          data:
-            rgb_color:
-            - 255
-            - 0
-            - 255
-            brightness_pct: 100
-          target:
-            entity_id:
-            - light.dana_s_fan_lights
+      middle_stop: []
       bottom_off_release: []
 - id: '1671606640908'
   alias: Bathroom Occupancy Override
@@ -6836,6 +6736,7 @@
       > as_timestamp(now()) - (3600) }}\n  {%endif%}\n{%endif%}"
     alias: turn off
     id: turn off
+    enabled: false
   - platform: device
     type: turned_off
     device_id: fe6f7334ca82ed9a53ef4b7fc752e65c
@@ -7009,3 +6910,138 @@
           - timer.guest_exhaust
   mode: queued
   max: 10
+- id: '1681346504601'
+  alias: Guest Bedroom Pedestal Pico
+  description: ''
+  use_blueprint:
+    path: stephack/core-pico.yaml
+    input:
+      pico_remote: c51c176058dad4748b6065d54c93bec5
+      auto_mode: parallel
+      top_on:
+      - parallel:
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_color_ropes
+            - switch.dana_s_incandescant_ropes
+            - switch.samsungtv
+        - service: light.turn_on
+          data:
+            rgb_color:
+            - 255
+            - 0
+            - 255
+            brightness_pct: 100
+          target:
+            entity_id:
+            - light.dana_s_fan_lights
+        - service: media_player.turn_on
+          data: {}
+          target:
+            entity_id: media_player.danas_32_tcl_roku_tv
+        - service: button.press
+          data: {}
+          target:
+            entity_id: button.screenon
+      down_lower:
+      - if:
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: switch.dana_s_south_color_rope
+            state: 'off'
+          - condition: state
+            entity_id: switch.dana_s_west_color_rope
+            state: 'off'
+        then:
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_color_ropes
+        else:
+        - service: switch.turn_off
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_color_ropes
+      bottom_off:
+      - parallel:
+        - service: switch.turn_off
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_color_ropes
+            - switch.dana_s_incandescant_ropes
+            - switch.polk_omni
+            - switch.samsungtv
+        - service: light.turn_off
+          data: {}
+          target:
+            entity_id:
+            - light.dana_s_fan_lights
+        - service: media_player.turn_off
+          data: {}
+          target:
+            entity_id:
+            - media_player.danas_32_tcl_roku_tv
+            - media_player.guest_speakers
+            - media_player.owntone_output_garage
+        - service: button.press
+          data: {}
+          target:
+            entity_id: button.screenoff_2
+      up_raise:
+      - if:
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: switch.dana_s_east_incandescent_rope
+            state: 'on'
+          - condition: state
+            entity_id: switch.dana_s_north_incandescent_rope
+            state: 'on'
+          - condition: state
+            entity_id: switch.dana_s_south_incandescent_rope
+            state: 'on'
+        then:
+        - service: switch.turn_off
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_incandescant_ropes
+        else:
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_incandescant_ropes
+      top_on_release: []
+      up_raise_release: []
+      down_lower_release: []
+      middle_stop_release: []
+      middle_stop:
+      - if:
+        - condition: state
+          entity_id: light.dana_s_fan_lights
+          state: 'on'
+        then:
+        - service: light.turn_off
+          data: {}
+          target:
+            entity_id:
+            - light.dana_s_fan_lights
+        else:
+        - service: light.turn_on
+          data:
+            rgb_color:
+            - 255
+            - 0
+            - 255
+            brightness_pct: 100
+          target:
+            entity_id:
+            - light.dana_s_fan_lights
+      bottom_off_release: []
