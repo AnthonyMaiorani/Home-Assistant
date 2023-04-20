@@ -10,7 +10,7 @@
   sensor: sensor.acurite_humidity
   delta_trigger: 4
   target_offset: 6
-  min_on_time: 180
+  min_on_time: 5
   max_on_time: 1200
   sample_interval: 3
 #  min_humidity: 55

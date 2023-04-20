@@ -36,15 +36,6 @@
         target:
           entity_id: media_player.anthony_s_echo_show
 - binary_sensor:
-  - name: "Showering"
-    unique_id: showering
-    state: >
-      {{ is_state('binary_sensor.shower', 'on') and 
-      is_state('binary_sensor.bathroom_door', 'off') and
-      is_state('input_boolean.bathroom_occupied', 'on') and
-      is_state('light.bathroom_lights', 'on') and 
-      is_state_attr('light.bathroom_lights', 'brightness', 255) and 
-      (utcnow() > states.light.bathroom_lights.last_changed + timedelta(minutes=2))}}
   - name: "Discord Active"
     state: >
       {{ states('sensor.discord')|float(-1) > 0}}

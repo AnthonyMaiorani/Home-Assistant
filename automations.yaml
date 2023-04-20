@@ -1167,7 +1167,7 @@
     entity_id:
     - light.desk_lights
     - light.fan_lights
-    - switch.desktop
+    - binary_sensor.desktop_power
     to: 'on'
     for:
       hours: 0
@@ -1178,6 +1178,13 @@
     - input_select.anthony
     from: home
     to: Just Left
+  - platform: state
+    entity_id:
+    - switch.usb_hub
+    from: unavailable
+  - platform: event
+    event_type: automation_reloaded
+    id: reloaded
   condition:
   - condition: state
     entity_id: switch.usb_hub
@@ -1188,7 +1195,7 @@
       before: '22:00:00'
       after: 05:00:00
     - condition: state
-      entity_id: switch.desktop
+      entity_id: binary_sensor.desktop_power
       state: 'on'
   action:
   - service: switch.turn_on
@@ -6539,6 +6546,10 @@
     - conditions:
       - condition: trigger
         id: shower start
+      - condition: state
+        entity_id: light.bathroom_lights
+        attribute: brightness
+        state: 255
       sequence:
       - service: input_boolean.turn_on
         data: {}
