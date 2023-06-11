@@ -1,23 +1,23 @@
 - platform: universal
   name: Kitchen Speakers
   children:
-    - media_player.owntone_output_kitchen_homepod
+    - media_player.owntone_output_kitchen_left
     - media_player.owntone_output_kitchen_right
   attributes:
-    state: media_player.owntone_output_kitchen_right
-    volume_level: media_player.owntone_output_kitchen_right|volume_level
+    state: media_player.owntone_output_kitchen_left
+    volume_level: media_player.owntone_output_kitchen_left|volume_level
   commands:
     turn_on:
       service: media_player.turn_on
       target:
         entity_id: 
-          - media_player.owntone_output_kitchen_homepod
+          - media_player.owntone_output_kitchen_left
           - media_player.owntone_output_kitchen_right
     turn_off:
       service: media_player.turn_off
       target:
         entity_id: 
-          - media_player.owntone_output_kitchen_homepod
+          - media_player.owntone_output_kitchen_left
           - media_player.owntone_output_kitchen_right
     set_volume:
       service: media_player.volume_set
@@ -25,7 +25,7 @@
         volume_level: "{{ volume_level }}"
       target:
         entity_id:
-          - media_player.owntone_output_kitchen_homepod
+          - media_player.owntone_output_kitchen_left
           - media_player.owntone_output_kitchen_right
   device_class: speaker
   unique_id: kitchen_speakers

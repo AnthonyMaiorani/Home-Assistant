@@ -8,6 +8,15 @@
           media_content_id: "\"cancel all my alarms today\""
         target:
           entity_id: media_player.anthony_s_echo_show
+  - name: "Cancel alarms today"
+    unique_id: alexa_cancel_alarms_today
+    press:
+      - service: media_player.play_media
+        data:
+          media_content_type: custom
+          media_content_id: "\"cancel all my alarms today\""
+        target:
+          entity_id: media_player.anthony_s_echo_show
   - name: "Cancel next alarm"
     unique_id: alexa_cancel_next_alarm
     press:
@@ -36,6 +45,14 @@
         target:
           entity_id: media_player.anthony_s_echo_show
 - binary_sensor:
+  - name: "Desktop Power"
+    state: >
+      {{ is_state('binary_sensor.desktop_ping', 'on') or
+      not( is_state('sensor.desktop_pc_lastactive', 'unavailable')
+        or is_state('binary_sensor.webcam', 'unavailable')
+        or is_state('sensor.discord', 'unavailable')
+      )}}
+    unique_id: desktop_power
   - name: "Discord Active"
     state: >
       {{ states('sensor.discord')|float(-1) > 0}}
@@ -107,10 +124,10 @@
       ( is_state('light.bedroom_lights', 'off') and expand('light.bedroom_lights')
       |selectattr('state','in',['unavailable','unknown','none'])|list|count < 1) -%} 0
       {# In call with color loop #}
-      {% elif is_state('switch.desktop', 'on') and is_state('binary_sensor.webcam', 'on') and 
+      {% elif is_state('binary_sensor.desktop_power', 'on') and is_state('binary_sensor.webcam', 'on') and 
       is_state_attr('light.fan_lights', 'effect', 'Color Loop') -%} 142
       {# In call with lights white #}
-      {% elif is_state('switch.desktop', 'on') and
+      {% elif is_state('binary_sensor.desktop_power', 'on') and
       is_state('binary_sensor.webcam', 'on') and
       is_state('light.fan_lights', 'on') -%} 204
       {# Night call #}
@@ -121,13 +138,13 @@
       {% elif is_state('binary_sensor.bedroom_door', 'on') and 
       is_state('light.fan_lights', 'on')-%} 254
       {# At desk with lights on #}
-      {% elif is_state('switch.desktop', 'on') and 
+      {% elif is_state('binary_sensor.desktop_power', 'on') and 
       is_state('light.fan_lights', 'on') -%} 153
       {# Window open #}
       {% elif is_state('cover.bedroom_blinds', 'open') and 
       is_state('sun.sun', 'above_horizon') -%} 153
       {# At desk with lights off #}
-      {% elif is_state('switch.desktop', 'on') and 
+      {% elif is_state('binary_sensor.desktop_power', 'on') and 
       is_state('binary_sensor.bed_occupancy', 'off')-%} 102
       {# Normal #}
       {% elif is_state('light.fan_lights', 'on') -%} 254

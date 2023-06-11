@@ -12,6 +12,14 @@
   - condition: state
     entity_id: light.fan_lights
     state: 'off'
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_select.anthony
+      state: Home
+    - condition: state
+      entity_id: input_select.anthony
+      state: Just Arrived
   action:
   - delay:
       hours: 0
@@ -29,7 +37,8 @@
     data: {}
     target:
       entity_id: light.bedroom_lights
-  - parallel:
+  - continue_on_error: true
+    parallel:
     - service: light.turn_on
       data:
         transition: 45
@@ -248,13 +257,13 @@
       - media_player.owntone_output_bathroom
       - media_player.owntone_output_desk
       - media_player.owntone_output_front
-      - media_player.owntone_output_kitchen_homepod
+      - media_player.owntone_output_kitchen_left
       - media_player.owntone_output_kitchen_right
+      - media_player.owntone_output_front_homepod
       - media_player.owntone_output_living_room_tv
       - media_player.owntone_output_master_bedroom_tv
       - media_player.owntone_output_nightstand
-      - media_player.owntone_output_garage
-      - media_player.owntone_output_guest_tv
+      - media_player.owntone_output_garage_homepod
       - media_player.owntone_output_guest_left
       - media_player.owntone_output_guest_right
   - if:
@@ -652,8 +661,8 @@
           data: {}
           target:
             entity_id:
-            - media_player.owntone_output_kitchen_homepod
             - media_player.owntone_output_kitchen_right
+            - media_player.owntone_output_kitchen_left
             - media_player.kitchen_speakers
     - conditions:
       - condition: state
@@ -709,7 +718,7 @@
           data: {}
           target:
             entity_id:
-            - media_player.owntone_output_kitchen_homepod
+            - media_player.owntone_output_kitchen_left
             - media_player.owntone_output_kitchen_right
             - media_player.kitchen_speakers
     default: []
@@ -820,139 +829,190 @@
       - condition: state
         entity_id: binary_sensor.webcam
         state: 'on'
-      - condition: template
-        value_template: '{{ false }}'
+      - condition: state
+        entity_id: binary_sensor.discord_active
+        state: 'on'
+      - condition: state
+        entity_id: switch.desktop
+        state: 'on'
       sequence:
       - service: script.turn_on
         data: {}
         target:
           entity_id: script.call
-      - service: switch.turn_off
-        data: {}
-        target:
-          entity_id: switch.living_room_fan
     default:
-    - if:
-      - condition: state
-        entity_id: light.fan_lights
-        state: 'on'
-      then:
-      - service: script.turn_on
-        data: {}
-        target:
-          entity_id: script.fan_off
-      alias: Fan Lights Off
-    - if:
-      - condition: state
-        entity_id: binary_sensor.home_alone
-        state: 'on'
-      - condition: state
-        entity_id: binary_sensor.bathroom_occupancy
-        state: 'off'
-      then:
-      - service: light.turn_off
-        data: {}
-        target:
-          entity_id:
-          - light.living_room_lights
-          - light.kitchen_cabinet_lights
-          - light.bathroom_lights
-      - service: switch.turn_off
-        data: {}
-        target:
-          entity_id:
-          - switch.living_room_fan
-          - switch.fronttv
-          - switch.lrtv
-          - switch.guesttv
-          - switch.laundry_room_light
-          - switch.gym_fan
-          - switch.dining_room_light
-          - light.master_hallway_light
-          - light.rotunda_lights
-          - switch.garage_light
-      alias: if home alone, turn off stuff
-    - service: input_boolean.turn_off
-      data: {}
-      target:
-        entity_id: input_boolean.privacy
-    - service: media_player.turn_off
-      data: {}
-      target:
-        entity_id:
-        - media_player.owntone_output_bathroom
-        - media_player.owntone_output_front
-        - media_player.owntone_output_garage
-        - media_player.kitchen_speakers
-        - media_player.owntone_output_living_room_tv
-        - media_player.guest_speakers
-        - media_player.owntone_output_guest_tv
-    - if:
-      - condition: or
-        conditions:
-        - condition: numeric_state
-          entity_id: media_player.owntone_output_desk
-          attribute: volume_level
-          above: 0.15
-        - condition: numeric_state
-          entity_id: media_player.owntone_output_nightstand
-          attribute: volume_level
-          above: 0.15
-      then:
+    - parallel:
       - if:
-        - condition: state
-          entity_id: media_player.spotify_anthony221121
-          attribute: media_playlist
-          state: Music
+        - condition: or
+          conditions:
+          - condition: numeric_state
+            entity_id: sensor.bedroom_acurite_temperature
+            above: 68
+          - condition: numeric_state
+            entity_id: climate.bedroom_ac
+            above: 68
+            attribute: current_temperature
+          - condition: numeric_state
+            entity_id: sensor.bedroom_acurite_humidity
+            above: 55
+          alias: Hot
         then:
-        - repeat:
-            count: '3'
-            sequence:
-            - service: media_player.volume_set
-              data:
-                volume_level: 0.18
-              target:
-                entity_id:
-                - media_player.spotify_anthony221121
-                - media_player.owntone_output_desk
-            - service: media_player.volume_set
-              data:
-                volume_level: 0.36
-              target:
-                entity_id:
-                - media_player.owntone_output_nightstand
-            - delay:
-                hours: 0
-                minutes: 0
-                seconds: 1
-                milliseconds: 0
-        else:
-        - service: media_player.volume_set
-          data:
-            volume_level: 0.13
+        - service: switch.turn_on
+          data: {}
           target:
             entity_id:
-            - media_player.spotify_anthony221121
-        - repeat:
-            count: '5'
-            sequence:
-            - service: media_player.volume_set
-              data:
-                volume_level: 0.13
-              target:
-                entity_id:
-                - media_player.owntone_output_desk
-            - service: media_player.volume_set
-              data:
-                volume_level: 0.26
-              target:
-                entity_id:
-                - media_player.owntone_output_nightstand
-            - delay:
-                hours: 0
-                minutes: 0
-                seconds: 1
-                milliseconds: 0
+            - switch.ac
+      - if:
+        - condition: state
+          entity_id: light.fan_lights
+          state: 'on'
+        then:
+        - service: script.turn_on
+          data: {}
+          target:
+            entity_id: script.fan_off
+        alias: Fan Lights Off
+      - if:
+        - condition: state
+          entity_id: binary_sensor.home_alone
+          state: 'on'
+        - condition: state
+          entity_id: binary_sensor.bathroom_occupancy
+          state: 'off'
+        then:
+        - service: light.turn_off
+          data: {}
+          target:
+            entity_id:
+            - light.living_room_lights
+            - light.kitchen_cabinet_lights
+            - light.bathroom_lights
+            - light.hallway_lights
+            - light.rotunda_lights
+            - light.master_hallway_light
+            - light.living_room_fan
+        - service: switch.turn_off
+          data: {}
+          target:
+            entity_id:
+            - switch.living_room_fan
+            - switch.fronttv
+            - switch.laundry_room_light
+            - switch.gym_fan
+            - switch.dining_room_light
+            - light.master_hallway_light
+            - light.rotunda_lights
+            - switch.garage_light
+            - switch.main_hall_light
+        alias: if home alone, turn off stuff
+      - service: media_player.turn_off
+        data: {}
+        target:
+          entity_id:
+          - media_player.owntone_output_bathroom
+          - media_player.owntone_output_front
+          - media_player.kitchen_speakers
+          - media_player.owntone_output_living_room_tv
+          - media_player.guest_speakers
+          - media_player.owntone_output_soundbar
+      - if:
+        - condition: or
+          conditions:
+          - condition: numeric_state
+            entity_id: media_player.owntone_output_desk
+            attribute: volume_level
+            above: 0.15
+          - condition: numeric_state
+            entity_id: media_player.owntone_output_nightstand
+            attribute: volume_level
+            above: 0.15
+        then:
+        - if:
+          - condition: state
+            entity_id: media_player.spotify_anthony221121
+            attribute: media_playlist
+            state: Music
+          then:
+          - service: media_player.volume_set
+            data:
+              volume_level: 0.18
+            target:
+              entity_id:
+              - media_player.spotify_anthony221121
+          - repeat:
+              count: '5'
+              sequence:
+              - service: media_player.turn_on
+                data: {}
+                target:
+                  entity_id:
+                  - media_player.owntone_output_nightstand
+                  - media_player.owntone_output_desk
+              - service: media_player.volume_set
+                data:
+                  volume_level: 0.18
+                target:
+                  entity_id:
+                  - media_player.owntone_output_desk
+              - service: media_player.volume_set
+                data:
+                  volume_level: 0.36
+                target:
+                  entity_id:
+                  - media_player.owntone_output_nightstand
+              - delay:
+                  hours: 0
+                  minutes: 0
+                  seconds: 1
+                  milliseconds: 0
+          else:
+          - service: media_player.volume_set
+            data:
+              volume_level: 0.13
+            target:
+              entity_id:
+              - media_player.spotify_anthony221121
+          - repeat:
+              count: '5'
+              sequence:
+              - service: media_player.volume_set
+                data:
+                  volume_level: 0.13
+                target:
+                  entity_id:
+                  - media_player.owntone_output_desk
+              - service: media_player.volume_set
+                data:
+                  volume_level: 0.26
+                target:
+                  entity_id:
+                  - media_player.owntone_output_nightstand
+              - delay:
+                  hours: 0
+                  minutes: 0
+                  seconds: 1
+                  milliseconds: 0
+        else:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: media_player.spotify_anthony221121
+            state: playing
+          - condition: state
+            entity_id: script.lofi
+            state: 'on'
+        - service: script.turn_on
+          data: {}
+          target:
+            entity_id: script.lofi
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id: input_boolean.privacy
+      - service: media_player.turn_off
+        data: {}
+        target:
+          entity_id: media_player.kitchen_speakers
   - if:
     - condition: time
       before: 05:00:00
@@ -1118,11 +1178,20 @@
   alias: Cool Room
   description: ''
   trigger:
-  - platform: zone
-    entity_id: person.anthony
-    zone: zone.home
-    event: enter
-  condition: []
+  - platform: state
+    entity_id:
+    - input_select.anthony
+    to: Just Arrived
+  condition:
+  - condition: or
+    conditions:
+    - condition: numeric_state
+      entity_id: sensor.anthony_s_room_temperature
+      above: 72
+    - condition: numeric_state
+      entity_id: weather.dark_sky
+      above: 68
+      attribute: temperature
   action:
   - delay:
       hours: 0
@@ -1145,10 +1214,10 @@
     target:
       entity_id: input_boolean.ac_boost
   - wait_for_trigger:
-    - platform: zone
-      entity_id: person.anthony
-      zone: zone.home
-      event: leave
+    - platform: state
+      entity_id:
+      - input_select.anthony
+      to: Just Left
     continue_on_timeout: false
     timeout: 00:25:00
   - service: climate.turn_off
@@ -1228,9 +1297,14 @@
     state: 'on'
   action:
   - if:
-    - condition: state
-      entity_id: input_select.anthony
-      state: Home
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: input_select.anthony
+        state: Home
+      - condition: state
+        entity_id: input_select.anthony
+        state: Just Arrived
     then:
     - service: climate.set_temperature
       data:
@@ -1279,6 +1353,12 @@
           preset_mode: none
         target:
           entity_id: climate.bedroom_ac
+    - service: climate.set_temperature
+      data:
+        hvac_mode: cool
+        temperature: '{{states(''sensor.ac_thermostat_temperature'') |int(61)}}'
+      target:
+        entity_id: climate.bedroom_ac
     else:
     - service: timer.cancel
       data: {}
@@ -1315,6 +1395,8 @@
     - light.shapes_ee82
     from: unavailable
     to: 'on'
+  - event_type: event_change_nanoleaf
+    platform: event
   condition:
   - condition: not
     conditions:
@@ -1528,9 +1610,14 @@
         entity_id: switch.porch_light
       enabled: true
     else:
-    - condition: state
-      entity_id: binary_sensor.back_door
-      state: 'off'
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: binary_sensor.back_door
+        state: 'off'
+      - condition: sun
+        after: sunrise
+        before: sunset
     - service: switch.turn_off
       data: {}
       target:
@@ -2026,6 +2113,9 @@
       seconds: 0
     alias: night medicine reminder
     id: night medicine reminder
+  - platform: time
+    at: 00:00:00
+    id: midnight
   condition: []
   action:
   - choose:
@@ -2071,11 +2161,15 @@
             data:
               tag: dog-medicine
     - conditions:
-      - condition: trigger
-        id: Night
       - condition: state
         entity_id: input_boolean.night_medicine
         state: 'off'
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: Night
+        - condition: trigger
+          id: midnight
       sequence:
       - service: notify.mobile_app_iphone
         data:
@@ -2250,7 +2344,7 @@
         then:
         - service: light.turn_on
           data:
-            brightness_pct: 18
+            brightness_pct: 40
           target:
             entity_id:
             - light.kitchen_lights
@@ -2305,6 +2399,7 @@
     - media_player.living_room_tv
     - media_player.front
     to: playing
+    id: leftroom1
   - platform: state
     entity_id:
     - light.living_room_lights
@@ -2326,119 +2421,188 @@
     - binary_sensor.nest_protect_kitchen_occupancy
     - binary_sensor.nest_protect_rotunda_occupancy
     - binary_sensor.master_hall_motion
+    - binary_sensor.lumi_lumi_motion_ac02_motion
     to: 'on'
     from: 'off'
+    id: leftroom2
   - platform: state
     entity_id:
     - lock.front_door
     - binary_sensor.back_door
     to: unlocked
+    id: leftroom3
+  - platform: state
+    entity_id:
+    - binary_sensor.anthony_s_room_2
+    - binary_sensor.motion_sensor_motion_detection
+    to: 'on'
+    id: enteredroom
   condition:
   - condition: state
     entity_id: binary_sensor.home_alone
     state: 'on'
-  - condition: not
-    conditions:
-    - condition: state
-      entity_id: switch.desktop
-      state: 'on'
-    - condition: state
-      entity_id: input_boolean.ac_boost
-      state: 'on'
-    - condition: state
-      entity_id: binary_sensor.bed_occupancy
-      state: 'on'
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: switch.ac
-      state: 'on'
-    - condition: state
-      entity_id: input_boolean.bedmotion
-      state: 'on'
-    - condition: and
-      conditions:
-      - condition: state
-        entity_id: media_player.kitchen_speakers
-        state: 'off'
-      - condition: state
-        entity_id: media_player.spotify_anthony221121
-        state: playing
-      - condition: state
-        entity_id: media_player.spotify_anthony221121
-        attribute: media_playlist
-        state: lofi
-      - condition: state
-        entity_id: media_player.owntone_server
-        state: playing
   action:
-  - if:
-    - condition: state
-      entity_id: switch.ac
-      state: 'on'
-    then:
-    - service: switch.turn_off
-      data: {}
-      target:
-        entity_id: switch.ac
-    - service: timer.cancel
-      data: {}
-      target:
-        entity_id: timer.ac
-    - service: input_boolean.turn_off
-      data: {}
-      target:
-        entity_id: input_boolean.ac_boost
-    alias: AC
-  - if:
-    - condition: state
-      entity_id: input_boolean.bedmotion
-      state: 'on'
-    then:
-    - service: input_boolean.turn_off
-      data: {}
-      target:
-        entity_id: input_boolean.bedmotion
-    alias: Turn off Motion Bypass
-  - if:
-    - condition: state
-      entity_id: media_player.kitchen_speakers
-      state: 'off'
-    - condition: state
-      entity_id: media_player.spotify_anthony221121
-      state: playing
-    - condition: state
-      entity_id: media_player.spotify_anthony221121
-      attribute: media_playlist
-      state: lofi
-    - condition: state
-      entity_id: media_player.owntone_server
-      state: playing
-    then:
-    - repeat:
-        count: '7'
-        sequence:
-        - service: media_player.turn_on
+  - choose:
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: switch.ac
+          state: 'on'
+        - condition: state
+          entity_id: input_boolean.bedmotion
+          state: 'on'
+        - condition: and
+          conditions:
+          - condition: state
+            entity_id: media_player.kitchen_speakers
+            state: 'off'
+          - condition: state
+            entity_id: media_player.spotify_anthony221121
+            state: playing
+          - condition: state
+            entity_id: media_player.spotify_anthony221121
+            attribute: media_playlist
+            state: lofi
+            enabled: false
+          - condition: state
+            entity_id: media_player.owntone_server
+            state: playing
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: switch.desktop
+          state: 'on'
+        - condition: state
+          entity_id: input_boolean.ac_boost
+          state: 'on'
+        - condition: state
+          entity_id: binary_sensor.bed_occupancy
+          state: 'on'
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: leftroom1
+        - condition: trigger
+          id: leftroom2
+        - condition: trigger
+          id: leftroom3
+      sequence:
+      - if:
+        - condition: state
+          entity_id: switch.ac
+          state: 'on'
+        then:
+        - service: switch.turn_off
+          data: {}
+          target:
+            entity_id: switch.ac
+        - service: timer.cancel
+          data: {}
+          target:
+            entity_id: timer.ac
+        - service: input_boolean.turn_off
+          data: {}
+          target:
+            entity_id: input_boolean.ac_boost
+        alias: AC
+      - if:
+        - condition: state
+          entity_id: input_boolean.bedmotion
+          state: 'on'
+        then:
+        - service: input_boolean.turn_off
+          data: {}
+          target:
+            entity_id: input_boolean.bedmotion
+        alias: Turn off Motion Bypass
+      - if:
+        - condition: state
+          entity_id: media_player.kitchen_speakers
+          state: 'off'
+        - condition: state
+          entity_id: media_player.spotify_anthony221121
+          state: playing
+        - condition: state
+          entity_id: media_player.spotify_anthony221121
+          attribute: media_playlist
+          state: lofi
+          enabled: false
+        - condition: state
+          entity_id: media_player.owntone_server
+          state: playing
+        then:
+        - repeat:
+            count: '20'
+            sequence:
+            - service: media_player.turn_on
+              data: {}
+              target:
+                entity_id:
+                - media_player.kitchen_speakers
+                - media_player.owntone_output_kitchen_left
+                - media_player.owntone_output_kitchen_right
+            - service: media_player.volume_set
+              data:
+                volume_level: 0.45
+              target:
+                entity_id:
+                - media_player.kitchen_speakers
+                - media_player.owntone_output_kitchen_left
+                - media_player.owntone_output_kitchen_right
+            - delay:
+                hours: 0
+                minutes: 0
+                seconds: 2
+                milliseconds: 0
+        alias: Turn on Kitchen HomePods
+    - conditions:
+      - condition: trigger
+        id: enteredroom
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: media_player.kitchen_speakers
+          state: playing
+        - condition: state
+          entity_id: media_player.owntone_output_kitchen_left
+          state: playing
+        - condition: state
+          entity_id: media_player.owntone_output_kitchen_right
+          state: playing
+        - condition: state
+          entity_id: switch.ac
+          state: 'off'
+      sequence:
+      - parallel:
+        - service: media_player.turn_off
           data: {}
           target:
             entity_id:
             - media_player.kitchen_speakers
-            - media_player.owntone_output_kitchen_homepod
             - media_player.owntone_output_kitchen_right
-        - service: media_player.volume_set
-          data:
-            volume_level: 0.45
-          target:
-            entity_id:
-            - media_player.kitchen_speakers
-            - media_player.owntone_output_kitchen_homepod
-            - media_player.owntone_output_kitchen_right
-        - delay:
-            hours: 0
-            minutes: 0
-            seconds: 1
-            milliseconds: 0
-    alias: Turn on Kitchen HomePods
+            - media_player.owntone_output_kitchen_left
+        - if:
+          - condition: or
+            conditions:
+            - condition: numeric_state
+              entity_id: sensor.bedroom_acurite_temperature
+              above: 68
+            - condition: numeric_state
+              entity_id: climate.bedroom_ac
+              above: 68
+              attribute: current_temperature
+            - condition: numeric_state
+              entity_id: sensor.bedroom_acurite_humidity
+              above: 55
+            alias: Hot
+          then:
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id:
+              - switch.ac
+          else: []
   mode: single
 - id: '1665996041801'
   alias: Katchy
@@ -3347,27 +3511,55 @@
   trigger:
   - platform: time
     at: '22:00:00'
-  condition:
-  - condition: state
-    entity_id: binary_sensor.workday_sensor
-    state: 'on'
-  - condition: state
-    entity_id: sensor.anthony_s_echo_show_next_alarm
-    state: unavailable
+    id: night
+  - platform: state
+    id: alarmset
+    entity_id:
+    - sensor.anthony_s_echo_show_next_alarm
+    from:
+    - unavailable
+    - unknown
+  condition: []
   action:
-  - service: notify.mobile_app_iphone
-    data:
-      message: Check Alexa App
-      title: Morning alarm not set
-      data:
-        push:
-          sound:
-            name: default
-            critical: 1
-            volume: 0.3
-        actions:
-        - action: Open Alexa App
-          title: Open Alexa App
+  - choose:
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: sensor.anthony_s_echo_show_next_alarm
+          state: unavailable
+        - condition: state
+          entity_id: sensor.anthony_s_echo_show_next_alarm
+          state: unknown
+      - condition: state
+        entity_id: binary_sensor.workday_sensor
+        state: 'on'
+      - condition: trigger
+        id: night
+      sequence:
+      - service: notify.mobile_app_iphone
+        data:
+          message: Check Alexa App
+          title: Morning alarm not set
+          data:
+            tag: alarm
+            push:
+              sound:
+                name: default
+                critical: 1
+                volume: 0.3
+            actions:
+            - action: Open Alexa App
+              title: Open Alexa App
+    - conditions:
+      - condition: trigger
+        id: alarmset
+      sequence:
+      - service: notify.mobile_app_iphone
+        data:
+          message: clear_notification
+          data:
+            tag: alarm
   mode: single
 - id: '1668535366974'
   alias: Connected to Car
@@ -3584,11 +3776,15 @@
       - service: homeassistant.update_entity
         data: {}
         target:
-          entity_id: lock.back_door
+          entity_id:
+          - lock.back_door
+          - lock.front_door
     - service: homeassistant.update_entity
       data: {}
       target:
-        entity_id: lock.back_door
+        entity_id:
+        - lock.back_door
+        - lock.front_door
     - delay:
         hours: 0
         minutes: 0
@@ -3890,7 +4086,15 @@
     - media_player.owntone_server
     from: 'off'
     to: playing
-  condition: []
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_select.anthony
+      state: Home
+    - condition: state
+      entity_id: input_select.anthony
+      state: Just Arrived
   action:
   - choose:
     - conditions:
@@ -3995,11 +4199,11 @@
               - media_player.owntone_output_living_room_tv
               - media_player.owntone_output_master_bedroom_tv
               - media_player.owntone_output_nightstand
-              - media_player.owntone_output_garage
+              - media_player.owntone_output_garage_homepod
               - media_player.guest_speakers
-              - media_player.owntone_output_guest_tv
-              - media_player.owntone_output_kitchen_homepod
+              - media_player.owntone_output_kitchen_left
               - media_player.owntone_output_kitchen_right
+              - media_player.owntone_output_front_homepod
           - if:
             - condition: not
               conditions:
@@ -4044,6 +4248,9 @@
           device_id: 3c08610e07933d66eb5347257aae98aa
           entity_id: light.bathroom_lights
           domain: light
+        - condition: state
+          entity_id: binary_sensor.bed_occupancy
+          state: 'off'
         - service: media_player.volume_set
           data:
             volume_level: 0.2
@@ -4151,13 +4358,10 @@
             device_id: c63a794911c38d9e98cbf969b2bc471b
             entity_id: switch.exhaust_fan
             domain: switch
-          - condition: state
-            entity_id: light.fan_lights
-            state: 'on'
           then:
           - service: media_player.volume_set
             data:
-              volume_level: 0.2
+              volume_level: 0.4
             target:
               entity_id: media_player.spotify_anthony221121
           - parallel:
@@ -4206,13 +4410,13 @@
                     - media_player.owntone_output_desk
                 - service: media_player.volume_set
                   data:
-                    volume_level: 0.2
+                    volume_level: 0.3
                   target:
                     entity_id:
                     - media_player.owntone_output_desk
                 - service: media_player.volume_set
                   data:
-                    volume_level: 0.4
+                    volume_level: 0.5
                   target:
                     entity_id:
                     - media_player.owntone_output_nightstand
@@ -4221,6 +4425,10 @@
                     minutes: 0
                     seconds: 1
                     milliseconds: 0
+                - service: input_boolean.turn_on
+                  data: {}
+                  target:
+                    entity_id: input_boolean.bedmotion
           alias: Turn other speakers on if leaving shower
     - conditions:
       - condition: trigger
@@ -4345,6 +4553,16 @@
     from: 'off'
     to: 'on'
     id: motion2
+  - platform: state
+    entity_id:
+    - binary_sensor.bathroom_aqara_motion
+    from: 'on'
+    to: 'off'
+    id: motion clear2
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 30
   condition: []
   action:
   - choose:
@@ -4355,12 +4573,12 @@
       - if:
         - condition: device
           type: is_off
-          device_id: 624405d34a0a0bc8df3990c131a31bd2
+          device_id: 3c08610e07933d66eb5347257aae98aa
           entity_id: light.bathroom_lights
           domain: light
         then:
         - type: turn_on
-          device_id: 624405d34a0a0bc8df3990c131a31bd2
+          device_id: 3c08610e07933d66eb5347257aae98aa
           entity_id: light.bathroom_lights
           domain: light
           brightness_pct: 100
@@ -4433,11 +4651,10 @@
             state: Home
           sequence:
           - type: turn_on
-            device_id: 624405d34a0a0bc8df3990c131a31bd2
+            device_id: 3c08610e07933d66eb5347257aae98aa
             entity_id: light.bathroom_lights
             domain: light
-            brightness_pct: 4
-            alias: Turn on bathroom lights dimly
+            brightness_pct: 1
         - conditions:
           - condition: sun
             before: sunrise
@@ -4456,14 +4673,13 @@
             state: Home
           sequence:
           - type: turn_on
-            device_id: 624405d34a0a0bc8df3990c131a31bd2
+            device_id: 3c08610e07933d66eb5347257aae98aa
             entity_id: light.bathroom_lights
             domain: light
-            brightness_pct: 35
-            alias: Turn on bathroom lights less dimly
+            brightness_pct: 1
         default:
         - type: turn_on
-          device_id: 624405d34a0a0bc8df3990c131a31bd2
+          device_id: 3c08610e07933d66eb5347257aae98aa
           entity_id: light.bathroom_lights
           domain: light
           brightness_pct: 100
@@ -4515,12 +4731,12 @@
           id: timer finished
       - condition: device
         type: is_on
-        device_id: 624405d34a0a0bc8df3990c131a31bd2
+        device_id: 3c08610e07933d66eb5347257aae98aa
         entity_id: light.bathroom_lights
         domain: light
       sequence:
       - type: turn_off
-        device_id: 624405d34a0a0bc8df3990c131a31bd2
+        device_id: 3c08610e07933d66eb5347257aae98aa
         entity_id: light.bathroom_lights
         domain: light
       - service: timer.cancel
@@ -4538,7 +4754,7 @@
           milliseconds: 0
       - condition: device
         type: is_off
-        device_id: 624405d34a0a0bc8df3990c131a31bd2
+        device_id: 3c08610e07933d66eb5347257aae98aa
         entity_id: light.bathroom_lights
         domain: light
       - condition: state
@@ -4563,6 +4779,14 @@
         - condition: state
           entity_id: switch.exhaust_fan
           state: 'on'
+        - condition: state
+          entity_id: climate.home
+          state: fan
+          attribute: hvac_action
+        - condition: state
+          entity_id: climate.home
+          state: cooling
+          attribute: hvac_action
       - condition: state
         entity_id: input_boolean.bathroom_occupied
         state: 'off'
@@ -4583,8 +4807,13 @@
           - condition: state
             entity_id: timer.bathroom_light
             state: idle
+        - condition: trigger
+          id: motion clear2
       - condition: state
         entity_id: binary_sensor.bathroom_multi_sensor_motion
+        state: 'off'
+      - condition: state
+        entity_id: binary_sensor.bathroom_aqara_motion
         state: 'off'
       sequence:
       - service: timer.start
@@ -4896,7 +5125,8 @@
   trigger:
   - platform: state
     entity_id:
-    - binary_sensor.nest_protect_hallway_occupancy
+    - binary_sensor.lumi_lumi_motion_ac02_motion
+    - binary_sensor.lumi_lumi_motion_ac02_iaszone
     to: 'off'
     from: 'on'
     for:
@@ -4919,13 +5149,14 @@
   - platform: state
     entity_id:
     - binary_sensor.lumi_lumi_motion_ac02_iaszone
+    - binary_sensor.lumi_lumi_motion_ac02_motion
     to: 'on'
     from: 'off'
     id: motion
   - platform: state
     entity_id:
     - automation.hallway_lights_off
-    to: 'off'
+    to: 'on'
     for:
       hours: 0
       minutes: 5
@@ -4934,6 +5165,15 @@
   - platform: homeassistant
     event: start
     id: start
+  - platform: state
+    entity_id:
+    - binary_sensor.bed_occupancy
+    from: 'on'
+    to: 'off'
+    id: out of bed
+  - platform: event
+    event_type: automation_reloaded
+    id: reloaded
   condition: []
   action:
   - choose:
@@ -4951,16 +5191,17 @@
           id: clear
         - condition: trigger
           id: start
-      - condition: state
-        entity_id: binary_sensor.nest_protect_hallway_occupancy
-        state: 'off'
-        for:
-          hours: 0
-          minutes: 5
-          seconds: 0
+        - condition: trigger
+          id: reloaded
       - condition: state
         entity_id: light.hallway_lights
         state: 'on'
+      - condition: state
+        entity_id: binary_sensor.lumi_lumi_motion_ac02_iaszone
+        state: 'off'
+      - condition: state
+        entity_id: binary_sensor.lumi_lumi_motion_ac02_motion
+        state: 'off'
       sequence:
       - service: light.turn_off
         data: {}
@@ -4983,15 +5224,25 @@
           - condition: state
             entity_id: binary_sensor.bedroom_on
             state: 'on'
+        - condition: and
+          conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: binary_sensor.lumi_lumi_motion_ac02_motion
+              state: 'on'
+            - condition: state
+              entity_id: binary_sensor.lumi_lumi_motion_ac02_iaszone
+              state: 'on'
+          - condition: trigger
+            id: out of bed
+          - condition: state
+            entity_id: binary_sensor.bedroom_door
+            state: 'on'
         alias: door opened
       - condition: state
         entity_id: light.hallway_lights
         state: 'off'
-      - condition: not
-        conditions:
-        - condition: time
-          after: 01:00:00
-          before: 06:00:00
       - condition: or
         conditions:
         - condition: sun
@@ -5013,6 +5264,16 @@
       - condition: state
         entity_id: binary_sensor.bed_occupancy
         state: 'off'
+      - condition: or
+        conditions:
+        - condition: not
+          conditions:
+          - condition: time
+            after: 01:00:00
+            before: 06:00:00
+        - condition: state
+          entity_id: switch.desktop
+          state: 'on'
       sequence:
       - service: light.turn_on
         data:
@@ -5075,9 +5336,6 @@
         entity_id: media_player.owntone_output_master_bedroom_tv
         state: 'on'
       - condition: state
-        entity_id: media_player.owntone_output_guest_tv
-        state: 'on'
-      - condition: state
         entity_id: media_player.kitchen_speakers
         state: 'on'
       - condition: state
@@ -5090,7 +5348,7 @@
         entity_id: media_player.owntone_output_front
         state: 'on'
       - condition: state
-        entity_id: media_player.owntone_output_garage
+        entity_id: media_player.owntone_output_garage_homepod
         state: 'on'
     then:
     - service: media_player.turn_off
@@ -5099,11 +5357,12 @@
         entity_id:
         - media_player.owntone_server
         - media_player.owntone_output_front
-        - media_player.owntone_output_kitchen_homepod
+        - media_player.owntone_output_front_homepod
+        - media_player.owntone_output_kitchen_left
+        - media_player.owntone_output_kitchen_right
         - media_player.owntone_output_living_room_tv
         - media_player.owntone_output_master_bedroom_tv
-        - media_player.owntone_output_garage
-        - media_player.owntone_output_guest_tv
+        - media_player.owntone_output_garage_homepod
         - media_player.owntone_output_guest_left
         - media_player.owntone_output_guest_right
         - media_player.kitchen_speakers
@@ -5362,15 +5621,12 @@
     from: 'off'
     id: wave
   - platform: device
-    device_id: 7c247296aac3c00b267bb165baab5a7c
-    domain: zwave_js
-    type: event.value_notification.central_scene
-    property: scene
-    property_key: '001'
-    endpoint: 0
-    command_class: 91
-    subtype: Endpoint 0 Scene 001
+    type: turned_on
+    device_id: c63a794911c38d9e98cbf969b2bc471b
+    entity_id: switch.exhaust_fan
+    domain: switch
     id: turned on
+    enabled: false
   - platform: state
     entity_id:
     - input_boolean.showering
@@ -5389,6 +5645,15 @@
     from: 'off'
     to: 'on'
     id: motion2
+  - platform: state
+    entity_id:
+    - input_boolean.bathroom_occupied
+    to: 'on'
+    for:
+      hours: 2
+      minutes: 0
+      seconds: 0
+    id: 2hrs
   condition: []
   action:
   - choose:
@@ -5455,6 +5720,19 @@
             domain: light
         - condition: trigger
           id: lights turned off
+        - condition: and
+          conditions:
+          - condition: trigger
+            id: 2hrs
+          - condition: state
+            entity_id: binary_sensor.bathroom_aqara_motion
+            state: 'off'
+          - condition: state
+            entity_id: binary_sensor.bathroom_multi_sensor_motion
+            state: 'off'
+          - condition: state
+            entity_id: input_boolean.showering
+            state: 'off'
       sequence:
       - service: input_boolean.turn_off
         data: {}
@@ -5689,6 +5967,7 @@
     - utd
     - raytheon
     - collin
+    - taylor_s_home
   condition:
   - condition: or
     conditions:
@@ -5753,9 +6032,6 @@
       entity_id: update.alexa_media_player_update
       state: 'on'
     - condition: state
-      entity_id: update.govee_update
-      state: 'on'
-    - condition: state
       entity_id: update.wyze_update
       state: 'on'
     - condition: state
@@ -5805,6 +6081,45 @@
       state: 'on'
     - condition: state
       entity_id: update.vaultwarden_bitwarden_update
+      state: 'on'
+    - condition: state
+      entity_id: update.bkplug2_firmware
+      state: 'on'
+    - condition: state
+      entity_id: update.bkplug1_firmware
+      state: 'on'
+    - condition: state
+      entity_id: update.bkplug3_firmware
+      state: 'on'
+    - condition: state
+      entity_id: update.bkplug4_firmware
+      state: 'on'
+    - condition: state
+      entity_id: update.roundplug2_firmware
+      state: 'on'
+    - condition: state
+      entity_id: update.roundplug1_firmware
+      state: 'on'
+    - condition: state
+      entity_id: update.wyzebulb4_firmware
+      state: 'on'
+    - condition: state
+      entity_id: update.wyzebulb5_firmware
+      state: 'on'
+    - condition: state
+      entity_id: update.wyzebulb7_firmware
+      state: 'on'
+    - condition: state
+      entity_id: update.wyzebulb6_firmware
+      state: 'on'
+    - condition: state
+      entity_id: update.usbswitch_firmware_2
+      state: 'on'
+    - condition: state
+      entity_id: update.home_assistant_core_update
+      state: 'on'
+    - condition: state
+      entity_id: update.kiosk_mode_update
       state: 'on'
   action:
   - parallel:
@@ -6025,9 +6340,19 @@
         target:
           entity_id:
           - update.vaultwarden_bitwarden_update
+    - if:
+      - condition: state
+        entity_id: update.kiosk_mode_update
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id:
+          - update.kiosk_mode_update
   - delay:
       hours: 0
-      minutes: 1
+      minutes: 3
       seconds: 0
       milliseconds: 0
   - parallel:
@@ -6112,6 +6437,106 @@
         data: {}
         target:
           entity_id: update.wyzebulb3_firmware
+    - if:
+      - condition: state
+        entity_id: update.wyzebulb4_firmware
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id: update.wyzebulb4_firmware
+    - if:
+      - condition: state
+        entity_id: update.wyzebulb5_firmware
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id: update.wyzebulb5_firmware
+    - if:
+      - condition: state
+        entity_id: update.wyzebulb6_firmware
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id: update.wyzebulb6_firmware
+    - if:
+      - condition: state
+        entity_id: update.bkplug2_firmware
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id: update.bkplug2_firmware
+    - if:
+      - condition: state
+        entity_id: update.bkplug1_firmware
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id: update.bkplug1_firmware
+    - if:
+      - condition: state
+        entity_id: update.bkplug3_firmware
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id: update.bkplug3_firmware
+    - if:
+      - condition: state
+        entity_id: update.bkplug4_firmware
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id: update.bkplug4_firmware
+    - if:
+      - condition: state
+        entity_id: update.roundplug2_firmware
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id: update.roundplug2_firmware
+    - if:
+      - condition: state
+        entity_id: update.roundplug1_firmware
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id: update.roundplug1_firmware
+    - if:
+      - condition: state
+        entity_id: update.usbswitch_firmware_2
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id: update.usbswitch_firmware_2
+    - if:
+      - condition: state
+        entity_id: update.wyzebulb7_firmware
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id:
+          - update.wyzebulb7_firmware
   - service: button.press
     data: {}
     target:
@@ -6132,15 +6557,6 @@
       data: {}
       target:
         entity_id: update.home_assistant_supervisor_update
-  - if:
-    - condition: state
-      entity_id: update.home_assistant_operating_system_update
-      state: 'on'
-    then:
-    - service: update.install
-      data: {}
-      target:
-        entity_id: update.home_assistant_operating_system_update
   - if:
     - condition: or
       conditions:
@@ -6163,9 +6579,6 @@
         entity_id: update.alexa_media_player_update
         state: 'on'
       - condition: state
-        entity_id: update.govee_update
-        state: 'on'
-      - condition: state
         entity_id: update.wyze_update
         state: 'on'
       - condition: state
@@ -6182,6 +6595,9 @@
         state: 'on'
       - condition: state
         entity_id: update.hisense_tv_update
+        state: 'on'
+      - condition: state
+        entity_id: update.govee_lan_control_update
         state: 'on'
     then:
     - parallel:
@@ -6246,16 +6662,6 @@
             entity_id: update.alexa_media_player_update
       - if:
         - condition: state
-          entity_id: update.govee_update
-          state: 'on'
-        then:
-        - service: update.install
-          data: {}
-          target:
-            entity_id:
-            - update.govee_update
-      - if:
-        - condition: state
           entity_id: update.wyze_update
           state: 'on'
         then:
@@ -6314,6 +6720,16 @@
           target:
             entity_id:
             - update.hisense_tv_update
+      - if:
+        - condition: state
+          entity_id: update.govee_lan_control_update
+          state: 'on'
+        then:
+        - service: update.install
+          data: {}
+          target:
+            entity_id:
+            - update.govee_lan_control_update
     - condition: not
       conditions:
       - condition: or
@@ -6326,6 +6742,27 @@
           state: Home
     - service: homeassistant.restart
       data: {}
+  - if:
+    - condition: state
+      entity_id: update.home_assistant_operating_system_update
+      state: 'on'
+    then:
+    - service: update.install
+      data: {}
+      target:
+        entity_id: update.home_assistant_operating_system_update
+    enabled: false
+  - if:
+    - condition: state
+      entity_id: update.home_assistant_core_update
+      state: 'on'
+    then:
+    - service: update.install
+      data: {}
+      target:
+        entity_id:
+        - update.home_assistant_core_update
+    enabled: true
   mode: single
 - id: '1677121828248'
   alias: Turn off TVs
@@ -6369,6 +6806,14 @@
     - condition: state
       entity_id: media_player.spotify_anthony221121
       state: playing
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_select.anthony
+      state: Just Arrived
+    - condition: state
+      entity_id: input_select.anthony
+      state: Home
   action:
   - service: script.lofi
     data: {}
@@ -6400,6 +6845,12 @@
     - binary_sensor.bed_occupancy
     to: 'on'
     id: bed
+  - platform: device
+    type: turned_on
+    device_id: aa29287a53774cb599c5658e30e48d9d
+    entity_id: light.kitchen_lights
+    domain: light
+    id: lights on
   condition:
   - condition: time
     after: '22:30:00'
@@ -6463,6 +6914,19 @@
         target:
           entity_id:
           - media_player.kitchen_speakers
+    - conditions:
+      - condition: trigger
+        id: lights on
+      sequence:
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 1
+          milliseconds: 0
+      - type: turn_off
+        device_id: 12fdf93ade08d994961d501d7730373c
+        entity_id: light.kitchen_cabinet_lights
+        domain: light
   mode: single
 - id: '1678704758356'
   alias: Resume Music After Macbook Stops It
@@ -6492,6 +6956,14 @@
     entity_id: media_player.spotify_anthony221121
     attribute: source
     state: Home Assistant
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_select.anthony
+      state: Just Arrived
+    - condition: state
+      entity_id: input_select.anthony
+      state: Home
   action:
   - if:
     - condition: state
@@ -6586,7 +7058,7 @@
     event: start
   - platform: state
     entity_id:
-    - media_player.owntone_output_garage
+    - media_player.owntone_output_garage_homepod
     from: 'off'
     to: 'On'
     id: owntone
@@ -6600,7 +7072,7 @@
           entity_id: pyscript.airport_2_playing
           state: 'True'
         - condition: state
-          entity_id: media_player.owntone_output_garage
+          entity_id: media_player.owntone_output_garage_homepod
           state: 'On'
       sequence:
       - service: switch.turn_on
@@ -6715,7 +7187,7 @@
             entity_id:
             - media_player.danas_32_tcl_roku_tv
             - media_player.guest_speakers
-            - media_player.owntone_output_garage
+            - media_player.owntone_output_garage_homepod
         - service: button.press
           data: {}
           target:
@@ -6930,129 +7402,49 @@
       pico_remote: c51c176058dad4748b6065d54c93bec5
       auto_mode: parallel
       top_on:
-      - parallel:
-        - service: switch.turn_on
-          data: {}
-          target:
-            entity_id:
-            - switch.dana_s_color_ropes
-            - switch.dana_s_incandescant_ropes
-            - switch.samsungtv
-        - service: light.turn_on
-          data:
-            rgb_color:
-            - 255
-            - 0
-            - 255
-            brightness_pct: 100
-          target:
-            entity_id:
-            - light.dana_s_fan_lights
-        - service: media_player.turn_on
-          data: {}
-          target:
-            entity_id: media_player.danas_32_tcl_roku_tv
-        - service: button.press
-          data: {}
-          target:
-            entity_id: button.screenon
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id:
+          - switch.guest_bedroom_light
       down_lower:
-      - if:
-        - condition: or
-          conditions:
-          - condition: state
-            entity_id: switch.dana_s_south_color_rope
-            state: 'off'
-          - condition: state
-            entity_id: switch.dana_s_west_color_rope
-            state: 'off'
-        then:
-        - service: switch.turn_on
-          data: {}
-          target:
-            entity_id:
-            - switch.dana_s_color_ropes
-        else:
-        - service: switch.turn_off
-          data: {}
-          target:
-            entity_id:
-            - switch.dana_s_color_ropes
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id:
+          - switch.guest_bedroom_fan
       bottom_off:
-      - parallel:
-        - service: switch.turn_off
-          data: {}
-          target:
-            entity_id:
-            - switch.dana_s_color_ropes
-            - switch.dana_s_incandescant_ropes
-            - switch.polk_omni
-            - switch.samsungtv
-        - service: light.turn_off
-          data: {}
-          target:
-            entity_id:
-            - light.dana_s_fan_lights
-        - service: media_player.turn_off
-          data: {}
-          target:
-            entity_id:
-            - media_player.danas_32_tcl_roku_tv
-            - media_player.guest_speakers
-            - media_player.owntone_output_garage
-        - service: button.press
-          data: {}
-          target:
-            entity_id: button.screenoff_2
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id:
+          - switch.guest_bedroom_light
       up_raise:
-      - if:
-        - condition: or
-          conditions:
-          - condition: state
-            entity_id: switch.dana_s_east_incandescent_rope
-            state: 'on'
-          - condition: state
-            entity_id: switch.dana_s_north_incandescent_rope
-            state: 'on'
-          - condition: state
-            entity_id: switch.dana_s_south_incandescent_rope
-            state: 'on'
-        then:
-        - service: switch.turn_off
-          data: {}
-          target:
-            entity_id:
-            - switch.dana_s_incandescant_ropes
-        else:
-        - service: switch.turn_on
-          data: {}
-          target:
-            entity_id:
-            - switch.dana_s_incandescant_ropes
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id:
+          - switch.guest_bedroom_fan
       top_on_release: []
       up_raise_release: []
       down_lower_release: []
       middle_stop_release: []
       middle_stop:
-      - if:
-        - condition: state
-          entity_id: light.dana_s_fan_lights
-          state: 'on'
-        then:
-        - service: light.turn_off
-          data: {}
-          target:
-            entity_id:
-            - light.dana_s_fan_lights
-        else:
-        - service: light.turn_on
-          data:
-            rgb_color:
-            - 255
-            - 0
-            - 255
-            brightness_pct: 100
-          target:
-            entity_id:
-            - light.dana_s_fan_lights
+      - service: switch.toggle
+        data: {}
+        target:
+          entity_id: switch.samsungtv
       bottom_off_release: []
+- id: '1683843733749'
+  alias: Turn Off USW LEDs
+  description: ''
+  trigger:
+  - platform: time_pattern
+    minutes: /5
+  condition: []
+  action:
+  - service: switch.turn_off
+    data: {}
+    target:
+      entity_id: switch.usw_leds
+  mode: single

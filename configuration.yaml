@@ -69,3 +69,12 @@ notify:
 rest_command:
   set_wled_brightness:
     url: http://192.168.1.57/win&A={{ states("input_number.wled_brightness") }}
+
+command_line:
+  - switch:
+      name: USW LEDs
+      command_on: !secret usw_leds_on
+      command_off: !secret usw_leds_off
+#     name: "U6-Pro LED"
+#     command_on: !secret u6_pro_on
+#     command_off: !secret u6_pro_off
