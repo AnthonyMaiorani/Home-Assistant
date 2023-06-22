@@ -740,66 +740,6 @@
     target:
       entity_id: cover.bedroom_blinds
   mode: single
-- id: '1629524719390'
-  alias: Closet Lights Control
-  description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - binary_sensor.closet
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: binary_sensor.closet
-        state: 'on'
-      - condition: state
-        entity_id: light.desk_lights
-        state: 'on'
-      sequence:
-      - service: light.turn_on
-        target:
-          entity_id: light.closet_lights
-        data:
-          effect: Color Loop
-          brightness_pct: 2
-      - service: light.turn_on
-        target:
-          entity_id: light.closet_lights
-        data:
-          brightness_pct: 100
-    - conditions:
-      - condition: state
-        entity_id: binary_sensor.closet
-        state: 'on'
-      - condition: state
-        entity_id: light.desk_lights
-        state: 'off'
-      sequence:
-      - service: light.turn_on
-        target:
-          entity_id: light.closet_lights
-        data:
-          rgb_color:
-          - 255
-          - 255
-          - 255
-          effect: None
-    - conditions:
-      - condition: state
-        entity_id: binary_sensor.closet
-        state: 'off'
-      - condition: state
-        entity_id: light.closet_lights
-        state: 'on'
-      sequence:
-      - service: light.turn_off
-        data: {}
-        target:
-          entity_id: light.closet_lights
-    default: []
-  mode: single
 - id: '1644476253725'
   alias: Bed Occupancy Detected
   description: If motion detected in bed under certain circumstances, turn off overhead
@@ -821,7 +761,7 @@
   - choose:
     - conditions:
       - condition: time
-        before: 05:00:00
+        before: 06:00:00
         after: '22:00:00'
       - condition: state
         entity_id: light.desk_lights
@@ -1284,17 +1224,30 @@
     - switch.ac
     - input_boolean.ac_boost
     to: 'on'
+  - platform: state
+    entity_id:
+    - input_select.anthony
   condition:
-  - condition: template
-    value_template: "{% set trigger = 'false' %}\n{% if is_state('input_boolean.ac_boost',
-      'on') %} \n  {% set trigger = 'true' %}\n{% elif not is_state('sensor.ac_thermostat_temperature',
-      'unknown') \n  and states('sensor.ac_thermostat_temperature') is not none %}\n
-      \ {% if not is_state_attr('climate.bedroom_ac', \"temperature\", \n  states('sensor.ac_thermostat_temperature')|int(61))
-      %} \n    {% set trigger = 'true' %}\n  {% endif %}\n{% endif %}\n{{ trigger
-      }}"
   - condition: state
     entity_id: switch.ac
     state: 'on'
+  - condition: or
+    conditions:
+    - condition: template
+      value_template: "{% set trigger = 'false' %}\n{% if is_state('input_boolean.ac_boost',
+        'on') %} \n  {% set trigger = 'true' %}\n{% elif not is_state('sensor.ac_thermostat_temperature',
+        'unknown') \n  and states('sensor.ac_thermostat_temperature') is not none
+        %}\n  {% if not is_state_attr('climate.bedroom_ac', \"temperature\", \n  states('sensor.ac_thermostat_temperature')|int(61))
+        %} \n    {% set trigger = 'true' %}\n  {% endif %}\n{% endif %}\n{{ trigger
+        }}"
+    - condition: and
+      conditions:
+      - condition: state
+        entity_id: switch.ac
+        state: 'on'
+      - condition: state
+        entity_id: input_select.anthony
+        state: Away
   action:
   - if:
     - condition: or
@@ -1703,10 +1656,6 @@
             - light.hallway_lights
         alias: Hallway Lights
       alias: Turn on Lights
-    - service: button.press
-      data: {}
-      target:
-        entity_id: button.tare
   mode: single
 - id: '1664570555449'
   alias: Turn on TV
@@ -7447,4 +7396,81 @@
     data: {}
     target:
       entity_id: switch.usw_leds
+  mode: single
+- id: '1686560160740'
+  alias: Webcam Profiles
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.webcam
+    to: 'on'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+  condition:
+  - condition: state
+    entity_id: binary_sensor.discord_active
+    state: 'on'
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: light.fan_lights
+        state: Color Loop
+        attribute: effect
+      sequence:
+      - repeat:
+          count: '6'
+          sequence:
+          - service: button.press
+            data: {}
+            target:
+              entity_id: button.color
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 0
+              milliseconds: 500
+    - conditions:
+      - condition: state
+        entity_id: light.fan_lights
+        state: 'on'
+      - condition: state
+        entity_id: light.fan_lights
+        state: None
+        attribute: effect
+      sequence:
+      - repeat:
+          count: '6'
+          sequence:
+          - service: button.press
+            data: {}
+            target:
+              entity_id:
+              - button.white
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 0
+              milliseconds: 500
+    - conditions:
+      - condition: state
+        entity_id: light.fan_lights
+        state: 'off'
+      sequence:
+      - repeat:
+          count: '6'
+          sequence:
+          - service: button.press
+            data: {}
+            target:
+              entity_id:
+              - button.off
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 0
+              milliseconds: 500
   mode: single

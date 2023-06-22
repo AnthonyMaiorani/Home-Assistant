@@ -62,39 +62,6 @@ light:
               }
               call.perform();
             }
-  - platform: rgb
-    id: closetleds
-    name: "${friendly_name_2}"
-    red: output_red
-    green: output_green
-    blue: output_blue
-    restore_mode: RESTORE_DEFAULT_OFF
-    effects:
-      - random:
-          name: Music
-          transition_length: .1s
-          update_interval: .2s
-      - lambda:
-          name: Color Loop
-          lambda: |-
-            static float state = 0;
-            if (state != id(hassstate).state) {
-              state = id(hassstate).state;
-              auto call = id(closetleds).turn_on();
-              call.set_transition_length(3000);
-              if (state == 0) {
-                call.set_rgb(0.45, 0.98, 0.39);
-              } else if (state == 1) {
-                call.set_rgb(0.45, 0.98, 0.93);
-              } else if (state == 2) {
-                call.set_rgb(0.38, 0.15, 0.96);
-              } else if (state == 3) {
-                call.set_rgb(0.5, 0.17, 0.96);
-              } else {
-                call.set_rgb(0.92, 0.2, 0.27);
-              }
-              call.perform();
-            }
 
 output:
   - platform: ledc
@@ -127,44 +94,3 @@ substitutions:
   friendly_name: "Desk Lights"
   friendly_name_2: "Closet Lights"
   name: desklights
-
-binary_sensor:
-  - platform: homeassistant
-    entity_id: binary_sensor.closet
-    id: closetstate
-    on_release:
-      - light.turn_off: closetleds
-  - platform: template
-    id: lighton
-    on_press:
-      then:
-        - if:
-            condition: 
-              binary_sensor.is_off: closetstate
-            then: 
-              - light.turn_off: closetleds
-    lambda: 'return id(closetleds).current_values.is_on();'
-
-remote_transmitter:
-  pin: GPIO32
-  carrier_duty_percent: 100
-
-switch:
-  - platform: template
-    name: Case Lights
-    assumed_state: true
-    optimistic: true
-    lambda: |-
-      return {};
-    turn_on_action:
-      - delay: 200ms
-      - remote_transmitter.transmit_rc_switch_raw:
-          code: '0100001110100100000000011'
-          protocol: 1
-          repeat: 3
-    turn_off_action:
-      - delay: 500ms
-      - remote_transmitter.transmit_rc_switch_raw:
-          code: '0100001110100100000000111'
-          protocol: 1
-          repeat: 5

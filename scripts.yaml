@@ -39,7 +39,6 @@ fan_off:
         - light.desk_lights
         - light.light_switch
         - light.light_switch_corner
-        - light.closet_lights
   mode: single
   icon: mdi:ceiling-light
 color_loop:
@@ -85,7 +84,6 @@ color_loop:
       target:
         entity_id:
         - light.bedroom_lights
-        - light.closet_lights
     - if:
       - condition: or
         conditions:
@@ -164,7 +162,6 @@ music:
       target:
         entity_id:
         - light.bedroom_lights
-        - light.closet_lights
     - service: light.turn_on
       data: {}
       target:
@@ -219,7 +216,6 @@ call:
       target:
         entity_id:
         - light.fan_lights
-        - light.closet_lights
         - light.desk_lights
         - light.wled
         - light.hallway_lights
@@ -361,7 +357,6 @@ night:
         entity_id:
         - light.shapes_007f
         - light.bedroom_lights
-        - light.closet_lights
         - light.glide_lan
         - light.shapes_ee82
         - light.wled
@@ -567,7 +562,6 @@ morning:
         - light.desk_lights
         - light.light_switch
         - light.light_switch_corner
-        - light.closet_lights
     - service: input_select.select_option
       data:
         option: Home

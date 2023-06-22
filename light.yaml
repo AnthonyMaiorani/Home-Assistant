@@ -15,7 +15,6 @@
   entities:
     - light.bed_lights
     - light.desk_lights
-    - light.closet_lights
 - platform: group
   unique_id: fan_lights
   name: Fan Lights
