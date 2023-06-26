@@ -62,6 +62,7 @@
         entity_id:
         - light.shapes_007f
         - light.shapes_ee82
+        - light.shapes_4948
     - service: script.turn_on
       data: {}
       target:
@@ -692,6 +693,7 @@
                 entity_id:
                 - light.shapes_007f
                 - light.shapes_ee82
+                - light.shapes_4948
               data:
                 brightness_pct: 100
           - conditions:
@@ -707,6 +709,7 @@
                 entity_id:
                 - light.shapes_007f
                 - light.shapes_ee82
+                - light.shapes_4948
               data:
                 brightness_pct: 100
           default: []
@@ -1350,6 +1353,16 @@
     to: 'on'
   - event_type: event_change_nanoleaf
     platform: event
+  - platform: state
+    entity_id:
+    - binary_sensor.desktop_power
+    from: 'on'
+    to: 'off'
+  - platform: state
+    entity_id:
+    - light.shapes_4948
+    from: unavailable
+    to: 'on'
   condition:
   - condition: not
     conditions:
@@ -1373,42 +1386,140 @@
         entity_id:
         - light.shapes_007f
         - light.shapes_ee82
+        - light.shapes_4948
     - stop: ''
-  - wait_template: "  {{ (not states('sensor.nanoleaf_scene') in (\"unavailable\",
-      \"unknown\") and not \n\n  is_state_attr('light.shapes_007f', \"effect\", states('sensor.nanoleaf_scene')))\n\n
-      \ or \n\n  (not states('sensor.nanoleaf_auto_brightness') in (\"unavailable\",
-      \"unknown\")\n  and not \n\n  is_state_attr('light.shapes_007f', \"brightness\",\n
-      \ states('sensor.nanoleaf_auto_brightness')|int - 2))\n\nor \n\n(not states('sensor.nanoleaf_scene')
+  - wait_template: "{{ (\n  not states('sensor.nanoleaf_scene') in (\"unavailable\",
+      \"unknown\") and not \n\n  is_state_attr('light.shapes_007f', \"effect\", states('sensor.nanoleaf_scene'))\n
+      \ )\n\n  or \n\n  (not states('sensor.nanoleaf_auto_brightness') in (\"unavailable\",
+      \"unknown\")\n  and not \n  is_state_attr('light.shapes_007f', \"brightness\",\n
+      \ states('sensor.nanoleaf_auto_brightness')|int - 2))\n\n  or \n\n  (not states('sensor.nanoleaf_scene')
       in (\"unavailable\", \"unknown\") and not \n\n  is_state_attr('light.shapes_ee82',
-      \"effect\", states('sensor.nanoleaf_scene')))\n\n  or \n\n  (not states('sensor.nanoleaf_auto_brightness')
-      in (\"unavailable\", \"unknown\")\n  and not \n\n  is_state_attr('light.shapes_ee82',
-      \"brightness\",\n  states('sensor.nanoleaf_auto_brightness')|int - 2))\n\n\n\n}}"
+      \"effect\", states('sensor.nanoleaf_scene'))\n  or\n  is_state_attr('light.shapes_ee82',
+      \"effect\", \"*ExtControl*\") and is_state('switch.desktop', 'on')\n  )\n\n
+      \ or \n\n  (not states('sensor.nanoleaf_auto_brightness') in (\"unavailable\",
+      \"unknown\")\n  and not \n\n  is_state_attr('light.shapes_ee82', \"brightness\",\n
+      \ states('sensor.nanoleaf_auto_brightness')|int - 2))\n\n}}"
     continue_on_timeout: false
     timeout: 00:05:00
+    enabled: false
   - parallel:
     - repeat:
         until:
         - condition: template
-          value_template: "      {{  is_state('sensor.nanoleaf_auto_brightness', '0')
-            or\n      (\n      (is_state_attr('light.shapes_007f', \"effect\",\n      states('sensor.nanoleaf_scene'))\n\n
-            \     and\n\n      is_state_attr('light.shapes_ee82', \"effect\",\n      states('sensor.nanoleaf_scene')))\n\n
-            \     )}}"
+          value_template: "{{  \nis_state('sensor.nanoleaf_auto_brightness', '0')
+            \nor\n(\n  (\n    is_state_attr('light.shapes_007f', \"effect\", states('sensor.nanoleaf_scene'))\n
+            \ or\n    not is_state('sensor.nanoleaf_scene', 'Webcam') and is_state_attr('light.shapes_007f',
+            \"effect\", \"*ExtControl*\")\n  )\n  \n  and\n  (\n    is_state_attr('light.shapes_ee82',
+            \"effect\", states('sensor.nanoleaf_scene'))\n    or \n    (\n      is_state_attr('light.shapes_ee82',
+            \"effect\", \"*ExtControl*\")\n      and\n      is_state('switch.desktop',
+            'on')\n    )\n  )\n  and\n  (\n    is_state_attr('light.shapes_4948',
+            \"effect\", states('sensor.nanoleaf_scene'))\n    or \n    (\n      is_state_attr('light.shapes_4948',
+            \"effect\", \"*ExtControl*\")\n      and\n      is_state('switch.desktop',
+            'on')\n    )\n  )\n)\n}}"
         sequence:
         - if:
-          - condition: template
-            value_template: "{{ not states('sensor.nanoleaf_scene') in (\"unavailable\",
-              \"unknown\") and not \n\n(is_state_attr('light.shapes_007f', \"effect\",
-              states('sensor.nanoleaf_scene'))\nand\nis_state_attr('light.shapes_ee82',
-              \"effect\", states('sensor.nanoleaf_scene'))\n)}}"
+          - condition: not
+            conditions:
+            - condition: or
+              conditions:
+              - condition: state
+                entity_id: sensor.nanoleaf_scene
+                state: unavailable
+              - condition: state
+                entity_id: sensor.nanoleaf_scene
+                state: unknown
+              alias: nanoleaf scene invalid
+            alias: Not
+          - condition: or
+            conditions:
+            - condition: not
+              conditions:
+              - condition: or
+                conditions:
+                - condition: template
+                  value_template: '{{ is_state_attr(''light.shapes_ee82'', "effect",
+                    states(''sensor.nanoleaf_scene'')) }}'
+                - condition: template
+                  value_template: '{{ is_state_attr(''light.shapes_ee82'', "effect",
+                    "*ExtControl*") and is_state(''switch.desktop'', ''on'') }}'
+                alias: vertical shapes scene correct
+              alias: Not
+            - condition: not
+              conditions:
+              - condition: or
+                conditions:
+                - condition: template
+                  value_template: '{{ is_state_attr(''light.shapes_007f'', "effect",
+                    states(''sensor.nanoleaf_scene'')) }}'
+                - condition: template
+                  value_template: '{{ not is_state(''sensor.nanoleaf_scene'', ''Webcam'')
+                    and is_state_attr(''light.shapes_007f'', "effect", "*ExtControl*")
+                    }}'
+                alias: desk shapes scene correct
+              alias: Not
+            - condition: not
+              conditions:
+              - condition: or
+                conditions:
+                - condition: template
+                  value_template: '{{ is_state_attr(''light.shapes_4948'', "effect",
+                    states(''sensor.nanoleaf_scene'')) }}'
+                - condition: template
+                  value_template: '{{ is_state_attr(''light.shapes_4948'', "effect",
+                    "*ExtControl*") and is_state(''switch.desktop'', ''on'') }}'
+                alias: corner shapes scene correct
+              alias: Not
           then:
-          - service: light.turn_on
-            continue_on_error: true
-            target:
-              entity_id:
-              - light.shapes_007f
-              - light.shapes_ee82
-            data:
-              effect: '{{ states(''sensor.nanoleaf_scene'') }}'
+          - parallel:
+            - service: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.shapes_007f
+              data:
+                effect: '{{ states(''sensor.nanoleaf_scene'') }}'
+            - if:
+              - condition: not
+                conditions:
+                - condition: and
+                  conditions:
+                  - condition: state
+                    entity_id: light.shapes_ee82
+                    attribute: effect
+                    state: '*ExtControl*'
+                  - condition: state
+                    entity_id: switch.desktop
+                    state: 'on'
+                alias: If not controlled by signal
+              then:
+              - service: light.turn_on
+                continue_on_error: true
+                target:
+                  entity_id:
+                  - light.shapes_ee82
+                data:
+                  effect: '{{ states(''sensor.nanoleaf_scene'') }}'
+            - if:
+              - condition: not
+                conditions:
+                - condition: and
+                  conditions:
+                  - condition: state
+                    entity_id: light.shapes_4948
+                    attribute: effect
+                    state: '*ExtControl*'
+                  - condition: state
+                    entity_id: switch.desktop
+                    state: 'on'
+              then:
+              - service: light.turn_on
+                continue_on_error: true
+                target:
+                  entity_id:
+                  - light.shapes_4948
+                data:
+                  effect: '{{ states(''sensor.nanoleaf_scene'') }}'
+            alias: Set effect
         - delay:
             hours: 0
             minutes: 0
@@ -1419,14 +1530,16 @@
         - condition: template
           value_template: "{{ \n(is_state_attr('light.shapes_007f', \"brightness\",
             states('sensor.nanoleaf_auto_brightness')|int - 2) \nand \nis_state_attr('light.shapes_ee82',
-            \"brightness\", states('sensor.nanoleaf_auto_brightness')|int - 2) )}}"
+            \"brightness\", states('sensor.nanoleaf_auto_brightness')|int - 2)\nand\nis_state_attr('light.shapes_4948',
+            \"brightness\", states('sensor.nanoleaf_auto_brightness')|int - 2)\n)}}"
         sequence:
         - if:
           - condition: template
             value_template: "{{not states('sensor.nanoleaf_auto_brightness') in (\"unavailable\",
               \"unknown\") and not \n(is_state_attr('light.shapes_007f', \"brightness\",
               states('sensor.nanoleaf_auto_brightness')|int - 2) \nand \nis_state_attr('light.shapes_ee82',
-              \"brightness\", states('sensor.nanoleaf_auto_brightness')|int - 2) )}}"
+              \"brightness\", states('sensor.nanoleaf_auto_brightness')|int - 2) \nand\nis_state_attr('light.shapes_4948',
+              \"brightness\", states('sensor.nanoleaf_auto_brightness')|int - 2) \n)}}"
           then:
           - service: light.turn_on
             continue_on_error: true
@@ -1434,6 +1547,7 @@
               entity_id:
               - light.shapes_007f
               - light.shapes_ee82
+              - light.shapes_4948
             data:
               brightness: '{{ states(''sensor.nanoleaf_auto_brightness'') }}'
         - delay:
@@ -5399,6 +5513,69 @@
         data: {}
         target:
           entity_id: switch.usb_hub
+      - if:
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: media_player.spotify_anthony221121
+            attribute: source
+            state: Home Assistant
+          - condition: state
+            entity_id: media_player.spotify_anthony221121
+            attribute: media_playlist
+            state: lofi
+        - condition: state
+          entity_id: binary_sensor.webcam
+          state: 'on'
+        then:
+        - service: homeassistant.reload_config_entry
+          data: {}
+          target:
+            entity_id: media_player.spotify_anthony221121
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 2
+            milliseconds: 0
+        - condition: template
+          value_template: '{{ not is_state_attr(''media_player.spotify_anthony221121'',
+            ''source'', ''DESKTOP-PC'') and "DESKTOP-PC" in state_attr(''media_player.spotify_anthony221121'',
+            ''source_list'')}}'
+        - service: media_player.select_source
+          data:
+            source: DESKTOP-PC
+          target:
+            entity_id: media_player.spotify_anthony221121
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 2
+            milliseconds: 0
+        - if:
+          - condition: state
+            entity_id: media_player.spotify_anthony221121
+            attribute: media_playlist
+            state: lofi
+          then:
+          - service: media_player.play_media
+            data:
+              media_content_type: playlist
+              media_content_id: https://open.spotify.com/playlist/1FXZPGh51QQyNUmADd5ssN
+              enqueue: play
+            target:
+              entity_id: media_player.spotify_anthony221121
+          alias: if playing lofi, switch to music
+        - service: media_player.volume_set
+          data:
+            volume_level: 0.3
+          target:
+            entity_id: media_player.spotify_anthony221121
+        - service: media_player.shuffle_set
+          data:
+            shuffle: true
+          target:
+            entity_id: media_player.spotify_anthony221121
+        alias: Move music to Desktop
       down_lower:
       - service: script.turn_on
         data: {}
@@ -5412,6 +5589,69 @@
         data: {}
         target:
           entity_id: switch.usb_hub
+      - if:
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: media_player.spotify_anthony221121
+            attribute: source
+            state: Home Assistant
+          - condition: state
+            entity_id: media_player.spotify_anthony221121
+            attribute: media_playlist
+            state: lofi
+        - condition: state
+          entity_id: binary_sensor.webcam
+          state: 'on'
+        then:
+        - service: homeassistant.reload_config_entry
+          data: {}
+          target:
+            entity_id: media_player.spotify_anthony221121
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 2
+            milliseconds: 0
+        - condition: template
+          value_template: '{{ not is_state_attr(''media_player.spotify_anthony221121'',
+            ''source'', ''DESKTOP-PC'') and "DESKTOP-PC" in state_attr(''media_player.spotify_anthony221121'',
+            ''source_list'')}}'
+        - service: media_player.select_source
+          data:
+            source: DESKTOP-PC
+          target:
+            entity_id: media_player.spotify_anthony221121
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 2
+            milliseconds: 0
+        - if:
+          - condition: state
+            entity_id: media_player.spotify_anthony221121
+            attribute: media_playlist
+            state: lofi
+          then:
+          - service: media_player.play_media
+            data:
+              media_content_type: playlist
+              media_content_id: https://open.spotify.com/playlist/1FXZPGh51QQyNUmADd5ssN
+              enqueue: play
+            target:
+              entity_id: media_player.spotify_anthony221121
+          alias: if playing lofi, switch to music
+        - service: media_player.volume_set
+          data:
+            volume_level: 0.3
+          target:
+            entity_id: media_player.spotify_anthony221121
+        - service: media_player.shuffle_set
+          data:
+            shuffle: true
+          target:
+            entity_id: media_player.spotify_anthony221121
+        alias: Move music to Desktop
       bottom_off:
       - service: script.turn_on
         data: {}
@@ -5425,6 +5665,69 @@
         data: {}
         target:
           entity_id: switch.usb_hub
+      - if:
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: media_player.spotify_anthony221121
+            attribute: source
+            state: Home Assistant
+          - condition: state
+            entity_id: media_player.spotify_anthony221121
+            attribute: media_playlist
+            state: lofi
+        - condition: state
+          entity_id: binary_sensor.webcam
+          state: 'on'
+        then:
+        - service: homeassistant.reload_config_entry
+          data: {}
+          target:
+            entity_id: media_player.spotify_anthony221121
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 2
+            milliseconds: 0
+        - condition: template
+          value_template: '{{ not is_state_attr(''media_player.spotify_anthony221121'',
+            ''source'', ''DESKTOP-PC'') and "DESKTOP-PC" in state_attr(''media_player.spotify_anthony221121'',
+            ''source_list'')}}'
+        - service: media_player.select_source
+          data:
+            source: DESKTOP-PC
+          target:
+            entity_id: media_player.spotify_anthony221121
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 2
+            milliseconds: 0
+        - if:
+          - condition: state
+            entity_id: media_player.spotify_anthony221121
+            attribute: media_playlist
+            state: lofi
+          then:
+          - service: media_player.play_media
+            data:
+              media_content_type: playlist
+              media_content_id: https://open.spotify.com/playlist/1FXZPGh51QQyNUmADd5ssN
+              enqueue: play
+            target:
+              entity_id: media_player.spotify_anthony221121
+          alias: if playing lofi, switch to music
+        - service: media_player.volume_set
+          data:
+            volume_level: 0.3
+          target:
+            entity_id: media_player.spotify_anthony221121
+        - service: media_player.shuffle_set
+          data:
+            shuffle: true
+          target:
+            entity_id: media_player.spotify_anthony221121
+        alias: Move music to Desktop
       up_raise:
       - choose:
         - conditions:
@@ -6139,16 +6442,6 @@
         target:
           entity_id:
           - update.fold_entity_row_update
-    - if:
-      - condition: state
-        entity_id: update.clock_card_scotte_version_update
-        state: 'on'
-      then:
-      - service: update.install
-        data: {}
-        target:
-          entity_id:
-          - update.clock_card_scotte_version_update
     - if:
       - condition: state
         entity_id: update.button_card_update
@@ -7398,7 +7691,7 @@
       entity_id: switch.usw_leds
   mode: single
 - id: '1686560160740'
-  alias: Webcam Profiles
+  alias: Webcam Profiles & Switch Music to Desktop
   description: ''
   trigger:
   - platform: state
@@ -7414,63 +7707,124 @@
     entity_id: binary_sensor.discord_active
     state: 'on'
   action:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: light.fan_lights
-        state: Color Loop
-        attribute: effect
-      sequence:
-      - repeat:
-          count: '6'
-          sequence:
-          - service: button.press
-            data: {}
-            target:
-              entity_id: button.color
-          - delay:
-              hours: 0
-              minutes: 0
-              seconds: 0
-              milliseconds: 500
-    - conditions:
-      - condition: state
-        entity_id: light.fan_lights
-        state: 'on'
-      - condition: state
-        entity_id: light.fan_lights
-        state: None
-        attribute: effect
-      sequence:
-      - repeat:
-          count: '6'
-          sequence:
-          - service: button.press
-            data: {}
-            target:
-              entity_id:
-              - button.white
-          - delay:
-              hours: 0
-              minutes: 0
-              seconds: 0
-              milliseconds: 500
-    - conditions:
-      - condition: state
-        entity_id: light.fan_lights
-        state: 'off'
-      sequence:
-      - repeat:
-          count: '6'
-          sequence:
-          - service: button.press
-            data: {}
-            target:
-              entity_id:
-              - button.off
-          - delay:
-              hours: 0
-              minutes: 0
-              seconds: 0
-              milliseconds: 500
+  - parallel:
+    - choose:
+      - conditions:
+        - condition: state
+          entity_id: light.fan_lights
+          state: Color Loop
+          attribute: effect
+        sequence:
+        - repeat:
+            count: '6'
+            sequence:
+            - service: button.press
+              data: {}
+              target:
+                entity_id: button.color
+            - delay:
+                hours: 0
+                minutes: 0
+                seconds: 0
+                milliseconds: 500
+      - conditions:
+        - condition: state
+          entity_id: light.fan_lights
+          state: 'on'
+        - condition: state
+          entity_id: light.fan_lights
+          state: None
+          attribute: effect
+        sequence:
+        - repeat:
+            count: '6'
+            sequence:
+            - service: button.press
+              data: {}
+              target:
+                entity_id:
+                - button.white
+            - delay:
+                hours: 0
+                minutes: 0
+                seconds: 0
+                milliseconds: 500
+      - conditions:
+        - condition: state
+          entity_id: light.fan_lights
+          state: 'off'
+        sequence:
+        - repeat:
+            count: '6'
+            sequence:
+            - service: button.press
+              data: {}
+              target:
+                entity_id:
+                - button.off
+            - delay:
+                hours: 0
+                minutes: 0
+                seconds: 0
+                milliseconds: 500
+    - if:
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: media_player.spotify_anthony221121
+          attribute: source
+          state: Home Assistant
+        - condition: state
+          entity_id: media_player.spotify_anthony221121
+          attribute: media_playlist
+          state: lofi
+      then:
+      - service: homeassistant.reload_config_entry
+        data: {}
+        target:
+          entity_id: media_player.spotify_anthony221121
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 2
+          milliseconds: 0
+      - condition: template
+        value_template: '{{ not is_state_attr(''media_player.spotify_anthony221121'',
+          ''source'', ''DESKTOP-PC'') and "DESKTOP-PC" in state_attr(''media_player.spotify_anthony221121'',
+          ''source_list'')}}'
+      - service: media_player.select_source
+        data:
+          source: DESKTOP-PC
+        target:
+          entity_id: media_player.spotify_anthony221121
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 2
+          milliseconds: 0
+      - if:
+        - condition: state
+          entity_id: media_player.spotify_anthony221121
+          attribute: media_playlist
+          state: lofi
+        then:
+        - service: media_player.play_media
+          data:
+            media_content_type: playlist
+            media_content_id: https://open.spotify.com/playlist/1FXZPGh51QQyNUmADd5ssN
+            enqueue: play
+          target:
+            entity_id: media_player.spotify_anthony221121
+        alias: if playing lofi, switch to music
+      - service: media_player.volume_set
+        data:
+          volume_level: 0.3
+        target:
+          entity_id: media_player.spotify_anthony221121
+      - service: media_player.shuffle_set
+        data:
+          shuffle: true
+        target:
+          entity_id: media_player.spotify_anthony221121
+      alias: Move music to Desktop
   mode: single

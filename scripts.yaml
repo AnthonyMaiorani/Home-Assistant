@@ -27,6 +27,7 @@ fan_off:
         - input_boolean.govee_cyan
         - light.shapes_007f
         - light.shapes_ee82
+        - light.shapes_4948
         - light.wled
     - data:
         brightness: 255
@@ -71,6 +72,7 @@ color_loop:
         entity_id:
         - light.shapes_007f
         - light.shapes_ee82
+        - light.shapes_4948
         - light.wled
     - data:
         brightness: 255
@@ -168,6 +170,7 @@ music:
         entity_id:
         - light.shapes_007f
         - light.shapes_ee82
+        - light.shapes_4948
   mode: single
   icon: mdi:party-popper
 call:
@@ -217,7 +220,6 @@ call:
         entity_id:
         - light.fan_lights
         - light.desk_lights
-        - light.wled
         - light.hallway_lights
     - service: light.turn_on
       data:
@@ -342,6 +344,18 @@ call:
       alias: turn off home lights if alone and night
     - event: event_change_nanoleaf
       event_data: {}
+    - repeat:
+        count: '10'
+        sequence:
+        - service: light.turn_off
+          data: {}
+          target:
+            entity_id: light.wled
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 1
+            milliseconds: 0
   mode: single
   icon: mdi:phone
 night:
@@ -359,6 +373,7 @@ night:
         - light.bedroom_lights
         - light.glide_lan
         - light.shapes_ee82
+        - light.shapes_4948
         - light.wled
     - service: cover.close_cover
       data: {}
@@ -422,6 +437,7 @@ night:
           target:
             entity_id:
             - light.shapes_ee82
+            - light.shapes_4948
             - light.shapes_007f
         - delay:
             hours: 0
@@ -550,6 +566,7 @@ morning:
         entity_id:
         - light.shapes_007f
         - light.shapes_ee82
+        - light.shapes_4948
         - light.wled
     - data:
         brightness: 255
