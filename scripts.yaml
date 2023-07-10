@@ -2,16 +2,6 @@ fan_off:
   alias: Lights Off
   sequence:
   - parallel:
-    - service: light.turn_on
-      data:
-        rgbw_color:
-        - 0
-        - 125
-        - 255
-        - 0
-        brightness: 2
-      target:
-        entity_id: light.glide_lan
     - service: homeassistant.turn_off
       data: {}
       target:
@@ -24,7 +14,6 @@ fan_off:
       service: homeassistant.turn_on
       target:
         entity_id:
-        - input_boolean.govee_cyan
         - light.shapes_007f
         - light.shapes_ee82
         - light.shapes_4948
@@ -37,9 +26,33 @@ fan_off:
       target:
         entity_id:
         - light.bed_lights
-        - light.desk_lights
         - light.light_switch
         - light.light_switch_corner
+    - if:
+      - condition: state
+        entity_id: binary_sensor.signalrgb_active
+        state: 'on'
+      then:
+      - service: light.turn_on
+        data:
+          brightness: 2
+        target:
+          entity_id: light.glide_lan
+      else:
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id: input_boolean.govee_cyan
+      - service: light.turn_on
+        data:
+          rgbw_color:
+          - 0
+          - 125
+          - 255
+          - 0
+          brightness: 2
+        target:
+          entity_id: light.glide_lan
   mode: single
   icon: mdi:ceiling-light
 color_loop:
@@ -51,6 +64,9 @@ color_loop:
         - condition: state
           entity_id: input_boolean.govee_cyan
           state: 'on'
+        - condition: state
+          entity_id: binary_sensor.signalrgb_active
+          state: 'off'
         sequence:
         - service: input_button.press
           data: {}
@@ -60,6 +76,16 @@ color_loop:
           target:
             entity_id: input_boolean.govee_cyan
           data: {}
+      - conditions:
+        - condition: state
+          entity_id: binary_sensor.signalrgb_active
+          state: 'on'
+        sequence:
+        - service: light.turn_on
+          data:
+            brightness_pct: 100
+          target:
+            entity_id: light.glide_lan
       default:
       - service: light.turn_on
         target:
@@ -148,11 +174,6 @@ music:
       target:
         entity_id: input_button.activategoveemusic
     - service: light.turn_on
-      target:
-        entity_id: light.desk_lights
-      data:
-        brightness_pct: 90
-    - service: light.turn_on
       data:
         effect: Music
         brightness_pct: 100
@@ -219,7 +240,6 @@ call:
       target:
         entity_id:
         - light.fan_lights
-        - light.desk_lights
         - light.hallway_lights
     - service: light.turn_on
       data:
@@ -536,6 +556,9 @@ morning:
         - condition: state
           entity_id: input_boolean.govee_cyan
           state: 'on'
+        - condition: state
+          entity_id: binary_sensor.signalrgb_active
+          state: 'off'
         sequence:
         - service: input_button.press
           data: {}
@@ -545,6 +568,16 @@ morning:
           target:
             entity_id: input_boolean.govee_cyan
           data: {}
+      - conditions:
+        - condition: state
+          entity_id: binary_sensor.signalrgb_active
+          state: 'on'
+        sequence:
+        - service: light.turn_on
+          data:
+            brightness_pct: 100
+          target:
+            entity_id: light.glide_lan
       default:
       - service: light.turn_on
         target:
@@ -576,7 +609,6 @@ morning:
       target:
         entity_id:
         - light.bed_lights
-        - light.desk_lights
         - light.light_switch
         - light.light_switch_corner
     - service: input_select.select_option
@@ -1599,7 +1631,7 @@ play_music:
     then:
     - service: media_player.volume_set
       data:
-        volume_level: 0.15
+        volume_level: 0.2
       target:
         entity_id:
         - media_player.spotify_anthony221121
@@ -2106,3 +2138,31 @@ stop_music:
       entity_id: media_player.spotify_anthony221121
   mode: single
   icon: mdi:stop
+'1688844134376':
+  alias: New Script
+  sequence:
+  - repeat:
+      until:
+      - condition: template
+        value_template: '{{ false }}'
+      sequence:
+      - service: light.turn_on
+        data:
+          brightness_pct: 100
+        target:
+          entity_id: light.shapes_4948
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 0
+          milliseconds: 700
+      - service: light.turn_on
+        data:
+          brightness_pct: 20
+        target:
+          entity_id: light.shapes_4948
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 0
+          milliseconds: 700

@@ -50,7 +50,6 @@
       target:
         entity_id:
         - light.fan_lights
-        - light.desk_lights
         - light.bed_lights
     - service: light.turn_on
       continue_on_error: true
@@ -673,7 +672,7 @@
         after: 07:00:00
         before: 01:00:00
       - condition: state
-        entity_id: light.desk_lights
+        entity_id: light.wled
         state: 'on'
       sequence:
       - parallel:
@@ -767,7 +766,7 @@
         before: 06:00:00
         after: '22:00:00'
       - condition: state
-        entity_id: light.desk_lights
+        entity_id: light.wled
         state: 'on'
       - condition: state
         entity_id: binary_sensor.webcam
@@ -1177,7 +1176,7 @@
     offset: 0
   - platform: state
     entity_id:
-    - light.desk_lights
+    - light.wled
     - light.fan_lights
     - binary_sensor.desktop_power
     to: 'on'
@@ -1363,6 +1362,13 @@
     - light.shapes_4948
     from: unavailable
     to: 'on'
+  - platform: state
+    entity_id:
+    - binary_sensor.signalrgb_active
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 1
   condition:
   - condition: not
     conditions:
@@ -1441,7 +1447,8 @@
                     states(''sensor.nanoleaf_scene'')) }}'
                 - condition: template
                   value_template: '{{ is_state_attr(''light.shapes_ee82'', "effect",
-                    "*ExtControl*") and is_state(''switch.desktop'', ''on'') }}'
+                    "*ExtControl*") and is_state(''binary_sensor.signalrgb_active'',
+                    ''on'') }}'
                 alias: vertical shapes scene correct
               alias: Not
             - condition: not
@@ -1451,10 +1458,12 @@
                 - condition: template
                   value_template: '{{ is_state_attr(''light.shapes_007f'', "effect",
                     states(''sensor.nanoleaf_scene'')) }}'
+                  alias: set to scene
                 - condition: template
-                  value_template: '{{ not is_state(''sensor.nanoleaf_scene'', ''Webcam'')
-                    and is_state_attr(''light.shapes_007f'', "effect", "*ExtControl*")
-                    }}'
+                  value_template: '{{ is_state_attr(''light.shapes_007f'', "effect",
+                    "*ExtControl*") and is_state(''binary_sensor.signalrgb_active'',
+                    ''on'') and not is_state(''binary_sensor.webcam'', ''on'') }}'
+                  alias: signalrgb
                 alias: desk shapes scene correct
               alias: Not
             - condition: not
@@ -1464,9 +1473,12 @@
                 - condition: template
                   value_template: '{{ is_state_attr(''light.shapes_4948'', "effect",
                     states(''sensor.nanoleaf_scene'')) }}'
+                  alias: set to scene
                 - condition: template
                   value_template: '{{ is_state_attr(''light.shapes_4948'', "effect",
-                    "*ExtControl*") and is_state(''switch.desktop'', ''on'') }}'
+                    "*ExtControl*") and is_state(''binary_sensor.signalrgb_active'',
+                    ''on'') }}'
+                  alias: signalrgb
                 alias: corner shapes scene correct
               alias: Not
           then:
