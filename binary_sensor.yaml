@@ -4,7 +4,7 @@
   scan_interval: 15
 - platform: generic_hygrostat
   name: Shower
-  sensor: sensor.acurite_humidity
+  sensor: sensor.bathroom_humidity
   delta_trigger: 4
   target_offset: 6
   min_on_time: 5

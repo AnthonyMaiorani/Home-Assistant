@@ -1,7 +1,7 @@
 default_config:
 logbook: !include logbook.yaml
 automation: !include automations.yaml
-history: !include history.yaml
+history:
 frontend: !include themes.yaml
 script: !include scripts.yaml
 group: !include groups.yaml
@@ -20,7 +20,7 @@ wake_on_lan:
 
 #reduce db size
 recorder:
-  purge_keep_days: 3
+#  purge_keep_days: 3
 
 # reduce login failure messages
 http:
@@ -48,7 +48,7 @@ timer:
     restore: true
     icon: mdi:fan-clock
   ac:
-    duration: "00:25:00"
+    duration: "00:30:00"
     name: "AC Boost Timer"
     restore: true
     icon: mdi:air-conditioner
@@ -69,6 +69,12 @@ notify:
 rest_command:
   set_wled_brightness:
     url: http://192.168.1.57/win&A={{ states("input_number.wled_brightness") }}
+  set_bed_brightness:
+    url: http://192.168.1.132/win&A={{ states("input_number.bed_brightness") }}
+  set_govee_brightness:
+    url: http://192.168.1.193/win&A={{ states("input_number.govee_brightness") }}
+  set_govee_preset:
+    url: http://192.168.1.193/win&PL={{ state_attr('input_select.govee_preset', 'options').index(states('input_select.govee_preset')) + 1 }}
 
 command_line:
   - switch:

@@ -1,0 +1,15 @@
+substitutions:
+  name: kauf-plug-7aacf2
+packages:
+  Kauf.PLF12: github://KaufHA/PLF12/kauf-plf12.yaml
+esphome:
+  name: ${name}
+  name_add_mac_suffix: false
+api:
+  encryption:
+    key: himItqURcrGc1HVwwpx4NU3MMiQHSV04wMjjSHf8cmM=
+
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password

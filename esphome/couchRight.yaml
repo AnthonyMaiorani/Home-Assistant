@@ -1,0 +1,91 @@
+esphome:
+  name: couchright
+  friendly_name: "Couch Right"
+
+esp32:
+  board: esp32dev
+
+wifi:
+  ssid: !secret ssid
+  password: !secret password
+  fast_connect: on
+  #output_power: 8.5dB
+  manual_ip:
+    static_ip: ${static_ip}
+    gateway: !secret gateway
+    subnet: !secret subnet
+    dns1: !secret dns1
+
+substitutions:
+  static_ip: 192.168.1.77
+
+captive_portal:
+logger:
+api:
+ota:
+bluetooth_proxy:
+
+button:
+  - platform: restart
+    name: "Restart"
+
+cover:
+  - platform: template
+    name: "Right"
+    id: couchRight
+    optimistic: true #remove this
+#    lambda: |-
+#      return id(rightDistance).state; 
+    has_position: true
+    open_action:
+      - cover.stop: couchRight
+      - switch.turn_on: openCouchRight
+      - delay: 8500ms
+      - cover.stop: couchRight
+    close_action:
+      - cover.stop: couchRight
+      - switch.turn_on: closeCouchRight
+      - delay: 8500ms
+      - cover.stop: couchRight
+    stop_action:
+      - switch.turn_off: closeCouchRight
+      - switch.turn_off: openCouchRight
+    position_action: # If desired position is higher than current position, open, else close
+      - cover.stop: couchRight
+      - lambda: |-
+          if (pos > id(couchRight).position) { id(openCouchRight).turn_on(); } 
+          else if (pos < id(couchRight).position) { id(closeCouchRight).turn_on(); }
+      - delay: !lambda "return abs(pos - (id(couchRight).position)) * 8000;" # Delay based on desired vs current pos
+      - cover.stop: couchRight
+
+switch:
+  - platform: gpio
+    id: closeCouchRight
+    pin: GPIO17 # IN1 / 
+    inverted: True
+    restore_mode: ALWAYS_OFF
+    internal: true
+  - platform: gpio
+    id: openCouchRight
+    pin: GPIO16 # IN2 / 
+    inverted: True
+    restore_mode: ALWAYS_OFF
+    internal: true
+
+#i2c:
+#    scl: 26
+#    sda: 27
+#    scan: true
+
+#sensor:
+#  - platform: vl53l0x
+#    name: "Distance"
+#    id: rightDistance
+#    update_interval: 500ms
+#    unit_of_measurement: "cm" #remove
+#    filters:
+#      - multiply: 100
+#      - delta: 0.3
+#      - calibrate_linear:
+#          - 0.0 -> 0.0
+#          - 1000.0 -> 1.0

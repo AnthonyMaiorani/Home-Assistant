@@ -2,17 +2,11 @@
   name: Bedroom Lights
   unique_id: bedroom_lights
   entities:
-    - light.bed_lights
     - light.wyze_bulb_1
     - light.wyze_bulb_2
     - light.wyze_bulb_3
     - light.light_switch
     - light.light_switch_corner
-- platform: group
-  unique_id: led_strips
-  name: LED Strips
-  entities:
-    - light.bed_lights
 - platform: group
   unique_id: fan_lights
   name: Fan Lights
@@ -23,6 +17,7 @@
 - platform: template
   lights:
     wled:
+      unique_id: wled
       friendly_name: WLED
       level_template: "{{ states('input_number.wled_brightness') }}"
       value_template: "{{ is_state('switch.wled', 'on') }}"
@@ -40,3 +35,51 @@
             value: "{{ brightness }}"
             entity_id: input_number.wled_brightness
         - service: rest_command.set_wled_brightness
+    bed:
+      unique_id: bed
+      friendly_name: bed
+      level_template: "{{ states('input_number.bed_brightness') }}"
+      value_template: "{{ is_state('switch.bed', 'on') }}"
+      turn_on:
+        service: switch.turn_on
+        data:
+            entity_id: switch.bed
+      turn_off:
+        service: switch.turn_off
+        data:
+            entity_id: switch.bed
+      set_level:
+        - service: input_number.set_value
+          data:
+            value: "{{ brightness }}"
+            entity_id: input_number.bed_brightness
+        - service: rest_command.set_bed_brightness
+    govee:
+      unique_id: govee
+      friendly_name: Govee
+      level_template: "{{ states('input_number.govee_brightness') }}"
+      value_template: "{{ is_state('switch.govee', 'on') }}"
+      effect_list_template: "{{ state_attr('input_select.govee_preset', 'options') }}"
+      effect_template: "{{ states('input_select.govee_preset') }}"
+      turn_on:
+        service: switch.turn_on
+        data:
+            entity_id: switch.govee
+      turn_off:
+        service: switch.turn_off
+        data:
+            entity_id: switch.govee
+      set_level:
+        - service: input_number.set_value
+          data:
+            value: "{{ brightness }}"
+          target:
+            entity_id: input_number.govee_brightness
+        - service: rest_command.set_govee_brightness
+      set_effect:
+        - service: input_select.select_option
+          data:
+            option: "{{ effect }}"
+          target:
+            entity_id: input_select.govee_preset
+        - service: rest_command.set_govee_preset

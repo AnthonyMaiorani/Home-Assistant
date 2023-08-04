@@ -1,0 +1,93 @@
+esphome:
+  name: couchleft
+  friendly_name: "Couch Left"
+
+esp32:
+  board: esp32dev
+
+wifi:
+  ssid: !secret ssid
+  password: !secret password
+  fast_connect: on
+  #output_power: 8.5dB
+  manual_ip:
+    static_ip: ${static_ip}
+    gateway: !secret gateway
+    subnet: !secret subnet
+    dns1: !secret dns1
+
+substitutions:
+  static_ip: 192.168.1.153
+
+captive_portal:
+logger:
+api:
+ota:
+bluetooth_proxy:
+
+button:
+  - platform: restart
+    name: "Couch Left Restart"
+
+cover:
+   - platform: template
+     name: "Left"
+     id: couchLeft
+     optimistic: true #remove this
+ #    lambda: |-
+ #      return id(leftDistance).state;   
+     has_position: true
+     open_action:
+       - cover.stop: couchLeft
+       - switch.turn_on: openCouchLeft
+       - delay: 8500ms
+       - cover.stop: couchLeft
+     close_action:
+       - cover.stop: couchLeft
+       - switch.turn_on: closeCouchLeft
+       - delay: 8500ms
+       - cover.stop: couchLeft
+     stop_action:
+       - switch.turn_off: closeCouchLeft
+       - switch.turn_off: openCouchLeft
+     position_action: # If desired position is higher than current position, open, else close
+       - cover.stop: couchLeft
+       - lambda: |-
+           if (pos > id(couchLeft).position) { id(openCouchLeft).turn_on(); } 
+           else if (pos < id(couchLeft).position) { id(closeCouchLeft).turn_on(); }
+       - delay: !lambda "return abs(pos - (id(couchLeft).position)) * 8000;" # Delay based on desired vs current pos
+       - cover.stop: couchLeft
+
+switch:
+   - platform: gpio
+     id: closeCouchLeft
+     pin: GPIO16
+     inverted: True
+     restore_mode: ALWAYS_OFF
+     internal: true
+   - platform: gpio
+     id: openCouchLeft
+     pin: GPIO17
+     inverted: True
+     restore_mode: ALWAYS_OFF
+     internal: true
+
+#i2c:
+#  scl: 26
+#  sda: 27
+#  scan: true
+
+#sensor:
+#   - platform: vl53l0x
+#     id: leftDistance
+#     name: "Distance"
+#     update_interval: 500ms
+#     unit_of_measurement: "cm" #remove
+#     filters:
+#       - multiply: 100
+#       - delta: 0.4
+#      - calibrate_linear:
+#          - 1000.0 -> 0.0
+#          - 0.0 -> 1.0
+#      - lambda: !lambda |-
+#          if (x < 0 || x > 1) return {};

@@ -22,6 +22,7 @@ ethernet:
 logger:
 api:
 ota:
+web_server:
 
 sensor:
   - platform: homeassistant

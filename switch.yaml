@@ -5,6 +5,20 @@
   body_off: '{"bri": "0"}'
   is_on_template: "{{ value_json.on }}"
   unique_id: wled
+- platform: rest
+  resource: http://192.168.1.193/json/state
+  name: Govee
+  body_on: '{"bri": "255"}'
+  body_off: '{"bri": "0"}'
+  is_on_template: "{{ value_json.on }}"
+  unique_id: govee
+- platform: rest
+  resource: http://192.168.1.132/json/state
+  name: Bed
+  body_on: '{"bri": "255"}'
+  body_off: '{"bri": "0"}'
+  is_on_template: "{{ value_json.on }}"
+  unique_id: bed
 - platform: template
   switches:
     # case_rgb:
@@ -68,7 +82,7 @@
               entity_id: input_boolean.privacy
     bedroomtoggle:
       unique_id: bedroom_toggle
-      value_template: "{{ is_state('light.bedroom_lights', 'on') and not state_attr('light.bed_lights', 'rgb_color')| join(' ') == '255 255 255'}}"
+      value_template: "{{ is_state('light.bedroom_lights', 'on') }}"
       turn_on:
         - parallel:
           - service: script.morning
@@ -89,6 +103,7 @@
                 - media_player.owntone_output_desk
                 - media_player.owntone_output_nightstand
                 - media_player.owntone_output_bathroom
+                - media_player.front
           - service: climate.turn_off
             target:
               entity_id:
@@ -101,6 +116,18 @@
       - service: climate.set_hvac_mode
         data:
           hvac_mode: cool
+        target:
+          entity_id: climate.bedroom_ac
+      - service: climate.set_preset_mode
+        data:
+          preset_mode: none
+        target:
+          entity_id: climate.bedroom_ac
+      - delay:
+          seconds: 2
+      - service: climate.set_preset_mode
+        data:
+          preset_mode: none
         target:
           entity_id: climate.bedroom_ac
       turn_off:
@@ -175,10 +202,64 @@
           target:
             entity_id:
               - switch.hisense_tv
+    brtv:
+      unique_id: brtv
+      friendly_name: Bedroom TV
+      value_template: "{{ not is_state('media_player.front', 'standby') }}"
+      turn_on:
+        - service: media_player.turn_on
+          target:
+            entity_id:
+              - media_player.front
+      turn_off:
+        - service: media_player.turn_off
+          target:
+            entity_id:
+              - media_player.front
+    acfanhigh:
+      unique_id: acfanhigh
+      friendly_name: AC Fan High
+      value_template: "{{ is_state('switch.ac', 'on') and ((is_state_attr('climate.bedroom_ac', 'fan_mode', 'high') or is_state('input_boolean.ac_boost', 'on'))) }}"
+      turn_on:
+        - service: switch.turn_on
+          target:
+            entity_id: switch.ac
+        - service: climate.set_fan_mode
+          data:
+            fan_mode: high
+          target:
+            entity_id: climate.bedroom_ac
+        - delay:
+            seconds: 3
+        - service: climate.set_fan_mode
+          data:
+            fan_mode: high
+          target:
+            entity_id: climate.bedroom_ac
+        - delay:
+            seconds: 3
+        - service: climate.set_fan_mode
+          data:
+            fan_mode: high
+          target:
+            entity_id: climate.bedroom_ac
+        - delay:
+            seconds: 3
+        - service: climate.set_fan_mode
+          data:
+            fan_mode: high
+          target:
+            entity_id: climate.bedroom_ac
+      turn_off:
+        - service: climate.set_fan_mode
+          data:
+              fan_mode: auto
+          target:
+            entity_id: climate.bedroom_ac
     guesttv:
       unique_id: guesttv
       friendly_name: Guest TV
-      value_template: "{{ is_state('media_player.guest_tv', 'on') }}"
+      value_template: "{{ not is_state('media_player.guest_tv', 'standby') }}"
       turn_on:
         - service: media_player.turn_on
           target:
@@ -192,7 +273,7 @@
     mastertv:
       unique_id: mastertv
       friendly_name: Master TV
-      value_template: "{{ is_state('remote.master_bedroom_tv', 'on') }}"
+      value_template: "{{ not is_state('media_player.master_bedroom_tv', 'standby') }}"
       turn_on:
         - service: media_player.turn_on
           target:

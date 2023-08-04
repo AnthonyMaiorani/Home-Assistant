@@ -8,6 +8,7 @@ wifi:
   password: !secret password
  # output_power: 8.5dB
   fast_connect: on
+  reboot_timeout: 0s
   manual_ip:
     static_ip: ${static_ip}
     gateway: !secret gateway

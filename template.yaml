@@ -8,15 +8,6 @@
           media_content_id: "\"cancel all my alarms today\""
         target:
           entity_id: media_player.anthony_s_echo_show
-  - name: "Cancel alarms today"
-    unique_id: alexa_cancel_alarms_today
-    press:
-      - service: media_player.play_media
-        data:
-          media_content_type: custom
-          media_content_id: "\"cancel all my alarms today\""
-        target:
-          entity_id: media_player.anthony_s_echo_show
   - name: "Cancel next alarm"
     unique_id: alexa_cancel_next_alarm
     press:
@@ -103,9 +94,8 @@
       {% if states('person.anthony')|lower in ['utd', 'raytheon', 'away', 'not_home'] 
       or not is_state('switch.ac', "on") or is_state('script.night', "on") %} unknown
       {% elif is_state("input_boolean.ac_boost", "on") -%} 61 
-      {% elif is_state("binary_sensor.bedroom_door", "on") and 
-      is_state("person.riana", "home") -%} 76
-      {% elif is_state("switch.desktop", "on") and not is_state("binary_sensor.bed_occupancy", "on") -%} 75
+      {% elif is_state("binary_sensor.bedroom_door", "on") and is_state("person.riana", "home") -%} 75
+      {% elif is_state("switch.desktop", "on") and not is_state("binary_sensor.bed_occupancy", "on") -%} 74
       {% elif is_state("light.fan_lights", "on") -%} 73 
       {%- else -%} 69
       {%- endif %}
@@ -135,9 +125,9 @@
       is_state('binary_sensor.webcam', 'on') and
       is_state('light.fan_lights', 'on') -%} 204
       {# Night call #}
-      {% elif not is_state('light.fan_lights', 'on') and state_attr('light.bed_lights', 'rgb_color')
+      {#{% elif not is_state('light.fan_lights', 'on') and state_attr('light.bed_lights', 'rgb_color')
       | join(' ') == '0 255 255' and 
-      is_state_attr('light.bed_lights', 'effect', 'None')%} 25
+      is_state_attr('light.bed_lights', 'effect', 'None')%} 26
       {# Door opened #}
       {% elif is_state('binary_sensor.bedroom_door', 'on') and 
       is_state('light.fan_lights', 'on')-%} 254
@@ -153,8 +143,9 @@
       {# Normal #}
       {% elif is_state('light.fan_lights', 'on') -%} 254
       {# In bed #}
-      {% elif is_state('light.bedroom_lights', 'on') and not
-      is_state_attr('light.bed_lights', 'effect', 'None') -%} 63
+      {# {% elif is_state('light.bedroom_lights', 'on') and not
+      is_state_attr('light.bed_lights', 'effect', 'None') -%} 63 #}
+      {% elif is_state('light.bedroom_lights', 'on') -%} 63
       {%- else -%} 0
       {%- endif %} 
 - trigger:
@@ -170,6 +161,7 @@
 - trigger:
   - platform: event
     event_type: event_change_nanoleaf
+    id: event
   - platform: time_pattern
     minutes: /30
   - platform: state
@@ -263,7 +255,7 @@
         {% set sceneChoices = ['Webcam'] %}
 
         {# Music #}
-        {% elif is_state('switch.desktop', 'off') 
+        {# {% elif is_state('switch.desktop', 'off') 
         and (is_state('media_player.owntone_output_desk', 'on') and
         state_attr('media_player.owntone_output_desk', 'volume_level') >= 0.25 and 
         is_state('media_player.spotify_anthony221121', 'playing')
@@ -278,12 +270,29 @@
         is not none and not 'lofi' in 
         state_attr('media_player.spotify_anthony221121', 'media_playlist') -%} 
         {% set sceneChoices = sceneChoices + lessChillMusicScenes %} {%- endif %} 
+        {%- endif %} #}
+
+        {% elif is_state('switch.desktop', 'off') 
+        and (is_state('media_player.owntone_output_desk', 'on') and
+        state_attr('media_player.owntone_output_desk', 'volume_level') >= 0.25 and 
+        is_state('media_player.spotify_anthony221121', 'playing')
+        and state_attr('media_player.spotify_anthony221121', 'volume_level') >= 0.42)
+        and not is_state('binary_sensor.macbook_audio_input_in_use', 'on') 
+        and not is_state('binary_sensor.macbook_camera_in_use', 'on')  -%} 
+        {% set sceneChoices = musicScenes %}
+        {% if state_attr('media_player.spotify_anthony221121', 'media_playlist') 
+        is defined and 
+        state_attr('media_player.spotify_anthony221121', 'media_playlist') 
+        is not none and not 'lofi' in 
+        state_attr('media_player.spotify_anthony221121', 'media_playlist') -%} 
+        {% set sceneChoices = sceneChoices + lessChillMusicScenes %} {%- endif %} 
         {%- endif %} 
 
         {# Unnecessary Trigger #}
         {% if now().minute != 30 and now().minute != 0 and 
         state_attr('light.shapes_007f', 'effect') is defined and 
-        state_attr('light.shapes_007f', 'effect') in sceneChoices -%}
+        state_attr('light.shapes_007f', 'effect') in sceneChoices and not
+        trigger.id == "event" -%}
         {% set sceneChoices = [state_attr('light.shapes_007f', 'effect')] %}
         {% set unnecessaryTrigger = true %}
         {%- endif %} 

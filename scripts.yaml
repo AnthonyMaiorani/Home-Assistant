@@ -10,88 +10,6 @@ fan_off:
         - input_boolean.bedmotion
         - switch.katchy
         - light.hallway_lights
-    - data: {}
-      service: homeassistant.turn_on
-      target:
-        entity_id:
-        - light.shapes_007f
-        - light.shapes_ee82
-        - light.shapes_4948
-        - light.wled
-    - data:
-        brightness: 255
-        effect: Color Loop
-        color_name: cyan
-      service: light.turn_on
-      target:
-        entity_id:
-        - light.bed_lights
-        - light.light_switch
-        - light.light_switch_corner
-    - if:
-      - condition: state
-        entity_id: binary_sensor.signalrgb_active
-        state: 'on'
-      then:
-      - service: light.turn_on
-        data:
-          brightness: 2
-        target:
-          entity_id: light.glide_lan
-      else:
-      - service: input_boolean.turn_on
-        data: {}
-        target:
-          entity_id: input_boolean.govee_cyan
-      - service: light.turn_on
-        data:
-          rgbw_color:
-          - 0
-          - 125
-          - 255
-          - 0
-          brightness: 2
-        target:
-          entity_id: light.glide_lan
-  mode: single
-  icon: mdi:ceiling-light
-color_loop:
-  alias: Color
-  sequence:
-  - parallel:
-    - choose:
-      - conditions:
-        - condition: state
-          entity_id: input_boolean.govee_cyan
-          state: 'on'
-        - condition: state
-          entity_id: binary_sensor.signalrgb_active
-          state: 'off'
-        sequence:
-        - service: input_button.press
-          data: {}
-          target:
-            entity_id: input_button.activategoveerainbow
-        - service: input_boolean.turn_off
-          target:
-            entity_id: input_boolean.govee_cyan
-          data: {}
-      - conditions:
-        - condition: state
-          entity_id: binary_sensor.signalrgb_active
-          state: 'on'
-        sequence:
-        - service: light.turn_on
-          data:
-            brightness_pct: 100
-          target:
-            entity_id: light.glide_lan
-      default:
-      - service: light.turn_on
-        target:
-          entity_id:
-          - light.glide_lan
-        data: {}
     - service: homeassistant.turn_on
       data: {}
       target:
@@ -99,7 +17,41 @@ color_loop:
         - light.shapes_007f
         - light.shapes_ee82
         - light.shapes_4948
+    - data:
+        brightness: 255
+        effect: Color Loop
+        color_name: cyan
+      service: light.turn_on
+      target:
+        entity_id:
+        - light.light_switch
+        - light.light_switch_corner
+    - service: light.turn_on
+      data:
+        brightness_pct: 40
+      target:
+        entity_id:
         - light.wled
+        - light.bed
+    - service: light.turn_on
+      data:
+        brightness: 9
+      target:
+        entity_id: light.govee
+  mode: restart
+  icon: mdi:ceiling-light
+color_loop:
+  alias: Color
+  sequence:
+  - parallel:
+    - service: homeassistant.turn_on
+      data: {}
+      target:
+        entity_id:
+        - light.shapes_007f
+        - light.shapes_ee82
+        - light.shapes_4948
+        - light.govee
     - data:
         brightness: 255
         effect: Color Loop
@@ -163,6 +115,13 @@ color_loop:
                 minutes: 0
                 seconds: 1
                 milliseconds: 0
+    - service: light.turn_on
+      data:
+        brightness_pct: 100
+      target:
+        entity_id:
+        - light.wled
+        - light.bed
   mode: single
   icon: mdi:lightbulb-on
 music:
@@ -243,19 +202,9 @@ call:
         - light.hallway_lights
     - service: light.turn_on
       data:
-        rgbw_color:
-        - 0
-        - 125
-        - 255
-        - 0
-        brightness: 2
+        brightness: 9
       target:
-        entity_id: light.glide_lan
-    - service: input_boolean.turn_on
-      target:
-        entity_id:
-        - input_boolean.govee_cyan
-      data: {}
+        entity_id: light.govee
     - if:
       - condition: state
         entity_id: media_player.spotify_anthony221121
@@ -334,7 +283,7 @@ call:
     - if:
       - condition: time
         after: '23:00:00'
-        before: 05:00:00
+        before: 06:00:00
         alias: night
       - condition: state
         entity_id: binary_sensor.home_alone
@@ -359,6 +308,7 @@ call:
           entity_id:
           - switch.gym_fan
           - switch.living_room_fan
+          - switch.porch_light
           - switch.laundry_room_light
           - switch.garage_light
       alias: turn off home lights if alone and night
@@ -376,25 +326,22 @@ call:
             minutes: 0
             seconds: 1
             milliseconds: 0
-  mode: single
+  mode: restart
   icon: mdi:phone
 night:
   sequence:
   - parallel:
-    - service: input_button.press
-      data: {}
-      target:
-        entity_id: input_button.activategoveeoff
     - service: light.turn_off
       data: {}
       target:
         entity_id:
         - light.shapes_007f
         - light.bedroom_lights
-        - light.glide_lan
+        - light.govee
         - light.shapes_ee82
         - light.shapes_4948
         - light.wled
+        - light.bed
     - service: cover.close_cover
       data: {}
       target:
@@ -420,7 +367,7 @@ night:
     - if:
       - condition: time
         after: '23:00:00'
-        before: 05:00:00
+        before: 06:00:00
         alias: night
       - condition: state
         entity_id: binary_sensor.home_alone
@@ -459,6 +406,7 @@ night:
             - light.shapes_ee82
             - light.shapes_4948
             - light.shapes_007f
+            - light.wled
         - delay:
             hours: 0
             minutes: 0
@@ -544,6 +492,27 @@ night:
                 milliseconds: 0
         alias: music
       alias: music
+    - if:
+      - condition: state
+        entity_id: binary_sensor.bed_occupancy
+        state: 'on'
+      - condition: state
+        entity_id: device_tracker.taylor
+        state: home
+      - condition: state
+        entity_id: switch.ac
+        state: 'on'
+      - condition: state
+        entity_id: input_boolean.ac_boost
+        state: 'off'
+      - condition: sun
+        before: sunrise
+        after: sunset
+      then:
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id: switch.acfanhigh
   alias: Night
   mode: restart
   icon: mdi:weather-night
@@ -551,39 +520,6 @@ morning:
   alias: Morning
   sequence:
   - parallel:
-    - choose:
-      - conditions:
-        - condition: state
-          entity_id: input_boolean.govee_cyan
-          state: 'on'
-        - condition: state
-          entity_id: binary_sensor.signalrgb_active
-          state: 'off'
-        sequence:
-        - service: input_button.press
-          data: {}
-          target:
-            entity_id: input_button.activategoveerainbow
-        - service: input_boolean.turn_off
-          target:
-            entity_id: input_boolean.govee_cyan
-          data: {}
-      - conditions:
-        - condition: state
-          entity_id: binary_sensor.signalrgb_active
-          state: 'on'
-        sequence:
-        - service: light.turn_on
-          data:
-            brightness_pct: 100
-          target:
-            entity_id: light.glide_lan
-      default:
-      - service: light.turn_on
-        target:
-          entity_id:
-          - light.glide_lan
-        data: {}
     - service: light.turn_on
       data:
         brightness_pct: 100
@@ -594,13 +530,13 @@ morning:
       target:
         entity_id: light.fan_lights
     - data: {}
-      service: homeassistant.turn_on
+      service: light.turn_on
       target:
         entity_id:
         - light.shapes_007f
         - light.shapes_ee82
         - light.shapes_4948
-        - light.wled
+        - light.govee
     - data:
         brightness: 255
         effect: Color Loop
@@ -608,7 +544,6 @@ morning:
       service: light.turn_on
       target:
         entity_id:
-        - light.bed_lights
         - light.light_switch
         - light.light_switch_corner
     - service: input_select.select_option
@@ -685,6 +620,22 @@ morning:
                 minutes: 0
                 seconds: 1
                 milliseconds: 0
+    - service: light.turn_on
+      data:
+        brightness_pct: 100
+      target:
+        entity_id:
+        - light.wled
+        - light.bed
+    - if:
+      - condition: sun
+        after: sunrise
+        before: sunset
+      then:
+      - service: cover.open_cover
+        data: {}
+        target:
+          entity_id: cover.bedroom_blinds
   mode: single
   icon: mdi:white-balance-sunny
 start_car:
@@ -1410,7 +1361,74 @@ lofi:
         alias: Turn on other speakers
       else: []
       enabled: true
-  mode: single
+  - if:
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: media_player.owntone_server
+        state: playing
+    then:
+    - service: hassio.addon_restart
+      data:
+        addon: 63120367_homepod-connect
+    - delay:
+        hours: 0
+        minutes: 0
+        seconds: 15
+        milliseconds: 0
+    - service: homeassistant.reload_config_entry
+      data: {}
+      target:
+        entity_id:
+        - media_player.owntone_server
+        - media_player.owntone_output_bathroom
+        - media_player.owntone_output_desk
+        - media_player.owntone_output_front
+        - media_player.owntone_output_front_homepod
+        - media_player.owntone_output_kitchen_left
+        - media_player.owntone_output_kitchen_right
+        - media_player.owntone_output_living_room_tv
+        - media_player.owntone_output_master_bedroom_tv
+        - media_player.owntone_output_nightstand
+        - media_player.owntone_output_garage_homepod
+        - media_player.owntone_output_guest_left
+        - media_player.owntone_output_guest_right
+    - wait_for_trigger:
+      - platform: state
+        entity_id:
+        - media_player.owntone_output_bathroom
+        from: unavailable
+      timeout:
+        hours: 0
+        minutes: 0
+        seconds: 45
+        milliseconds: 0
+    - repeat:
+        count: 2
+        sequence:
+        - service: media_player.turn_off
+          data: {}
+          target:
+            entity_id:
+            - media_player.owntone_server
+            - media_player.owntone_output_bathroom
+            - media_player.owntone_output_desk
+            - media_player.owntone_output_front
+            - media_player.owntone_output_front_homepod
+            - media_player.owntone_output_kitchen_left
+            - media_player.owntone_output_kitchen_right
+            - media_player.owntone_output_living_room_tv
+            - media_player.owntone_output_master_bedroom_tv
+            - media_player.owntone_output_nightstand
+            - media_player.owntone_output_garage_homepod
+            - media_player.owntone_output_guest_left
+            - media_player.owntone_output_guest_right
+    - service: script.turn_on
+      data: {}
+      target:
+        entity_id: script.lofi
+    alias: If Owntone not playing, restart Addon and start over
+  mode: restart
   icon: mdi:meditation
 play_music:
   alias: Play Music
@@ -2138,31 +2156,3 @@ stop_music:
       entity_id: media_player.spotify_anthony221121
   mode: single
   icon: mdi:stop
-'1688844134376':
-  alias: New Script
-  sequence:
-  - repeat:
-      until:
-      - condition: template
-        value_template: '{{ false }}'
-      sequence:
-      - service: light.turn_on
-        data:
-          brightness_pct: 100
-        target:
-          entity_id: light.shapes_4948
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 0
-          milliseconds: 700
-      - service: light.turn_on
-        data:
-          brightness_pct: 20
-        target:
-          entity_id: light.shapes_4948
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 0
-          milliseconds: 700
