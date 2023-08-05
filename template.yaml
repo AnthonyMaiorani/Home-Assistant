@@ -91,7 +91,7 @@
   - name: "AC Thermostat Temperature"
     unique_id: ac_thermostat_temperature
     state: >
-      {% if states('person.anthony')|lower in ['utd', 'raytheon', 'away', 'not_home'] 
+      {% if (states('person.anthony')|lower in ['utd', 'raytheon', 'away', 'not_home'] and not states('person.taylor', 'home')) 
       or not is_state('switch.ac', "on") or is_state('script.night', "on") %} unknown
       {% elif is_state("input_boolean.ac_boost", "on") -%} 61 
       {% elif is_state("binary_sensor.bedroom_door", "on") and is_state("person.riana", "home") -%} 75
@@ -114,7 +114,7 @@
     unique_id: nanoleaf_auto_brightness
     state: >
       {# Off #}
-      {% if not states('input_select.anthony') in ['Just Arrived', 'Home'] or
+      {% if (not states('input_select.anthony') in ['Just Arrived', 'Home'] and not states('person.taylor', 'home')) or
       ( is_state('light.bedroom_lights', 'off') and expand('light.bedroom_lights')
       |selectattr('state','in',['unavailable','unknown','none'])|list|count < 1) -%} 0
       {# In call with color loop #}

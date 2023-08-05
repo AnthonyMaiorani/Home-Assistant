@@ -631,11 +631,19 @@ morning:
       - condition: sun
         after: sunrise
         before: sunset
+      - condition: numeric_state
+        entity_id: weather.dark_sky
+        attribute: temperature
+        below: 85
       then:
       - service: cover.open_cover
         data: {}
         target:
           entity_id: cover.bedroom_blinds
+    - service: switch.turn_off
+      data: {}
+      target:
+        entity_id: switch.acfanhigh
   mode: single
   icon: mdi:white-balance-sunny
 start_car:
