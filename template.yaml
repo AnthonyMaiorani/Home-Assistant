@@ -77,7 +77,8 @@
       is_state('input_select.anthony', 'Just Arrived'))
       and not ((is_state('input_select.riana', 'Home') or
       is_state('input_select.riana', 'Just Arrived'))
-      or states('zone.home')|int(2) > 1)) }}
+      or states('zone.home')|int(2) > 1)) or (
+      states('zone.home')|int(2) == 2) and (is_state('input_select.taylor_presence', 'Just Arrived') or is_state('input_select.taylor_presence', 'Home'))  }}
     unique_id: home_alone
   - name: "Entry Doors"
     state: > 
@@ -91,8 +92,8 @@
   - name: "AC Thermostat Temperature"
     unique_id: ac_thermostat_temperature
     state: >
-      {% if (states('person.anthony')|lower in ['utd', 'raytheon', 'away', 'not_home'] and not states('person.taylor', 'home')) 
-      or not is_state('switch.ac', "on") or is_state('script.night', "on") %} unknown
+      {% if (states('person.anthony')|lower in ['utd', 'raytheon', 'away', 'not_home'] or not states('person.taylor', 'home')) 
+      or not is_state('switch.ac', "on") %} unknown
       {% elif is_state("input_boolean.ac_boost", "on") -%} 61 
       {% elif is_state("binary_sensor.bedroom_door", "on") and is_state("person.riana", "home") -%} 75
       {% elif is_state("switch.desktop", "on") and not is_state("binary_sensor.bed_occupancy", "on") -%} 74

@@ -1,23 +1,26 @@
 - platform: rest
   resource: http://192.168.1.57/json/state
   name: WLED
-  body_on: '{"bri": "255"}'
-  body_off: '{"bri": "0"}'
+  body_on: '{"on": "true"}'
+  body_off: '{"on": "false"}'
   is_on_template: "{{ value_json.on }}"
   unique_id: wled
+  scan_interval: 5
 - platform: rest
   resource: http://192.168.1.193/json/state
   name: Govee
-  body_on: '{"bri": "255"}'
-  body_off: '{"bri": "0"}'
+  body_on: '{"on": "true"}'
+  body_off: '{"on": "false"}'
   is_on_template: "{{ value_json.on }}"
+  scan_interval: 5
   unique_id: govee
 - platform: rest
   resource: http://192.168.1.132/json/state
   name: Bed
-  body_on: '{"bri": "255"}'
-  body_off: '{"bri": "0"}'
+  body_on: '{"on": "true"}'
+  body_off: '{"on": "false"}'
   is_on_template: "{{ value_json.on }}"
+  scan_interval: 5
   unique_id: bed
 - platform: template
   switches:
@@ -219,7 +222,7 @@
     acfanhigh:
       unique_id: acfanhigh
       friendly_name: AC Fan High
-      value_template: "{{ is_state('switch.ac', 'on') and ((is_state_attr('climate.bedroom_ac', 'fan_mode', 'high') or is_state('input_boolean.ac_boost', 'on'))) }}"
+      value_template: "{{ states('climate.bedroom_ac') in ['cool', 'fan_only'] and ((is_state_attr('climate.bedroom_ac', 'fan_mode', 'high') or is_state('input_boolean.ac_boost', 'on'))) }}"
       turn_on:
         - service: switch.turn_on
           target:
@@ -259,7 +262,7 @@
     guesttv:
       unique_id: guesttv
       friendly_name: Guest TV
-      value_template: "{{ not is_state('media_player.guest_tv', 'standby') }}"
+      value_template: "{{ is_state('binary_sensor.guest_bedroom_tv_in_use', 'on') }} "
       turn_on:
         - service: media_player.turn_on
           target:

@@ -21,6 +21,8 @@
       friendly_name: WLED
       level_template: "{{ states('input_number.wled_brightness') }}"
       value_template: "{{ is_state('switch.wled', 'on') }}"
+      effect_list_template: "{{ state_attr('input_select.wled_preset', 'options') }}"
+      effect_template: "{{ states('input_select.wled_preset') }}"
       turn_on:
         service: switch.turn_on
         data:
@@ -35,6 +37,13 @@
             value: "{{ brightness }}"
             entity_id: input_number.wled_brightness
         - service: rest_command.set_wled_brightness
+      set_effect:
+        - service: input_select.select_option
+          data:
+            option: "{{ effect }}"
+          target:
+            entity_id: input_select.wled_preset
+        - service: rest_command.set_wled_preset
     bed:
       unique_id: bed
       friendly_name: bed
