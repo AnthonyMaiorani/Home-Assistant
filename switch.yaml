@@ -1,26 +1,29 @@
 - platform: rest
   resource: http://192.168.1.57/json/state
   name: WLED
-  body_on: '{"on": "true"}'
-  body_off: '{"on": "false"}'
+  body_on: '{"on":true}'
+  body_off: '{"on":false}'
   is_on_template: "{{ value_json.on }}"
   unique_id: wled
+  method: patch
   scan_interval: 5
 - platform: rest
   resource: http://192.168.1.193/json/state
   name: Govee
-  body_on: '{"on": "true"}'
-  body_off: '{"on": "false"}'
+  body_on: '{"on":true}'
+  body_off: '{"on":false}'
   is_on_template: "{{ value_json.on }}"
   scan_interval: 5
+  method: patch
   unique_id: govee
 - platform: rest
   resource: http://192.168.1.132/json/state
   name: Bed
-  body_on: '{"on": "true"}'
-  body_off: '{"on": "false"}'
+  body_on: '{"on":true}'
+  body_off: '{"on":false}'
   is_on_template: "{{ value_json.on }}"
   scan_interval: 5
+  method: patch
   unique_id: bed
 - platform: template
   switches:

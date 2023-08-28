@@ -17,6 +17,7 @@ fan_off:
         - light.shapes_007f
         - light.shapes_ee82
         - light.shapes_4948
+        - switch.lumi_lumi_plug_maus01_switch_2
     - data:
         brightness: 255
         effect: Color Loop
@@ -44,14 +45,6 @@ color_loop:
   alias: Color
   sequence:
   - parallel:
-    - service: homeassistant.turn_on
-      data: {}
-      target:
-        entity_id:
-        - light.shapes_007f
-        - light.shapes_ee82
-        - light.shapes_4948
-        - light.govee
     - data:
         brightness: 255
         effect: Color Loop
@@ -122,6 +115,25 @@ color_loop:
         entity_id:
         - light.wled
         - light.bed
+        - light.govee
+    - service: switch.turn_on
+      data: {}
+      target:
+        entity_id:
+        - switch.usb_hub
+        - switch.lumi_lumi_plug_maus01_switch_2
+    - service: homeassistant.turn_on
+      data: {}
+      target:
+        entity_id:
+        - light.shapes_007f
+        - light.shapes_4948
+        - light.shapes_ee82
+    - service: automation.trigger
+      data:
+        skip_condition: true
+      target:
+        entity_id: automation.nanoleaf_scene_changer_and_auto_brightness
   mode: single
   icon: mdi:lightbulb-on
 music:
@@ -187,13 +199,16 @@ call:
     - service: input_boolean.turn_off
       data: {}
       target:
-        entity_id: input_boolean.bedmotion
+        entity_id:
+        - input_boolean.bedmotion
+        - input_boolean.privacy
     - service: switch.turn_off
       data: {}
       target:
         entity_id:
         - switch.desktop
         - switch.usb_hub
+        - switch.lumi_lumi_plug_maus01_switch_2
     - service: light.turn_off
       data: {}
       target:
@@ -202,7 +217,7 @@ call:
         - light.hallway_lights
     - service: light.turn_on
       data:
-        brightness: 9
+        brightness: 5
       target:
         entity_id: light.govee
     - if:
@@ -326,6 +341,13 @@ call:
             minutes: 0
             seconds: 1
             milliseconds: 0
+      enabled: false
+    - service: light.turn_on
+      data:
+        brightness: 10
+      target:
+        entity_id:
+        - light.bed
   mode: restart
   icon: mdi:phone
 night:
@@ -349,7 +371,9 @@ night:
     - service: switch.turn_off
       data: {}
       target:
-        entity_id: switch.desktop
+        entity_id:
+        - switch.desktop
+        - switch.lumi_lumi_plug_maus01_switch_2
     - if:
       - condition: state
         state: 'on'
@@ -633,14 +657,14 @@ morning:
         effect: None
       target:
         entity_id: light.fan_lights
-    - data: {}
+    - data:
+        brightness_pct: 100
       service: light.turn_on
       target:
         entity_id:
-        - light.shapes_007f
-        - light.shapes_ee82
-        - light.shapes_4948
         - light.govee
+        - light.wled
+        - light.bed
     - data:
         brightness: 255
         effect: Color Loop
@@ -724,13 +748,14 @@ morning:
                 minutes: 0
                 seconds: 1
                 milliseconds: 0
-    - service: light.turn_on
-      data:
-        brightness_pct: 100
+    - service: homeassistant.turn_on
+      data: {}
       target:
         entity_id:
-        - light.wled
-        - light.bed
+        - light.shapes_007f
+        - light.shapes_4948
+        - light.shapes_ee82
+        - switch.lumi_lumi_plug_maus01_switch_2
     - if:
       - condition: sun
         after: sunrise
@@ -752,11 +777,20 @@ morning:
       - condition: state
         entity_id: binary_sensor.bed_occupancy
         state: 'on'
+      - condition: and
+        conditions:
+        - condition: state
+          entity_id: input_select.taylor_presence
+          state: Home
+        - condition: state
+          entity_id: input_select.taylor_presence
+          state: Just Arrived
       then:
       - service: input_boolean.turn_on
         data: {}
         target:
           entity_id: input_boolean.bedmotion
+      enabled: true
   mode: single
   icon: mdi:white-balance-sunny
 start_car:

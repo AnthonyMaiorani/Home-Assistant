@@ -120,15 +120,14 @@
       |selectattr('state','in',['unavailable','unknown','none'])|list|count < 1) -%} 0
       {# In call with color loop #}
       {% elif is_state('binary_sensor.desktop_power', 'on') and is_state('binary_sensor.webcam', 'on') and 
-      is_state_attr('light.fan_lights', 'effect', 'Color Loop') -%} 142
+      is_state_attr('light.fan_lights', 'effect', 'Color Loop') -%} 178
       {# In call with lights white #}
       {% elif is_state('binary_sensor.desktop_power', 'on') and
       is_state('binary_sensor.webcam', 'on') and
       is_state('light.fan_lights', 'on') -%} 204
       {# Night call #}
-      {#{% elif not is_state('light.fan_lights', 'on') and state_attr('light.bed_lights', 'rgb_color')
-      | join(' ') == '0 255 255' and 
-      is_state_attr('light.bed_lights', 'effect', 'None')%} 26
+      {% elif not is_state('light.fan_lights', 'on') and not is_state('light.wled', 'on') and 
+      is_state('light.govee', 'on') and is_state('light.bed', 'on') %} 26
       {# Door opened #}
       {% elif is_state('binary_sensor.bedroom_door', 'on') and 
       is_state('light.fan_lights', 'on')-%} 254
@@ -220,9 +219,9 @@
         {# Regular Scenes #}
         {% set defaultScenes = ['Cosmos', 'Dynamic Blue', 'Ocean', 
         'Vaporwave', 'Rainbow', 'energy'] %}
-        {% set nightScenes = ['moonlight', 'Lightscape', 'Night light', 
-        'Tron Legacy', 'Pink To Blue', 'Rain', 'TRON CITY', 'Waterfall', 
-        'Playstation Blue', 'Bedtime', 'Aurora magic', 'Holodek'] %}
+        {% set nightScenes = ['moonlight', 'Lightscape', 'Night light',
+        'Pink To Blue', 'Rain',  'Waterfall', 'Playstation Blue', 'Bedtime', 
+        'Aurora magic', 'Holodek'] %}
         {% set holidayScenes = ['Christmas', 'Christmas Candy Cane', 
         'Christmas Flow', 'Christmas Tree'] %}
         {% set musicScenes = ['Shooting Stars', 'Cotton Candy', 'Pop Rocks',
@@ -231,6 +230,7 @@
         'Water Cooler', 'Clubbing', 'Snowy Holiday', 'Lofi Sound'] %}
         {% set lessChillMusicScenes = ['cool thing', 'Hip Hop', 
         'Tachyon Light2', 'Oceanworks'] %}
+        {% set darkScenes = ['TRON CITY', 'Tron Legacy'] %}
 
         {# Build List of Scenes #}
         {% set sceneChoices = defaultScenes %}
@@ -239,6 +239,11 @@
         {# Night Scenes #}
         {% if now().hour < 7 and is_state('switch.desktop', 'off') %}  
         {% set sceneChoices = sceneChoices + nightScenes %}
+
+          {# If in call on laptop #}
+          {% if states('sensor.macbook_air_active_camera') in ['unavailable', 'Inactive'] %}
+          {% set sceneChoices = sceneChoices + darkScenes %}
+          {%- endif %} 
         {%- endif %}  
 
         {# Holiday Scenes #}
