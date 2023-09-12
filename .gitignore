@@ -6,6 +6,8 @@
 !.gitignore
 !*.md
 !esphome
+!custom_components
+!custom_components/**
 !.travis.yml
 !blueprints/**
 !blueprints/
@@ -19,9 +21,12 @@
 node-red
 www
 tts
-custom_components/
 
 # Ensure these YAML files are ignored, otherwise your secret data/credentials will leak.
 ip_bans.yaml
 secrets.yaml
 known_devices.yaml
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
