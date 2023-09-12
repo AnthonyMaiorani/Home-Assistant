@@ -227,10 +227,6 @@
         name: ios-dark-mode-dark-blue
         mode: light
       service: frontend.set_theme
-    - service: input_boolean.turn_on
-      data: {}
-      target:
-        entity_id: input_boolean.govee_cyan
     - if:
       - condition: state
         entity_id: person.anthony
@@ -287,6 +283,19 @@
         entity_id:
         - switch.airport_express
         - switch.lumi_lumi_plug_maus01_switch_3
+    - if:
+      - condition: state
+        entity_id: switch.desktop
+        state: 'off'
+      - condition: time
+        after: 00:00:00
+      - condition: sun
+        before: sunrise
+      then:
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id: switch.usb_hub
   - service: automation.turn_on
     data: {}
     target:
@@ -297,14 +306,14 @@
       entity_id:
       - media_player.owntone_server
       - media_player.owntone_output_bathroom
-      - media_player.owntone_output_desk
+      - media_player.owntone_output_anthony_s_desk
       - media_player.owntone_output_front
       - media_player.owntone_output_kitchen_left
       - media_player.owntone_output_kitchen_right
       - media_player.owntone_output_front_homepod
       - media_player.owntone_output_living_room_tv
       - media_player.owntone_output_master_bedroom_tv
-      - media_player.owntone_output_nightstand
+      - media_player.owntone_output_anthony_s_nightstand
       - media_player.owntone_output_garage_homepod
       - media_player.owntone_output_guest_left
       - media_player.owntone_output_guest_right
@@ -673,13 +682,13 @@
                   volume_level: 0.13
                 target:
                   entity_id:
-                  - media_player.owntone_output_desk
+                  - media_player.owntone_output_anthony_s_desk
               - service: media_player.volume_set
                 data:
                   volume_level: 0.26
                 target:
                   entity_id:
-                  - media_player.owntone_output_nightstand
+                  - media_player.owntone_output_anthony_s_nightstand
               - delay:
                   hours: 0
                   minutes: 0
@@ -935,11 +944,11 @@
         - condition: or
           conditions:
           - condition: numeric_state
-            entity_id: media_player.owntone_output_desk
+            entity_id: media_player.owntone_output_anthony_s_desk
             attribute: volume_level
             above: 0.15
           - condition: numeric_state
-            entity_id: media_player.owntone_output_nightstand
+            entity_id: media_player.owntone_output_anthony_s_nightstand
             attribute: volume_level
             above: 0.15
         - condition: or
@@ -970,20 +979,20 @@
                 data: {}
                 target:
                   entity_id:
-                  - media_player.owntone_output_nightstand
-                  - media_player.owntone_output_desk
+                  - media_player.owntone_output_anthony_s_nightstand
+                  - media_player.owntone_output_anthony_s_desk
               - service: media_player.volume_set
                 data:
                   volume_level: 0.18
                 target:
                   entity_id:
-                  - media_player.owntone_output_desk
+                  - media_player.owntone_output_anthony_s_desk
               - service: media_player.volume_set
                 data:
                   volume_level: 0.36
                 target:
                   entity_id:
-                  - media_player.owntone_output_nightstand
+                  - media_player.owntone_output_anthony_s_nightstand
               - delay:
                   hours: 0
                   minutes: 0
@@ -1019,13 +1028,13 @@
                       volume_level: 0.12
                     target:
                       entity_id:
-                      - media_player.owntone_output_desk
+                      - media_player.owntone_output_anthony_s_desk
                   - service: media_player.volume_set
                     data:
                       volume_level: 0.24
                     target:
                       entity_id:
-                      - media_player.owntone_output_nightstand
+                      - media_player.owntone_output_anthony_s_nightstand
                   - delay:
                       hours: 0
                       minutes: 0
@@ -1054,13 +1063,13 @@
                       volume_level: 0.12
                     target:
                       entity_id:
-                      - media_player.owntone_output_desk
+                      - media_player.owntone_output_anthony_s_desk
                   - service: media_player.volume_set
                     data:
                       volume_level: 0.24
                     target:
                       entity_id:
-                      - media_player.owntone_output_nightstand
+                      - media_player.owntone_output_anthony_s_nightstand
                   - delay:
                       hours: 0
                       minutes: 0
@@ -1082,13 +1091,13 @@
                     volume_level: 0.13
                   target:
                     entity_id:
-                    - media_player.owntone_output_desk
+                    - media_player.owntone_output_anthony_s_desk
                 - service: media_player.volume_set
                   data:
                     volume_level: 0.26
                   target:
                     entity_id:
-                    - media_player.owntone_output_nightstand
+                    - media_player.owntone_output_anthony_s_nightstand
                 - delay:
                     hours: 0
                     minutes: 0
@@ -1125,8 +1134,8 @@
           data: {}
           target:
             entity_id:
-            - media_player.owntone_output_desk
-            - media_player.owntone_output_nightstand
+            - media_player.owntone_output_anthony_s_desk
+            - media_player.owntone_output_anthony_s_nightstand
       - service: input_boolean.turn_off
         data: {}
         target:
@@ -1328,10 +1337,10 @@
       to: 'on'
     continue_on_timeout: false
     timeout: 00:30:00
-  - service: input_boolean.turn_on
+  - service: switch.turn_on
     data: {}
     target:
-      entity_id: input_boolean.ac_boost
+      entity_id: switch.ac_boost
   - wait_for_trigger:
     - platform: state
       entity_id:
@@ -1343,6 +1352,10 @@
     data: {}
     target:
       entity_id: climate.bedroom_ac
+  - service: switch.turn_off
+    data: {}
+    target:
+      entity_id: switch.ac_boost
   mode: single
 - id: '1658727301790'
   alias: USB Control
@@ -1370,6 +1383,10 @@
     entity_id:
     - switch.usb_hub
     from: unavailable
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 20
   - platform: event
     event_type: automation_reloaded
     id: reloaded
@@ -1379,12 +1396,11 @@
     state: 'off'
   - condition: or
     conditions:
-    - condition: time
-      before: '22:00:00'
-      after: 05:00:00
     - condition: state
       entity_id: binary_sensor.desktop_power
       state: 'on'
+    - condition: sun
+      after: sunrise
   action:
   - service: switch.turn_on
     data: {}
@@ -1532,11 +1548,13 @@
     - light.shapes_007f
     from: unavailable
     to: 'on'
+    id: desk available
   - platform: state
     entity_id:
     - light.shapes_ee82
     from: unavailable
     to: 'on'
+    id: vertical available
   - event_type: event_change_nanoleaf
     platform: event
   - platform: state
@@ -1549,6 +1567,7 @@
     - light.shapes_4948
     from: unavailable
     to: 'on'
+    id: corner available
   - platform: state
     entity_id:
     - binary_sensor.signalrgb_active
@@ -1572,19 +1591,64 @@
     - light.govee
     to: 'on'
     from: 'off'
+  - platform: state
+    entity_id:
+    - binary_sensor.signalrgb_active
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+    to: 'on'
+    from: 'off'
+  - platform: state
+    entity_id:
+    - binary_sensor.signalrgb_active
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 15
+    to: 'on'
+    from: 'off'
+  - platform: state
+    entity_id:
+    - binary_sensor.signalrgb_active
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 20
+    to: 'on'
+    from: 'off'
+  - platform: state
+    entity_id:
+    - script.call
+    to: 'on'
+  - platform: state
+    entity_id:
+    - script.call
+    to: 'off'
+  - platform: state
+    entity_id:
+    - light.shapes_007f
+    attribute: effect
+    from: Webcam
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 2
   condition:
   - condition: not
     conditions:
     - condition: state
       entity_id: script.night
       state: 'on'
-  - condition: state
-    entity_id: switch.bedroomtoggle
-    state: 'on'
   action:
   - if:
     - condition: trigger
-      id: reloaded
+      id:
+      - reloaded
+      - desk available
+      - corner available
+      - vertical available
     - condition: state
       entity_id: light.bedroom_lights
       state: 'off'
@@ -1611,6 +1675,9 @@
     continue_on_timeout: false
     timeout: 00:05:00
     enabled: false
+  - condition: state
+    entity_id: switch.bedroomtoggle
+    state: 'on'
   - parallel:
     - repeat:
         until:
@@ -3015,8 +3082,6 @@
     - light.rotunda_lights
     - switch.gym_fan
     - binary_sensor.dining_room_occupancy
-    - binary_sensor.nest_protect_kitchen_occupancy
-    - binary_sensor.nest_protect_rotunda_occupancy
     - binary_sensor.master_hall_motion
     - binary_sensor.lumi_lumi_motion_ac02_motion
     to: 'on'
@@ -3091,10 +3156,6 @@
         - condition: state
           entity_id: input_boolean.ac_boost
           state: 'on'
-        - condition: state
-          entity_id: binary_sensor.bed_occupancy
-          state: 'on'
-          enabled: false
       - condition: or
         conditions:
         - condition: trigger
@@ -3103,6 +3164,17 @@
           id: leftroom2
         - condition: trigger
           id: leftroom3
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: binary_sensor.bed_occupancy
+          state: 'off'
+        - condition: state
+          entity_id: input_select.taylor_presence
+          state: Home
+        - condition: state
+          entity_id: input_select.taylor_presence
+          state: Just Arrived
       sequence:
       - if:
         - condition: state
@@ -4171,28 +4243,13 @@
     - conditions:
       - condition: trigger
         id:
-        - send notification
-      sequence:
-      - service: notify.mobile_app_iphone
-        data:
-          message: clear_notification
-          data:
-            tag: mail
-        alias: reset
-      - service: notify.mobile_app_iphone
-        data:
-          message: '{{ states(''sensor.mail_usps_mail'') }} {% if states(''sensor.mail_usps_mail'')|float(0)
-            == 1 %}peice{%else%}peices{%endif%} of mail {% if states(''sensor.mail_usps_mail'')|float(0)
-            == 1 %}was{%else%}were{%endif%} delivered.'
-          data:
-            entity_id: camera.mail_usps_camera
-            tag: mail
-    - conditions:
-      - condition: trigger
-        id:
         - mailbox opened
+        - send notification
       - condition: state
         entity_id: input_boolean.mail_checked
+        state: 'off'
+      - condition: state
+        entity_id: input_boolean.mail_delivered
         state: 'off'
       sequence:
       - service: notify.mobile_app_iphone
@@ -4200,6 +4257,26 @@
           message: clear_notification
           data:
             tag: mail
+      - if:
+        - condition: not
+          conditions:
+          - condition: or
+            conditions:
+            - condition: numeric_state
+              entity_id: sensor.mail_usps_mail
+              above: 0
+            - condition: numeric_state
+              entity_id: sensor.mail_usps_packages
+              above: 0
+        then:
+        - service: input_boolean.turn_on
+          data: {}
+          target:
+            entity_id:
+            - input_boolean.mail_delivered
+            - input_boolean.mail_checked
+        - stop: ''
+        alias: Stop if 0
       - service: notify.mobile_app_iphone
         data:
           message: '{{ states(''sensor.mail_usps_mail'') }} {% if states(''sensor.mail_usps_mail'')|float(0)
@@ -4208,6 +4285,10 @@
           data:
             entity_id: camera.mail_usps_camera
             tag: mail
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id: input_boolean.mail_delivered
     - conditions:
       - condition: trigger
         id:
@@ -4221,13 +4302,15 @@
       - service: input_boolean.turn_off
         data: {}
         target:
-          entity_id: input_boolean.mail_checked
+          entity_id:
+          - input_boolean.mail_checked
+          - input_boolean.mail_delivered
     - conditions:
       - condition: trigger
         id:
         - mailbox opened
       - condition: state
-        entity_id: input_boolean.mail_checked
+        entity_id: input_boolean.mail_delivered
         state: 'on'
       sequence:
       - service: notify.mobile_app_iphone
@@ -4235,6 +4318,10 @@
           message: clear_notification
           data:
             tag: mail
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id: input_boolean.mail_checked
   mode: single
 - id: '1667193576124'
   alias: Alarm Reminder
@@ -4583,7 +4670,7 @@
       entity_id: button.tare
   mode: single
 - id: '1668564599073'
-  alias: Reboot AirPort
+  alias: Reboot Soundbar AirPort
   description: ''
   trigger:
   - platform: state
@@ -4591,52 +4678,32 @@
     - media_player.owntone_server
   - platform: state
     entity_id:
-    - media_player.owntone_output_desk
+    - media_player.owntone_output_soundbar
     for:
       hours: 0
       minutes: 0
       seconds: 5
   condition:
-  - condition: or
+  - condition: and
     conditions:
-    - condition: and
+    - condition: not
       conditions:
       - condition: state
-        entity_id: media_player.owntone_output_nightstand
-        state: 'on'
-        for:
-          hours: 0
-          minutes: 1
-          seconds: 0
-      - condition: state
-        entity_id: media_player.owntone_output_desk
-        state: 'off'
-        for:
-          hours: 0
-          minutes: 0
-          seconds: 5
-      - condition: state
-        entity_id: media_player.spotify_anthony221121
-        state: playing
-    - condition: and
-      conditions:
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: media_player.owntone_server
-          state: unavailable
-      - condition: state
-        entity_id: media_player.owntone_output_desk
+        entity_id: media_player.owntone_server
         state: unavailable
-        for:
-          hours: 0
-          minutes: 0
-          seconds: 5
+    - condition: state
+      entity_id: media_player.owntone_output_soundbar
+      state: unavailable
+      for:
+        hours: 0
+        minutes: 0
+        seconds: 5
   action:
   - service: switch.turn_off
     data: {}
     target:
-      entity_id: switch.airport_express
+      entity_id:
+      - switch.sonoff_s31_lite_zb_switch_4
   - delay:
       hours: 0
       minutes: 0
@@ -4645,7 +4712,8 @@
   - service: switch.turn_on
     data: {}
     target:
-      entity_id: switch.airport_express
+      entity_id:
+      - switch.sonoff_s31_lite_zb_switch_4
   - if:
     - condition: not
       conditions:
@@ -4673,7 +4741,7 @@
               > now() - timedelta( minutes = 1 ) \nor as_local(state_attr('script.test',
               \n        'last_triggered')) > now() - timedelta( minutes = 1 )\n}}"
           - condition: state
-            entity_id: media_player.owntone_output_nightstand
+            entity_id: media_player.owntone_output_anthony_s_nightstand
             state: 'on'
           - condition: state
             entity_id: media_player.kitchen_speakers
@@ -4689,7 +4757,7 @@
   - wait_for_trigger:
     - platform: state
       entity_id:
-      - media_player.owntone_output_desk
+      - media_player.owntone_output_anthony_s_desk
       from: unavailable
     continue_on_timeout: true
     timeout:
@@ -4700,7 +4768,7 @@
   - repeat:
       until:
       - condition: state
-        entity_id: media_player.owntone_output_desk
+        entity_id: media_player.owntone_output_anthony_s_desk
         state: 'on'
       sequence:
       - delay:
@@ -4711,13 +4779,14 @@
       - service: media_player.turn_on
         data: {}
         target:
-          entity_id: media_player.owntone_output_desk
+          entity_id: media_player.owntone_output_anthony_s_desk
+    enabled: false
   - repeat:
       until:
       - condition: template
-        value_template: '{{ state_attr(''media_player.owntone_output_desk'', ''volume_level'')
-          == state_attr(''media_player.spotify_anthony221121'', ''volume_level'')
-          }}
+        value_template: '{{ state_attr(''media_player.owntone_output_anthony_s_desk'',
+          ''volume_level'') == state_attr(''media_player.spotify_anthony221121'',
+          ''volume_level'') }}
 
           '
       sequence:
@@ -4728,7 +4797,8 @@
 
             '
         target:
-          entity_id: media_player.owntone_output_desk
+          entity_id: media_player.owntone_output_anthony_s_desk
+    enabled: false
   mode: single
 - id: '1668917163074'
   alias: Turn off lights at night
@@ -4918,9 +4988,9 @@
               volume_level: '{% if states(''input_boolean.showering'') is defined
                 and is_state(''input_boolean.showering'', ''on'') %} {% set vol =
                 0.55 %} {% elif states(''switch.exhaust_fan'') is defined and is_state(''switch.exhaust_fan'',
-                ''on'') %} {% set vol = 0.5 %} {% elif state_attr(''media_player.owntone_output_nightstand'',
-                ''volume_level'') is defined and state_attr(''media_player.owntone_output_nightstand'',
-                ''volume_level'') is not none %}  {% set vol =  state_attr(''media_player.owntone_output_nightstand'',
+                ''on'') %} {% set vol = 0.5 %} {% elif state_attr(''media_player.owntone_output_anthony_s_nightstand'',
+                ''volume_level'') is defined and state_attr(''media_player.owntone_output_anthony_s_nightstand'',
+                ''volume_level'') is not none %}  {% set vol =  state_attr(''media_player.owntone_output_anthony_s_nightstand'',
                 ''volume_level'') %}  {% else %} {% set vol = 0.11 %} {% endif %}
                 {{ vol }}
 
@@ -4940,10 +5010,10 @@
         - condition: or
           conditions:
           - condition: state
-            entity_id: media_player.owntone_output_nightstand
+            entity_id: media_player.owntone_output_anthony_s_nightstand
             state: 'on'
           - condition: state
-            entity_id: media_player.owntone_output_desk
+            entity_id: media_player.owntone_output_anthony_s_desk
             state: 'on'
         then:
         - parallel:
@@ -4951,11 +5021,11 @@
             data: {}
             target:
               entity_id:
-              - media_player.owntone_output_desk
+              - media_player.owntone_output_anthony_s_desk
               - media_player.owntone_output_front
               - media_player.owntone_output_living_room_tv
               - media_player.owntone_output_master_bedroom_tv
-              - media_player.owntone_output_nightstand
+              - media_player.owntone_output_anthony_s_nightstand
               - media_player.owntone_output_garage_homepod
               - media_player.guest_speakers
               - media_player.owntone_output_kitchen_left
@@ -4990,8 +5060,8 @@
                 data: {}
                 target:
                   entity_id:
-                  - media_player.owntone_output_desk
-                  - media_player.owntone_output_nightstand
+                  - media_player.owntone_output_anthony_s_desk
+                  - media_player.owntone_output_anthony_s_nightstand
               - delay:
                   hours: 0
                   minutes: 0
@@ -5052,20 +5122,20 @@
                 data: {}
                 target:
                   entity_id:
-                  - media_player.owntone_output_nightstand
-                  - media_player.owntone_output_desk
+                  - media_player.owntone_output_anthony_s_nightstand
+                  - media_player.owntone_output_anthony_s_desk
               - service: media_player.volume_set
                 data:
                   volume_level: 0.2
                 target:
                   entity_id:
-                  - media_player.owntone_output_desk
+                  - media_player.owntone_output_anthony_s_desk
               - service: media_player.volume_set
                 data:
                   volume_level: 0.4
                 target:
                   entity_id:
-                  - media_player.owntone_output_nightstand
+                  - media_player.owntone_output_anthony_s_nightstand
               - delay:
                   hours: 0
                   minutes: 0
@@ -5104,10 +5174,10 @@
           - condition: or
             conditions:
             - condition: state
-              entity_id: media_player.owntone_output_nightstand
+              entity_id: media_player.owntone_output_anthony_s_nightstand
               state: 'off'
             - condition: state
-              entity_id: media_player.owntone_output_desk
+              entity_id: media_player.owntone_output_anthony_s_desk
               state: 'off'
           - condition: state
             entity_id: media_player.spotify_anthony221121
@@ -5166,20 +5236,20 @@
                   data: {}
                   target:
                     entity_id:
-                    - media_player.owntone_output_nightstand
-                    - media_player.owntone_output_desk
+                    - media_player.owntone_output_anthony_s_nightstand
+                    - media_player.owntone_output_anthony_s_desk
                 - service: media_player.volume_set
                   data:
                     volume_level: 0.3
                   target:
                     entity_id:
-                    - media_player.owntone_output_desk
+                    - media_player.owntone_output_anthony_s_desk
                 - service: media_player.volume_set
                   data:
                     volume_level: 0.5
                   target:
                     entity_id:
-                    - media_player.owntone_output_nightstand
+                    - media_player.owntone_output_anthony_s_nightstand
                 - delay:
                     hours: 0
                     minutes: 0
@@ -5310,12 +5380,14 @@
   - platform: state
     entity_id:
     - binary_sensor.bathroom_aqara_motion
+    - binary_sensor.lumi_lumi_motion_ac02_motion_3
     from: 'off'
     to: 'on'
     id: motion2
   - platform: state
     entity_id:
     - binary_sensor.bathroom_aqara_motion
+    - binary_sensor.lumi_lumi_motion_ac02_motion_3
     from: 'on'
     to: 'off'
     id: motion clear2
@@ -6217,6 +6289,9 @@
       - condition: state
         entity_id: media_player.owntone_output_garage_homepod
         state: 'on'
+      - condition: state
+        entity_id: media_player.owntone_output_front_homepod
+        state: 'on'
     then:
     - service: media_player.turn_off
       data: {}
@@ -6303,7 +6378,7 @@
     path: stephack/core-pico.yaml
     input:
       pico_remote: df24bd878efc1f29899ba74213c4b124
-      auto_mode: queued
+      auto_mode: restart
       top_on:
       - service: script.turn_on
         data: {}
@@ -6597,14 +6672,23 @@
       down_lower_release: []
       middle_stop_release: []
       middle_stop:
+      - if:
+        - condition: state
+          entity_id: media_player.spotify_anthony221121
+          attribute: source
+          state: DESKTOP-PC
+        - condition: state
+          entity_id: switch.desktop
+          state: 'on'
+        then:
+        - service: media_player.media_pause
+          data: {}
+          target:
+            entity_id: media_player.spotify_anthony221121
       - service: switch.toggle
         data: {}
         target:
           entity_id: switch.desktop
-      - service: switch.turn_on
-        data: {}
-        target:
-          entity_id: switch.usb_hub
 - id: '1671430225021'
   alias: Dana's Pedestal Pico
   description: ''
@@ -6900,6 +6984,10 @@
           data: {}
           target:
             entity_id: script.lofi
+      - service: timer.cancel
+        data: {}
+        target:
+          entity_id: timer.exhaust
     - conditions:
       - condition: trigger
         id: 'off'
@@ -7797,6 +7885,7 @@
           target:
             entity_id:
             - update.nest_protect_update
+        enabled: false
       - if:
         - condition: state
           entity_id: update.hisense_tv_update
@@ -7807,16 +7896,6 @@
           target:
             entity_id:
             - update.hisense_tv_update
-      - if:
-        - condition: state
-          entity_id: update.govee_lan_control_update
-          state: 'on'
-        then:
-        - service: update.install
-          data: {}
-          target:
-            entity_id:
-            - update.govee_lan_control_update
     - condition: not
       conditions:
       - condition: or
@@ -7849,7 +7928,7 @@
       target:
         entity_id:
         - update.home_assistant_core_update
-    enabled: true
+    enabled: false
   mode: single
 - id: '1677121828248'
   alias: Turn off TVs
@@ -8039,10 +8118,10 @@
   - condition: or
     conditions:
     - condition: state
-      entity_id: media_player.owntone_output_desk
+      entity_id: media_player.owntone_output_anthony_s_desk
       state: 'on'
     - condition: state
-      entity_id: media_player.owntone_output_nightstand
+      entity_id: media_player.owntone_output_anthony_s_nightstand
       state: 'on'
   - condition: state
     entity_id: media_player.spotify_anthony221121
@@ -8300,17 +8379,6 @@
             - switch.dana_s_color_ropes
             - switch.dana_s_incandescant_ropes
             - switch.samsungtv
-        - service: light.turn_on
-          data:
-            rgb_color:
-            - 255
-            - 0
-            - 255
-            brightness_pct: 100
-          target:
-            entity_id:
-            - light.dana_s_fan_lights
-          enabled: false
         - service: media_player.turn_on
           data: {}
           target:
@@ -8320,15 +8388,48 @@
           target:
             entity_id:
             - button.screenon
-        - service: light.turn_on
-          data:
-            effect: None
-            xy_color:
-            - 0.455
-            - 0.374
-          target:
-            entity_id:
-            - light.dana_s_fan_lights
+        - if:
+          - condition: or
+            conditions:
+            - condition: or
+              conditions:
+              - condition: state
+                entity_id: input_select.anthony
+                state: Just Left
+              - condition: state
+                entity_id: input_select.anthony
+                state: Extended Away
+              - condition: state
+                entity_id: input_select.anthony
+                state: Away
+            - condition: state
+              entity_id: device_tracker.dana
+              state: home
+          - condition: state
+            entity_id: input_boolean.guest
+            state: 'off'
+          then:
+          - service: light.turn_on
+            data:
+              effect: None
+              xy_color:
+              - 0.455
+              - 0.374
+            target:
+              entity_id:
+              - light.dana_s_fan_lights
+          else:
+          - service: light.turn_on
+            data:
+              rgb_color:
+              - 255
+              - 0
+              - 255
+              brightness_pct: 100
+            target:
+              entity_id:
+              - light.dana_s_fan_lights
+            enabled: true
     - conditions:
       - condition: or
         conditions:
@@ -8719,30 +8820,32 @@
         value_template: '{{ not is_state_attr(''media_player.spotify_anthony221121'',
           ''source'', ''DESKTOP-PC'') and "DESKTOP-PC" in state_attr(''media_player.spotify_anthony221121'',
           ''source_list'')}}'
-      - service: media_player.select_source
+      - service: script.stop_music
+        data: {}
+      - repeat:
+          until:
+          - condition: state
+            entity_id: media_player.spotify_anthony221121
+            attribute: source
+            state: DESKTOP-PC
+          sequence:
+          - service: media_player.select_source
+            data:
+              source: DESKTOP-PC
+            target:
+              entity_id: media_player.spotify_anthony221121
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 2
+              milliseconds: 0
+      - service: media_player.play_media
         data:
-          source: DESKTOP-PC
+          media_content_type: playlist
+          media_content_id: https://open.spotify.com/playlist/1FXZPGh51QQyNUmADd5ssN
+          enqueue: play
         target:
           entity_id: media_player.spotify_anthony221121
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 2
-          milliseconds: 0
-      - if:
-        - condition: state
-          entity_id: media_player.spotify_anthony221121
-          attribute: media_playlist
-          state: lofi
-        then:
-        - service: media_player.play_media
-          data:
-            media_content_type: playlist
-            media_content_id: https://open.spotify.com/playlist/1FXZPGh51QQyNUmADd5ssN
-            enqueue: play
-          target:
-            entity_id: media_player.spotify_anthony221121
-        alias: if playing lofi, switch to music
       - service: media_player.volume_set
         data:
           volume_level: 1
@@ -9103,6 +9206,14 @@
     - condition: state
       entity_id: light.shapes_ee82
       state: 'on'
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_select.taylor_presence
+      state: Home
+    - condition: state
+      entity_id: input_select.taylor_presence
+      state: Just Arrived
   action:
   - choose:
     - conditions:
@@ -9407,3 +9518,453 @@
         target:
           entity_id: light.wled
   mode: single
+- id: '1693256810267'
+  alias: GoXLR
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.desktop
+    from: 'off'
+    to: 'on'
+    id: 'on'
+  - platform: state
+    entity_id:
+    - switch.desktop
+    from: 'on'
+    to: 'off'
+    id: 'off'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 20
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - 'on'
+      sequence:
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id: switch.sonoff_s31_lite_zb_switch_2
+    - conditions:
+      - condition: trigger
+        id:
+        - 'off'
+      sequence:
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id: switch.sonoff_s31_lite_zb_switch_2
+  mode: single
+- id: '1693288313787'
+  alias: Desktop Spotify Volume
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - media_player.spotify_anthony221121
+    attribute: source
+    to: DESKTOP-PC
+  condition: []
+  action:
+  - service: media_player.volume_set
+    data:
+      volume_level: 1
+    target:
+      entity_id: media_player.spotify_anthony221121
+  mode: single
+- id: '1693319496181'
+  alias: Reboot Desk Airport
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - media_player.owntone_server
+  - platform: state
+    entity_id:
+    - media_player.owntone_output_anthony_s_desk
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 5
+  condition:
+  - condition: or
+    conditions:
+    - condition: and
+      conditions:
+      - condition: state
+        entity_id: media_player.owntone_output_anthony_s_nightstand
+        state: 'on'
+        for:
+          hours: 0
+          minutes: 1
+          seconds: 0
+      - condition: state
+        entity_id: media_player.owntone_output_anthony_s_desk
+        state: 'off'
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 5
+      - condition: state
+        entity_id: media_player.spotify_anthony221121
+        state: playing
+    - condition: and
+      conditions:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.owntone_server
+          state: unavailable
+      - condition: state
+        entity_id: media_player.owntone_output_anthony_s_desk
+        state: unavailable
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 5
+  action:
+  - service: switch.turn_off
+    data: {}
+    target:
+      entity_id:
+      - switch.airport_express
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 1
+      milliseconds: 0
+  - service: switch.turn_on
+    data: {}
+    target:
+      entity_id:
+      - switch.airport_express
+  - if:
+    - condition: not
+      conditions:
+      - condition: and
+        conditions:
+        - condition: state
+          entity_id: media_player.owntone_server
+          state: playing
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: media_player.owntone_output_bathroom
+            state: 'on'
+          - condition: state
+            entity_id: media_player.owntone_output_front
+            state: 'on'
+          - condition: state
+            entity_id: media_player.guest_speakers
+            state: 'on'
+          - condition: state
+            entity_id: media_player.owntone_output_living_room_tv
+            state: 'on'
+          - condition: template
+            value_template: "{{ as_local(state_attr('script.lofi', \n        'last_triggered'))
+              > now() - timedelta( minutes = 1 ) \nor as_local(state_attr('script.test',
+              \n        'last_triggered')) > now() - timedelta( minutes = 1 )\n}}"
+          - condition: state
+            entity_id: media_player.owntone_output_anthony_s_nightstand
+            state: 'on'
+          - condition: state
+            entity_id: media_player.kitchen_speakers
+            state: 'on'
+      alias: If not currently playing
+    then:
+    - delay:
+        hours: 0
+        minutes: 1
+        seconds: 0
+        milliseconds: 0
+    - stop: ''
+  - wait_for_trigger:
+    - platform: state
+      entity_id:
+      - media_player.owntone_output_anthony_s_desk
+      from: unavailable
+    continue_on_timeout: true
+    timeout:
+      hours: 0
+      minutes: 2
+      seconds: 0
+      milliseconds: 0
+  - repeat:
+      until:
+      - condition: state
+        entity_id: media_player.owntone_output_anthony_s_desk
+        state: 'on'
+      sequence:
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 4
+          milliseconds: 0
+      - service: media_player.turn_on
+        data: {}
+        target:
+          entity_id: media_player.owntone_output_anthony_s_desk
+    enabled: true
+  - repeat:
+      until:
+      - condition: template
+        value_template: '{{ state_attr(''media_player.owntone_output_anthony_s_desk'',
+          ''volume_level'') == state_attr(''media_player.spotify_anthony221121'',
+          ''volume_level'') }}
+
+          '
+      sequence:
+      - service: media_player.volume_set
+        data:
+          volume_level: '{{ state_attr(''media_player.spotify_anthony221121'', ''volume_level'')
+            }}
+
+            '
+        target:
+          entity_id: media_player.owntone_output_anthony_s_desk
+    enabled: true
+  mode: single
+- id: '1694314775941'
+  alias: Reconnect Devices
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - light.wyze_bulb_1
+    to: unavailable
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+    id: wyze1
+  - platform: state
+    entity_id:
+    - light.wyze_bulb_2
+    to: unavailable
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+    id: wyze2
+  - platform: state
+    entity_id:
+    - light.wyze_bulb_3
+    to: unavailable
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+    id: wyze3
+  - platform: state
+    entity_id:
+    - light.wyze_bulb_4
+    to: unavailable
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+    id: wyze4
+  - platform: state
+    entity_id:
+    - light.wyze_bulb_5
+    to: unavailable
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+    id: wyze5
+  - platform: state
+    entity_id:
+    - light.wyze_bulb_6
+    to: unavailable
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+    id: wyze6
+  - platform: state
+    entity_id:
+    - light.wyze_bulb_7
+    to: unavailable
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+    id: wyze7
+  - platform: state
+    entity_id:
+    - light.shapes_007f
+    to: unavailable
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    id: desk
+  - platform: state
+    entity_id:
+    - light.shapes_4948
+    to: unavailable
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    id: corner
+  - platform: state
+    entity_id:
+    - light.shapes_ee82
+    to: unavailable
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    id: vertical
+  - platform: state
+    entity_id:
+    - light.shapes_ee82
+    to: unavailable
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+    id: vertical
+  - platform: state
+    entity_id:
+    - switch.usb_hub
+    to: unavailable
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+    id: usb
+  - platform: state
+    entity_id:
+    - light.light_switch
+    to: unavailable
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+    id: lightswitch
+  - platform: state
+    entity_id:
+    - climate.bedroom_ac
+    to: unavailable
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+    id: ac
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - wyze1
+      sequence:
+      - service: unifi.reconnect_client
+        data:
+          device_id: a70e82946e63319e164a4da0e22d4914
+    - conditions:
+      - condition: trigger
+        id:
+        - wyze2
+      sequence:
+      - service: unifi.reconnect_client
+        data:
+          device_id: a99f1a10374d0da5dfff1ec7cfcc5167
+    - conditions:
+      - condition: trigger
+        id:
+        - wyze3
+      sequence:
+      - service: unifi.reconnect_client
+        data:
+          device_id: 576a724b67bd453192cd5fe4a07f4c5c
+    - conditions:
+      - condition: trigger
+        id:
+        - wyze4
+      sequence:
+      - service: unifi.reconnect_client
+        data:
+          device_id: 49d87e72a8f0f7bcb69a206582ea6193
+    - conditions:
+      - condition: trigger
+        id:
+        - wyze5
+      sequence:
+      - service: unifi.reconnect_client
+        data:
+          device_id: b3114ce194084d0c57723164f3843d6a
+    - conditions:
+      - condition: trigger
+        id:
+        - wyze6
+      sequence:
+      - service: unifi.reconnect_client
+        data:
+          device_id: 997bfba8f6c661648c72ce69eb4c0086
+    - conditions:
+      - condition: trigger
+        id:
+        - wyze7
+      sequence:
+      - service: unifi.reconnect_client
+        data:
+          device_id: 4375fe2a4cb7d679c724b4ea785c6a4b
+    - conditions:
+      - condition: trigger
+        id:
+        - desk
+      sequence:
+      - service: unifi.reconnect_client
+        data:
+          device_id: a527267e8064d2c3323e4e9009482636
+    - conditions:
+      - condition: trigger
+        id:
+        - corner
+      sequence:
+      - service: unifi.reconnect_client
+        data:
+          device_id: ba96691142b71d4ece3ecb55aa1d1f75
+    - conditions:
+      - condition: trigger
+        id:
+        - vertical
+      sequence:
+      - service: unifi.reconnect_client
+        data:
+          device_id: 6f6c06677e18334e6dcd4bfe91cdf67b
+    - conditions:
+      - condition: trigger
+        id:
+        - usb
+      sequence:
+      - service: unifi.reconnect_client
+        data:
+          device_id: 9a32bb26971f7740dfdb47ad78f6128b
+    - conditions:
+      - condition: trigger
+        id:
+        - lightswitch
+      sequence:
+      - service: unifi.reconnect_client
+        data:
+          device_id: 9a32bb26971f7740dfdb47ad78f6128b
+    - conditions:
+      - condition: trigger
+        id:
+        - ac
+      sequence:
+      - service: unifi.reconnect_client
+        data:
+          device_id: 32e68440a6bf677e14380d6fd815522d
+  mode: parallel
+  max: 20
