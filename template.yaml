@@ -92,7 +92,7 @@
   - name: "AC Thermostat Temperature"
     unique_id: ac_thermostat_temperature
     state: >
-      {% if (states('person.anthony')|lower in ['utd', 'raytheon', 'away', 'not_home'] or not states('person.taylor', 'home')) 
+      {% if not (states('input_select.anthony')|lower in ['just arrived', 'home'] or not states('input_select.taylor')|lower in ['just arrived', 'home']) 
       or not is_state('switch.ac', "on") %} unknown
       {% elif is_state("input_boolean.ac_boost", "on") -%} 61 
       {% elif is_state("binary_sensor.bedroom_door", "on") and is_state("person.riana", "home") -%} 75
@@ -116,8 +116,7 @@
     state: >
       {# Off #}
       {% if (not states('input_select.anthony') in ['Just Arrived', 'Home'] and not states('person.taylor', 'home')) or
-      ( is_state('light.bedroom_lights', 'off') and expand('light.bedroom_lights')
-      |selectattr('state','in',['unavailable','unknown','none'])|list|count < 1) -%} 0
+      ( is_state('light.bedroom_lights', 'off') and is_state('light.wled', 'off')) -%} 0
       {# In call with color loop #}
       {% elif is_state('binary_sensor.desktop_power', 'on') and is_state('binary_sensor.webcam', 'on') and 
       is_state_attr('light.fan_lights', 'effect', 'Color Loop') -%} 178
@@ -145,7 +144,7 @@
       {# In bed #}
       {# {% elif is_state('light.bedroom_lights', 'on') and not
       is_state_attr('light.bed_lights', 'effect', 'None') -%} 63 #}
-      {% elif is_state('light.bedroom_lights', 'on') -%} 63
+      {% elif is_state('light.wled', 'on') -%} 63
       {%- else -%} 0
       {%- endif %} 
 - trigger:
@@ -186,12 +185,12 @@
     to: "on"
   - platform: state
     entity_id:
-      - media_player.owntone_output_desk
+      - media_player.owntone_output_anthony_s_desk
     to: 
       - "on"
       - "off"
   - platform: numeric_state
-    entity_id: media_player.owntone_output_desk
+    entity_id: media_player.owntone_output_anthony_s_desk
     above: 0.24
     attribute: volume_level
     for:
@@ -199,7 +198,7 @@
       minutes: 0
       seconds: 2
   - platform: numeric_state
-    entity_id: media_player.owntone_output_desk
+    entity_id: media_player.owntone_output_anthony_s_desk
     below: 0.25
     attribute: volume_level
     for:
@@ -262,8 +261,8 @@
 
         {# Music #}
         {# {% elif is_state('switch.desktop', 'off') 
-        and (is_state('media_player.owntone_output_desk', 'on') and
-        state_attr('media_player.owntone_output_desk', 'volume_level') >= 0.25 and 
+        and (is_state('media_player.owntone_output_anthony_s_desk', 'on') and
+        state_attr('media_player.owntone_output_anthony_s_desk', 'volume_level') >= 0.25 and 
         is_state('media_player.spotify_anthony221121', 'playing')
         and state_attr('media_player.spotify_anthony221121', 'volume_level') >= 0.42) and not 
         state_attr('light.bed_lights', 'rgb_color')| join(' ') == '0 255 255'
@@ -279,8 +278,8 @@
         {%- endif %} #}
 
         {% elif is_state('switch.desktop', 'off') 
-        and (is_state('media_player.owntone_output_desk', 'on') and
-        state_attr('media_player.owntone_output_desk', 'volume_level') >= 0.25 and 
+        and (is_state('media_player.owntone_output_anthony_s_desk', 'on') and
+        state_attr('media_player.owntone_output_anthony_s_desk', 'volume_level') >= 0.25 and 
         is_state('media_player.spotify_anthony221121', 'playing')
         and state_attr('media_player.spotify_anthony221121', 'volume_level') >= 0.42)
         and not is_state('binary_sensor.macbook_audio_input_in_use', 'on') 
