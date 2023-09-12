@@ -5,14 +5,17 @@
 !*.yaml
 !.gitignore
 !*.md
-!esphome
-!custom_components
-!custom_components/**
-!.travis.yml
-!blueprints/**
-!blueprints/
+!/esphome
+!/custom_components
+!/custom_components/**
+!/blueprints/**
+!/blueprints/
 !packages
 !pyscript/
+!/.github
+!/.github/workflows
+!/owntone/
+!owntone.conf
 !*.py
 
 # Ignore folders.
@@ -21,6 +24,7 @@
 node-red
 www
 tts
+custom_components/mail_and_packages/images
 
 # Ensure these YAML files are ignored, otherwise your secret data/credentials will leak.
 ip_bans.yaml
