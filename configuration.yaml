@@ -65,7 +65,8 @@ notify:
     services:
       - service: mobile_app_iphone
       - service: mobile_app_ipad_pro
-      - service: mobile_app_macbook
+      - service: mobile_app_macbook_air
+      - service: mobile_app_ipad_2
 
 rest_command:
   set_wled_brightness:
