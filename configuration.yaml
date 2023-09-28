@@ -18,9 +18,10 @@ wake_on_lan:
 #homeassistant:
 #  customize: !include customize.yaml
 
-#reduce db size
 recorder:
-#  purge_keep_days: 3
+  exclude:
+    entities:
+      - sensor.anthony_s_echo_show_next_alarm
 
 # reduce login failure messages
 http:

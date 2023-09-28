@@ -9,9 +9,3 @@ binary_sensor:
       payload_on: "on"
       off_delay: 600000
       device_class: motion
-sensor:
-  - name: "LoRa_Code"
-    state_topic: "LoRa-Gateway/Code"
-
-  - name: "LoRa_RSSI"
-    state_topic: "LoRa-Gateway/RSSI"

@@ -1,0 +1,73 @@
+esphome:
+  name: midea-eth
+  friendly_name: midea
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+ethernet:
+  type: LAN8720
+  mdc_pin: GPIO23
+  mdio_pin: GPIO18
+  clk_mode: GPIO0_IN
+  phy_addr: 1
+  power_pin: GPIO16
+  manual_ip:
+    static_ip: ${static_ip}
+    gateway: !secret gateway
+    subnet: !secret subnet
+    dns1: !secret dns1
+    
+substitutions:
+  static_ip: 192.168.1.3
+
+api:
+ota:
+
+# Disable logging over UART (required)
+logger:
+  baud_rate: 0
+
+# UART settings for Midea dongle (required)
+uart:
+  tx_pin: 3         # hardware dependant
+  rx_pin: 1         # hardware dependant
+  baud_rate: 9600
+
+button:
+  platform: template
+  name: "Display Toggle"
+  on_press:
+    - midea_ac.display_toggle:
+
+switch:
+  - platform: template
+    name: Beeper
+    icon: mdi:volume-source
+    optimistic: true
+    turn_on_action:
+      midea_ac.beeper_on:
+    turn_off_action:
+      midea_ac.beeper_off:
+
+# Main settings
+climate:
+  - platform: midea
+    name: Bedroom AC            
+    period: 1200ms
+    num_attempts: 5
+    autoconf: true              
+    visual:             
+      min_temperature: 16 °C
+      temperature_step: 1 °C    
+    supported_modes:            
+      - FAN_ONLY                
+      - COOL
+      - DRY
+    custom_fan_modes:
+      - SILENT
+      - TURBO
+    outdoor_temperature:        
+      name: Temp

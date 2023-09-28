@@ -89,6 +89,10 @@
       {{ is_state('sensor.alarm_motion', 'O') }}
     unique_id: master_hall_motion
 - sensor:
+  - name: "Ecobee Current Action"
+    unique_id: ecobee_current_action
+    state: >
+      {{ state_attr('climate.home', 'hvac_action') }}
   - name: "AC Thermostat Temperature"
     unique_id: ac_thermostat_temperature
     state: >
@@ -126,7 +130,7 @@
       is_state('light.fan_lights', 'on') -%} 204
       {# Night call #}
       {% elif not is_state('light.fan_lights', 'on') and not is_state('light.wled', 'on') and 
-      is_state('light.govee', 'on') and is_state('light.bed', 'on') %} 26
+      is_state('light.govee', 'on') and is_state('light.bed', 'on') %} 23
       {# Door opened #}
       {% elif is_state('binary_sensor.bedroom_door', 'on') and 
       is_state('light.fan_lights', 'on')-%} 254

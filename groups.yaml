@@ -4,6 +4,7 @@ room: # used for ha menu
     - script.morning
     - script.night
     - script.fan_off
+    - switch.light_switch_relay
     - script.color_loop
     - script.music
     - script.call

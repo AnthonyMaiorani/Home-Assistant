@@ -15,6 +15,7 @@ wifi:
     subnet: !secret subnet
     dns1: !secret dns1
 
+web_server:
 captive_portal:
 logger:
 api:
@@ -46,7 +47,7 @@ binary_sensor:
       inverted: True
     id: lightswitch
     on_multi_click:
-    - timing:
+    - timing: # Normal Press, toggle bedroom
         - ON for at most .3s
         - OFF for at least .4s
       then:
@@ -54,13 +55,14 @@ binary_sensor:
             service: switch.toggle
             data:
               entity_id: switch.bedroomtoggle
-    - timing:
+    - timing: # Hold, make fan lights white
         - ON for at least .301s
         - OFF for at least .1s
       then:
-      - homeassistant.service:
-          service: script.morning
-    - timing:
+        - switch.turn_on: relay1
+        - homeassistant.service:
+            service: script.morning
+    - timing: # 3 second hold, Toggle internal relay
         - ON for at least 3s
         - OFF for at least .1s
       then:

@@ -15,6 +15,7 @@ wifi:
     subnet: !secret subnet
     dns1: !secret dns1
 
+web_server:
 captive_portal:
 logger:
 api:

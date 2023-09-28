@@ -66,6 +66,7 @@ fan_off:
         skip_condition: true
       target:
         entity_id: automation.nanoleaf_scene_changer_and_auto_brightness
+  - stop: ''
   mode: restart
   icon: mdi:ceiling-light
 color_loop:
@@ -206,6 +207,62 @@ color_loop:
         data: {}
         target:
           entity_id: cover.bedroom_blinds
+    - if:
+      - condition: and
+        conditions:
+        - condition: state
+          entity_id: light.wyze_bulb_1
+          state: unavailable
+        - condition: state
+          entity_id: light.wyze_bulb_2
+          state: unavailable
+        - condition: state
+          entity_id: light.wyze_bulb_3
+          state: unavailable
+        alias: relay was turned off
+      then:
+      - wait_for_trigger:
+        - platform: state
+          entity_id:
+          - light.wyze_bulb_1
+          from: unavailable
+        - platform: state
+          entity_id:
+          - light.wyze_bulb_2
+          from: unavailable
+        - platform: state
+          entity_id:
+          - light.wyze_bulb_3
+          from: unavailable
+      - data:
+          brightness: 255
+          effect: Color Loop
+          rgbw_color:
+          - 0
+          - 255
+          - 255
+          - 0
+        service: light.turn_on
+        target:
+          entity_id:
+          - light.fan_lights
+      else:
+      - data:
+          brightness: 255
+          effect: Color Loop
+          rgbw_color:
+          - 0
+          - 255
+          - 255
+          - 0
+        service: light.turn_on
+        target:
+          entity_id:
+          - light.fan_lights
+    - service: switch.turn_on
+      data: {}
+      target:
+        entity_id: switch.light_switch_relay
   mode: single
   icon: mdi:lightbulb-on
 music:
@@ -418,6 +475,10 @@ call:
             - 255
             brightness_pct: 50
       enabled: true
+    - service: cover.close_cover
+      data: {}
+      target:
+        entity_id: cover.bedroom_blinds
   mode: restart
   icon: mdi:phone
 night:
@@ -748,15 +809,6 @@ morning:
       - script.call
       - script.fan_off
   - parallel:
-    - service: light.turn_on
-      data:
-        brightness_pct: 100
-        hs_color:
-        - 30.353
-        - 33.597
-        effect: None
-      target:
-        entity_id: light.fan_lights
     - data:
         brightness_pct: 100
       service: light.turn_on
@@ -915,6 +967,56 @@ morning:
         data: {}
         target:
           entity_id: switch.sonoff_s31_lite_zb_switch_2
+    - if:
+      - condition: and
+        conditions:
+        - condition: state
+          entity_id: light.wyze_bulb_1
+          state: unavailable
+        - condition: state
+          entity_id: light.wyze_bulb_2
+          state: unavailable
+        - condition: state
+          entity_id: light.wyze_bulb_3
+          state: unavailable
+        alias: relay was turned off
+      then:
+      - wait_for_trigger:
+        - platform: state
+          entity_id:
+          - light.wyze_bulb_1
+          from: unavailable
+        - platform: state
+          entity_id:
+          - light.wyze_bulb_2
+          from: unavailable
+        - platform: state
+          entity_id:
+          - light.wyze_bulb_3
+          from: unavailable
+      - service: light.turn_on
+        data:
+          brightness_pct: 100
+          hs_color:
+          - 30.353
+          - 33.597
+          effect: None
+        target:
+          entity_id: light.fan_lights
+      else:
+      - service: light.turn_on
+        data:
+          brightness_pct: 100
+          hs_color:
+          - 30.353
+          - 33.597
+          effect: None
+        target:
+          entity_id: light.fan_lights
+    - service: switch.turn_on
+      data: {}
+      target:
+        entity_id: switch.light_switch_relay
   mode: single
   icon: mdi:white-balance-sunny
 start_car:
@@ -1066,7 +1168,7 @@ lofi:
     then:
     - service: hassio.addon_restart
       data:
-        addon: 63120367_homepod-connect
+        addon: 63120367_homepod_connect
     - delay:
         hours: 0
         minutes: 0
@@ -1193,7 +1295,7 @@ lofi:
     then:
     - service: hassio.addon_restart
       data:
-        addon: 63120367_homepod-connect
+        addon: 63120367_homepod_connect
     - delay:
         hours: 0
         minutes: 0
@@ -1656,7 +1758,7 @@ lofi:
     then:
     - service: hassio.addon_restart
       data:
-        addon: 63120367_homepod-connect
+        addon: 63120367_homepod_connect
     - delay:
         hours: 0
         minutes: 0
@@ -1818,7 +1920,7 @@ play_music:
     then:
     - service: hassio.addon_restart
       data:
-        addon: 63120367_homepod-connect
+        addon: 63120367_homepod_connect
     - delay:
         hours: 0
         minutes: 0
@@ -2297,7 +2399,7 @@ play_music:
     then:
     - service: hassio.addon_restart
       data:
-        addon: 63120367_homepod-connect
+        addon: 63120367_homepod_connect
     - delay:
         hours: 0
         minutes: 0
@@ -2369,7 +2471,7 @@ stop_music:
       - script.play_music
   - service: hassio.addon_restart
     data:
-      addon: 4b3d1287_homepod_connect
+      addon: 63120367_homepod_connect
   - delay:
       hours: 0
       minutes: 0
