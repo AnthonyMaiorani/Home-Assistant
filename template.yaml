@@ -54,7 +54,10 @@
     unique_id: signalrgb_active
   - name: "AirPods Connected"
     state: >
-      {{ "Anthony’s AirPods Pro" in 
+      {{ "Anthony’s AirPods Pro" in state_attr('sensor.macbook_air_active_audio_output', 
+      'All Audio Output') or "Anthony’s AirPods Pro #2" in 
+      state_attr('sensor.macbook_air_active_audio_output', 
+      'All Audio Output') or "Anthony’s AirPods" in 
       state_attr('sensor.macbook_air_active_audio_output', 
       'All Audio Output') }}
     unique_id: airpods_connected
@@ -138,8 +141,7 @@
       {% elif is_state('binary_sensor.desktop_power', 'on') and 
       is_state('light.fan_lights', 'on') -%} 153
       {# Window open #}
-      {% elif is_state('cover.bedroom_blinds', 'open') and 
-      is_state('sun.sun', 'above_horizon') -%} 153
+      {% elif is_state('cover.bedroom_blinds', 'open') -%} 153
       {# At desk with lights off #}
       {% elif is_state('binary_sensor.desktop_power', 'on') and 
       is_state('binary_sensor.bed_occupancy', 'off')-%} 102
@@ -299,6 +301,7 @@
 
         {# Unnecessary Trigger #}
         {% if now().minute != 30 and now().minute != 0 and 
+        now().second > 0 and
         state_attr('light.shapes_007f', 'effect') is defined and 
         state_attr('light.shapes_007f', 'effect') in sceneChoices and not
         trigger.id == "event" -%}

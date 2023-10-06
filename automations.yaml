@@ -296,6 +296,10 @@
         data: {}
         target:
           entity_id: switch.usb_hub
+    - service: mqtt.publish
+      data:
+        topic: homeassistant/binary_sensor/mailbox/state
+        payload: empty
   - service: automation.turn_on
     data: {}
     target:
@@ -743,12 +747,16 @@
               entity_id: light.fan_lights
               state: 'off'
             sequence:
-            - service: script.color_loop
+            - service: script.turn_on
+              continue_on_error: true
               data: {}
+              target:
+                entity_id: script.color_loop
             - condition: state
               entity_id: binary_sensor.webcam
               state: 'off'
             - service: light.turn_on
+              continue_on_error: true
               target:
                 entity_id:
                 - light.shapes_007f
@@ -765,6 +773,7 @@
               state: 'off'
             sequence:
             - service: light.turn_on
+              continue_on_error: true
               target:
                 entity_id:
                 - light.shapes_007f
@@ -1590,7 +1599,7 @@
     from: 'off'
   - platform: state
     entity_id:
-    - switch.desktop
+    - light.shapes_ee82
     attribute: Effect
     to: '*ExtControl*'
     for:
@@ -1646,6 +1655,24 @@
       hours: 0
       minutes: 0
       seconds: 2
+  - platform: state
+    entity_id:
+    - light.shapes_4948
+    attribute: Effect
+    to: '*ExtControl*'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 2
+  - platform: state
+    entity_id:
+    - light.shapes_007f
+    attribute: Effect
+    to: '*ExtControl*'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 2
   condition:
   - condition: not
     conditions:
@@ -1674,20 +1701,6 @@
         - light.shapes_ee82_2
         - light.shapes_4948_2
     - stop: ''
-  - wait_template: "{{ (\n  not states('sensor.nanoleaf_scene') in (\"unavailable\",
-      \"unknown\") and not \n\n  is_state_attr('light.shapes_007f', \"effect\", states('sensor.nanoleaf_scene'))\n
-      \ )\n\n  or \n\n  (not states('sensor.nanoleaf_auto_brightness') in (\"unavailable\",
-      \"unknown\")\n  and not \n  is_state_attr('light.shapes_007f', \"brightness\",\n
-      \ states('sensor.nanoleaf_auto_brightness')|int - 2))\n\n  or \n\n  (not states('sensor.nanoleaf_scene')
-      in (\"unavailable\", \"unknown\") and not \n\n  is_state_attr('light.shapes_ee82',
-      \"effect\", states('sensor.nanoleaf_scene'))\n  or\n  is_state_attr('light.shapes_ee82',
-      \"effect\", \"*ExtControl*\") and is_state('switch.desktop', 'on')\n  )\n\n
-      \ or \n\n  (not states('sensor.nanoleaf_auto_brightness') in (\"unavailable\",
-      \"unknown\")\n  and not \n\n  is_state_attr('light.shapes_ee82', \"brightness\",\n
-      \ states('sensor.nanoleaf_auto_brightness')|int - 2))\n\n}}"
-    continue_on_timeout: false
-    timeout: 00:05:00
-    enabled: false
   - condition: state
     entity_id: switch.bedroomtoggle
     state: 'on'
@@ -1705,6 +1718,7 @@
             \"effect\", states('sensor.nanoleaf_scene'))\n    or \n    (\n      is_state_attr('light.shapes_4948',
             \"effect\", \"*ExtControl*\")\n      and\n      is_state('switch.desktop',
             'on')\n    )\n  )\n)\n}}"
+          alias: effect is correct
         sequence:
         - if:
           - condition: or
@@ -1752,6 +1766,7 @@
                   alias: signalrgb
                 alias: corner shapes scene correct
               alias: Not
+            alias: any set effect incorrect
           then:
           - parallel:
             - if:
@@ -1779,6 +1794,9 @@
                     state: unknown
                   alias: nanoleaf scene invalid
                 alias: Not
+              - condition: state
+                entity_id: light.shapes_ee82
+                state: 'on'
               then:
               - service: light.turn_on
                 continue_on_error: true
@@ -1787,6 +1805,7 @@
                   - light.shapes_ee82
                 data:
                   effect: '{{ states(''sensor.nanoleaf_scene'') }}'
+              alias: vertical shapes
             - if:
               - condition: not
                 conditions:
@@ -1811,6 +1830,9 @@
                     state: unknown
                   alias: nanoleaf scene invalid
                 alias: Not
+              - condition: state
+                entity_id: light.shapes_4948
+                state: 'on'
               then:
               - service: light.turn_on
                 continue_on_error: true
@@ -1819,6 +1841,7 @@
                   - light.shapes_4948
                 data:
                   effect: '{{ states(''sensor.nanoleaf_scene'') }}'
+              alias: corner shapes
             - if:
               - condition: state
                 entity_id: binary_sensor.webcam
@@ -1837,18 +1860,20 @@
                   - light.shapes_007f
                 data:
                   effect: '{{ states(''sensor.nanoleaf_scene'') }}'
+              alias: desk shapes
             alias: Set effect
+          alias: set effect
         - delay:
             hours: 0
             minutes: 0
-            seconds: 10
+            seconds: 2
             milliseconds: 0
     - repeat:
         until:
         - condition: template
-          value_template: "{{ \n(is_state_attr('light.shapes_007f', \"brightness\",
-            states('sensor.nanoleaf_auto_brightness')|int - 2) \nand \nis_state_attr('light.shapes_ee82',
-            \"brightness\", states('sensor.nanoleaf_auto_brightness')|int - 2)\nand\nis_state_attr('light.shapes_4948',
+          value_template: "{{ \n(is_state_attr('light.shapes_483c', \"brightness\",
+            states('sensor.nanoleaf_auto_brightness')|int - 2) \nand \nis_state_attr('light.shapes_ee82_2',
+            \"brightness\", states('sensor.nanoleaf_auto_brightness')|int - 2)\nand\nis_state_attr('light.shapes_4948_2',
             \"brightness\", states('sensor.nanoleaf_auto_brightness')|int - 2)\n)}}"
         sequence:
         - if:
@@ -1858,6 +1883,7 @@
               states('sensor.nanoleaf_auto_brightness')|int - 2) \nand \nis_state_attr('light.shapes_ee82',
               \"brightness\", states('sensor.nanoleaf_auto_brightness')|int - 2) \nand\nis_state_attr('light.shapes_4948',
               \"brightness\", states('sensor.nanoleaf_auto_brightness')|int - 2) \n)}}"
+            alias: any set brightness incorrect
           then:
           - service: light.turn_on
             continue_on_error: true
@@ -1868,10 +1894,52 @@
               - light.shapes_483c
             data:
               brightness: '{{ states(''sensor.nanoleaf_auto_brightness'') }}'
+          - parallel:
+            - if:
+              - condition: state
+                entity_id: light.shapes_483c
+                state: 'on'
+              then:
+              - service: light.turn_on
+                continue_on_error: true
+                target:
+                  entity_id:
+                  - light.shapes_483c
+                data:
+                  brightness: '{{ states(''sensor.nanoleaf_auto_brightness'') }}'
+              alias: set desk lights brightness
+            - if:
+              - condition: state
+                entity_id: light.shapes_4948_2
+                state: 'on'
+              then:
+              - service: light.turn_on
+                continue_on_error: true
+                target:
+                  entity_id:
+                  - light.shapes_4948_2
+                data:
+                  brightness: '{{ states(''sensor.nanoleaf_auto_brightness'') }}'
+              alias: set corner lights brightness
+            - if:
+              - condition: state
+                entity_id: light.shapes_ee82_2
+                state: 'on'
+              then:
+              - service: light.turn_on
+                continue_on_error: true
+                target:
+                  entity_id:
+                  - light.shapes_ee82_2
+                data:
+                  brightness: '{{ states(''sensor.nanoleaf_auto_brightness'') }}'
+              alias: set vertical lights brightness
+            alias: set brightness
+          alias: set brightness
         - delay:
             hours: 0
             minutes: 0
-            seconds: 10
+            seconds: 2
             milliseconds: 0
     - if:
       - condition: template
@@ -1900,190 +1968,59 @@
           - light.govee
         data:
           effect: '{{ states(''sensor.nanoleaf_scene'') }}'
-    - if:
-      - condition: state
-        entity_id: light.fan_lights
-        state: 'on'
-      then:
-      - service: light.turn_on
-        target:
-          entity_id:
-          - light.govee
-        data:
-          brightness_pct: 100
-      else:
-      - condition: not
-        conditions:
-        - condition: and
-          conditions:
-          - condition: or
-            conditions:
-            - condition: state
-              entity_id: input_select.taylor_presence
-              state: Home
-            - condition: state
-              entity_id: input_select.taylor_presence
-              state: Just Arrived
-          - condition: state
-            entity_id: switch.brtv
-            state: 'on'
-      - service: light.turn_on
-        target:
-          entity_id:
-          - light.govee
-        data:
-          brightness: 9
-  - repeat:
-      until:
-      - condition: template
-        value_template: "{{  \nis_state('sensor.nanoleaf_auto_brightness', '0') \nor\n(\n
-          \ (\n    is_state_attr('light.shapes_007f', \"effect\", states('sensor.nanoleaf_scene'))\n
-          \ or\n    not is_state('sensor.nanoleaf_scene', 'Webcam') and is_state_attr('light.shapes_007f',
-          \"effect\", \"*ExtControl*\")\n  )\n  \n  and\n  (\n    is_state_attr('light.shapes_ee82',
-          \"effect\", states('sensor.nanoleaf_scene'))\n    or \n    (\n      is_state_attr('light.shapes_ee82',
-          \"effect\", \"*ExtControl*\")\n      and\n      is_state('switch.desktop',
-          'on')\n    )\n  )\n  and\n  (\n    is_state_attr('light.shapes_4948', \"effect\",
-          states('sensor.nanoleaf_scene'))\n    or \n    (\n      is_state_attr('light.shapes_4948',
-          \"effect\", \"*ExtControl*\")\n      and\n      is_state('switch.desktop',
-          'on')\n    )\n  )\n)\n}}"
-      sequence:
-      - if:
+      alias: set govee scene
+    - choose:
+      - conditions:
+        - condition: state
+          entity_id: light.fan_lights
+          state: 'on'
+        sequence:
+        - service: light.turn_on
+          target:
+            entity_id:
+            - light.govee
+          data:
+            brightness_pct: 100
+      - conditions:
         - condition: or
           conditions:
-          - condition: not
+          - condition: state
+            entity_id: cover.bedroom_blinds
+            state: open
+          - condition: state
+            entity_id: cover.bedroom_blinds
+            state: opening
+        sequence:
+        - service: light.turn_on
+          target:
+            entity_id:
+            - light.govee
+          data:
+            brightness_pct: 13
+      - conditions:
+        - condition: not
+          conditions:
+          - condition: and
             conditions:
             - condition: or
               conditions:
-              - condition: template
-                value_template: '{{ is_state_attr(''light.shapes_ee82'', "effect",
-                  states(''sensor.nanoleaf_scene'')) }}'
-              - condition: template
-                value_template: '{{ is_state_attr(''light.shapes_ee82'', "effect",
-                  "*ExtControl*") and is_state(''binary_sensor.signalrgb_active'',
-                  ''on'') }}'
-              alias: vertical shapes scene correct
-            alias: Not
-          - condition: not
-            conditions:
-            - condition: or
-              conditions:
-              - condition: template
-                value_template: '{{ is_state_attr(''light.shapes_007f'', "effect",
-                  states(''sensor.nanoleaf_scene'')) }}'
-                alias: set to scene
-              - condition: template
-                value_template: '{{ is_state_attr(''light.shapes_007f'', "effect",
-                  "*ExtControl*") and is_state(''binary_sensor.signalrgb_active'',
-                  ''on'') and not is_state(''binary_sensor.webcam'', ''on'') }}'
-                alias: signalrgb
-              alias: desk shapes scene correct
-            alias: Not
-          - condition: not
-            conditions:
-            - condition: or
-              conditions:
-              - condition: template
-                value_template: '{{ is_state_attr(''light.shapes_4948'', "effect",
-                  states(''sensor.nanoleaf_scene'')) }}'
-                alias: set to scene
-              - condition: template
-                value_template: '{{ is_state_attr(''light.shapes_4948'', "effect",
-                  "*ExtControl*") and is_state(''binary_sensor.signalrgb_active'',
-                  ''on'') }}'
-                alias: signalrgb
-              alias: corner shapes scene correct
-            alias: Not
-        then:
-        - parallel:
-          - if:
+              - condition: state
+                entity_id: input_select.taylor_presence
+                state: Home
+              - condition: state
+                entity_id: input_select.taylor_presence
+                state: Just Arrived
             - condition: state
-              entity_id: binary_sensor.webcam
+              entity_id: switch.brtv
               state: 'on'
-            then:
-            - service: light.turn_on
-              data:
-                effect: Webcam
-              target:
-                entity_id: light.shapes_007f
-            else:
-            - service: light.turn_on
-              continue_on_error: true
-              target:
-                entity_id:
-                - light.shapes_007f
-              data:
-                effect: '{{ states(''sensor.nanoleaf_scene'') }}'
-          - if:
-            - condition: not
-              conditions:
-              - condition: and
-                conditions:
-                - condition: state
-                  entity_id: light.shapes_ee82
-                  attribute: effect
-                  state: '*ExtControl*'
-                - condition: state
-                  entity_id: switch.desktop
-                  state: 'on'
-              alias: If not controlled by signal
-            - condition: not
-              conditions:
-              - condition: or
-                conditions:
-                - condition: state
-                  entity_id: sensor.nanoleaf_scene
-                  state: unavailable
-                - condition: state
-                  entity_id: sensor.nanoleaf_scene
-                  state: unknown
-                alias: nanoleaf scene invalid
-              alias: Not
-            then:
-            - service: light.turn_on
-              continue_on_error: true
-              target:
-                entity_id:
-                - light.shapes_ee82
-              data:
-                effect: '{{ states(''sensor.nanoleaf_scene'') }}'
-          - if:
-            - condition: not
-              conditions:
-              - condition: and
-                conditions:
-                - condition: state
-                  entity_id: light.shapes_4948
-                  attribute: effect
-                  state: '*ExtControl*'
-                - condition: state
-                  entity_id: switch.desktop
-                  state: 'on'
-            - condition: not
-              conditions:
-              - condition: or
-                conditions:
-                - condition: state
-                  entity_id: sensor.nanoleaf_scene
-                  state: unavailable
-                - condition: state
-                  entity_id: sensor.nanoleaf_scene
-                  state: unknown
-                alias: nanoleaf scene invalid
-              alias: Not
-            then:
-            - service: light.turn_on
-              continue_on_error: true
-              target:
-                entity_id:
-                - light.shapes_4948
-              data:
-                effect: '{{ states(''sensor.nanoleaf_scene'') }}'
-          alias: Set effect
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 10
-          milliseconds: 0
+        sequence:
+        - service: light.turn_on
+          target:
+            entity_id:
+            - light.govee
+          data:
+            brightness: 5
+      alias: set govee brightness
   mode: restart
 - id: '1661505890362'
   alias: Spotify Refresh
@@ -2853,7 +2790,7 @@
         - conditions:
           - condition: time
             before: 02:30:00
-            after: '17:00:00'
+            after: '18:00:00'
           sequence:
           - if:
             - condition: state
@@ -4866,13 +4803,6 @@
       hours: 0
       minutes: 3
       seconds: 0
-  - condition: state
-    entity_id: binary_sensor.nest_protect_kitchen_occupancy
-    state: 'off'
-    for:
-      hours: 0
-      minutes: 20
-      seconds: 0
   action:
   - service: light.turn_off
     data: {}
@@ -5331,6 +5261,10 @@
         data: {}
         target:
           entity_id: script.play_music
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id: switch.light_switch_relay
   mode: queued
   max: 100
 - id: '1668919655434'
@@ -7192,9 +7126,6 @@
       entity_id: update.bed_esp_firmware
       state: 'on'
     - condition: state
-      entity_id: update.desklights_firmware
-      state: 'on'
-    - condition: state
       entity_id: update.lightswitch_firmware
       state: 'on'
     - condition: state
@@ -7297,9 +7228,6 @@
       entity_id: update.vaultwarden_bitwarden_update
       state: 'on'
     - condition: state
-      entity_id: update.bkplug2_firmware
-      state: 'on'
-    - condition: state
       entity_id: update.bkplug1_firmware
       state: 'on'
     - condition: state
@@ -7327,9 +7255,6 @@
       entity_id: update.wyzebulb6_firmware
       state: 'on'
     - condition: state
-      entity_id: update.usbswitch_firmware_2
-      state: 'on'
-    - condition: state
       entity_id: update.home_assistant_core_update
       state: 'on'
     - condition: state
@@ -7355,6 +7280,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id: update.z_wave_js_to_mqtt_update
@@ -7365,6 +7291,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id: update.esphome_update
@@ -7374,6 +7301,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id: update.studio_code_server_update
@@ -7383,6 +7311,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id:
@@ -7393,6 +7322,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id:
@@ -7403,6 +7333,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id:
@@ -7413,6 +7344,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id:
@@ -7423,6 +7355,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id:
@@ -7433,6 +7366,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id:
@@ -7443,6 +7377,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id:
@@ -7453,6 +7388,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id:
@@ -7463,6 +7399,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id:
@@ -7473,6 +7410,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id:
@@ -7483,6 +7421,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id:
@@ -7493,6 +7432,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id:
@@ -7503,6 +7443,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id:
@@ -7513,6 +7454,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id:
@@ -7523,6 +7465,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id:
@@ -7533,6 +7476,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id:
@@ -7543,6 +7487,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id:
@@ -7553,6 +7498,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id:
@@ -7563,6 +7509,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id:
@@ -7579,6 +7526,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id: update.alarm_firmware
@@ -7588,6 +7536,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id: update.bed_esp_firmware
@@ -7597,6 +7546,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id: update.lightswitch_firmware
@@ -7606,6 +7556,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id: update.midea_firmware
@@ -7615,6 +7566,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id: update.usbswitch_firmware
@@ -7624,6 +7576,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id: update.wyzebulb1_firmware
@@ -7633,6 +7586,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id: update.wyzebulb2_firmware
@@ -7642,6 +7596,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id: update.wyzebulb3_firmware
@@ -7651,6 +7606,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id: update.wyzebulb4_firmware
@@ -7660,6 +7616,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id: update.wyzebulb5_firmware
@@ -7669,6 +7626,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id: update.wyzebulb6_firmware
@@ -7678,6 +7636,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id: update.bkplug1_firmware
@@ -7687,6 +7646,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id: update.bkplug3_firmware
@@ -7696,6 +7656,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id: update.bkplug4_firmware
@@ -7705,6 +7666,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id: update.roundplug2_firmware
@@ -7714,6 +7676,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id: update.roundplug1_firmware
@@ -7723,6 +7686,7 @@
         state: 'on'
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id:
@@ -7733,6 +7697,7 @@
         entity_id: update.kauf_plug_7aacf2_firmware
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id:
@@ -7743,6 +7708,7 @@
         entity_id: update.guest_bedroom_tv_plug_firmware
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id:
@@ -7753,6 +7719,7 @@
         entity_id: update.couch_left_firmware
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id:
@@ -7763,6 +7730,7 @@
         entity_id: update.couch_right_firmware
       then:
       - service: update.install
+        continue_on_error: true
         data: {}
         target:
           entity_id:
@@ -7825,9 +7793,6 @@
         state: 'on'
       - condition: state
         entity_id: update.hisense_tv_update
-        state: 'on'
-      - condition: state
-        entity_id: update.govee_lan_control_update
         state: 'on'
     then:
     - parallel:
@@ -8072,9 +8037,16 @@
     entity_id: light.kitchen_lights
     domain: light
     id: lights on
+  - type: motion
+    platform: device
+    device_id: 636093ce084fceeb09083a7a66a2efe6
+    entity_id: ca871a2082db2d3f829b9e50ff599285
+    domain: binary_sensor
+    id: kitchen motion
+    enabled: false
   condition:
   - condition: time
-    after: '22:30:00'
+    after: '22:00:00'
     before: 08:00:00
   - condition: sun
     before: sunrise
@@ -8083,7 +8055,9 @@
   - choose:
     - conditions:
       - condition: trigger
-        id: enter
+        id:
+        - enter
+        - kitchen motion
       - condition: or
         conditions:
         - condition: state
@@ -10097,7 +10071,8 @@
       exclude:
         entity_id:
         - sensor.macbook_air_internal_battery_level
-        - sensor.ipad_2_battery_level
+        - sensor.anthony_maioranis_ipad_battery_level
+        - sensor.ipad_air_2_black_battery_level
       actions:
       - service: notify.anthonys_devices
         data:
@@ -10105,3 +10080,27 @@
           title: Low Battery Warning
       day: 0
       threshold: 20
+      time: '20:00:00'
+- id: '1695936735732'
+  alias: Mailbox Guard
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.mailbox
+    to: 'on'
+  condition: []
+  action:
+  - service: notify.anthonys_devices
+    data:
+      message: Mailbox Guard detected motion
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - service: mqtt.publish
+    data:
+      topic: homeassistant/binary_sensor/mailbox/state
+      payload: empty
+  mode: single

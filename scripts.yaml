@@ -22,10 +22,10 @@ fan_off:
       data: {}
       target:
         entity_id:
-        - light.shapes_007f
-        - light.shapes_ee82
-        - light.shapes_4948
         - switch.lumi_lumi_plug_maus01_switch_2
+        - light.shapes_483c
+        - light.shapes_4948_2
+        - light.shapes_ee82_2
     - data:
         brightness: 255
         effect: Color Loop
@@ -42,11 +42,6 @@ fan_off:
         entity_id:
         - light.wled
         - light.bed
-    - service: light.turn_on
-      data:
-        brightness: 9
-      target:
-        entity_id: light.govee
     - if:
       - condition: state
         entity_id: switch.desktop
@@ -66,7 +61,6 @@ fan_off:
         skip_condition: true
       target:
         entity_id: automation.nanoleaf_scene_changer_and_auto_brightness
-  - stop: ''
   mode: restart
   icon: mdi:ceiling-light
 color_loop:
@@ -447,11 +441,6 @@ call:
           target:
             entity_id:
             - light.bed
-        - delay:
-            hours: 0
-            minutes: 0
-            seconds: 1
-            milliseconds: 0
         - service: light.turn_on
           data:
             brightness: 5
@@ -461,7 +450,9 @@ call:
         - service: switch.turn_off
           data: {}
           target:
-            entity_id: switch.usb_hub
+            entity_id:
+            - switch.usb_hub
+            - switch.sonoff_s31_lite_zb_switch_2
         - service: light.turn_on
           target:
             entity_id:
@@ -473,8 +464,12 @@ call:
             - 0
             - 255
             - 255
-            brightness_pct: 50
-      enabled: true
+            brightness_pct: 30
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 1
+            milliseconds: 0
     - service: cover.close_cover
       data: {}
       target:
@@ -994,15 +989,27 @@ morning:
           entity_id:
           - light.wyze_bulb_3
           from: unavailable
-      - service: light.turn_on
-        data:
-          brightness_pct: 100
-          hs_color:
-          - 30.353
-          - 33.597
-          effect: None
-        target:
-          entity_id: light.fan_lights
+      - repeat:
+          sequence:
+          - service: light.turn_on
+            data:
+              brightness_pct: 100
+              hs_color:
+              - 30.353
+              - 33.597
+              effect: None
+            target:
+              entity_id: light.fan_lights
+          until:
+          - condition: state
+            entity_id: light.wyze_bulb_1
+            state: 'on'
+          - condition: state
+            entity_id: light.wyze_bulb_2
+            state: 'on'
+          - condition: state
+            entity_id: light.wyze_bulb_3
+            state: 'on'
       else:
       - service: light.turn_on
         data:
@@ -1246,6 +1253,11 @@ lofi:
       - media_player.owntone_output_kitchen_left
       - media_player.owntone_output_kitchen_right
       - media_player.owntone_output_front_homepod
+      - media_player.owntone_output_danas_nightstand
+      - media_player.kitchen_speakers
+      - media_player.owntone_output_soundbar
+      - media_player.owntone_output_guest_right
+      - media_player.owntone_output_guest_left
   - repeat:
       count: '7'
       sequence:
@@ -1861,16 +1873,19 @@ play_music:
       - media_player.owntone_output_bathroom
       - media_player.owntone_output_anthony_s_desk
       - media_player.owntone_output_front
-      - media_player.owntone_output_kitchen_left
-      - media_player.owntone_output_kitchen_right
-      - media_player.owntone_output_kitchen_right
       - media_player.owntone_output_living_room_tv
       - media_player.owntone_output_master_bedroom_tv
       - media_player.owntone_output_anthony_s_nightstand
       - media_player.owntone_output_garage_homepod
-      - media_player.owntone_output_guest_left
-      - media_player.owntone_output_guest_right
+      - media_player.guest_speakers
+      - media_player.owntone_output_kitchen_left
+      - media_player.owntone_output_kitchen_right
       - media_player.owntone_output_front_homepod
+      - media_player.owntone_output_danas_nightstand
+      - media_player.kitchen_speakers
+      - media_player.owntone_output_soundbar
+      - media_player.owntone_output_guest_right
+      - media_player.owntone_output_guest_left
   - repeat:
       count: '7'
       sequence:
@@ -2494,6 +2509,10 @@ stop_music:
       - media_player.owntone_output_garage_homepod
       - media_player.owntone_output_guest_left
       - media_player.owntone_output_guest_right
+      - media_player.owntone_output_danas_nightstand
+      - media_player.owntone_output_soundbar
+      - media_player.guest_speakers
+      - media_player.kitchen_speakers
   - wait_for_trigger:
     - platform: state
       entity_id:

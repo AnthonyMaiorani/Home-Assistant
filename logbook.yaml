@@ -5,6 +5,7 @@ exclude:
     - sensor.time*
     - sensor.*node_status
     - sensor.alarm_line*
+    - button.identify*
   domains:
     - input_number
     - group
@@ -24,3 +25,4 @@ exclude:
     - sensor.anthony_s_echo_show_next_alarm
     - switch.ac_boost
     - sensor.desktop_pc_lastactive
+    - automation.privacy
