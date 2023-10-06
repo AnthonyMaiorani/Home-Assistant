@@ -1764,9 +1764,15 @@ lofi:
   - if:
     - condition: not
       conditions:
-      - condition: state
-        entity_id: media_player.owntone_server
-        state: playing
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: media_player.spotify_anthony221121
+          attribute: media_playlist
+          state: lofi
+        - condition: state
+          entity_id: media_player.owntone_server
+          state: playing
     then:
     - service: hassio.addon_restart
       data:
@@ -1793,6 +1799,8 @@ lofi:
         - media_player.owntone_output_garage_homepod
         - media_player.owntone_output_guest_left
         - media_player.owntone_output_guest_right
+        - media_player.owntone_output_danas_nightstand
+        - media_player.owntone_output_soundbar
     - wait_for_trigger:
       - platform: state
         entity_id:
@@ -1823,6 +1831,8 @@ lofi:
             - media_player.owntone_output_garage_homepod
             - media_player.owntone_output_guest_left
             - media_player.owntone_output_guest_right
+            - media_player.owntone_output_danas_nightstand
+            - media_player.owntone_output_soundbar
     - service: script.turn_on
       data: {}
       target:
@@ -2408,9 +2418,15 @@ play_music:
   - if:
     - condition: not
       conditions:
-      - condition: state
-        entity_id: media_player.owntone_server
-        state: playing
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: media_player.spotify_anthony221121
+          attribute: media_playlist
+          state: Music
+        - condition: state
+          entity_id: media_player.owntone_server
+          state: playing
     then:
     - service: hassio.addon_restart
       data:
@@ -2437,6 +2453,8 @@ play_music:
         - media_player.owntone_output_garage_homepod
         - media_player.owntone_output_guest_left
         - media_player.owntone_output_guest_right
+        - media_player.owntone_output_danas_nightstand
+        - media_player.owntone_output_soundbar
     - wait_for_trigger:
       - platform: state
         entity_id:
@@ -2467,13 +2485,15 @@ play_music:
             - media_player.owntone_output_garage_homepod
             - media_player.owntone_output_guest_left
             - media_player.owntone_output_guest_right
+            - media_player.owntone_output_danas_nightstand
+            - media_player.owntone_output_soundbar
     - service: script.turn_on
       data: {}
       target:
         entity_id:
         - script.play_music
     alias: If Owntone not playing, restart Addon and start over
-  mode: single
+  mode: restart
   icon: mdi:music-note
 stop_music:
   alias: Stop Music
