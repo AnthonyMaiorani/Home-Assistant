@@ -17,6 +17,8 @@
 !/owntone/
 !owntone.conf
 !*.py
+!/rtl_433/
+!/rtl_433/*
 
 # Ignore folders.
 .storage
