@@ -26,6 +26,8 @@ fan_off:
         - light.shapes_483c
         - light.shapes_4948_2
         - light.shapes_ee82_2
+        - light.wled
+        - light.bed
     - data:
         brightness: 255
         effect: Color Loop
@@ -35,13 +37,6 @@ fan_off:
         entity_id:
         - light.light_switch
         - light.light_switch_corner
-    - service: light.turn_on
-      data:
-        brightness_pct: 40
-      target:
-        entity_id:
-        - light.wled
-        - light.bed
     - if:
       - condition: state
         entity_id: switch.desktop
@@ -56,11 +51,6 @@ fan_off:
         data: {}
         target:
           entity_id: switch.sonoff_s31_lite_zb_switch_2
-    - service: automation.trigger
-      data:
-        skip_condition: true
-      target:
-        entity_id: automation.nanoleaf_scene_changer_and_auto_brightness
   mode: restart
   icon: mdi:ceiling-light
 color_loop:
@@ -429,7 +419,7 @@ call:
     - event: event_change_nanoleaf
       event_data: {}
     - repeat:
-        count: '20'
+        count: 80
         sequence:
         - service: light.turn_off
           data: {}
@@ -468,8 +458,8 @@ call:
         - delay:
             hours: 0
             minutes: 0
-            seconds: 1
-            milliseconds: 0
+            seconds: 0
+            milliseconds: 500
     - service: cover.close_cover
       data: {}
       target:

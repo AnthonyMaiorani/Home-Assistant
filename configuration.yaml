@@ -88,3 +88,15 @@ command_line:
 #     name: "U6-Pro LED"
 #     command_on: !secret u6_pro_on
 #     command_off: !secret u6_pro_off
+
+# panel_iframe:
+#   network:
+#     title: "Network"
+#     url: !secret network
+#     icon: mdi:router-wireless
+#     require_admin: true
+#   protect:
+#     title: "Protect"
+#     url: !secret protect
+#     icon: mdi:cctv
+#     require_admin: true

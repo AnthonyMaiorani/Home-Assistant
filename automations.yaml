@@ -1708,7 +1708,7 @@
     - repeat:
         until:
         - condition: template
-          value_template: "{{  \nis_state('sensor.nanoleaf_auto_brightness', '0')
+          value_template: "{{  \n\nis_state('sensor.nanoleaf_auto_brightness', '0')
             \nor\n(\n  (\n    is_state_attr('light.shapes_007f', \"effect\", states('sensor.nanoleaf_scene'))\n
             \ or\n    not is_state('sensor.nanoleaf_scene', 'Webcam') and is_state_attr('light.shapes_007f',
             \"effect\", \"*ExtControl*\")\n  )\n  \n  and\n  (\n    is_state_attr('light.shapes_ee82',
@@ -1720,149 +1720,141 @@
             'on')\n    )\n  )\n)\n}}"
           alias: effect is correct
         sequence:
-        - if:
-          - condition: or
-            conditions:
+        - alias: Set effect
+          parallel:
+          - if:
+            - condition: not
+              conditions:
+              - condition: and
+                conditions:
+                - condition: state
+                  entity_id: light.shapes_ee82
+                  attribute: effect
+                  state: '*ExtControl*'
+                - condition: state
+                  entity_id: switch.desktop
+                  state: 'on'
+              alias: If not controlled by signal
             - condition: not
               conditions:
               - condition: or
                 conditions:
-                - condition: template
-                  value_template: '{{ is_state_attr(''light.shapes_ee82'', "effect",
-                    states(''sensor.nanoleaf_scene'')) }}'
-                - condition: template
-                  value_template: '{{ is_state_attr(''light.shapes_ee82'', "effect",
-                    "*ExtControl*") and is_state(''binary_sensor.signalrgb_active'',
-                    ''on'') }}'
-                alias: vertical shapes scene correct
+                - condition: state
+                  entity_id: sensor.nanoleaf_scene
+                  state: unavailable
+                - condition: state
+                  entity_id: sensor.nanoleaf_scene
+                  state: unknown
+                alias: nanoleaf scene invalid
               alias: Not
+            - condition: state
+              entity_id: light.shapes_ee82
+              state: 'on'
+            - condition: not
+              conditions:
+              - condition: template
+                value_template: "{{  \n\nis_state('sensor.nanoleaf_auto_brightness',
+                  '0') \nor (\n  (\n    is_state_attr('light.shapes_ee82', \"effect\",
+                  states('sensor.nanoleaf_scene'))\n    or \n    (\n      is_state_attr('light.shapes_ee82',
+                  \"effect\", \"*ExtControl*\")\n      and\n      is_state('switch.desktop',
+                  'on')\n    )\n  )\n)\n}}"
+              alias: Effect incorrect
+            then:
+            - service: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.shapes_ee82
+              data:
+                effect: '{{ states(''sensor.nanoleaf_scene'') }}'
+            alias: vertical shapes
+          - if:
+            - condition: not
+              conditions:
+              - condition: and
+                conditions:
+                - condition: state
+                  entity_id: light.shapes_4948
+                  attribute: effect
+                  state: '*ExtControl*'
+                - condition: state
+                  entity_id: switch.desktop
+                  state: 'on'
             - condition: not
               conditions:
               - condition: or
                 conditions:
-                - condition: template
-                  value_template: '{{ is_state_attr(''light.shapes_007f'', "effect",
-                    states(''sensor.nanoleaf_scene'')) }}'
-                  alias: set to scene
-                - condition: template
-                  value_template: '{{ is_state_attr(''light.shapes_007f'', "effect",
-                    "*ExtControl*") and is_state(''binary_sensor.signalrgb_active'',
-                    ''on'') and not is_state(''binary_sensor.webcam'', ''on'') }}'
-                  alias: signalrgb
-                alias: desk shapes scene correct
+                - condition: state
+                  entity_id: sensor.nanoleaf_scene
+                  state: unavailable
+                - condition: state
+                  entity_id: sensor.nanoleaf_scene
+                  state: unknown
+                alias: nanoleaf scene invalid
               alias: Not
+            - condition: state
+              entity_id: light.shapes_4948
+              state: 'on'
             - condition: not
               conditions:
-              - condition: or
-                conditions:
-                - condition: template
-                  value_template: '{{ is_state_attr(''light.shapes_4948'', "effect",
-                    states(''sensor.nanoleaf_scene'')) }}'
-                  alias: set to scene
-                - condition: template
-                  value_template: '{{ is_state_attr(''light.shapes_4948'', "effect",
-                    "*ExtControl*") and is_state(''binary_sensor.signalrgb_active'',
-                    ''on'') }}'
-                  alias: signalrgb
-                alias: corner shapes scene correct
-              alias: Not
-            alias: any set effect incorrect
-          then:
-          - parallel:
-            - if:
-              - condition: not
-                conditions:
-                - condition: and
-                  conditions:
-                  - condition: state
-                    entity_id: light.shapes_ee82
-                    attribute: effect
-                    state: '*ExtControl*'
-                  - condition: state
-                    entity_id: switch.desktop
-                    state: 'on'
-                alias: If not controlled by signal
-              - condition: not
-                conditions:
-                - condition: or
-                  conditions:
-                  - condition: state
-                    entity_id: sensor.nanoleaf_scene
-                    state: unavailable
-                  - condition: state
-                    entity_id: sensor.nanoleaf_scene
-                    state: unknown
-                  alias: nanoleaf scene invalid
-                alias: Not
+              - condition: template
+                value_template: "{{  \n\nis_state('sensor.nanoleaf_auto_brightness',
+                  '0') \nor (\n  (\n    is_state_attr('light.shapes_4948', \"effect\",
+                  states('sensor.nanoleaf_scene'))\n    or \n    (\n      is_state_attr('light.shapes_4948',
+                  \"effect\", \"*ExtControl*\")\n      and\n      is_state('switch.desktop',
+                  'on')\n    )\n  )\n)\n}}"
+              alias: Effect incorrect
+            then:
+            - service: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.shapes_4948
+              data:
+                effect: '{{ states(''sensor.nanoleaf_scene'') }}'
+            alias: corner shapes
+          - alias: desk shapes
+            if:
+            - condition: state
+              entity_id: binary_sensor.webcam
+              state: 'on'
+            - condition: not
+              conditions:
               - condition: state
-                entity_id: light.shapes_ee82
-                state: 'on'
-              then:
-              - service: light.turn_on
-                continue_on_error: true
-                target:
-                  entity_id:
-                  - light.shapes_ee82
-                data:
-                  effect: '{{ states(''sensor.nanoleaf_scene'') }}'
-              alias: vertical shapes
-            - if:
-              - condition: not
-                conditions:
-                - condition: and
-                  conditions:
-                  - condition: state
-                    entity_id: light.shapes_4948
-                    attribute: effect
-                    state: '*ExtControl*'
-                  - condition: state
-                    entity_id: switch.desktop
-                    state: 'on'
-              - condition: not
-                conditions:
-                - condition: or
-                  conditions:
-                  - condition: state
-                    entity_id: sensor.nanoleaf_scene
-                    state: unavailable
-                  - condition: state
-                    entity_id: sensor.nanoleaf_scene
-                    state: unknown
-                  alias: nanoleaf scene invalid
-                alias: Not
-              - condition: state
-                entity_id: light.shapes_4948
-                state: 'on'
-              then:
-              - service: light.turn_on
-                continue_on_error: true
-                target:
-                  entity_id:
-                  - light.shapes_4948
-                data:
-                  effect: '{{ states(''sensor.nanoleaf_scene'') }}'
-              alias: corner shapes
-            - if:
-              - condition: state
-                entity_id: binary_sensor.webcam
-                state: 'on'
-              then:
-              - service: light.turn_on
-                data:
-                  effect: Webcam
-                target:
-                  entity_id: light.shapes_007f
-              else:
-              - service: light.turn_on
-                continue_on_error: true
-                target:
-                  entity_id:
-                  - light.shapes_007f
-                data:
-                  effect: '{{ states(''sensor.nanoleaf_scene'') }}'
-              alias: desk shapes
-            alias: Set effect
-          alias: set effect
+                entity_id: light.shapes_007f
+                attribute: effect
+                state: Webcam
+              alias: Effect incorrect
+            - condition: state
+              entity_id: light.shapes_007f
+              state: 'on'
+            then:
+            - service: light.turn_on
+              continue_on_error: true
+              data:
+                effect: Webcam
+              target:
+                entity_id: light.shapes_007f
+            else:
+            - condition: not
+              conditions:
+              - condition: template
+                value_template: "{{  \n\nis_state('sensor.nanoleaf_auto_brightness',
+                  '0') \nor (\n  (\n    is_state_attr('light.shapes_007f', \"effect\",
+                  states('sensor.nanoleaf_scene'))\n  or\n    not is_state('sensor.nanoleaf_scene',
+                  'Webcam') and is_state_attr('light.shapes_007f', \"effect\", \"*ExtControl*\")\n
+                  \ )\n)\n}}"
+              alias: effect incorrect
+            - condition: state
+              entity_id: light.shapes_007f
+              state: 'on'
+            - service: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.shapes_007f
+              data:
+                effect: '{{ states(''sensor.nanoleaf_scene'') }}'
         - delay:
             hours: 0
             minutes: 0
@@ -1871,70 +1863,64 @@
     - repeat:
         until:
         - condition: template
-          value_template: "{{ \n(is_state_attr('light.shapes_483c', \"brightness\",
-            states('sensor.nanoleaf_auto_brightness')|int - 2) \nand \nis_state_attr('light.shapes_ee82_2',
-            \"brightness\", states('sensor.nanoleaf_auto_brightness')|int - 2)\nand\nis_state_attr('light.shapes_4948_2',
-            \"brightness\", states('sensor.nanoleaf_auto_brightness')|int - 2)\n)}}"
+          value_template: "{{ \n(state_attr('light.shapes_483c', \"brightness\")|int
+            - states('sensor.nanoleaf_auto_brightness')|int)|abs <= 2 \nand \n(state_attr('light.shapes_ee82_2',
+            \"brightness\")|int - states('sensor.nanoleaf_auto_brightness')|int)|abs
+            <= 2 \nand\n(state_attr('light.shapes_4948_2', \"brightness\")|int - states('sensor.nanoleaf_auto_brightness')|int)|abs
+            <= 2 \n}}"
         sequence:
-        - if:
-          - condition: template
-            value_template: "{{not states('sensor.nanoleaf_auto_brightness') in (\"unavailable\",
-              \"unknown\") and not \n(is_state_attr('light.shapes_007f', \"brightness\",
-              states('sensor.nanoleaf_auto_brightness')|int - 2) \nand \nis_state_attr('light.shapes_ee82',
-              \"brightness\", states('sensor.nanoleaf_auto_brightness')|int - 2) \nand\nis_state_attr('light.shapes_4948',
-              \"brightness\", states('sensor.nanoleaf_auto_brightness')|int - 2) \n)}}"
-            alias: any set brightness incorrect
-          then:
-          - service: light.turn_on
-            continue_on_error: true
-            target:
-              entity_id:
-              - light.shapes_4948_2
-              - light.shapes_ee82_2
-              - light.shapes_483c
-            data:
-              brightness: '{{ states(''sensor.nanoleaf_auto_brightness'') }}'
-          - parallel:
-            - if:
-              - condition: state
-                entity_id: light.shapes_483c
-                state: 'on'
-              then:
-              - service: light.turn_on
-                continue_on_error: true
-                target:
-                  entity_id:
-                  - light.shapes_483c
-                data:
-                  brightness: '{{ states(''sensor.nanoleaf_auto_brightness'') }}'
-              alias: set desk lights brightness
-            - if:
-              - condition: state
-                entity_id: light.shapes_4948_2
-                state: 'on'
-              then:
-              - service: light.turn_on
-                continue_on_error: true
-                target:
-                  entity_id:
-                  - light.shapes_4948_2
-                data:
-                  brightness: '{{ states(''sensor.nanoleaf_auto_brightness'') }}'
-              alias: set corner lights brightness
-            - if:
-              - condition: state
-                entity_id: light.shapes_ee82_2
-                state: 'on'
-              then:
-              - service: light.turn_on
-                continue_on_error: true
-                target:
-                  entity_id:
-                  - light.shapes_ee82_2
-                data:
-                  brightness: '{{ states(''sensor.nanoleaf_auto_brightness'') }}'
-              alias: set vertical lights brightness
-            alias: set brightness
+        - parallel:
+          - if:
+            - condition: state
+              entity_id: light.shapes_483c
+              state: 'on'
+            - condition: template
+              value_template: '{{ (state_attr(''light.shapes_483c'', "brightness")|int
+                - states(''sensor.nanoleaf_auto_brightness'')|int)|abs >= 2 }}'
+              alias: brightness incorrect
+            then:
+            - service: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.shapes_483c
+              data:
+                brightness: '{{ states(''sensor.nanoleaf_auto_brightness'') }}'
+            alias: set desk lights brightness
+          - if:
+            - condition: state
+              entity_id: light.shapes_4948_2
+              state: 'on'
+            - condition: template
+              value_template: '{{ (state_attr(''light.shapes_4948_2'', "brightness")|int
+                - states(''sensor.nanoleaf_auto_brightness'')|int)|abs >= 2 }}'
+              alias: brightness incorrect
+            then:
+            - service: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.shapes_4948_2
+              data:
+                brightness: '{{ states(''sensor.nanoleaf_auto_brightness'') }}'
+            alias: set corner lights brightness
+          - if:
+            - condition: state
+              entity_id: light.shapes_ee82_2
+              state: 'on'
+            - condition: template
+              value_template: '{{ (state_attr(''light.shapes_ee82_2'', "brightness")|int
+                - states(''sensor.nanoleaf_auto_brightness'')|int)|abs >= 2 }}'
+              alias: brightness incorrect
+            then:
+            - service: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.shapes_ee82_2
+              data:
+                brightness: '{{ states(''sensor.nanoleaf_auto_brightness'') }}'
+            alias: set vertical lights brightness
           alias: set brightness
         - delay:
             hours: 0
@@ -2021,7 +2007,14 @@
           data:
             brightness: 5
       alias: set govee brightness
-  mode: restart
+  - service: automation.trigger
+    data:
+      skip_condition: true
+    target:
+      entity_id: automation.nanoleaf_automation_reset
+    enabled: false
+  mode: parallel
+  max: 99999
 - id: '1661505890362'
   alias: Spotify Refresh
   description: ''
@@ -2317,7 +2310,7 @@
         entity_id: input_boolean.breakfast
         state: 'off'
       sequence:
-      - service: notify.mobile_app_iphone
+      - service: notify.anthonys_devices
         data:
           message: clear_notification
           data:
@@ -2335,7 +2328,7 @@
           entity_id: binary_sensor.home_alone
           state: 'on'
         then:
-        - service: notify.mobile_app_iphone
+        - service: notify.anthonys_devices
           data:
             message: Lola hasn't eaten breakfast yet
             data:
@@ -2346,7 +2339,7 @@
                   critical: 1
                   volume: 0.3
         else:
-        - service: notify.mobile_app_iphone
+        - service: notify.anthonys_devices
           data:
             message: Lola hasn't eaten breakfast yet
             data:
@@ -2358,7 +2351,7 @@
         entity_id: input_boolean.dinner
         state: 'off'
       sequence:
-      - service: notify.mobile_app_iphone
+      - service: notify.anthonys_devices
         data:
           message: clear_notification
           data:
@@ -2376,7 +2369,7 @@
           entity_id: binary_sensor.home_alone
           state: 'on'
         then:
-        - service: notify.mobile_app_iphone
+        - service: notify.anthonys_devices
           data:
             message: Lola hasn't eaten dinner yet
             data:
@@ -2387,7 +2380,7 @@
                   critical: 1
                   volume: 0.3
         else:
-        - service: notify.mobile_app_iphone
+        - service: notify.anthonys_devices
           data:
             message: Lola hasn't eaten dinner yet
             data:
@@ -2426,7 +2419,7 @@
               target:
                 entity_id: input_boolean.breakfast
             else:
-            - service: notify.mobile_app_iphone
+            - service: notify.anthonys_devices
               data:
                 message: Lola already ate breakfast
                 data:
@@ -2451,7 +2444,7 @@
               target:
                 entity_id: input_boolean.dinner
             else:
-            - service: notify.mobile_app_iphone
+            - service: notify.anthonys_devices
               data:
                 message: Lola already ate dinner
                 data:
@@ -2461,7 +2454,7 @@
                       critical: 1
                       volume: 0.3
               enabled: false
-      - service: notify.mobile_app_iphone
+      - service: notify.anthonys_devices
         data:
           message: clear_notification
           data:
@@ -2471,7 +2464,7 @@
           minutes: 2
           seconds: 0
           milliseconds: 0
-      - service: notify.mobile_app_iphone
+      - service: notify.anthonys_devices
         data:
           message: clear_notification
           data:
@@ -2494,7 +2487,7 @@
         entity_id: binary_sensor.home_alone
         state: 'on'
       sequence:
-      - service: notify.mobile_app_iphone
+      - service: notify.anthonys_devices
         data:
           message: clear_notification
           data:
@@ -2512,7 +2505,7 @@
           entity_id: zone.home
           below: 2
         then:
-        - service: notify.mobile_app_iphone
+        - service: notify.anthonys_devices
           data:
             message: It's time to feed Lola dinner
             data:
@@ -2523,7 +2516,7 @@
                   critical: 1
                   volume: 0.3
         else:
-        - service: notify.mobile_app_iphone
+        - service: notify.anthonys_devices
           data:
             message: It's time to feed Lola dinner
             data:
@@ -2564,12 +2557,12 @@
             after: '16:30:00'
           alias: Hasn't eaten dinner
         then:
-        - service: notify.mobile_app_iphone
+        - service: notify.anthonys_devices
           data:
             message: clear_notification
             data:
               tag: dog-food
-        - service: notify.mobile_app_iphone
+        - service: notify.anthonys_devices
           data:
             message: It's time to feed Lola dinner
             data:
@@ -2589,12 +2582,12 @@
             after: 08:00:00
             before: '15:00:00'
           alias: Hasn't eaten breakfast
-        - service: notify.mobile_app_iphone
+        - service: notify.anthonys_devices
           data:
             message: clear_notification
             data:
               tag: dog-food
-        - service: notify.mobile_app_iphone
+        - service: notify.anthonys_devices
           data:
             message: It's time to feed Lola breakfast
             data:
@@ -2678,7 +2671,7 @@
         entity_id: input_boolean.morning_medicine
         state: 'off'
       sequence:
-      - service: notify.mobile_app_iphone
+      - service: notify.anthonys_devices
         data:
           message: clear_notification
           data:
@@ -2696,7 +2689,7 @@
           entity_id: binary_sensor.home_alone
           state: 'on'
         then:
-        - service: notify.mobile_app_iphone
+        - service: notify.anthonys_devices
           data:
             message: Lola hasn't gotten her medicine yet
             data:
@@ -2707,7 +2700,7 @@
                   critical: 1
                   volume: 0.3
         else:
-        - service: notify.mobile_app_iphone
+        - service: notify.anthonys_devices
           data:
             message: Lola hasn't gotten her medicine yet
             data:
@@ -2723,7 +2716,7 @@
         - condition: trigger
           id: midnight
       sequence:
-      - service: notify.mobile_app_iphone
+      - service: notify.anthonys_devices
         data:
           message: clear_notification
           data:
@@ -2741,7 +2734,7 @@
           entity_id: binary_sensor.home_alone
           state: 'on'
         then:
-        - service: notify.mobile_app_iphone
+        - service: notify.anthonys_devices
           data:
             message: Lola hasn't gotten her medicine yet
             data:
@@ -2752,7 +2745,7 @@
                   critical: 1
                   volume: 0.3
         else:
-        - service: notify.mobile_app_iphone
+        - service: notify.anthonys_devices
           data:
             message: Lola hasn't gotten her medicine yet
             data:
@@ -2802,7 +2795,7 @@
               target:
                 entity_id: input_boolean.night_medicine
             else: []
-      - service: notify.mobile_app_iphone
+      - service: notify.anthonys_devices
         data:
           message: clear_notification
           data:
@@ -2817,7 +2810,7 @@
         entity_id: input_boolean.night_medicine
         state: 'off'
       sequence:
-      - service: notify.mobile_app_iphone
+      - service: notify.anthonys_devices
         data:
           message: clear_notification
           data:
@@ -2835,7 +2828,7 @@
           entity_id: binary_sensor.home_alone
           state: 'on'
         then:
-        - service: notify.mobile_app_iphone
+        - service: notify.anthonys_devices
           data:
             message: It's time to give Lola her medicine
             data:
@@ -2846,7 +2839,7 @@
                   critical: 1
                   volume: 0.3
         else:
-        - service: notify.mobile_app_iphone
+        - service: notify.anthonys_devices
           data:
             message: It's time to give Lola her medicine
             data:
@@ -10103,4 +10096,30 @@
     data:
       topic: homeassistant/binary_sensor/mailbox/state
       payload: empty
+  mode: single
+- id: '1696582551718'
+  alias: Nanoleaf Automation Reset
+  description: ''
+  trigger:
+  - platform: homeassistant
+    event: start
+  - platform: event
+    event_type: automation_reloaded
+    id: reloaded
+  condition: []
+  action:
+  - service: automation.turn_off
+    data:
+      stop_actions: true
+    target:
+      entity_id: automation.nanoleaf_scene_changer_and_auto_brightness
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 0
+      milliseconds: 500
+  - service: automation.turn_on
+    data: {}
+    target:
+      entity_id: automation.nanoleaf_scene_changer_and_auto_brightness
   mode: single
