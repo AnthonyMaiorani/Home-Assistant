@@ -19,6 +19,9 @@
 !*.py
 !/rtl_433/
 !/rtl_433/*
+!/themes/
+!/themes/ios-themes
+!/themes/ios-themes/*
 
 # Ignore folders.
 .storage
