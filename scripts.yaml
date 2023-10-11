@@ -26,8 +26,6 @@ fan_off:
         - light.shapes_483c
         - light.shapes_4948_2
         - light.shapes_ee82_2
-        - light.wled
-        - light.bed
     - data:
         brightness: 255
         effect: Color Loop
@@ -51,6 +49,13 @@ fan_off:
         data: {}
         target:
           entity_id: switch.sonoff_s31_lite_zb_switch_2
+    - service: light.turn_on
+      data:
+        brightness_pct: 35
+      target:
+        entity_id:
+        - light.bed
+        - light.wled
   mode: restart
   icon: mdi:ceiling-light
 color_loop:
@@ -136,24 +141,15 @@ color_loop:
         - light.wled
         - light.bed
         - light.govee
+        - light.shapes_483c
+        - light.shapes_4948_2
+        - light.shapes_ee82_2
     - service: switch.turn_on
       data: {}
       target:
         entity_id:
         - switch.usb_hub
         - switch.lumi_lumi_plug_maus01_switch_2
-    - service: homeassistant.turn_on
-      data: {}
-      target:
-        entity_id:
-        - light.shapes_007f
-        - light.shapes_4948
-        - light.shapes_ee82
-    - service: automation.trigger
-      data:
-        skip_condition: true
-      target:
-        entity_id: automation.nanoleaf_scene_changer_and_auto_brightness
     - if:
       - condition: state
         entity_id: switch.desktop
@@ -186,6 +182,9 @@ color_loop:
       - condition: numeric_state
         entity_id: sensor.pirateweather_daytime_high_temperature_0d
         below: 95
+      - condition: state
+        entity_id: cover.bedroom_blinds
+        state: closed
       then:
       - service: cover.open_cover
         data: {}
@@ -354,7 +353,7 @@ call:
       else:
       - service: media_player.volume_set
         data:
-          volume_level: 0.07
+          volume_level: 0.12
         target:
           entity_id:
           - media_player.spotify_anthony221121
@@ -369,13 +368,13 @@ call:
               - media_player.owntone_output_anthony_s_nightstand
           - service: media_player.volume_set
             data:
-              volume_level: 0.07
+              volume_level: 0.11
             target:
               entity_id:
               - media_player.owntone_output_anthony_s_desk
           - service: media_player.volume_set
             data:
-              volume_level: 0.14
+              volume_level: 0.21
             target:
               entity_id:
               - media_player.owntone_output_anthony_s_nightstand
@@ -889,10 +888,10 @@ morning:
       data: {}
       target:
         entity_id:
-        - light.shapes_007f
-        - light.shapes_4948
-        - light.shapes_ee82
         - switch.lumi_lumi_plug_maus01_switch_2
+        - light.shapes_483c
+        - light.shapes_4948_2
+        - light.shapes_ee82_2
     - if:
       - condition: sun
         after: sunrise
@@ -911,6 +910,9 @@ morning:
       - condition: numeric_state
         entity_id: sensor.pirateweather_daytime_high_temperature_0d
         below: 95
+      - condition: state
+        entity_id: cover.bedroom_blinds
+        state: closed
       then:
       - service: cover.open_cover
         data: {}
@@ -1751,18 +1753,27 @@ lofi:
         alias: Turn on other speakers
       else: []
       enabled: true
-  - if:
-    - condition: not
+  - alias: If Owntone not playing, restart Addon and start over
+    if:
+    - condition: or
       conditions:
-      - condition: or
+      - condition: not
         conditions:
         - condition: state
           entity_id: media_player.spotify_anthony221121
           attribute: media_playlist
           state: lofi
+      - condition: not
+        conditions:
         - condition: state
           entity_id: media_player.owntone_server
           state: playing
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.owntone_output_anthony_s_nightstand
+          state: 'on'
+        enabled: true
     then:
     - service: hassio.addon_restart
       data:
@@ -1827,7 +1838,6 @@ lofi:
       data: {}
       target:
         entity_id: script.lofi
-    alias: If Owntone not playing, restart Addon and start over
   mode: restart
   icon: mdi:meditation
 play_music:
@@ -2405,18 +2415,26 @@ play_music:
       else: []
       enabled: true
       alias: Turn on other speakers if nobody else home
-  - if:
-    - condition: not
+  - alias: If Owntone not playing, restart Addon and start over
+    if:
+    - condition: or
       conditions:
-      - condition: or
+      - condition: not
         conditions:
         - condition: state
           entity_id: media_player.spotify_anthony221121
           attribute: media_playlist
           state: Music
+      - condition: not
+        conditions:
         - condition: state
           entity_id: media_player.owntone_server
           state: playing
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.owntone_output_anthony_s_nightstand
+          state: 'on'
     then:
     - service: hassio.addon_restart
       data:
@@ -2482,7 +2500,6 @@ play_music:
       target:
         entity_id:
         - script.play_music
-    alias: If Owntone not playing, restart Addon and start over
   mode: restart
   icon: mdi:music-note
 stop_music:

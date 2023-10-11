@@ -1858,16 +1858,16 @@
         - delay:
             hours: 0
             minutes: 0
-            seconds: 2
+            seconds: 1
             milliseconds: 0
     - repeat:
         until:
         - condition: template
-          value_template: "{{ \n(state_attr('light.shapes_483c', \"brightness\")|int
-            - states('sensor.nanoleaf_auto_brightness')|int)|abs <= 2 \nand \n(state_attr('light.shapes_ee82_2',
-            \"brightness\")|int - states('sensor.nanoleaf_auto_brightness')|int)|abs
-            <= 2 \nand\n(state_attr('light.shapes_4948_2', \"brightness\")|int - states('sensor.nanoleaf_auto_brightness')|int)|abs
-            <= 2 \n}}"
+          value_template: "{{ \n(state_attr('light.shapes_483c', \"brightness\")|int(0)
+            - states('sensor.nanoleaf_auto_brightness')|int(0))|abs <= 2 \nand \n(state_attr('light.shapes_ee82_2',
+            \"brightness\")|int(0) - states('sensor.nanoleaf_auto_brightness')|int(0))|abs
+            <= 2 \nand\n(state_attr('light.shapes_4948_2', \"brightness\")|int(0)
+            - states('sensor.nanoleaf_auto_brightness')|int(0))|abs <= 2 \n}}"
         sequence:
         - parallel:
           - if:
@@ -1925,88 +1925,108 @@
         - delay:
             hours: 0
             minutes: 0
-            seconds: 2
+            seconds: 1
             milliseconds: 0
-    - if:
-      - condition: template
-        value_template: '{{ states(''sensor.nanoleaf_scene'') in state_attr(''input_select.govee_preset'',
-          ''options'') }}'
-      - condition: not
-        conditions:
-        - condition: and
-          conditions:
-          - condition: state
-            entity_id: switch.brtv
-            state: 'on'
-          - condition: or
-            conditions:
-            - condition: state
-              entity_id: input_select.taylor_presence
-              state: Home
-            - condition: state
-              entity_id: input_select.taylor_presence
-              state: Just Arrived
-      then:
-      - service: light.turn_on
-        continue_on_error: true
-        target:
-          entity_id:
-          - light.govee
-        data:
-          effect: '{{ states(''sensor.nanoleaf_scene'') }}'
-      alias: set govee scene
-    - choose:
-      - conditions:
-        - condition: state
-          entity_id: light.fan_lights
-          state: 'on'
+    - repeat:
         sequence:
-        - service: light.turn_on
-          target:
-            entity_id:
-            - light.govee
-          data:
-            brightness_pct: 100
-      - conditions:
-        - condition: or
-          conditions:
-          - condition: state
-            entity_id: cover.bedroom_blinds
-            state: open
-          - condition: state
-            entity_id: cover.bedroom_blinds
-            state: opening
-        sequence:
-        - service: light.turn_on
-          target:
-            entity_id:
-            - light.govee
-          data:
-            brightness_pct: 13
-      - conditions:
-        - condition: not
-          conditions:
-          - condition: and
+        - alias: set govee scene
+          if:
+          - condition: template
+            value_template: '{{ states(''sensor.nanoleaf_scene'') in state_attr(''input_select.govee_preset'',
+              ''options'') }}'
+          - condition: not
             conditions:
+            - condition: and
+              conditions:
+              - condition: state
+                entity_id: switch.brtv
+                state: 'on'
+              - condition: or
+                conditions:
+                - condition: state
+                  entity_id: input_select.taylor_presence
+                  state: Home
+                - condition: state
+                  entity_id: input_select.taylor_presence
+                  state: Just Arrived
+          then:
+          - service: light.turn_on
+            continue_on_error: true
+            target:
+              entity_id:
+              - light.govee
+            data:
+              effect: '{{ states(''sensor.nanoleaf_scene'') }}'
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 1
+            milliseconds: 0
+        until:
+        - condition: template
+          value_template: '{{ is_state_attr(''light.govee'', ''effect'', states(''sensor.nanoleaf_scene''))
+            }}'
+          alias: govee effect set
+    - repeat:
+        count: 7
+        sequence:
+        - choose:
+          - conditions:
+            - condition: state
+              entity_id: light.fan_lights
+              state: 'on'
+            sequence:
+            - service: light.turn_on
+              target:
+                entity_id:
+                - light.govee
+              data:
+                brightness_pct: 100
+          - conditions:
             - condition: or
               conditions:
               - condition: state
-                entity_id: input_select.taylor_presence
-                state: Home
+                entity_id: cover.bedroom_blinds
+                state: open
               - condition: state
-                entity_id: input_select.taylor_presence
-                state: Just Arrived
-            - condition: state
-              entity_id: switch.brtv
-              state: 'on'
-        sequence:
-        - service: light.turn_on
-          target:
-            entity_id:
-            - light.govee
-          data:
-            brightness: 5
-      alias: set govee brightness
+                entity_id: cover.bedroom_blinds
+                state: opening
+            sequence:
+            - service: light.turn_on
+              target:
+                entity_id:
+                - light.govee
+              data:
+                brightness_pct: 13
+          - conditions:
+            - condition: not
+              conditions:
+              - condition: and
+                conditions:
+                - condition: or
+                  conditions:
+                  - condition: state
+                    entity_id: input_select.taylor_presence
+                    state: Home
+                  - condition: state
+                    entity_id: input_select.taylor_presence
+                    state: Just Arrived
+                - condition: state
+                  entity_id: switch.brtv
+                  state: 'on'
+            sequence:
+            - service: light.turn_on
+              target:
+                entity_id:
+                - light.govee
+              data:
+                brightness: 5
+          alias: set govee brightness
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 1
+            milliseconds: 0
   - service: automation.trigger
     data:
       skip_condition: true
@@ -4188,7 +4208,7 @@
     id: reset
   - platform: state
     entity_id:
-    - binary_sensor.mailbox_door
+    - binary_sensor.mailbox
     from: 'off'
     to: 'on'
     id: mailbox opened
@@ -4264,9 +4284,24 @@
       - condition: trigger
         id:
         - mailbox opened
-      - condition: state
-        entity_id: input_boolean.mail_delivered
-        state: 'on'
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: input_boolean.mail_delivered
+          state: 'on'
+          for:
+            hours: 0
+            minutes: 6
+            seconds: 0
+        - condition: state
+          entity_id: input_select.riana
+          state: Just Arrived
+        - condition: state
+          entity_id: input_select.anthony
+          state: Just Arrived
+        - condition: state
+          entity_id: binary_sensor.entry_doors
+          state: 'on'
       sequence:
       - service: notify.mobile_app_iphone
         data:
@@ -7176,9 +7211,6 @@
       entity_id: update.pirate_weather_update
       state: 'on'
     - condition: state
-      entity_id: update.frigate_update_2
-      state: 'on'
-    - condition: state
       entity_id: update.dronemobile_update
       state: 'on'
     - condition: state
@@ -7186,12 +7218,6 @@
       state: 'on'
     - condition: state
       entity_id: update.hisense_tv_update
-      state: 'on'
-    - condition: state
-      entity_id: update.frigate_update
-      state: 'on'
-    - condition: state
-      entity_id: update.ftp_update
       state: 'on'
     - condition: state
       entity_id: update.home_assistant_google_drive_backup_update
@@ -7375,28 +7401,6 @@
         target:
           entity_id:
           - update.timer_bar_card_update
-    - if:
-      - condition: state
-        entity_id: update.frigate_update
-        state: 'on'
-      then:
-      - service: update.install
-        continue_on_error: true
-        data: {}
-        target:
-          entity_id:
-          - update.frigate_update
-    - if:
-      - condition: state
-        entity_id: update.ftp_update
-        state: 'on'
-      then:
-      - service: update.install
-        continue_on_error: true
-        data: {}
-        target:
-          entity_id:
-          - update.ftp_update
     - if:
       - condition: state
         entity_id: update.home_assistant_google_drive_backup_update
@@ -7776,9 +7780,6 @@
         entity_id: update.pirate_weather_update
         state: 'on'
       - condition: state
-        entity_id: update.frigate_update_2
-        state: 'on'
-      - condition: state
         entity_id: update.dronemobile_update
         state: 'on'
       - condition: state
@@ -7868,16 +7869,6 @@
           target:
             entity_id:
             - update.pirate_weather_update
-      - if:
-        - condition: state
-          entity_id: update.frigate_update_2
-          state: 'on'
-        then:
-        - service: update.install
-          data: {}
-          target:
-            entity_id:
-            - update.frigate_update_2
       - if:
         - condition: state
           entity_id: update.dronemobile_update
@@ -9487,7 +9478,7 @@
         timeout:
           hours: 0
           minutes: 0
-          seconds: 1
+          seconds: 2
           milliseconds: 800
       - if:
         - condition: template
