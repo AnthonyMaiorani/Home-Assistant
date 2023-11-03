@@ -2132,6 +2132,7 @@
   - platform: state
     entity_id:
     - media_player.spotify_anthony221121
+    - media_player.owntone_server
     to: playing
   condition: []
   action:
@@ -2156,6 +2157,10 @@
         - condition: state
           entity_id: media_player.spotify_anthony221121
           state: paused
+        - condition: state
+          entity_id: media_player.owntone_server
+          state: playing
+        enabled: false
       sequence:
       - service: homeassistant.update_entity
         data: {}
@@ -10446,26 +10451,33 @@
       minutes: 0
       seconds: 15
     id: stuck 2
+    enabled: false
   - platform: template
-    value_template: '{% set current_position = state_attr(''media_player.spotify_anthony221121'',
-      ''media_position'') | default(0) | float %}
-
-      {% set previous_position = states(''input_number.spotify_previous_position'')
-      | default(0) | float %}
-
-      {{ is_state(''media_player.spotify_anthony221121'', ''paused'') and current_position
-      > previous_position }}'
+    value_template: "    {% set current_position = state_attr('media_player.spotify_anthony221121',
+      'media_position') | default(0) | float %}\n    {% set previous_position = states('input_number.spotify_previous_position')
+      | default(0) | float %}\n    {% set current_timestamp = state_attr('media_player.spotify_anthony221121',
+      'media_position_updated_at').strftime('%Y-%m-%d %H:%M:%S') %}\n    {% set last_timestamp
+      = states('input_datetime.spotify_last_updated') %}\n    {% set previous_timestamp
+      = states('input_datetime.spotify_previous_updated') %}\n    {{ is_state('media_player.spotify_anthony221121',
+      'paused') and current_position > previous_position and current_timestamp !=
+      last_timestamp and current_timestamp != previous_timestamp }}"
     id: stuck
+    enabled: false
   - platform: state
     entity_id:
     - media_player.spotify_anthony221121
     to: paused
-    id: store media position
+    id: store initial media position
   - platform: state
     entity_id:
     - media_player.spotify_anthony221121
     from: paused
     id: reset
+  - platform: state
+    entity_id:
+    - media_player.spotify_anthony221121
+    attribute: media_position_updated_at
+    id: store subsequent update
   condition: []
   action:
   - choose:
@@ -10580,16 +10592,30 @@
           value: 0
         target:
           entity_id: input_number.spotify_previous_position
+      - service: input_datetime.set_datetime
+        data_template:
+          entity_id: input_datetime.spotify_last_updated
+          date: '{{ state_attr(''media_player.spotify_anthony221121'', ''media_position_updated_at'').strftime(''%Y-%m-%d'')
+            }}'
+          time: '{{ state_attr(''media_player.spotify_anthony221121'', ''media_position_updated_at'').strftime(''%H:%M:%S'')
+            }}'
     - conditions:
       - condition: trigger
         id:
-        - store media position
+        - store initial media position
       sequence:
       - service: input_number.set_value
         data:
           entity_id: input_number.spotify_previous_position
           value: '{{ state_attr(''media_player.spotify_anthony221121'', ''media_position'')
             | default(0) }}'
+      - service: input_datetime.set_datetime
+        data_template:
+          entity_id: input_datetime.spotify_last_updated
+          date: '{{ state_attr(''media_player.spotify_anthony221121'', ''media_position_updated_at'').strftime(''%Y-%m-%d'')
+            }}'
+          time: '{{ state_attr(''media_player.spotify_anthony221121'', ''media_position_updated_at'').strftime(''%H:%M:%S'')
+            }}'
     - conditions:
       - condition: trigger
         id:
@@ -10600,4 +10626,25 @@
           value: 0
         target:
           entity_id: input_number.spotify_previous_position
-  mode: single
+    - conditions:
+      - condition: trigger
+        id:
+        - store subsequent update
+      - condition: state
+        entity_id: media_player.spotify_anthony221121
+        state: paused
+      sequence:
+      - service: input_datetime.set_datetime
+        data_template:
+          entity_id: input_datetime.spotify_previous_updated
+          date: '{{ states(''input_datetime.spotify_last_updated'')[:10] }}'
+          time: '{{ states(''input_datetime.spotify_last_updated'')[11:19] }}'
+      - service: input_datetime.set_datetime
+        data_template:
+          entity_id: input_datetime.spotify_last_updated
+          date: '{{ state_attr(''media_player.spotify_anthony221121'', ''media_position_updated_at'').strftime(''%Y-%m-%d'')
+            }}'
+          time: '{{ state_attr(''media_player.spotify_anthony221121'', ''media_position_updated_at'').strftime(''%H:%M:%S'')
+            }}'
+  mode: queued
+  max: 10
