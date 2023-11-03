@@ -75,6 +75,8 @@ rest_command:
     url: http://192.168.1.57/win&PL={{ state_attr('input_select.wled_preset', 'options').index(states('input_select.wled_preset')) + 1 }}
   set_bed_brightness:
     url: http://192.168.1.132/win&A={{ states("input_number.bed_brightness") }}
+  set_rope_brightness:
+    url: http://192.168.1.180/win&A={{ states("input_number.rope_brightness") }}
   set_govee_brightness:
     url: http://192.168.1.193/win&A={{ states("input_number.govee_brightness") }}
   set_govee_preset:

@@ -1,11 +1,11 @@
-binary_sensor:
-    - state_topic: "FP"
-      name: "Front Porch Motion"
-      payload_on: "on"
-      off_delay: 600000
-      device_class: motion
-    - state_topic: "backyard"
-      name: "Backyard Motion"
-      payload_on: "on"
-      off_delay: 600000
-      device_class: motion
+# binary_sensor:
+#     - state_topic: "FP"
+#       name: "Front Porch Motion"
+#       payload_on: "on"
+#       off_delay: 600000
+#       device_class: motion
+#     - state_topic: "backyard"
+#       name: "Backyard Motion"
+#       payload_on: "on"
+#       off_delay: 600000
+#       device_class: motion

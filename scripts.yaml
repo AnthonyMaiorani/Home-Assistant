@@ -49,6 +49,7 @@ fan_off:
         data: {}
         target:
           entity_id: switch.sonoff_s31_lite_zb_switch_2
+      enabled: false
     - service: light.turn_on
       data:
         brightness_pct: 35
@@ -56,6 +57,7 @@ fan_off:
         entity_id:
         - light.bed
         - light.wled
+        - light.rope
   mode: restart
   icon: mdi:ceiling-light
 color_loop:
@@ -144,6 +146,7 @@ color_loop:
         - light.shapes_483c
         - light.shapes_4948_2
         - light.shapes_ee82_2
+        - light.rope
     - service: switch.turn_on
       data: {}
       target:
@@ -430,6 +433,7 @@ call:
           target:
             entity_id:
             - light.bed
+            - light.rope
         - service: light.turn_on
           data:
             brightness: 5
@@ -487,6 +491,7 @@ night:
         - light.shapes_4948
         - light.wled
         - light.bed
+        - light.rope
     - service: cover.close_cover
       data: {}
       target:
@@ -801,6 +806,7 @@ morning:
         - light.govee
         - light.wled
         - light.bed
+        - light.rope
     - data:
         brightness: 255
         effect: Color Loop
@@ -968,19 +974,6 @@ morning:
           state: unavailable
         alias: relay was turned off
       then:
-      - wait_for_trigger:
-        - platform: state
-          entity_id:
-          - light.wyze_bulb_1
-          from: unavailable
-        - platform: state
-          entity_id:
-          - light.wyze_bulb_2
-          from: unavailable
-        - platform: state
-          entity_id:
-          - light.wyze_bulb_3
-          from: unavailable
       - repeat:
           sequence:
           - service: light.turn_on
@@ -996,12 +989,24 @@ morning:
           - condition: state
             entity_id: light.wyze_bulb_1
             state: 'on'
+            for:
+              hours: 0
+              minutes: 0
+              seconds: 1
           - condition: state
             entity_id: light.wyze_bulb_2
             state: 'on'
+            for:
+              hours: 0
+              minutes: 0
+              seconds: 1
           - condition: state
             entity_id: light.wyze_bulb_3
             state: 'on'
+            for:
+              hours: 0
+              minutes: 0
+              seconds: 1
       else:
       - service: light.turn_on
         data:
@@ -1851,6 +1856,10 @@ play_music:
     - condition: state
       entity_id: input_select.anthony
       state: Home
+  - service: script.turn_off
+    data: {}
+    target:
+      entity_id: script.lofi
   - if:
     - condition: state
       entity_id: script.stop_music
@@ -1866,10 +1875,6 @@ play_music:
         minutes: 0
         seconds: 45
         milliseconds: 0
-  - service: script.turn_off
-    data: {}
-    target:
-      entity_id: script.lofi
   - service: media_player.select_source
     data:
       source: librespot-java (pipe)
@@ -2081,6 +2086,7 @@ play_music:
       alias: set normal volume
     alias: set volume
   - service: media_player.play_media
+    continue_on_error: true
     data:
       media_content_type: playlist
       media_content_id: https://open.spotify.com/playlist/1FXZPGh51QQyNUmADd5ssN
@@ -2115,7 +2121,8 @@ play_music:
     target:
       entity_id: media_player.spotify_anthony221121
   - parallel:
-    - if:
+    - alias: Turn on Desk Speakers
+      if:
       - condition: state
         entity_id: media_player.owntone_output_anthony_s_desk
         state: 'off'
@@ -2123,25 +2130,21 @@ play_music:
         entity_id: input_boolean.showering
         state: 'off'
       then:
-      - service: media_player.turn_on
-        data: {}
-        target:
-          entity_id: media_player.owntone_output_anthony_s_desk
       - repeat:
           until:
           - condition: state
             entity_id: media_player.owntone_output_anthony_s_desk
             state: 'on'
           sequence:
-          - delay:
-              hours: 0
-              minutes: 0
-              seconds: 2
-              milliseconds: 0
           - service: media_player.turn_on
             data: {}
             target:
               entity_id: media_player.owntone_output_anthony_s_desk
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
       - if:
         - condition: state
           entity_id: media_player.owntone_output_anthony_s_desk
@@ -2170,8 +2173,37 @@ play_music:
             skip_condition: true
           target:
             entity_id: automation.reboot_airport
-      alias: Turn on Desk Speakers
-    - if:
+      else:
+      - if:
+        - condition: state
+          entity_id: media_player.owntone_output_anthony_s_desk
+          state: 'on'
+        then:
+        - repeat:
+            until:
+            - condition: template
+              value_template: '{{ state_attr(''media_player.owntone_output_anthony_s_desk'',
+                ''volume_level'') == state_attr(''media_player.spotify_anthony221121'',
+                ''volume_level'') }}
+
+                '
+            sequence:
+            - service: media_player.volume_set
+              data:
+                volume_level: '{{ state_attr(''media_player.spotify_anthony221121'',
+                  ''volume_level'') }}
+
+                  '
+              target:
+                entity_id: media_player.owntone_output_anthony_s_desk
+        else:
+        - service: automation.trigger
+          data:
+            skip_condition: true
+          target:
+            entity_id: automation.reboot_airport
+    - alias: Turn on Nightstand Speaker
+      if:
       - condition: state
         state: 'off'
         entity_id: media_player.owntone_output_anthony_s_nightstand
@@ -2181,11 +2213,6 @@ play_music:
       then:
       - repeat:
           until:
-          - condition: template
-            value_template: "{{ state_attr('media_player.owntone_output_anthony_s_nightstand',
-              'volume_level') == \n2 * (state_attr('media_player.spotify_anthony221121',
-              'volume_level')) \nor state_attr('media_player.owntone_output_anthony_s_nightstand',
-              'volume_level') == 1}}\n"
           - condition: state
             entity_id: media_player.owntone_output_anthony_s_nightstand
             state: 'on'
@@ -2194,6 +2221,19 @@ play_music:
             data: {}
             target:
               entity_id: media_player.owntone_output_anthony_s_nightstand
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
+      - repeat:
+          until:
+          - condition: template
+            value_template: "{{ state_attr('media_player.owntone_output_anthony_s_nightstand',
+              'volume_level') == \n2 * (state_attr('media_player.spotify_anthony221121',
+              'volume_level')) \nor state_attr('media_player.owntone_output_anthony_s_nightstand',
+              'volume_level') == 1}}\n"
+          sequence:
           - service: media_player.volume_set
             data:
               volume_level: '{{ 2 * (state_attr(''media_player.spotify_anthony221121'',
@@ -2207,7 +2247,34 @@ play_music:
               minutes: 0
               seconds: 1
               milliseconds: 0
-      alias: Turn on Nightstand Speaker
+      else:
+      - if:
+        - condition: state
+          entity_id: media_player.owntone_output_anthony_s_nightstand
+          state: 'on'
+        then:
+        - repeat:
+            until:
+            - condition: template
+              value_template: "{{ state_attr('media_player.owntone_output_anthony_s_nightstand',
+                'volume_level') == \n2 * (state_attr('media_player.spotify_anthony221121',
+                'volume_level')) \nor state_attr('media_player.owntone_output_anthony_s_nightstand',
+                'volume_level') == 1}}\n"
+            sequence:
+            - service: media_player.volume_set
+              data:
+                volume_level: '{{ 2 * (state_attr(''media_player.spotify_anthony221121'',
+                  ''volume_level'')) }}
+
+                  '
+              target:
+                entity_id: media_player.owntone_output_anthony_s_nightstand
+            - delay:
+                hours: 0
+                minutes: 0
+                seconds: 1
+                milliseconds: 0
+        else: []
     - if:
       - condition: state
         state: 'off'

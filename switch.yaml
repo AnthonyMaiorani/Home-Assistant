@@ -25,6 +25,15 @@
   scan_interval: 5
   method: patch
   unique_id: bed
+- platform: rest
+  resource: http://192.168.1.180/json/state
+  name: Rope
+  body_on: '{"on":true}'
+  body_off: '{"on":false}'
+  is_on_template: "{{ value_json.on }}"
+  scan_interval: 5
+  method: patch
+  unique_id: rope
 - platform: template
   switches:
     # case_rgb:
@@ -111,8 +120,6 @@
               entity_id:
                 - media_player.owntone_output_anthony_s_desk
                 - media_player.owntone_output_anthony_s_nightstand
-                - media_player.owntone_output_bathroom
-                - media_player.front
           - service: climate.turn_off
             target:
               entity_id:

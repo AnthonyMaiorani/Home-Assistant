@@ -53,17 +53,63 @@
       entity_id: light.bedroom_lights
   - continue_on_error: true
     parallel:
-    - service: light.turn_on
-      data:
-        transition: 45
-        effect: None
-        brightness: 255
-        hs_color:
-        - 30.353
-        - 33.597
-      target:
-        entity_id:
-        - light.fan_lights
+    - if:
+      - condition: and
+        conditions:
+        - condition: state
+          entity_id: light.wyze_bulb_1
+          state: unavailable
+        - condition: state
+          entity_id: light.wyze_bulb_2
+          state: unavailable
+        - condition: state
+          entity_id: light.wyze_bulb_3
+          state: unavailable
+        alias: relay was turned off
+      then:
+      - repeat:
+          sequence:
+          - service: light.turn_on
+            data:
+              brightness_pct: 100
+              hs_color:
+              - 30.353
+              - 33.597
+              effect: None
+            target:
+              entity_id: light.fan_lights
+          until:
+          - condition: state
+            entity_id: light.wyze_bulb_1
+            state: 'on'
+            for:
+              hours: 0
+              minutes: 0
+              seconds: 1
+          - condition: state
+            entity_id: light.wyze_bulb_2
+            state: 'on'
+            for:
+              hours: 0
+              minutes: 0
+              seconds: 1
+          - condition: state
+            entity_id: light.wyze_bulb_3
+            state: 'on'
+            for:
+              hours: 0
+              minutes: 0
+              seconds: 1
+      else:
+      - service: light.turn_on
+        data:
+          brightness_pct: 100
+          hs_color:
+          - 30.353
+          - 33.597
+          effect: None
+        target:
+          entity_id: light.fan_lights
     - service: light.turn_on
       continue_on_error: true
       data:
@@ -79,6 +125,10 @@
       data: {}
       target:
         entity_id: script.play_music
+    - service: switch.turn_on
+      data: {}
+      target:
+        entity_id: switch.light_switch_relay
   - delay:
       hours: 0
       minutes: 0
@@ -300,6 +350,9 @@
       data:
         topic: homeassistant/binary_sensor/mailbox/state
         payload: empty
+    - service: automation.trigger
+      target:
+        entity_id: automation.adjust_kitchen_homepod_volume
   - service: automation.turn_on
     data: {}
     target:
@@ -949,6 +1002,15 @@
           - media_player.owntone_output_living_room_tv
           - media_player.guest_speakers
           - media_player.owntone_output_soundbar
+          - media_player.kitchen_speakers
+          - media_player.owntone_output_kitchen_left
+          - media_player.owntone_output_kitchen_right
+          - media_player.owntone_output_garage_homepod
+          - media_player.owntone_output_front_homepod
+          - media_player.owntone_output_master_bedroom_tv
+          - media_player.owntone_output_danas_nightstand
+          - media_player.owntone_output_guest_left
+          - media_player.owntone_output_guest_right
       - if:
         - condition: or
           conditions:
@@ -1673,6 +1735,8 @@
       hours: 0
       minutes: 0
       seconds: 2
+  - platform: time_pattern
+    minutes: /1
   condition:
   - condition: not
     conditions:
@@ -1836,15 +1900,25 @@
               target:
                 entity_id: light.shapes_007f
             else:
-            - condition: not
+            - alias: effect incorrect
+              condition: or
               conditions:
+              - condition: not
+                conditions:
+                - condition: template
+                  value_template: "{{  \n\nis_state('sensor.nanoleaf_auto_brightness',
+                    '0') \nor (\n  (\n    is_state_attr('light.shapes_007f', \"effect\",
+                    states('sensor.nanoleaf_scene'))\n  or\n    not is_state('sensor.nanoleaf_scene',
+                    'Webcam') and is_state_attr('light.shapes_007f', \"effect\", \"*ExtControl*\")\n
+                    \ )\n)\n}}"
               - condition: template
-                value_template: "{{  \n\nis_state('sensor.nanoleaf_auto_brightness',
-                  '0') \nor (\n  (\n    is_state_attr('light.shapes_007f', \"effect\",
-                  states('sensor.nanoleaf_scene'))\n  or\n    not is_state('sensor.nanoleaf_scene',
-                  'Webcam') and is_state_attr('light.shapes_007f', \"effect\", \"*ExtControl*\")\n
-                  \ )\n)\n}}"
-              alias: effect incorrect
+                value_template: '{{ not state_attr(''light.shapes_007f'', ''effect'')
+                  is defined and state_attr(''light.shapes_007f'', ''effect'')|length
+                  }}'
+              - condition: template
+                value_template: "{{  \n\nis_state_attr('light.shapes_007f', \"effect\",
+                  \"*ExtControl*\") and is_state('binary_sensor.signalrgb_active',
+                  'off')\n\n}}"
             - condition: state
               entity_id: light.shapes_007f
               state: 'on'
@@ -3041,6 +3115,7 @@
     - binary_sensor.dining_room_occupancy
     - binary_sensor.master_hall_motion
     - binary_sensor.lumi_lumi_motion_ac02_motion
+    - binary_sensor.lumi_lumi_motion_ac02_motion_5
     to: 'on'
     from: 'off'
     id: leftroom2
@@ -3056,6 +3131,12 @@
     - binary_sensor.bed_occupancy
     to: 'on'
     id: enteredroom
+  - platform: state
+    entity_id:
+    - cover.couch_left_left
+    - cover.couch_right_right
+    from: closing
+    id: left room 4
   condition:
   - condition: or
     conditions:
@@ -3115,14 +3196,6 @@
           state: 'on'
       - condition: or
         conditions:
-        - condition: trigger
-          id: leftroom1
-        - condition: trigger
-          id: leftroom2
-        - condition: trigger
-          id: leftroom3
-      - condition: or
-        conditions:
         - condition: state
           entity_id: binary_sensor.bed_occupancy
           state: 'off'
@@ -3132,6 +3205,12 @@
         - condition: state
           entity_id: input_select.taylor_presence
           state: Just Arrived
+      - condition: trigger
+        id:
+        - leftroom1
+        - leftroom2
+        - leftroom3
+        - left room 4
       sequence:
       - if:
         - condition: state
@@ -4208,7 +4287,7 @@
     id: reset
   - platform: state
     entity_id:
-    - binary_sensor.mailbox
+    - binary_sensor.mailbox_door
     from: 'off'
     to: 'on'
     id: mailbox opened
@@ -4541,123 +4620,224 @@
         entity_id: input_boolean.weather_notification_sent
       enabled: false
     enabled: false
-  - if:
-    - condition: state
-      entity_id: media_player.spotify_anthony221121
-      attribute: source
-      state: Home Assistant
-    then:
-    - service: script.turn_on
-      data: {}
-      target:
-        entity_id: script.stop_music
-  - if:
-    - condition: or
-      conditions:
+  - parallel:
+    - if:
       - condition: state
-        entity_id: binary_sensor.front_door
-        state: 'on'
-      - condition: state
-        entity_id: binary_sensor.back_door
-        state: 'on'
-      - condition: state
-        entity_id: lock.front_door
-        state: unlocked
-      - condition: state
-        entity_id: lock.back_door
-        state: unlocked
-      - condition: and
-        conditions:
-        - condition: numeric_state
-          entity_id: weather.dark_sky
-          below: 48
-          attribute: temperature
-        - condition: state
-          entity_id: input_boolean.weather_notification_sent
-          state: 'off'
-        enabled: false
-    then:
-    - parallel:
-      - service: button.press
+        entity_id: media_player.spotify_anthony221121
+        attribute: source
+        state: Home Assistant
+      then:
+      - service: script.turn_on
         data: {}
         target:
-          entity_id:
-          - button.back_door_wake
-          - button.front_door_wake
-      - service: notify.mobile_app_iphone
-        data:
-          message: clear_notification
+          entity_id: script.stop_music
+    - service: button.press
+      data: {}
+      target:
+        entity_id: button.tare
+    - if:
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: binary_sensor.front_door
+          state: 'on'
+        - condition: state
+          entity_id: binary_sensor.back_door
+          state: 'on'
+        - condition: state
+          entity_id: lock.front_door
+          state: unlocked
+        - condition: state
+          entity_id: lock.back_door
+          state: unlocked
+        - condition: and
+          conditions:
+          - condition: numeric_state
+            entity_id: weather.dark_sky
+            below: 48
+            attribute: temperature
+          - condition: state
+            entity_id: input_boolean.weather_notification_sent
+            state: 'off'
+          enabled: false
+      then:
+      - parallel:
+        - service: button.press
+          data: {}
+          target:
+            entity_id:
+            - button.back_door_wake
+            - button.front_door_wake
+        - service: notify.mobile_app_iphone
           data:
-            tag: car-reminder
+            message: clear_notification
+            data:
+              tag: car-reminder
+        - service: homeassistant.update_entity
+          data: {}
+          target:
+            entity_id:
+            - lock.back_door
+            - lock.front_door
       - service: homeassistant.update_entity
         data: {}
         target:
           entity_id:
           - lock.back_door
           - lock.front_door
-    - service: homeassistant.update_entity
-      data: {}
-      target:
-        entity_id:
-        - lock.back_door
-        - lock.front_door
-    - delay:
-        hours: 0
-        minutes: 0
-        seconds: 2
-        milliseconds: 500
-    - condition: or
-      conditions:
-      - condition: state
-        entity_id: binary_sensor.front_door
-        state: 'on'
-      - condition: state
-        entity_id: binary_sensor.back_door
-        state: 'on'
-      - condition: state
-        entity_id: lock.front_door
-        state: unlocked
-      - condition: state
-        entity_id: lock.back_door
-        state: unlocked
-      - condition: and
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 2
+          milliseconds: 500
+      - condition: or
         conditions:
-        - condition: numeric_state
-          entity_id: weather.dark_sky
-          below: 48
-          attribute: temperature
         - condition: state
-          entity_id: input_boolean.weather_notification_sent
-          state: 'off'
-        enabled: false
-    - condition: template
-      value_template: '{{ not is_state(''person.riana'', ''home'')
+          entity_id: binary_sensor.front_door
+          state: 'on'
+        - condition: state
+          entity_id: binary_sensor.back_door
+          state: 'on'
+        - condition: state
+          entity_id: lock.front_door
+          state: unlocked
+        - condition: state
+          entity_id: lock.back_door
+          state: unlocked
+        - condition: and
+          conditions:
+          - condition: numeric_state
+            entity_id: weather.dark_sky
+            below: 48
+            attribute: temperature
+          - condition: state
+            entity_id: input_boolean.weather_notification_sent
+            state: 'off'
+          enabled: false
+      - condition: template
+        value_template: '{{ not is_state(''person.riana'', ''home'')
 
-        and not is_state(''person.dana'', ''home'')
+          and not is_state(''person.dana'', ''home'')
 
-        and states(''zone.home'')|int < 2
+          and states(''zone.home'')|int < 2
 
-        }}'
-    - service: notify.mobile_app_iphone
-      data:
-        message: '{% if is_state(''binary_sensor.front_door'', ''on'') or is_state(''lock.front_door'',
-          ''unlocked'') %}The front door is unlocked.{% endif %}{% if is_state(''binary_sensor.back_door'',
-          ''on'') or is_state(''lock.back_door'', ''unlocked'') %}The back door is
-          unlocked.{% endif %} {% if state_attr(''weather.dark_sky'', ''temperature'')
-          is defined %}{% if state_attr(''weather.dark_sky'', ''temperature'')|float(48)
-          < 48 %}It is {{state_attr(''weather.dark_sky'', ''temperature'')}}°.{% endif
-          %}{% endif %}'
+          }}'
+      - service: notify.mobile_app_iphone
         data:
-          tag: car-reminder
-          push:
-            sound:
-              name: default
-              critical: 1
-              volume: 0.3
-  - service: button.press
-    data: {}
+          message: '{% if is_state(''binary_sensor.front_door'', ''on'') or is_state(''lock.front_door'',
+            ''unlocked'') %}The front door is unlocked.{% endif %}{% if is_state(''binary_sensor.back_door'',
+            ''on'') or is_state(''lock.back_door'', ''unlocked'') %}The back door
+            is unlocked.{% endif %} {% if state_attr(''weather.dark_sky'', ''temperature'')
+            is defined %}{% if state_attr(''weather.dark_sky'', ''temperature'')|float(48)
+            < 48 %}It is {{state_attr(''weather.dark_sky'', ''temperature'')}}°.{%
+            endif %}{% endif %}'
+          data:
+            tag: car-reminder
+            push:
+              sound:
+                name: default
+                critical: 1
+                volume: 0.3
+  - alias: Set Spotify Output to iPhone
+    repeat:
+      while:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.spotify_anthony221121
+          attribute: source
+          state: iPhone
+      sequence:
+      - if:
+        - condition: template
+          value_template: '{{ "iPhone" not in state_attr(''media_player.spotify_anthony221121'',
+            ''source_list'')}}'
+        then:
+        - service: homeassistant.reload_config_entry
+          data: {}
+          target:
+            entity_id: media_player.spotify_anthony221121
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 10
+            milliseconds: 0
+      - service: homeassistant.update_entity
+        data: {}
+        target:
+          entity_id: media_player.spotify_anthony221121
+      - service: media_player.select_source
+        continue_on_error: true
+        data:
+          source: iPhone
+        target:
+          entity_id: media_player.spotify_anthony221121
+      - wait_for_trigger:
+        - platform: state
+          entity_id:
+          - media_player.spotify_anthony221121
+          attribute: source
+          to: iPhone
+        timeout:
+          hours: 0
+          minutes: 0
+          seconds: 2
+          milliseconds: 0
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: media_player.spotify_anthony221121
+        attribute: source
+        state: iPhone
+      - condition: state
+        entity_id: media_player.spotify_anthony221121
+        attribute: media_playlist
+        state: lofi
+      sequence:
+      - service: media_player.play_media
+        continue_on_error: true
+        data:
+          media_content_type: playlist
+          media_content_id: https://open.spotify.com/playlist/1FXZPGh51QQyNUmADd5ssN
+          enqueue: play
+        target:
+          entity_id: media_player.spotify_anthony221121
+    - conditions:
+      - condition: state
+        entity_id: media_player.spotify_anthony221121
+        attribute: media_playlist
+        state: Music
+      - condition: state
+        entity_id: media_player.spotify_anthony221121
+        attribute: source
+        state: iPhone
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.spotify_anthony221121
+          state: playing
+        alias: Not playing
+      sequence:
+      - repeat:
+          sequence:
+          - service: media_player.media_play
+            entity_id: media_player.spotify_anthony221121
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 2
+              milliseconds: 0
+          until:
+          - condition: state
+            entity_id: media_player.spotify_anthony221121
+            state: playing
+    alias: Play music
+  - service: media_player.repeat_set
+    data:
+      repeat: all
     target:
-      entity_id: button.tare
+      entity_id: media_player.spotify_anthony221121
+    alias: Turn on repeat all
   mode: single
 - id: '1668564599073'
   alias: Reboot Soundbar AirPort
@@ -6298,7 +6478,6 @@
       data: {}
       target:
         entity_id:
-        - media_player.owntone_server
         - media_player.owntone_output_front
         - media_player.owntone_output_front_homepod
         - media_player.owntone_output_kitchen_left
@@ -6309,6 +6488,8 @@
         - media_player.owntone_output_guest_left
         - media_player.owntone_output_guest_right
         - media_player.kitchen_speakers
+        - media_player.owntone_output_danas_nightstand
+        - media_player.owntone_output_soundbar
   - if:
     - condition: device
       type: is_off
@@ -7732,26 +7913,41 @@
         target:
           entity_id:
           - update.couch_right_firmware
-  - service: button.press
-    data: {}
-    target:
-      entity_id: button.tare
-  - delay:
-      hours: 0
-      minutes: 1
-      seconds: 0
-      milliseconds: 0
-  - service: script.night
-    data: {}
   - if:
-    - condition: state
-      entity_id: update.home_assistant_supervisor_update
-      state: 'on'
+    - condition: not
+      conditions:
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: person.anthony
+          state: home
+        - condition: state
+          entity_id: input_select.anthony
+          state: Just Arrived
+        - condition: state
+          entity_id: input_select.anthony
+          state: Home
     then:
-    - service: update.install
+    - service: button.press
       data: {}
       target:
+        entity_id: button.tare
+    - delay:
+        hours: 0
+        minutes: 1
+        seconds: 0
+        milliseconds: 0
+    - service: script.night
+      data: {}
+    - if:
+      - condition: state
         entity_id: update.home_assistant_supervisor_update
+        state: 'on'
+      then:
+      - service: update.install
+        data: {}
+        target:
+          entity_id: update.home_assistant_supervisor_update
   - if:
     - condition: or
       conditions:
@@ -9206,9 +9402,9 @@
   action:
   - choose:
     - conditions:
-      - condition: trigger
-        id:
-        - playing
+      - condition: state
+        entity_id: media_player.living_room_tv
+        state: playing
       sequence:
       - repeat:
           count: '10'
@@ -9478,7 +9674,7 @@
         timeout:
           hours: 0
           minutes: 0
-          seconds: 2
+          seconds: 3
           milliseconds: 800
       - if:
         - condition: template
@@ -10113,4 +10309,295 @@
     data: {}
     target:
       entity_id: automation.nanoleaf_scene_changer_and_auto_brightness
+  mode: single
+- id: '1698236774477'
+  alias: Connected to Car - Eli
+  description: ''
+  trigger: []
+  condition: []
+  action:
+  - service: automation.turn_off
+    data:
+      stop_actions: true
+    target:
+      entity_id: automation.spotify_refresh
+  - service: homeassistant.update_entity
+    data: {}
+    target:
+      entity_id: media_player.spotify_eli
+  - choose: []
+    default:
+    - alias: Set Spotify Output to iPhone
+      if:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.spotify_eli
+          attribute: source
+          state: iPhone
+        alias: Output not set to iphone
+      then:
+      - alias: 'Ensure iPhone in Connect Outputs '
+        repeat:
+          sequence:
+          - service: homeassistant.reload_config_entry
+            data: {}
+            target:
+              entity_id: media_player.spotify_eli
+          - alias: Wait for iPhone to appear
+            wait_for_trigger:
+            - platform: template
+              value_template: '{{ ("iPhone" in state_attr(''media_player.spotify_eli'',
+                ''source_list'')) | default(false) }}
+
+                '
+              for:
+                hours: 0
+                minutes: 0
+                seconds: 2
+            timeout:
+              hours: 0
+              minutes: 0
+              seconds: 3
+              milliseconds: 0
+          while:
+          - alias: iPhone not in Connect outputs
+            condition: template
+            value_template: '{{ ("iPhone" not in state_attr(''media_player.spotify_eli'',
+              ''source_list'')) | default(false) }}
+
+              '
+          - condition: state
+            entity_id: media_player.spotify_eli
+            state: unavailable
+      - service: homeassistant.update_entity
+        data: {}
+        target:
+          entity_id: media_player.spotify_eli
+      - alias: Ensure iPhone was set as output
+        repeat:
+          sequence:
+          - if:
+            - condition: not
+              conditions:
+              - condition: state
+                entity_id: media_player.spotify_eli
+                state: unavailable
+            then:
+            - service: media_player.select_source
+              continue_on_error: true
+              data:
+                source: iPhone
+              target:
+                entity_id: media_player.spotify_eli
+              alias: Attempt to set output
+          - service: homeassistant.reload_config_entry
+            data: {}
+            target:
+              entity_id: media_player.spotify_eli
+          - alias: Wait for iPhone to set
+            wait_for_trigger:
+            - platform: state
+              entity_id:
+              - media_player.spotify_eli
+              attribute: source
+              to: iPhone
+              for:
+                hours: 0
+                minutes: 0
+                seconds: 2
+            timeout:
+              hours: 0
+              minutes: 0
+              seconds: 3
+              milliseconds: 0
+          while:
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: media_player.spotify_eli
+              attribute: source
+              state: iPhone
+    - service: media_player.play_media
+      continue_on_error: true
+      data:
+        media_content_type: playlist
+        media_content_id: spotify:user:orespawnog:collection
+        enqueue: play
+      target:
+        entity_id: media_player.spotify_eli
+      alias: Play Likes Playlist
+  - service: automation.turn_on
+    data: {}
+    target:
+      entity_id: automation.spotify_refresh
+  mode: single
+- id: '1698450236507'
+  alias: Resume stuck Spotify
+  description: ''
+  trigger:
+  - platform: template
+    value_template: '{{ is_state_attr(''media_player.spotify_anthony221121'', ''media_position'',
+      state_attr(''media_player.spotify_anthony221121'', ''media_duration'')) and
+      is_state_attr(''media_player.spotify_anthony221121'', ''media_playlist'', "lofi")
+      and is_state(''media_player.spotify_anthony221121'', ''paused'') }}'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 15
+    id: stuck 2
+  - platform: template
+    value_template: '{% set current_position = state_attr(''media_player.spotify_anthony221121'',
+      ''media_position'') | default(0) | float %}
+
+      {% set previous_position = states(''input_number.spotify_previous_position'')
+      | default(0) | float %}
+
+      {{ is_state(''media_player.spotify_anthony221121'', ''paused'') and current_position
+      > previous_position }}'
+    id: stuck
+  - platform: state
+    entity_id:
+    - media_player.spotify_anthony221121
+    to: paused
+    id: store media position
+  - platform: state
+    entity_id:
+    - media_player.spotify_anthony221121
+    from: paused
+    id: reset
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - stuck
+        - stuck 2
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: input_select.anthony
+          state: Home
+        - condition: state
+          entity_id: input_select.anthony
+          state: Just Arrived
+      sequence:
+      - service: media_player.media_next_track
+        data: {}
+        target:
+          entity_id: media_player.spotify_anthony221121
+      - parallel:
+        - if:
+          - condition: state
+            state: 'off'
+            entity_id: media_player.owntone_output_anthony_s_nightstand
+          then:
+          - repeat:
+              until:
+              - condition: template
+                value_template: "{{ state_attr('media_player.owntone_output_anthony_s_nightstand',
+                  'volume_level') == \n2 * (state_attr('media_player.spotify_anthony221121',
+                  'volume_level')) \nor state_attr('media_player.owntone_output_anthony_s_nightstand',
+                  'volume_level') == 1}}\n"
+              - condition: state
+                entity_id: media_player.owntone_output_anthony_s_nightstand
+                state: 'on'
+              sequence:
+              - service: media_player.turn_on
+                data: {}
+                target:
+                  entity_id: media_player.owntone_output_anthony_s_nightstand
+              - service: media_player.volume_set
+                data:
+                  volume_level: '{{ 2 * (state_attr(''media_player.spotify_anthony221121'',
+                    ''volume_level'')) }}
+
+                    '
+                target:
+                  entity_id: media_player.owntone_output_anthony_s_nightstand
+              - delay:
+                  hours: 0
+                  minutes: 0
+                  seconds: 1
+                  milliseconds: 0
+          alias: Turn on Nightstand Speaker
+        - if:
+          - condition: state
+            entity_id: media_player.owntone_output_anthony_s_desk
+            state: 'off'
+          then:
+          - service: media_player.turn_on
+            data: {}
+            target:
+              entity_id: media_player.owntone_output_anthony_s_desk
+          - repeat:
+              until:
+              - condition: state
+                entity_id: media_player.owntone_output_anthony_s_desk
+                state: 'on'
+              sequence:
+              - delay:
+                  hours: 0
+                  minutes: 0
+                  seconds: 2
+                  milliseconds: 0
+              - service: media_player.turn_on
+                data: {}
+                target:
+                  entity_id: media_player.owntone_output_anthony_s_desk
+          - if:
+            - condition: state
+              entity_id: media_player.owntone_output_anthony_s_desk
+              state: 'on'
+            then:
+            - repeat:
+                until:
+                - condition: template
+                  value_template: '{{ state_attr(''media_player.owntone_output_anthony_s_desk'',
+                    ''volume_level'') == state_attr(''media_player.spotify_anthony221121'',
+                    ''volume_level'') }}
+
+                    '
+                sequence:
+                - service: media_player.volume_set
+                  data:
+                    volume_level: '{{ state_attr(''media_player.spotify_anthony221121'',
+                      ''volume_level'') }}
+
+                      '
+                  target:
+                    entity_id: media_player.owntone_output_anthony_s_desk
+            else:
+            - service: automation.trigger
+              data:
+                skip_condition: true
+              target:
+                entity_id: automation.reboot_airport
+          alias: Turn on Desk Speakers
+      - service: input_number.set_value
+        data:
+          value: 0
+        target:
+          entity_id: input_number.spotify_previous_position
+    - conditions:
+      - condition: trigger
+        id:
+        - store media position
+      sequence:
+      - service: input_number.set_value
+        data:
+          entity_id: input_number.spotify_previous_position
+          value: '{{ state_attr(''media_player.spotify_anthony221121'', ''media_position'')
+            | default(0) }}'
+    - conditions:
+      - condition: trigger
+        id:
+        - reset
+      sequence:
+      - service: input_number.set_value
+        data:
+          value: 0
+        target:
+          entity_id: input_number.spotify_previous_position
   mode: single
