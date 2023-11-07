@@ -69,23 +69,23 @@ output:
     id: output_red
     pin: ${red}
   - platform: ledc
-    id: output_green
+    id: output_blue
     pin: ${green}
   - platform: ledc
-    id: output_blue
+    id: output_green
     pin: ${blue_2}
   - platform: ledc
     id: output_red_2
     pin: ${red_2}
   - platform: ledc
-    id: output_green_2
+    id: output_blue_2
     pin: ${green_2}
   - platform: ledc
-    id: output_blue_2
+    id: output_green_2
     pin: ${blue}
 
 substitutions:
-  static_ip: 192.168.1.193
+  static_ip: 192.168.1.195
   red: GPIO02
   green: GPIO12
   blue: GPIO05

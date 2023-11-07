@@ -172,13 +172,13 @@
   - platform: state
     entity_id:
       - binary_sensor.webcam
-  - platform: state
-    entity_id:
-      - media_player.spotify_anthony221121
-    to: 
-      - "playing"
-      - "idle"
-      - "paused"
+  # - platform: state
+  #   entity_id:
+  #     - media_player.spotify_anthony221121
+  #   to: 
+  #     - "playing"
+  #     - "idle"
+  #     - "paused"
   - platform: state
     entity_id:
       - light.shapes_007f
@@ -189,32 +189,32 @@
       - light.shapes_ee82
     from: "off"
     to: "on"
-  - platform: state
-    entity_id:
-      - media_player.owntone_output_anthony_s_desk
-    to: 
-      - "on"
-      - "off"
-  - platform: numeric_state
-    entity_id: media_player.owntone_output_anthony_s_desk
-    above: 0.24
-    attribute: volume_level
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 2
-  - platform: numeric_state
-    entity_id: media_player.owntone_output_anthony_s_desk
-    below: 0.25
-    attribute: volume_level
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 2
-  - platform: state
-    entity_id:
-      - media_player.spotify_anthony221121
-    attribute: media_playlist
+  # - platform: state
+  #   entity_id:
+  #     - media_player.owntone_output_anthony_s_desk
+  #   to: 
+  #     - "on"
+  #     - "off"
+  # - platform: numeric_state
+  #   entity_id: media_player.owntone_output_anthony_s_desk
+  #   above: 0.24
+  #   attribute: volume_level
+  #   for:
+  #     hours: 0
+  #     minutes: 0
+  #     seconds: 2
+  # - platform: numeric_state
+  #   entity_id: media_player.owntone_output_anthony_s_desk
+  #   below: 0.25
+  #   attribute: volume_level
+  #   for:
+  #     hours: 0
+  #     minutes: 0
+  #     seconds: 2
+  # - platform: state
+  #   entity_id:
+  #     - media_player.spotify_anthony221121
+  #   attribute: media_playlist
   sensor:
     - name: "Nanoleaf Scene"
       unique_id: nanoleaf_scene
@@ -225,7 +225,7 @@
         {% set defaultScenes = ['Cosmos', 'Dynamic Blue', 'Ocean', 
         'Vaporwave', 'Rainbow', 'energy'] %}
         {% set nightScenes = ['moonlight', 'Lightscape', 'Night light',
-        'Pink To Blue', 'Rain',  'Waterfall', 'Playstation Blue', 'Bedtime', 
+        'Pink To Blue', 'Waterfall', 'Playstation Blue', 'Bedtime', 
         'Aurora magic', 'Holodek'] %}
         {% set holidayScenes = ['Christmas', 'Christmas Candy Cane', 
         'Christmas Flow', 'Christmas Tree'] %}
@@ -301,7 +301,7 @@
 
         {# Unnecessary Trigger #}
         {% if now().minute != 30 and now().minute != 0 and 
-        now().second > 0 and
+        now().second > 0 and now().microsecond > 300000 and
         state_attr('light.shapes_007f', 'effect') is defined and 
         state_attr('light.shapes_007f', 'effect') in sceneChoices and not
         trigger.id == "event" -%}

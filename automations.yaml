@@ -10648,3 +10648,104 @@
             }}'
   mode: queued
   max: 10
+- id: '1699001999294'
+  alias: Resume Spotify
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - media_player.spotify_anthony221121
+    to: paused
+    id: paused
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 1
+  - platform: state
+    entity_id:
+    - binary_sensor.macbook_air_active
+    attribute: Screen Off
+    from: 'false'
+    to: 'true'
+    id: macbook sleep
+  - platform: state
+    entity_id:
+    - binary_sensor.airpods_connected
+    from: 'on'
+    to: 'off'
+    id: airpods disconnect
+  - platform: state
+    entity_id:
+    - media_player.spotify_anthony221121
+    attribute: media_title
+    to: Thrilling Dreams
+    id: 1st song
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 1
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_select.anthony
+      state: Home
+    - condition: state
+      entity_id: input_select.anthony
+      state: Just Arrived
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: media_player.spotify_anthony221121
+      attribute: source
+      state: Home Assistant
+    - condition: state
+      entity_id: media_player.spotify_anthony221121
+      state: DESKTOP-PC
+      attribute: source
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - macbook sleep
+        - airpods disconnect
+      sequence:
+      - service: media_player.media_play
+        data: {}
+        target:
+          entity_id: media_player.spotify_anthony221121
+    - conditions:
+      - condition: trigger
+        id:
+        - 1st song
+      - condition: state
+        entity_id: script.lofi
+        state: 'off'
+      sequence:
+      - service: media_player.shuffle_set
+        data:
+          shuffle: false
+        target:
+          entity_id: media_player.spotify_anthony221121
+      - service: media_player.shuffle_set
+        data:
+          shuffle: true
+        target:
+          entity_id: media_player.spotify_anthony221121
+      - service: media_player.media_next_track
+        data: {}
+        target:
+          entity_id: media_player.spotify_anthony221121
+    default:
+    - service: media_player.media_next_track
+      data: {}
+      target:
+        entity_id: media_player.spotify_anthony221121
+    - delay:
+        hours: 0
+        minutes: 0
+        seconds: 1
+        milliseconds: 0
+  mode: queued
+  max: 10

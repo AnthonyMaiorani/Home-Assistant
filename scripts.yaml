@@ -58,6 +58,8 @@ fan_off:
         - light.bed
         - light.wled
         - light.rope
+        - light.lamp2
+        - light.lamp1
   mode: restart
   icon: mdi:ceiling-light
 color_loop:
@@ -147,6 +149,8 @@ color_loop:
         - light.shapes_4948_2
         - light.shapes_ee82_2
         - light.rope
+        - light.lamp1
+        - light.lamp2
     - service: switch.turn_on
       data: {}
       target:
@@ -421,7 +425,7 @@ call:
     - event: event_change_nanoleaf
       event_data: {}
     - repeat:
-        count: 80
+        count: 200
         sequence:
         - service: light.turn_off
           data: {}
@@ -434,6 +438,8 @@ call:
             entity_id:
             - light.bed
             - light.rope
+            - light.lamp1
+            - light.lamp2
         - service: light.turn_on
           data:
             brightness: 5
@@ -492,6 +498,8 @@ night:
         - light.wled
         - light.bed
         - light.rope
+        - light.lamp1
+        - light.lamp2
     - service: cover.close_cover
       data: {}
       target:
@@ -807,6 +815,8 @@ morning:
         - light.wled
         - light.bed
         - light.rope
+        - light.lamp1
+        - light.lamp2
     - data:
         brightness: 255
         effect: Color Loop

@@ -34,6 +34,24 @@
   scan_interval: 5
   method: patch
   unique_id: rope
+- platform: rest
+  resource: http://192.168.1.221/json/state
+  name: Lamp 1
+  body_on: '{"on":true}'
+  body_off: '{"on":false}'
+  is_on_template: "{{ value_json.on }}"
+  scan_interval: 5
+  method: patch
+  unique_id: lamp1
+- platform: rest
+  resource: http://192.168.1.197/json/state
+  name: Lamp 2
+  body_on: '{"on":true}'
+  body_off: '{"on":false}'
+  is_on_template: "{{ value_json.on }}"
+  scan_interval: 5
+  method: patch
+  unique_id: lamp2
 - platform: template
   switches:
     # case_rgb:
