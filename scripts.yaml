@@ -1550,25 +1550,23 @@ lofi:
               seconds: 1
               milliseconds: 0
       alias: Turn on Nightstand Speaker
-    - if:
+    - alias: Turn on Bathroom Speaker
+      if:
       - condition: state
         state: 'off'
         entity_id: media_player.owntone_output_bathroom
       - condition: state
         entity_id: binary_sensor.bed_occupancy
         state: 'off'
-      - condition: device
-        type: is_on
-        device_id: 624405d34a0a0bc8df3990c131a31bd2
+      - condition: state
         entity_id: light.bathroom_lights
-        domain: light
+        state: 'on'
       then:
       - service: automation.trigger
         data:
           skip_condition: false
         target:
           entity_id: automation.bathroom_music
-      alias: Turn on Bathroom Speaker
     - if:
       - condition: time
         after: 07:00:00
@@ -2285,18 +2283,17 @@ play_music:
                 seconds: 1
                 milliseconds: 0
         else: []
-    - if:
+    - alias: Turn on Bathroom Speaker
+      if:
       - condition: state
         state: 'off'
         entity_id: media_player.owntone_output_bathroom
       - condition: state
         entity_id: binary_sensor.bed_occupancy
         state: 'off'
-      - condition: device
-        type: is_on
-        device_id: 624405d34a0a0bc8df3990c131a31bd2
+      - condition: state
         entity_id: light.bathroom_lights
-        domain: light
+        state: 'on'
       then:
       - wait_for_trigger:
         - platform: state
@@ -2313,7 +2310,6 @@ play_music:
           skip_condition: false
         target:
           entity_id: automation.bathroom_music
-      alias: Turn on Bathroom Speaker
     - if:
       - condition: state
         entity_id: binary_sensor.bed_occupancy

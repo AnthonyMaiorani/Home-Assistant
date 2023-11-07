@@ -211,11 +211,6 @@
       - condition: state
         entity_id: binary_sensor.shower
         state: 'on'
-      - condition: device
-        type: is_on
-        device_id: 624405d34a0a0bc8df3990c131a31bd2
-        entity_id: light.bathroom_lights
-        domain: light
       - condition: or
         conditions:
         - condition: state
@@ -224,6 +219,9 @@
         - condition: state
           entity_id: input_select.anthony
           state: Home
+      - condition: state
+        entity_id: light.bathroom_lights
+        state: 'on'
       then:
       - service: timer.start
         data: {}
@@ -4096,21 +4094,6 @@
           - camera.elitedesk_garage
   mode: parallel
   max: 10
-- id: '1666854622989'
-  alias: Front Porch Notification
-  description: ''
-  use_blueprint:
-    path: hunterjm/frigate_0.10_notification.yaml
-    input:
-      camera: porch
-      base_url: https://maioranihome.duckdns.org
-      update_thumbnail: false
-      labels:
-      - person
-      cooldown: 100
-      silence_timer: 60
-      loiter_timer: 0
-      notify_group: anthonys_devices
 - id: '1666891695746'
   alias: Camera Triggers
   description: ''
@@ -5860,243 +5843,6 @@
         target:
           entity_id: timer.bathroom_light
   mode: restart
-- id: fp
-  alias: Front Porch Not Blueprint
-  description: ''
-  trigger:
-  - platform: event
-    event_type: mobile_app_notification_action
-    event_data:
-      action: silence-{{ camera }}
-    id: silence
-  - platform: mqtt
-    topic: frigate/events
-    payload: '{{ camera }}/new'
-    value_template: '{{ value_json[''after''][''camera''] }}/{{ value_json[''type'']}}'
-    id: frigate-event
-  - platform: time
-    at: 04:00:00
-    id: reset
-  condition: []
-  action:
-  - choose:
-    - alias: Silence New Object Notifications
-      conditions:
-      - condition: trigger
-        id: silence
-      sequence:
-      - service: automation.turn_off
-        target:
-          entity_id: '{{ this.entity_id }}'
-        data:
-          stop_actions: false
-      - service: notify.{{ group_target }}
-        data:
-          message: clear_notification
-          data:
-            tag: porch-person
-      - delay:
-          minutes: 60
-      - service: automation.turn_on
-        target:
-          entity_id: '{{ this.entity_id }}'
-    - alias: Frigate Event
-      conditions:
-      - condition: trigger
-        id: frigate-event
-      - '{{ is_state(this.entity_id, ''on'') }}'
-      - '{{ not this.attributes.last_triggered or (now() - this.attributes.last_triggered).seconds
-        > cooldown }}'
-      sequence:
-      - variables:
-          id: '{{ trigger.payload_json[''after''][''id''] }}'
-          object: '{{ trigger.payload_json[''after''][''label''] }}'
-          label: '{{ object | title }}'
-          initial_home: '{{ presence_entity != '''' and is_state(presence_entity,
-            ''home'') }}'
-          initial_entered_zones: '{{ trigger.payload_json[''after''][''entered_zones'']
-            }}'
-      - alias: Notifications enabled for object label
-        condition: template
-        value_template: '{{ not labels|length or object in labels }}'
-      - alias: Notify on new object
-        choose:
-        - conditions:
-          - '{{ not zone_only or initial_entered_zones|length > 0 }}'
-          - '{{ not zones|length or zones|select(''in'', initial_entered_zones)|list|length
-            > 0 }}'
-          - '{{ not initial_home }}'
-          sequence:
-          - choose:
-            - conditions: '{{ not group_target }}'
-              sequence:
-              - device_id: false
-                domain: mobile_app
-                type: notify
-                message: A {{ label }} was detected on the {{ camera_name }} camera.
-                data:
-                  tag: '{{ id }}'
-                  group: frigate-notification-{{ camera }}
-                  image: /api/frigate/notifications/{{id}}/snapshot.jpg
-                  clickAction: '{{base_url}}/api/frigate/notifications/{{id}}/{{camera}}/clip.mp4'
-                  ttl: '{{ iif(critical, 0, 3600000) }}'
-                  priority: '{{ iif(critical, ''high'', ''normal'') }}'
-                  url: http://elitedesk:81/ui3.htm?cam=FP
-                  attachment:
-                    url: /api/frigate/notifications/{{id}}/snapshot.jpg
-                  push:
-                    interruption-level: '{{ iif(critical, ''critical'', ''active'')
-                      }}'
-                  actions:
-                  - action: silence-{{ camera }}
-                    title: Silence New Notifications
-                    destructive: true
-            default:
-            - condition: not
-              conditions:
-              - condition: state
-                entity_id: binary_sensor.entry_doors
-                state: 'on'
-            - service: notify.{{ group_target }}
-              data:
-                message: A person was detected at the porch.
-                data:
-                  tag: porch-person
-                  group: frigate-notification-{{ camera }}
-                  image: /api/frigate/notifications/{{id}}/snapshot.jpg
-                  clickAction: '{{base_url}}/api/frigate/notifications/{{id}}/{{camera}}/clip.mp4'
-                  ttl: '{{ iif(critical, 0, 3600000) }}'
-                  priority: '{{ iif(critical, ''high'', ''normal'') }}'
-                  url: http://elitedesk:81/ui3.htm?cam=FP
-                  attachment:
-                    url: /api/frigate/notifications/{{id}}/snapshot.jpg
-                  push:
-                    interruption-level: '{{ iif(critical, ''critical'', ''active'')
-                      }}'
-                  actions:
-                  - action: silence-{{ camera }}
-                    title: Silence New Notifications
-                    destructive: true
-      - repeat:
-          sequence:
-          - wait_for_trigger:
-            - platform: mqtt
-              topic: frigate/events
-              payload: '{{ id }}'
-              value_template: '{{ value_json[''after''][''id''] }}'
-            timeout:
-              minutes: 2
-            continue_on_timeout: false
-          - variables:
-              event: '{{ wait.trigger.payload_json }}'
-              loitering: '{{ loiter_timer and event[''before''][''motionless_count'']/fps/60
-                < loiter_timer and event[''after''][''motionless_count'']/fps/60 >=
-                loiter_timer }}'
-              new_snapshot: '{{ update_thumbnail and event[''before''][''snapshot_time'']
-                != event[''after''][''snapshot_time''] }}'
-              home: '{{ presence_entity != '''' and is_state(presence_entity, ''home'')
-                }}'
-              presence_changed: '{{ presence_entity != '''' and as_datetime(event[''before''][''frame_time''])
-                < states[presence_entity].last_changed }}'
-              last_zones: '{{ event[''before''][''entered_zones''] }}'
-              entered_zones: '{{ event[''after''][''entered_zones''] }}'
-              zone_filter: '{{ not zone_only or entered_zones|length > 0 }}'
-              stationary_moved: '{{ event[''after''][''position_changes''] > event[''before''][''position_changes'']
-                }}'
-              zone_only_changed: '{{ zone_only and (entered_zones|length > 0 and not
-                last_zones|length) }}'
-              entered_zones_changed: '{{ zones|length > 0 and (zones|select(''in'',
-                entered_zones)|list|length > 0 and not zones|select(''in'', last_zones)|list|length)
-                }}'
-              update: '{{ new_snapshot and not loitering and not presence_changed
-                and not zone_only_changed and not entered_zones_changed }}'
-          - alias: Notify on loitering or significant change
-            choose:
-            - conditions: '{{ loitering or (not home and zone_filter and (new_snapshot
-                or presence_changed or stationary_moved or zone_only_changed or entered_zones_changed))
-                }}'
-              sequence:
-              - choose:
-                - conditions: '{{ not group_target }}'
-                  sequence:
-                  - device_id: false
-                    domain: mobile_app
-                    type: notify
-                    message: A {{ label }} {{ 'is loitering' if loitering else 'was
-                      detected' }} on the {{ camera_name }} camera.
-                    data:
-                      tag: '{{ id }}{{''-loitering'' if loitering}}'
-                      group: frigate-notification-{{ camera }}{{'-loitering' if loitering}}
-                      image: /api/frigate/notifications/{{id}}/snapshot.jpg
-                      clickAction: '{{base_url}}/api/frigate/notifications/{{id}}/{{camera}}/clip.mp4'
-                      ttl: '{{ iif(critical, 0, 3600000) }}'
-                      priority: '{{ iif(critical, ''high'', ''normal'') }}'
-                      url: http://elitedesk:81/ui3.htm?cam=FP
-                      attachment:
-                        url: /api/frigate/notifications/{{id}}/snapshot.jpg
-                      sound: '{{ iif(update, ''none'', ''default'') }}'
-                      push:
-                        interruption-level: '{{ iif(critical, ''critical'', ''active'')
-                          }}'
-                      actions:
-                      - action: silence-{{ camera }}
-                        title: Silence New Notifications
-                        destructive: true
-                default:
-                - service: notify.{{ group_target }}
-                  data:
-                    message: A {{ label }} {{ 'is loitering' if loitering else 'was
-                      detected' }} on the {{ camera_name }} camera.
-                    data:
-                      tag: '{{ id }}{{''-loitering'' if loitering}}'
-                      group: frigate-notification-{{ camera }}{{'-loitering' if loitering}}
-                      image: /api/frigate/notifications/{{id}}/snapshot.jpg
-                      clickAction: '{{base_url}}/api/frigate/notifications/{{id}}/{{camera}}/clip.mp4'
-                      ttl: '{{ iif(critical, 0, 3600000) }}'
-                      priority: '{{ iif(critical, ''high'', ''normal'') }}'
-                      url: http://elitedesk:81/ui3.htm?cam=FP
-                      attachment:
-                        url: /api/frigate/notifications/{{id}}/snapshot.jpg
-                      sound: '{{ iif(update, ''none'', ''default'') }}'
-                      push:
-                        interruption-level: '{{ iif(critical, ''critical'', ''active'')
-                          }}'
-                      actions:
-                      - action: silence-{{ camera }}
-                        title: Silence New Notifications
-                        destructive: true
-          until: '{{ not wait.trigger or wait.trigger.payload_json[''type''] == ''end''
-            }}'
-    - conditions:
-      - condition: trigger
-        id: reset
-      sequence:
-      - service: notify.{{ group_target }}
-        data:
-          message: clear_notification
-          data:
-            tag: porch-person
-  mode: parallel
-  trigger_variables:
-    camera: porch
-  variables:
-    camera: porch
-    camera_name: '{{ camera | replace(''_'', '' '') | title }}'
-    base_url: https://maioranihome.duckdns.org
-    critical: false
-    update_thumbnail: false
-    group_target: anthonys_devices
-    zone_only: false
-    input_zones: []
-    zones: '{{ input_zones | list }}'
-    input_labels:
-    - person
-    labels: '{{ input_labels | list }}'
-    presence_entity: ''
-    cooldown: 100
-    loiter_timer: 0
-    fps_value: '{{ states(''sensor.'' + camera + ''_camera_fps'') }}'
-    fps: '{{ fps_value|int if is_number(fps_value) else 8 }}'
 - id: '1670483390344'
   alias: Kitchen Cabinet Pico
   description: ''
@@ -6955,11 +6701,11 @@
   - platform: homeassistant
     event: start
     id: start
-  - platform: device
-    type: turned_off
-    device_id: 624405d34a0a0bc8df3990c131a31bd2
-    entity_id: light.bathroom_lights
-    domain: light
+  - platform: state
+    entity_id:
+    - light.bathroom_lights
+    to: 'off'
+    from: 'on'
     id: lights turned off
   - platform: state
     entity_id:
@@ -7002,6 +6748,8 @@
       minutes: 50
       seconds: 0
     id: 2hrs
+  - platform: state
+    entity_id: []
   condition: []
   action:
   - choose:
@@ -7062,11 +6810,9 @@
               id: reload
             - condition: trigger
               id: start
-          - condition: device
-            type: is_off
-            device_id: 624405d34a0a0bc8df3990c131a31bd2
+          - condition: state
             entity_id: light.bathroom_lights
-            domain: light
+            state: 'off'
         - condition: trigger
           id: lights turned off
         - condition: and
