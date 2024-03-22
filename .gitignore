@@ -23,7 +23,9 @@
 !/themes/ios-themes/*
 
 # Ignore folders.
-**/custom_components/*
+/custom_components
+custom_components
+/custom_components/**
 .storage
 .cloud
 node-red
