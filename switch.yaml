@@ -8,6 +8,42 @@
   method: patch
   scan_interval: 5
 - platform: rest
+  resource: http://192.168.1.167/json/state
+  name: Floor Lamp
+  body_on: '{"on":true}'
+  body_off: '{"on":false}'
+  is_on_template: "{{ value_json.on }}"
+  unique_id: floor_lamp
+  method: patch
+  scan_interval: 5
+- platform: rest
+  resource: http://192.168.1.51/json/state
+  name: Floor Lamp 2
+  body_on: '{"on":true}'
+  body_off: '{"on":false}'
+  is_on_template: "{{ value_json.on }}"
+  unique_id: floor_lamp_2
+  method: patch
+  scan_interval: 5
+- platform: rest
+  resource: http://192.168.1.177/json/state
+  name: Black COB
+  body_on: '{"on":true}'
+  body_off: '{"on":false}'
+  is_on_template: "{{ value_json.on }}"
+  unique_id: black_cob
+  method: patch
+  scan_interval: 5
+- platform: rest
+  resource: http://192.168.1.196/json/state
+  name: Lines
+  body_on: '{"on":true}'
+  body_off: '{"on":false}'
+  is_on_template: "{{ value_json.on }}"
+  unique_id: lines
+  method: patch
+  scan_interval: 5
+- platform: rest
   resource: http://192.168.1.193/json/state
   name: Govee
   body_on: '{"on":true}'
@@ -44,7 +80,7 @@
   method: patch
   unique_id: lamp1
 - platform: rest
-  resource: http://192.168.1.197/json/state
+  resource: http://192.168.1.200/json/state
   name: Lamp 2
   body_on: '{"on":true}'
   body_off: '{"on":false}'
@@ -52,6 +88,33 @@
   scan_interval: 5
   method: patch
   unique_id: lamp2
+- platform: rest
+  resource: http://192.168.1.110/json/state
+  name: Charger 1
+  body_on: '{"on":true}'
+  body_off: '{"on":false}'
+  is_on_template: "{{ value_json.on }}"
+  scan_interval: 5
+  method: patch
+  unique_id: charger1
+- platform: rest
+  resource: http://192.168.1.78/json/state
+  name: Cube
+  body_on: '{"on":true}'
+  body_off: '{"on":false}'
+  is_on_template: "{{ value_json.on }}"
+  scan_interval: 5
+  method: patch
+  unique_id: cube
+- platform: rest
+  resource: http://192.168.1.38/json/state
+  name: Charger 2
+  body_on: '{"on":true}'
+  body_off: '{"on":false}'
+  is_on_template: "{{ value_json.on }}"
+  scan_interval: 5
+  method: patch
+  unique_id: charger2
 - platform: template
   switches:
     # case_rgb:
@@ -341,19 +404,19 @@
     desktop:
       unique_id: desktop
       friendly_name: Desktop
-      value_template: "{{ states('binary_sensor.desktop_power') }}"
+      value_template: "{{ not is_state('button.desktop_pc_satellite_shutdown', 'unavailable') }} "
       turn_on:
         - service: wake_on_lan.send_magic_packet
           data:
             mac: !secret desktop
         - service: switch.turn_on
           target: 
-            entity_id: switch.sonoff_s31_lite_zb_switch_2
+            entity_id: switch.goxlr
       turn_off:
         - service: button.press
           target:
             entity_id:
-              - button.shutdown
+              - button.desktop_pc_satellite_shutdown
         - service: switch.turn_off
           target: 
-            entity_id: switch.sonoff_s31_lite_zb_switch_2
+            entity_id: switch.goxlr

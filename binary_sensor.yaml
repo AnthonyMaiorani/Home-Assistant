@@ -1,11 +1,3 @@
-- platform: ping
-  host: !secret host
-  name: Desktop Ping
-  scan_interval: 15
-- platform: ping
-  host: !secret garage
-  name: Garage Ping
-  scan_interval: 15
 - platform: generic_hygrostat
   name: Shower
   sensor: sensor.bathroom_humidity

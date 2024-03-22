@@ -1,0 +1,68 @@
+---
+substitutions:
+  id_prefix: ratgdov2-abc87c
+  friendly_name: "RATGDOv2 abc87c"
+  uart_tx_pin: GPIO33
+  uart_rx_pin: GPIO32
+  input_obst_pin: GPIO35
+  status_door_pin: GPIO14
+  status_obstruction_pin: GPIO17
+  dry_contact_open_pin: GPIO1
+  dry_contact_close_pin: GPIO3
+  dry_contact_light_pin: GPIO15
+
+web_server:
+
+bluetooth_proxy:
+  active: true
+esp32_ble_tracker:
+  scan_parameters:
+    interval: 1100ms
+    window: 1100ms
+
+esphome:
+  name: ${id_prefix}
+  friendly_name: ${friendly_name}
+  name_add_mac_suffix: true
+  project:
+    name: ratgdo.esphome
+    version: "2.0"
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+ethernet:
+  type: LAN8720
+  mdc_pin: GPIO23
+  mdio_pin: GPIO18
+  clk_mode: GPIO0_IN
+  phy_addr: 1
+  power_pin: GPIO16
+  manual_ip:
+    static_ip: 192.168.1.36
+    gateway: !secret gateway
+    subnet: !secret subnet
+    dns1: !secret dns1
+
+dashboard_import:
+  package_import_url: github://ratgdo/esphome-ratgdo/v2board_esp32_d1_mini.yaml@main
+
+packages:
+  remote_package:
+    url: https://github.com/ratgdo/esphome-ratgdo
+    files: [base.yaml]
+    refresh: 1s
+
+# Sync time with Home Assistant.
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+
+api:
+  id: api_server
+
+ota:
+
+logger:

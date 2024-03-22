@@ -101,6 +101,82 @@
             value: "{{ brightness }}"
             entity_id: input_number.lamp_1_brightness
         - service: rest_command.set_lamp_1_brightness
+    floor_lamp:
+      unique_id: floor_lamp
+      friendly_name: Floor Lamp
+      level_template: "{{ states('input_number.floor_lamp_brightness') }}"
+      value_template: "{{ is_state('switch.floor_lamp', 'on') }}"
+      turn_on:
+        service: switch.turn_on
+        data:
+            entity_id: switch.floor_lamp
+      turn_off:
+        service: switch.turn_off
+        data:
+            entity_id: switch.floor_lamp
+      set_level:
+        - service: input_number.set_value
+          data:
+            value: "{{ brightness }}"
+            entity_id: input_number.floor_lamp_brightness
+        - service: rest_command.set_floor_lamp_brightness
+    floor_lamp_2:
+      unique_id: floor_lamp_2
+      friendly_name: Floor Lamp 2
+      level_template: "{{ states('input_number.floor_lamp_2_brightness') }}"
+      value_template: "{{ is_state('switch.floor_lamp_2', 'on') }}"
+      turn_on:
+        service: switch.turn_on
+        data:
+            entity_id: switch.floor_lamp_2
+      turn_off:
+        service: switch.turn_off
+        data:
+            entity_id: switch.floor_lamp_2
+      set_level:
+        - service: input_number.set_value
+          data:
+            value: "{{ brightness }}"
+            entity_id: input_number.floor_lamp_2_brightness
+        - service: rest_command.set_floor_lamp_2_brightness
+    black_cob:
+      unique_id: black_cob
+      friendly_name: Black COB
+      level_template: "{{ states('input_number.black_cob_brightness') }}"
+      value_template: "{{ is_state('switch.black_cob', 'on') }}"
+      turn_on:
+        service: switch.turn_on
+        data:
+            entity_id: switch.black_cob
+      turn_off:
+        service: switch.turn_off
+        data:
+            entity_id: switch.black_cob
+      set_level:
+        - service: input_number.set_value
+          data:
+            value: "{{ brightness }}"
+            entity_id: input_number.black_cob_brightness
+        - service: rest_command.set_black_cob_brightness
+    lines:
+      unique_id: lines
+      friendly_name: Lines
+      level_template: "{{ states('input_number.lines_brightness') }}"
+      value_template: "{{ is_state('switch.lines', 'on') }}"
+      turn_on:
+        service: switch.turn_on
+        data:
+            entity_id: switch.lines
+      turn_off:
+        service: switch.turn_off
+        data:
+            entity_id: switch.lines
+      set_level:
+        - service: input_number.set_value
+          data:
+            value: "{{ brightness }}"
+            entity_id: input_number.lines_brightness
+        - service: rest_command.set_lines_brightness
     lamp2:
       unique_id: lamp2
       friendly_name: Lamp 2
@@ -120,6 +196,63 @@
             value: "{{ brightness }}"
             entity_id: input_number.lamp_2_brightness
         - service: rest_command.set_lamp_2_brightness
+    charger1:
+      unique_id: charger1
+      friendly_name: Charger 1
+      level_template: "{{ states('input_number.charger_1_brightness') }}"
+      value_template: "{{ is_state('switch.charger_1', 'on') }}"
+      turn_on:
+        service: switch.turn_on
+        data:
+            entity_id: switch.charger_1
+      turn_off:
+        service: switch.turn_off
+        data:
+            entity_id: switch.charger_1
+      set_level:
+        - service: input_number.set_value
+          data:
+            value: "{{ brightness }}"
+            entity_id: input_number.chager_1_brightness
+        - service: rest_command.set_charger_1_brightness
+    charger2:
+      unique_id: charger2
+      friendly_name: Charger 2
+      level_template: "{{ states('input_number.charger_2_brightness') }}"
+      value_template: "{{ is_state('switch.charger_2', 'on') }}"
+      turn_on:
+        service: switch.turn_on
+        data:
+            entity_id: switch.charger_2
+      turn_off:
+        service: switch.turn_off
+        data:
+            entity_id: switch.charger_2
+      set_level:
+        - service: input_number.set_value
+          data:
+            value: "{{ brightness }}"
+            entity_id: input_number.charger_2_brightness
+        - service: rest_command.set_charger_2_brightness
+    cube:
+      unique_id: cube
+      friendly_name: Cube
+      level_template: "{{ states('input_number.cube_brightness') }}"
+      value_template: "{{ is_state('switch.cube', 'on') }}"
+      turn_on:
+        service: switch.turn_on
+        data:
+            entity_id: switch.cube
+      turn_off:
+        service: switch.turn_off
+        data:
+            entity_id: switch.cube
+      set_level:
+        - service: input_number.set_value
+          data:
+            value: "{{ brightness }}"
+            entity_id: input_number.cube_brightness
+        - service: rest_command.set_cube_brightness
     govee:
       unique_id: govee
       friendly_name: Govee

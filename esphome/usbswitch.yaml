@@ -5,14 +5,19 @@ substitutions:
 
 esphome:
   name: ${name}
-  platform: ESP8266
+
+esp8266:
+  early_pin_init: false
   board: esp01_1m
 
 wifi:
-  ssid: !secret ssid
-  password: !secret password
-  fast_connect: on
-  #output_power: 20dB
+  networks:
+  - ssid: !secret ssid
+    password: !secret password
+    bssid: 9C:05:D6:37:4A:30
+  fast_connect: off
+  power_save_mode: none
+  output_power: 20dB
   manual_ip:
     static_ip: ${static_ip}
     gateway: !secret gateway
@@ -22,15 +27,17 @@ wifi:
 captive_portal:
 logger:
 api:
+  #reboot_timeout: 0s
 ota:
 
-status_led:
-  pin:
-    number: GPIO16 # Blue LED
+#status_led:
+#  pin:
+#    number: GPIO16 # Blue LED
 
 switch:
   # Relay
   - platform: gpio
+    restore_mode: ALWAYS_ON
     id: relay
     pin: GPIO5
 
@@ -38,7 +45,7 @@ switch:
   - platform: gpio
     pin: GPIO14
     id: green_led
-    inverted: true # start on
+    inverted: false # start off
 
   # Switch template to link relay and green LED states
   # LED is on when relay is off
@@ -52,7 +59,7 @@ switch:
         return false;
       }
     turn_on_action:
-        - switch.turn_on:
+        - switch.turn_off:
             id: green_led
         - switch.turn_on:
             id: relay
@@ -62,13 +69,13 @@ switch:
         - switch.turn_off:
             id: relay
 
-# Button
-binary_sensor:
-  - platform: gpio
-    id: button
-    pin:
-      number: GPIO04
-      mode: INPUT_PULLUP
-      inverted: True
-    on_press:
-      - switch.toggle: "${name}_relay"
+## Button
+#binary_sensor:
+#  - platform: gpio
+#    id: button
+#    pin:
+#      number: GPIO04
+#      mode: INPUT_PULLUP
+#      inverted: True
+#    on_press:
+#      - switch.toggle: "${name}_relay"

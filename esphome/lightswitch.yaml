@@ -1,6 +1,8 @@
 esphome:
   name: lightswitch
-  platform: ESP8266
+
+esp8266:
+#  early_pin_init: false
   board: esp01_1m
 
 wifi:
@@ -8,7 +10,7 @@ wifi:
   password: !secret password
   fast_connect: on
   #output_power: 8.5dB
-  reboot_timeout: 0s
+  #reboot_timeout: 0s
   manual_ip:
     static_ip: ${static_ip}
     gateway: !secret gateway
@@ -19,6 +21,7 @@ web_server:
 captive_portal:
 logger:
 api:
+  #reboot_timeout: 0s
 ota:
 
 substitutions:
@@ -67,6 +70,19 @@ binary_sensor:
         - OFF for at least .1s
       then:
         - switch.toggle: relay1
+    - timing: # Triple press, reboot node
+        - ON for at most .3s
+        - OFF for at most .3s
+        - ON for at most .3s
+        - OFF for at most .3s
+        - ON for at most .3s
+        - OFF for at most .3s
+      then:
+        - button.press: restartButton
+
+button:
+  - platform: restart
+    id: restartButton
           
 light:
   - platform: rgb

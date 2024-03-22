@@ -24,6 +24,7 @@ logger:
 api:
 ota:
 bluetooth_proxy:
+esp32_ble_tracker:
 
 button:
   - platform: restart

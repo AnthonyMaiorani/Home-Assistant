@@ -15,6 +15,7 @@ room: # used for ha menu
     - switch.katchy
     - script.lofi
     - script.play_music
+    - script.stop_music
 home:
   name: Home
   entities: 

@@ -21,6 +21,8 @@ captive_portal:
 api:
 ota:
 
+web_server:
+
 # Disable logging over UART (required)
 logger:
   baud_rate: 0

@@ -1,0 +1,24 @@
+substitutions:
+  name: ratgdov25-60b6fc
+  friendly_name: RATGDOv2.5 60b6fc
+  static_ip: 192.168.1.84
+packages:
+  ratgdo.esphome: github://ratgdo/esphome-ratgdo/v25board_esp32_d1_mini.yaml@main
+esphome:
+  name: ${name}
+  name_add_mac_suffix: false
+  friendly_name: ${friendly_name}
+
+api:
+
+wifi:
+  ssid: !secret ssid
+  password: !secret password
+  fast_connect: on
+  #output_power: 8.5dB
+  power_save_mode: none
+  manual_ip:
+    static_ip: ${static_ip}
+    gateway: !secret gateway
+    subnet: !secret subnet
+    dns1: !secret dns1

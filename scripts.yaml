@@ -25,7 +25,9 @@ fan_off:
         - switch.lumi_lumi_plug_maus01_switch_2
         - light.shapes_483c
         - light.shapes_4948_2
-        - light.shapes_ee82_2
+        - light.shapes_007f
+        - light.shapes_4948
+        - light.shapes_ee82
     - data:
         brightness: 255
         effect: Color Loop
@@ -43,12 +45,12 @@ fan_off:
       - service: switch.turn_on
         data: {}
         target:
-          entity_id: switch.sonoff_s31_lite_zb_switch_2
+          entity_id: switch.goxlr
       else:
       - service: switch.turn_off
         data: {}
         target:
-          entity_id: switch.sonoff_s31_lite_zb_switch_2
+          entity_id: switch.goxlr
       enabled: false
     - service: light.turn_on
       data:
@@ -58,8 +60,26 @@ fan_off:
         - light.bed
         - light.wled
         - light.rope
-        - light.lamp2
-        - light.lamp1
+        - light.lines
+    - if:
+      - condition: state
+        entity_id: automation.nanoleaf_scene_changer_and_auto_brightness
+        state: 'off'
+      then:
+      - service: automation.turn_on
+        data: {}
+        target:
+          entity_id: automation.nanoleaf_scene_changer_and_auto_brightness
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 0
+          milliseconds: 500
+      - service: automation.trigger
+        data:
+          skip_condition: true
+        target:
+          entity_id: automation.nanoleaf_scene_changer_and_auto_brightness
   mode: restart
   icon: mdi:ceiling-light
 color_loop:
@@ -147,10 +167,8 @@ color_loop:
         - light.govee
         - light.shapes_483c
         - light.shapes_4948_2
-        - light.shapes_ee82_2
         - light.rope
-        - light.lamp1
-        - light.lamp2
+        - light.lines
     - service: switch.turn_on
       data: {}
       target:
@@ -165,12 +183,13 @@ color_loop:
       - service: switch.turn_on
         data: {}
         target:
-          entity_id: switch.sonoff_s31_lite_zb_switch_2
+          entity_id: switch.goxlr
       else:
       - service: switch.turn_off
         data: {}
         target:
-          entity_id: switch.sonoff_s31_lite_zb_switch_2
+          entity_id: switch.goxlr
+        enabled: false
     - if:
       - condition: sun
         after: sunrise
@@ -321,10 +340,8 @@ call:
         attribute: media_playlist
         state: Music
       then:
-      - service: script.turn_on
+      - service: script.lofi
         data: {}
-        target:
-          entity_id: script.lofi
       - service: media_player.volume_set
         data:
           volume_level: 0.07
@@ -332,7 +349,7 @@ call:
           entity_id:
           - media_player.spotify_anthony221121
       - repeat:
-          count: '5'
+          count: 100
           sequence:
           - service: media_player.turn_on
             data: {}
@@ -365,7 +382,7 @@ call:
           entity_id:
           - media_player.spotify_anthony221121
       - repeat:
-          count: '5'
+          count: 100
           sequence:
           - service: media_player.turn_on
             data: {}
@@ -430,7 +447,8 @@ call:
         - service: light.turn_off
           data: {}
           target:
-            entity_id: light.wled
+            entity_id:
+            - light.wled
         - service: light.turn_on
           data:
             brightness: 10
@@ -438,8 +456,7 @@ call:
             entity_id:
             - light.bed
             - light.rope
-            - light.lamp1
-            - light.lamp2
+            - light.lines
         - service: light.turn_on
           data:
             brightness: 5
@@ -451,7 +468,7 @@ call:
           target:
             entity_id:
             - switch.usb_hub
-            - switch.sonoff_s31_lite_zb_switch_2
+            - switch.goxlr
         - service: light.turn_on
           target:
             entity_id:
@@ -469,6 +486,13 @@ call:
             minutes: 0
             seconds: 0
             milliseconds: 500
+        - service: light.turn_on
+          data:
+            brightness: 23
+          target:
+            entity_id:
+            - light.shapes_4948_2
+            - light.shapes_483c
     - service: cover.close_cover
       data: {}
       target:
@@ -485,6 +509,7 @@ night:
       - script.call
       - script.color_loop
       - script.fan_off
+      - script.play_music
   - parallel:
     - service: light.turn_off
       data: {}
@@ -498,8 +523,9 @@ night:
         - light.wled
         - light.bed
         - light.rope
-        - light.lamp1
-        - light.lamp2
+        - light.lines
+        - light.shapes_483c
+        - light.shapes_4948_2
     - service: cover.close_cover
       data: {}
       target:
@@ -567,6 +593,14 @@ night:
             - light.shapes_4948
             - light.shapes_007f
             - light.wled
+            - light.shapes_4948_2
+            - light.shapes_483c
+            - light.lines
+            - light.rope
+            - light.govee
+            - light.bed
+            - light.light_switch
+            - light.light_switch_corner
         - delay:
             hours: 0
             minutes: 0
@@ -657,7 +691,7 @@ night:
         entity_id: binary_sensor.bed_occupancy
         state: 'on'
       - condition: state
-        entity_id: device_tracker.taylor
+        entity_id: person.taylor
         state: home
       - condition: state
         entity_id: switch.ac
@@ -785,12 +819,12 @@ night:
       - service: switch.turn_on
         data: {}
         target:
-          entity_id: switch.sonoff_s31_lite_zb_switch_2
+          entity_id: switch.goxlr
       else:
       - service: switch.turn_off
         data: {}
         target:
-          entity_id: switch.sonoff_s31_lite_zb_switch_2
+          entity_id: switch.goxlr
   alias: Night
   mode: restart
   icon: mdi:weather-night
@@ -815,8 +849,7 @@ morning:
         - light.wled
         - light.bed
         - light.rope
-        - light.lamp1
-        - light.lamp2
+        - light.lines
     - data:
         brightness: 255
         effect: Color Loop
@@ -907,7 +940,9 @@ morning:
         - switch.lumi_lumi_plug_maus01_switch_2
         - light.shapes_483c
         - light.shapes_4948_2
-        - light.shapes_ee82_2
+        - light.shapes_007f
+        - light.shapes_4948
+        - light.shapes_ee82
     - if:
       - condition: sun
         after: sunrise
@@ -964,12 +999,13 @@ morning:
       - service: switch.turn_on
         data: {}
         target:
-          entity_id: switch.sonoff_s31_lite_zb_switch_2
+          entity_id: switch.goxlr
       else:
       - service: switch.turn_off
         data: {}
         target:
-          entity_id: switch.sonoff_s31_lite_zb_switch_2
+          entity_id: switch.goxlr
+        enabled: false
     - if:
       - condition: and
         conditions:
@@ -1031,6 +1067,25 @@ morning:
       data: {}
       target:
         entity_id: switch.light_switch_relay
+    - if:
+      - condition: state
+        entity_id: automation.nanoleaf_scene_changer_and_auto_brightness
+        state: 'off'
+      then:
+      - service: automation.turn_on
+        data: {}
+        target:
+          entity_id: automation.nanoleaf_scene_changer_and_auto_brightness
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 0
+          milliseconds: 500
+      - service: automation.trigger
+        data:
+          skip_condition: true
+        target:
+          entity_id: automation.nanoleaf_scene_changer_and_auto_brightness
   mode: single
   icon: mdi:white-balance-sunny
 start_car:
@@ -1182,7 +1237,7 @@ lofi:
     then:
     - service: hassio.addon_restart
       data:
-        addon: 63120367_homepod_connect
+        addon: 4b3d1287_homepod_connect_dev
     - delay:
         hours: 0
         minutes: 0
@@ -1260,7 +1315,7 @@ lofi:
       - media_player.owntone_output_kitchen_left
       - media_player.owntone_output_kitchen_right
       - media_player.owntone_output_front_homepod
-      - media_player.owntone_output_danas_nightstand
+      - media_player.owntone_output_owntone_output_front_left
       - media_player.kitchen_speakers
       - media_player.owntone_output_soundbar
       - media_player.owntone_output_guest_right
@@ -1314,7 +1369,7 @@ lofi:
     then:
     - service: hassio.addon_restart
       data:
-        addon: 63120367_homepod_connect
+        addon: 4b3d1287_homepod_connect_dev
     - delay:
         hours: 0
         minutes: 0
@@ -1420,8 +1475,8 @@ lofi:
   - service: media_player.volume_set
     data:
       volume_level: "{% if states('binary_sensor.bed_occupancy') is defined and is_state('binary_sensor.bed_occupancy',
-        'on') %}\n    {% set vol =  0.10 %}\n{% elif now().hour >= 23 or now().hour
-        < 6 %}\n    {% set vol = 0.10 %}\n{% else %}\n    {% set vol = 0.19 %}\n{%
+        'on') %}\n    {% set vol =  0.08 %}\n{% elif now().hour >= 23 or now().hour
+        < 6 %}\n    {% set vol = 0.08 %}\n{% else %}\n    {% set vol = 0.13 %}\n{%
         endif %} {{ vol }}\n"
     target:
       entity_id:
@@ -1454,6 +1509,7 @@ lofi:
           seconds: 1
           milliseconds: 0
   - service: media_player.repeat_set
+    continue_on_error: true
     data:
       repeat: all
     target:
@@ -1463,7 +1519,8 @@ lofi:
     target:
       entity_id: media_player.spotify_anthony221121
   - parallel:
-    - if:
+    - alias: Turn on Desk Speakers
+      if:
       - condition: state
         entity_id: media_player.owntone_output_anthony_s_desk
         state: 'off'
@@ -1509,14 +1566,36 @@ lofi:
                   '
               target:
                 entity_id: media_player.owntone_output_anthony_s_desk
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 2
+            milliseconds: 0
+        - repeat:
+            until:
+            - condition: template
+              value_template: '{{ state_attr(''media_player.owntone_output_anthony_s_desk'',
+                ''volume_level'') == state_attr(''media_player.spotify_anthony221121'',
+                ''volume_level'') }}
+
+                '
+            sequence:
+            - service: media_player.volume_set
+              data:
+                volume_level: '{{ state_attr(''media_player.spotify_anthony221121'',
+                  ''volume_level'') }}
+
+                  '
+              target:
+                entity_id: media_player.owntone_output_anthony_s_desk
         else:
         - service: automation.trigger
           data:
             skip_condition: true
           target:
             entity_id: automation.reboot_airport
-      alias: Turn on Desk Speakers
-    - if:
+    - alias: Turn on Nightstand Speaker
+      if:
       - condition: state
         state: 'off'
         entity_id: media_player.owntone_output_anthony_s_nightstand
@@ -1549,7 +1628,72 @@ lofi:
               minutes: 0
               seconds: 1
               milliseconds: 0
-      alias: Turn on Nightstand Speaker
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 2
+          milliseconds: 0
+      - repeat:
+          until:
+          - condition: template
+            value_template: "{{ state_attr('media_player.owntone_output_anthony_s_nightstand',
+              'volume_level') == \n2 * (state_attr('media_player.spotify_anthony221121',
+              'volume_level')) \nor state_attr('media_player.owntone_output_anthony_s_nightstand',
+              'volume_level') == 1}}\n"
+          - condition: state
+            entity_id: media_player.owntone_output_anthony_s_nightstand
+            state: 'on'
+          sequence:
+          - service: media_player.turn_on
+            data: {}
+            target:
+              entity_id: media_player.owntone_output_anthony_s_nightstand
+          - service: media_player.volume_set
+            data:
+              volume_level: '{{ 2 * (state_attr(''media_player.spotify_anthony221121'',
+                ''volume_level'')) }}
+
+                '
+            target:
+              entity_id: media_player.owntone_output_anthony_s_nightstand
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 2
+          milliseconds: 0
+      - repeat:
+          until:
+          - condition: template
+            value_template: "{{ state_attr('media_player.owntone_output_anthony_s_nightstand',
+              'volume_level') == \n2 * (state_attr('media_player.spotify_anthony221121',
+              'volume_level')) \nor state_attr('media_player.owntone_output_anthony_s_nightstand',
+              'volume_level') == 1}}\n"
+          - condition: state
+            entity_id: media_player.owntone_output_anthony_s_nightstand
+            state: 'on'
+          sequence:
+          - service: media_player.turn_on
+            data: {}
+            target:
+              entity_id: media_player.owntone_output_anthony_s_nightstand
+          - service: media_player.volume_set
+            data:
+              volume_level: '{{ 2 * (state_attr(''media_player.spotify_anthony221121'',
+                ''volume_level'')) }}
+
+                '
+            target:
+              entity_id: media_player.owntone_output_anthony_s_nightstand
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
     - alias: Turn on Bathroom Speaker
       if:
       - condition: state
@@ -1790,7 +1934,7 @@ lofi:
     then:
     - service: hassio.addon_restart
       data:
-        addon: 63120367_homepod_connect
+        addon: 4b3d1287_homepod_connect_dev
     - delay:
         hours: 0
         minutes: 0
@@ -1813,7 +1957,7 @@ lofi:
         - media_player.owntone_output_garage_homepod
         - media_player.owntone_output_guest_left
         - media_player.owntone_output_guest_right
-        - media_player.owntone_output_danas_nightstand
+        - media_player.owntone_output_owntone_output_front_left
         - media_player.owntone_output_soundbar
     - wait_for_trigger:
       - platform: state
@@ -1845,7 +1989,7 @@ lofi:
             - media_player.owntone_output_garage_homepod
             - media_player.owntone_output_guest_left
             - media_player.owntone_output_guest_right
-            - media_player.owntone_output_danas_nightstand
+            - media_player.owntone_output_owntone_output_front_left
             - media_player.owntone_output_soundbar
     - service: script.turn_on
       data: {}
@@ -1904,7 +2048,7 @@ play_music:
       - media_player.owntone_output_kitchen_left
       - media_player.owntone_output_kitchen_right
       - media_player.owntone_output_front_homepod
-      - media_player.owntone_output_danas_nightstand
+      - media_player.owntone_output_owntone_output_front_left
       - media_player.kitchen_speakers
       - media_player.owntone_output_soundbar
       - media_player.owntone_output_guest_right
@@ -1958,7 +2102,7 @@ play_music:
     then:
     - service: hassio.addon_restart
       data:
-        addon: 63120367_homepod_connect
+        addon: 4b3d1287_homepod_connect_dev
     - delay:
         hours: 0
         minutes: 0
@@ -2310,13 +2454,17 @@ play_music:
           skip_condition: false
         target:
           entity_id: automation.bathroom_music
-    - if:
+    - alias: Turn on other speakers if nobody else home
+      if:
       - condition: state
         entity_id: binary_sensor.bed_occupancy
         state: 'off'
       - condition: state
         entity_id: binary_sensor.home_alone
         state: 'on'
+      - condition: state
+        entity_id: input_boolean.showering
+        state: 'off'
       then:
       - parallel:
         - if:
@@ -2487,7 +2635,6 @@ play_music:
         alias: Turn on other speakers
       else: []
       enabled: true
-      alias: Turn on other speakers if nobody else home
   - alias: If Owntone not playing, restart Addon and start over
     if:
     - condition: or
@@ -2511,7 +2658,7 @@ play_music:
     then:
     - service: hassio.addon_restart
       data:
-        addon: 63120367_homepod_connect
+        addon: 4b3d1287_homepod_connect_dev
     - delay:
         hours: 0
         minutes: 0
@@ -2534,7 +2681,7 @@ play_music:
         - media_player.owntone_output_garage_homepod
         - media_player.owntone_output_guest_left
         - media_player.owntone_output_guest_right
-        - media_player.owntone_output_danas_nightstand
+        - media_player.owntone_output_owntone_output_front_left
         - media_player.owntone_output_soundbar
     - wait_for_trigger:
       - platform: state
@@ -2566,7 +2713,7 @@ play_music:
             - media_player.owntone_output_garage_homepod
             - media_player.owntone_output_guest_left
             - media_player.owntone_output_guest_right
-            - media_player.owntone_output_danas_nightstand
+            - media_player.owntone_output_owntone_output_front_left
             - media_player.owntone_output_soundbar
     - service: script.turn_on
       data: {}
@@ -2586,7 +2733,7 @@ stop_music:
       - script.play_music
   - service: hassio.addon_restart
     data:
-      addon: 63120367_homepod_connect
+      addon: 4b3d1287_homepod_connect_dev
   - delay:
       hours: 0
       minutes: 0
@@ -2609,7 +2756,7 @@ stop_music:
       - media_player.owntone_output_garage_homepod
       - media_player.owntone_output_guest_left
       - media_player.owntone_output_guest_right
-      - media_player.owntone_output_danas_nightstand
+      - media_player.owntone_output_front_left
       - media_player.owntone_output_soundbar
       - media_player.guest_speakers
       - media_player.kitchen_speakers

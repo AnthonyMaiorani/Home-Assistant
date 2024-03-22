@@ -8,6 +8,12 @@
           media_content_id: "\"cancel all my alarms today\""
         target:
           entity_id: media_player.anthony_s_echo_show
+  - name: "Trigger connected to car"
+    unique_id: trigger_connected_to_car
+    press:
+      - service: automation.trigger
+        target: 
+          entity_id: automation.connected_to_car
   - name: "Cancel next alarm"
     unique_id: alexa_cancel_next_alarm
     press:
@@ -92,6 +98,45 @@
       {{ is_state('sensor.alarm_motion', 'O') }}
     unique_id: master_hall_motion
 - sensor:
+  - name: "Shade Height"
+    unique_id: shade_height
+    state: >
+      {% set deg2rad = pi/180 %}
+
+      {%- macro norm(x, min, max) %}
+        {{ (x - min) / (max - min) }}
+      {%- endmacro %}
+
+      {%- macro h2perc(x) %}
+        {{ 100 * float(norm(x, h_min, h_max)) }}
+      {%- endmacro %}
+
+      {%- macro clipv(x, x_min, x_max) %}
+        {{ max(min(x, x_max), x_min) }}
+      {%- endmacro %}
+
+      {% set win_azi = 96 %}
+      {% set d = 0.3 %}
+      {% set h_max = 1.22 %}
+      {% set h_min = 0 %}
+
+      {% set fov = deg2rad * 90 %}
+
+      {% set sun_azi = state_attr('sun.sun', 'azimuth') %}
+      {% set sun_ele = state_attr('sun.sun', 'elevation') %}
+
+      {% set def_h = h_max %}
+      
+      {% set alpha = deg2rad * sun_ele %}
+      {% set gamma = deg2rad * (win_azi - sun_azi) %}    
+
+      {% set h = (d / cos(gamma)) * tan(alpha) %}
+
+      {% if (alpha > 0) and (gamma | abs < fov) %}
+          {{ clipv(h2perc(h) | round(0) | int , 0, 100) }}
+      {% else %}  
+          {{ clipv(h2perc(def_h) | round(0) | int , 0, 100) }}
+      {% endif %}
   - name: "Ecobee Current Action"
     unique_id: ecobee_current_action
     state: >
@@ -103,9 +148,9 @@
       or not is_state('switch.ac', "on") %} unknown
       {% elif is_state("input_boolean.ac_boost", "on") -%} 61 
       {% elif is_state("binary_sensor.bedroom_door", "on") and is_state("person.riana", "home") -%} 75
-      {% elif is_state("switch.desktop", "on") and not is_state("binary_sensor.bed_occupancy", "on") -%} 74
-      {% elif is_state("light.fan_lights", "on") -%} 73 
-      {%- else -%} 69
+      {% elif is_state("switch.desktop", "on") and not is_state("binary_sensor.bed_occupancy", "on") -%} 73
+      {% elif is_state("light.fan_lights", "on") -%} 72 
+      {%- else -%} 67
       {%- endif %}
   - name: "Alarm Display"
     unique_id: alarm_display
@@ -123,7 +168,7 @@
     state: >
       {# Off #}
       {% if (not states('input_select.anthony') in ['Just Arrived', 'Home'] and not states('person.taylor', 'home')) or
-      ( is_state('light.bedroom_lights', 'off') and is_state('light.wled', 'off')) -%} 0
+      ( is_state('light.bedroom_lights', 'off') and is_state('light.govee', 'off')) -%} 0
       {# In call with color loop #}
       {% elif is_state('binary_sensor.desktop_power', 'on') and is_state('binary_sensor.webcam', 'on') and 
       is_state_attr('light.fan_lights', 'effect', 'Color Loop') -%} 178
@@ -131,6 +176,10 @@
       {% elif is_state('binary_sensor.desktop_power', 'on') and
       is_state('binary_sensor.webcam', 'on') and
       is_state('light.fan_lights', 'on') -%} 204
+      {# In call with lights off #}
+      {% elif is_state('binary_sensor.desktop_power', 'on') and
+      is_state('binary_sensor.webcam', 'on') and not
+      is_state('light.fan_lights', 'on') -%} 102
       {# Night call #}
       {% elif not is_state('light.fan_lights', 'on') and not is_state('light.wled', 'on') and 
       is_state('light.govee', 'on') and is_state('light.bed', 'on') %} 23
@@ -172,13 +221,18 @@
   - platform: state
     entity_id:
       - binary_sensor.webcam
-  # - platform: state
-  #   entity_id:
-  #     - media_player.spotify_anthony221121
-  #   to: 
-  #     - "playing"
-  #     - "idle"
-  #     - "paused"
+#  - platform: state
+#    entity_id:
+#      - media_player.spotify_anthony221121
+#    to: 
+#      - "playing"
+#      - "idle"
+#      - "paused"
+  - platform: state
+    entity_id:
+      - binary_sensor.macbook_air_camera_in_use
+    from: "off"
+    to: "on"
   - platform: state
     entity_id:
       - light.shapes_007f
@@ -225,7 +279,7 @@
         {% set defaultScenes = ['Cosmos', 'Dynamic Blue', 'Ocean', 
         'Vaporwave', 'Rainbow', 'energy'] %}
         {% set nightScenes = ['moonlight', 'Lightscape', 'Night light',
-        'Pink To Blue', 'Waterfall', 'Playstation Blue', 'Bedtime', 
+        'Pink To Blue', 'Playstation Blue', 'Bedtime', 
         'Aurora magic', 'Holodek'] %}
         {% set holidayScenes = ['Christmas', 'Christmas Candy Cane', 
         'Christmas Flow', 'Christmas Tree'] %}

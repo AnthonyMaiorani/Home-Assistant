@@ -5,9 +5,7 @@ packages:
 esphome:
   name: ${name}
   name_add_mac_suffix: false
-api:
-  encryption:
-    key: himItqURcrGc1HVwwpx4NU3MMiQHSV04wMjjSHf8cmM=
+
 
 
 wifi:

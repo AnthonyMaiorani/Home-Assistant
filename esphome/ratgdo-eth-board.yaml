@@ -1,0 +1,71 @@
+---
+substitutions:
+  id_prefix: ratgdov25
+  friendly_name: "RATGDOv2.5"
+  uart_tx_pin: D1
+  uart_rx_pin: D2
+  input_obst_pin: D7
+  status_door_pin: GPIO0
+  status_obstruction_pin: GPIO25
+  dry_contact_open_pin: GPIO32
+  dry_contact_close_pin: GPIO4
+  dry_contact_light_pin: GPIO14
+  static_ip: 192.168.1.150
+
+web_server:
+
+esphome:
+  name: ${id_prefix}
+  friendly_name: ${friendly_name}
+  name_add_mac_suffix: true
+  project:
+    name: ratgdo.esphome
+    version: "2.5"
+
+esp32:
+  board: wemos_d1_mini32
+
+dashboard_import:
+  package_import_url: github://ratgdo/esphome-ratgdo/v25board_esp32_d1_mini.yaml@main
+
+packages:
+  remote_package:
+    url: https://github.com/ratgdo/esphome-ratgdo
+    files: [base.yaml]
+    refresh: 1s
+
+# Sync time with Home Assistant.
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+
+api:
+  id: api_server
+
+ota:
+
+logger:
+
+#ethernet:
+#  type: LAN8720
+#  mdc_pin: GPIO23
+#  mdio_pin: GPIO18
+#  clk_mode: GPIO17_OUT
+#  phy_addr: 0
+#  power_pin: GPIO5
+#  manual_ip:
+#    static_ip: ${static_ip}
+#    gateway: !secret gateway
+#    subnet: !secret subnet
+#    dns1: !secret dns1
+
+wifi:
+  ssid: !secret ssid
+  password: !secret password
+  fast_connect: on
+  #output_power: 8.5dB
+  manual_ip:
+    static_ip: ${static_ip}
+    gateway: !secret gateway
+    subnet: !secret subnet
+    dns1: !secret dns1

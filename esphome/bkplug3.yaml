@@ -24,7 +24,7 @@ ota:
 #    id: homeassistant_time
 
 substitutions:
-  name: "Dana's South Color Rope"
+  name: "Dana's South Incandescent Rope"
   static_ip: 192.168.1.145
   restore_mode: RESTORE_DEFAULT_ON
 #  current_res: "0.0019"

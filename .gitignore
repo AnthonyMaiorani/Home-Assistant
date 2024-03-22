@@ -5,9 +5,8 @@
 !*.yaml
 !.gitignore
 !*.md
+!*.jinja
 !/esphome
-!/custom_components
-!/custom_components/**
 !/blueprints/**
 !/blueprints/
 !packages
@@ -24,6 +23,7 @@
 !/themes/ios-themes/*
 
 # Ignore folders.
+**/custom_components/*
 .storage
 .cloud
 node-red

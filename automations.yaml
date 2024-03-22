@@ -214,7 +214,7 @@
       - condition: or
         conditions:
         - condition: state
-          entity_id: device_tracker.taylor
+          entity_id: person.taylor
           state: home
         - condition: state
           entity_id: input_select.anthony
@@ -238,7 +238,7 @@
           entity_id: timer.ac
       - if:
         - condition: state
-          entity_id: device_tracker.taylor
+          entity_id: person.taylor
           state: home
         - condition: state
           entity_id: binary_sensor.bed_occupancy
@@ -351,27 +351,35 @@
     - service: automation.trigger
       target:
         entity_id: automation.adjust_kitchen_homepod_volume
+      data:
+        skip_condition: true
+    - service: homeassistant.reload_config_entry
+      data: {}
+      target:
+        entity_id:
+        - media_player.owntone_server
+        - media_player.owntone_output_bathroom
+        - media_player.owntone_output_anthony_s_desk
+        - media_player.owntone_output_kitchen_left
+        - media_player.owntone_output_kitchen_right
+        - media_player.owntone_output_front_homepod
+        - media_player.owntone_output_living_room_tv
+        - media_player.owntone_output_master_bedroom_tv
+        - media_player.owntone_output_anthony_s_nightstand
+        - media_player.owntone_output_garage_homepod
+        - media_player.owntone_output_guest_left
+        - media_player.owntone_output_guest_right
+        - media_player.owntone_output_front_left
+        - media_player.owntone_output_guest_room_tv
+        - media_player.owntone_output_soundbar
+    - service: button.press
+      target:
+        entity_id: button.desktop_pc_satellite_restart_iotlink
+      data: {}
   - service: automation.turn_on
     data: {}
     target:
       entity_id: automation.ac_controls
-  - service: homeassistant.reload_config_entry
-    data: {}
-    target:
-      entity_id:
-      - media_player.owntone_server
-      - media_player.owntone_output_bathroom
-      - media_player.owntone_output_anthony_s_desk
-      - media_player.owntone_output_front
-      - media_player.owntone_output_kitchen_left
-      - media_player.owntone_output_kitchen_right
-      - media_player.owntone_output_front_homepod
-      - media_player.owntone_output_living_room_tv
-      - media_player.owntone_output_master_bedroom_tv
-      - media_player.owntone_output_anthony_s_nightstand
-      - media_player.owntone_output_garage_homepod
-      - media_player.owntone_output_guest_left
-      - media_player.owntone_output_guest_right
   - if:
     - condition: state
       entity_id: media_player.owntone_output_bathroom
@@ -384,6 +392,49 @@
       data: {}
       target:
         entity_id: media_player.owntone_output_bathroom
+  - if:
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: input_select.anthony
+        state: Home
+      - condition: state
+        entity_id: input_select.anthony
+        state: Just Arrived
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: media_player.spotify_anthony221121
+        state: playing
+      - condition: state
+        entity_id: media_player.spotify_anthony221121
+        state: unavailable
+    then:
+    - service: script.turn_on
+      target:
+        entity_id: script.lofi
+      data: {}
+  - parallel:
+    - service: browser_mod.refresh
+      data:
+        browser_id:
+        - 2c8b769e-f4d4e0e9
+      alias: refresh doorbell cam tablet
+    - alias: refresh medicine tablet
+      service: browser_mod.refresh
+      data:
+        browser_id:
+        - 92e9f5b7-92d2f3c4
+    - alias: refresh food tablet
+      service: browser_mod.refresh
+      data:
+        browser_id:
+        - b8229aec-8e77c6cd
+    - alias: refresh bedroom tablet
+      service: browser_mod.refresh
+      data:
+        browser_id:
+        - f1e02257-8ed3a647
   initial_state: true
   mode: single
 - id: '1620642299524'
@@ -429,7 +480,7 @@
         entity_id: person.anthony
         state: unknown
     - condition: state
-      entity_id: device_tracker.taylor
+      entity_id: person.taylor
       state: home
   action:
   - parallel:
@@ -844,6 +895,10 @@
             - media_player.owntone_output_kitchen_left
             - media_player.owntone_output_kitchen_right
             - media_player.kitchen_speakers
+        - service: automation.turn_on
+          target:
+            entity_id: automation.bed_occupancy
+          data: {}
     default: []
   mode: single
 - id: '1627966300438'
@@ -852,11 +907,13 @@
   trigger:
   - platform: sun
     event: sunset
-    offset: +00:30:00
+    offset: +00:25:00
   condition:
-  - condition: state
-    entity_id: cover.bedroom_blinds
-    state: open
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: cover.bedroom_blinds
+      state: closed
   action:
   - service: cover.close_cover
     data: {}
@@ -919,10 +976,16 @@
             entity_id: sensor.bedroom_humidity
             above: 55
           alias: Hot
-        - condition: numeric_state
-          entity_id: climate.home
-          attribute: temperature
-          above: 73
+        - condition: or
+          conditions:
+          - condition: numeric_state
+            entity_id: climate.home
+            attribute: temperature
+            above: 70
+          - condition: numeric_state
+            entity_id: weather.dark_sky
+            attribute: temperature
+            above: 65
         then:
         - service: switch.turn_on
           data: {}
@@ -1291,22 +1354,24 @@
       hours: 0
       minutes: 10
       seconds: 0
-  - platform: zone
-    entity_id: person.riana
-    zone: zone.home
-    event: enter
-    id: Just Arrived
-  - platform: zone
-    entity_id: person.riana
-    zone: zone.home
-    event: leave
-    id: Just Left
   - platform: homeassistant
     event: start
     id: startup
   - platform: event
     event_type: automation_reloaded
     id: reloaded
+  - platform: state
+    entity_id:
+    - person.riana
+    from: not_home
+    to: home
+    id: Just Arrived
+  - platform: state
+    entity_id:
+    - person.riana
+    from: home
+    to: not_home
+    id: Just Left
   condition: []
   action:
   - choose:
@@ -1364,7 +1429,8 @@
           entity_id: input_select.riana
     - conditions:
       - condition: trigger
-        id: Just Arrived
+        id:
+        - Just Arrived
       sequence:
       - service: input_select.select_option
         data:
@@ -1373,7 +1439,8 @@
           entity_id: input_select.riana
     - conditions:
       - condition: trigger
-        id: Just Left
+        id:
+        - Just Left
       sequence:
       - service: input_select.select_option
         data:
@@ -1626,6 +1693,7 @@
   - platform: state
     entity_id:
     - light.shapes_007f
+    - light.shapes_483c
     from: unavailable
     to: 'on'
     id: desk available
@@ -1639,12 +1707,13 @@
     platform: event
   - platform: state
     entity_id:
-    - binary_sensor.desktop_power
+    - switch.desktop
     from: 'on'
     to: 'off'
   - platform: state
     entity_id:
     - light.shapes_4948
+    - light.shapes_4948_2
     from: unavailable
     to: 'on'
     id: corner available
@@ -1749,9 +1818,16 @@
       - desk available
       - corner available
       - vertical available
-    - condition: state
-      entity_id: light.bedroom_lights
-      state: 'off'
+    - condition: and
+      conditions:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: light.bedroom_lights
+          state: 'on'
+      - condition: state
+        entity_id: switch.light_switch_relay
+        state: 'on'
     then:
     - service: light.turn_off
       data: {}
@@ -1760,7 +1836,6 @@
         - light.shapes_007f
         - light.shapes_ee82
         - light.shapes_4948
-        - light.shapes_ee82_2
         - light.shapes_4948_2
     - stop: ''
   - condition: state
@@ -1936,37 +2011,43 @@
         until:
         - condition: template
           value_template: "{{ \n(state_attr('light.shapes_483c', \"brightness\")|int(0)
-            - states('sensor.nanoleaf_auto_brightness')|int(0))|abs <= 2 \nand \n(state_attr('light.shapes_ee82_2',
+            - states('sensor.nanoleaf_auto_brightness')|int(0))|abs <= 2 \nand \n(state_attr('light.shapes_ee82',
             \"brightness\")|int(0) - states('sensor.nanoleaf_auto_brightness')|int(0))|abs
             <= 2 \nand\n(state_attr('light.shapes_4948_2', \"brightness\")|int(0)
             - states('sensor.nanoleaf_auto_brightness')|int(0))|abs <= 2 \n}}"
         sequence:
-        - parallel:
-          - if:
-            - condition: state
-              entity_id: light.shapes_483c
-              state: 'on'
-            - condition: template
-              value_template: '{{ (state_attr(''light.shapes_483c'', "brightness")|int
-                - states(''sensor.nanoleaf_auto_brightness'')|int)|abs >= 2 }}'
-              alias: brightness incorrect
+        - alias: set brightness
+          parallel:
+          - alias: set desk lights brightness
+            if:
+            - alias: brightness incorrect
+              condition: template
+              value_template: '{{ (state_attr(''light.shapes_007f'', "brightness")|int(0)
+                - states(''sensor.nanoleaf_auto_brightness'')|int(0))|abs >= 2 }}'
+            - condition: not
+              conditions:
+              - condition: state
+                entity_id: light.shapes_007f
+                state: unavailable
             then:
             - service: light.turn_on
               continue_on_error: true
               target:
                 entity_id:
-                - light.shapes_483c
+                - light.shapes_007f
               data:
                 brightness: '{{ states(''sensor.nanoleaf_auto_brightness'') }}'
-            alias: set desk lights brightness
-          - if:
-            - condition: state
-              entity_id: light.shapes_4948_2
-              state: 'on'
-            - condition: template
-              value_template: '{{ (state_attr(''light.shapes_4948_2'', "brightness")|int
-                - states(''sensor.nanoleaf_auto_brightness'')|int)|abs >= 2 }}'
-              alias: brightness incorrect
+          - alias: set corner lights brightness
+            if:
+            - alias: brightness incorrect
+              condition: template
+              value_template: '{{ (state_attr(''light.shapes_4948_2'', "brightness")|int(0)
+                - states(''sensor.nanoleaf_auto_brightness'')|int(0))|abs >= 2 }}'
+            - condition: not
+              conditions:
+              - condition: state
+                entity_id: light.shapes_4948_2
+                state: unavailable
             then:
             - service: light.turn_on
               continue_on_error: true
@@ -1975,25 +2056,25 @@
                 - light.shapes_4948_2
               data:
                 brightness: '{{ states(''sensor.nanoleaf_auto_brightness'') }}'
-            alias: set corner lights brightness
-          - if:
-            - condition: state
-              entity_id: light.shapes_ee82_2
-              state: 'on'
-            - condition: template
-              value_template: '{{ (state_attr(''light.shapes_ee82_2'', "brightness")|int
-                - states(''sensor.nanoleaf_auto_brightness'')|int)|abs >= 2 }}'
-              alias: brightness incorrect
+          - alias: set vertical lights brightness
+            if:
+            - alias: brightness incorrect
+              condition: template
+              value_template: '{{ (state_attr(''light.shapes_ee82'', "brightness")|int(0)
+                - states(''sensor.nanoleaf_auto_brightness'')|int(0))|abs >= 2 }}'
+            - condition: not
+              conditions:
+              - condition: state
+                entity_id: light.shapes_ee82
+                state: unavailable
             then:
             - service: light.turn_on
               continue_on_error: true
               target:
                 entity_id:
-                - light.shapes_ee82_2
+                - light.shapes_ee82
               data:
                 brightness: '{{ states(''sensor.nanoleaf_auto_brightness'') }}'
-            alias: set vertical lights brightness
-          alias: set brightness
         - delay:
             hours: 0
             minutes: 0
@@ -2039,14 +2120,49 @@
           value_template: '{{ is_state_attr(''light.govee'', ''effect'', states(''sensor.nanoleaf_scene''))
             }}'
           alias: govee effect set
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: light.shapes_483c
+            state: 'on'
+          - condition: state
+            entity_id: light.shapes_4948_2
+            state: 'on'
+          - condition: state
+            entity_id: light.shapes_4948
+            state: 'on'
+          - condition: state
+            entity_id: light.shapes_007f
+            state: 'on'
+          - condition: state
+            entity_id: light.shapes_ee82
+            state: 'on'
     - repeat:
         count: 7
         sequence:
-        - choose:
+        - alias: set govee brightness
+          choose:
           - conditions:
             - condition: state
               entity_id: light.fan_lights
               state: 'on'
+            - condition: or
+              conditions:
+              - condition: state
+                entity_id: light.shapes_483c
+                state: 'on'
+              - condition: state
+                entity_id: light.shapes_4948_2
+                state: 'on'
+              - condition: state
+                entity_id: light.shapes_4948
+                state: 'on'
+              - condition: state
+                entity_id: light.shapes_007f
+                state: 'on'
+              - condition: state
+                entity_id: light.shapes_ee82
+                state: 'on'
             sequence:
             - service: light.turn_on
               target:
@@ -2086,6 +2202,23 @@
                 - condition: state
                   entity_id: switch.brtv
                   state: 'on'
+            - condition: or
+              conditions:
+              - condition: state
+                entity_id: light.shapes_483c
+                state: 'on'
+              - condition: state
+                entity_id: light.shapes_4948_2
+                state: 'on'
+              - condition: state
+                entity_id: light.shapes_4948
+                state: 'on'
+              - condition: state
+                entity_id: light.shapes_007f
+                state: 'on'
+              - condition: state
+                entity_id: light.shapes_ee82
+                state: 'on'
             sequence:
             - service: light.turn_on
               target:
@@ -2093,7 +2226,6 @@
                 - light.govee
               data:
                 brightness: 5
-          alias: set govee brightness
         - delay:
             hours: 0
             minutes: 0
@@ -2105,8 +2237,7 @@
     target:
       entity_id: automation.nanoleaf_automation_reset
     enabled: false
-  mode: parallel
-  max: 99999
+  mode: restart
 - id: '1661505890362'
   alias: Spotify Refresh
   description: ''
@@ -2167,7 +2298,7 @@
       - delay:
           hours: 0
           minutes: 0
-          seconds: 5
+          seconds: 15
           milliseconds: 0
   mode: single
 - id: '1661880635465'
@@ -2436,6 +2567,17 @@
                   critical: 1
                   volume: 0.3
         else:
+        - condition: or
+          conditions:
+          - condition: numeric_state
+            entity_id: sensor.home_anthony_distance
+            below: 600
+          - condition: state
+            entity_id: input_select.anthony
+            state: Home
+          - condition: state
+            entity_id: input_select.anthony
+            state: Just Arrived
         - service: notify.anthonys_devices
           data:
             message: Lola hasn't eaten breakfast yet
@@ -2477,6 +2619,17 @@
                   critical: 1
                   volume: 0.3
         else:
+        - condition: or
+          conditions:
+          - condition: numeric_state
+            entity_id: sensor.home_anthony_distance
+            below: 600
+          - condition: state
+            entity_id: input_select.anthony
+            state: Home
+          - condition: state
+            entity_id: input_select.anthony
+            state: Just Arrived
         - service: notify.anthonys_devices
           data:
             message: Lola hasn't eaten dinner yet
@@ -2613,6 +2766,17 @@
                   critical: 1
                   volume: 0.3
         else:
+        - condition: or
+          conditions:
+          - condition: numeric_state
+            entity_id: sensor.home_anthony_distance
+            below: 600
+          - condition: state
+            entity_id: input_select.anthony
+            state: Home
+          - condition: state
+            entity_id: input_select.anthony
+            state: Just Arrived
         - service: notify.anthonys_devices
           data:
             message: It's time to feed Lola dinner
@@ -2684,6 +2848,17 @@
             message: clear_notification
             data:
               tag: dog-food
+        - condition: or
+          conditions:
+          - condition: numeric_state
+            entity_id: sensor.home_anthony_distance
+            below: 600
+          - condition: state
+            entity_id: input_select.anthony
+            state: Home
+          - condition: state
+            entity_id: input_select.anthony
+            state: Just Arrived
         - service: notify.anthonys_devices
           data:
             message: It's time to feed Lola breakfast
@@ -2701,6 +2876,9 @@
   trigger:
   - platform: time_pattern
     seconds: /2
+  - platform: state
+    entity_id:
+    - switch.privacy
   condition:
   - condition: template
     value_template: '{{ states(''group.indoor_cams'') == states(''input_boolean.privacy'')}} '
@@ -2712,21 +2890,19 @@
         entity_id: input_boolean.privacy
         state: 'on'
       sequence:
-      - service: homeassistant.turn_off
+      - service: switch.turn_on
         data: {}
         target:
-          entity_id:
-          - switch.kauf_plug
+          entity_id: switch.g5_flex_privacy_mode
     - conditions:
       - condition: state
         entity_id: input_boolean.privacy
         state: 'off'
       sequence:
-      - service: homeassistant.turn_on
-        data: {}
+      - service: switch.turn_off
         target:
-          entity_id:
-          - switch.kauf_plug
+          entity_id: switch.g5_flex_privacy_mode
+        data: {}
   mode: single
 - id: '1665186115040'
   alias: Dog Medicine Reminder
@@ -2797,6 +2973,17 @@
                   critical: 1
                   volume: 0.3
         else:
+        - condition: or
+          conditions:
+          - condition: numeric_state
+            entity_id: sensor.home_anthony_distance
+            below: 600
+          - condition: state
+            entity_id: input_select.anthony
+            state: Home
+          - condition: state
+            entity_id: input_select.anthony
+            state: Just Arrived
         - service: notify.anthonys_devices
           data:
             message: Lola hasn't gotten her medicine yet
@@ -2842,6 +3029,17 @@
                   critical: 1
                   volume: 0.3
         else:
+        - condition: or
+          conditions:
+          - condition: numeric_state
+            entity_id: sensor.home_anthony_distance
+            below: 600
+          - condition: state
+            entity_id: input_select.anthony
+            state: Home
+          - condition: state
+            entity_id: input_select.anthony
+            state: Just Arrived
         - service: notify.anthonys_devices
           data:
             message: Lola hasn't gotten her medicine yet
@@ -2876,11 +3074,35 @@
               data: {}
               target:
                 entity_id: input_boolean.morning_medicine
+            - service: input_datetime.set_datetime
+              data:
+                datetime: '{{ now() }}'
+              target:
+                entity_id: input_datetime.morning_medicine_given
             else: []
         - conditions:
-          - condition: time
-            before: 02:30:00
-            after: '18:00:00'
+          - condition: or
+            conditions:
+            - condition: template
+              value_template: "{% set default_time = \"00:00:00\" %}  \n{% set time_difference_threshold
+                = 9 %}\n\n{% set morning_medicine_given = states('input_datetime.morning_medicine_given')
+                %}\n{% set morning_medicine_time = morning_medicine_given.split('
+                ')[-1] if morning_medicine_given != 'unknown' and morning_medicine_given
+                != 'none' else default_time %}\n\n{% set current_time = now().strftime('%H:%M:%S')
+                %}\n\n{% set given_time = morning_medicine_time.split(':') %}\n{%
+                set current_time_split = current_time.split(':') %}\n\n{% set given_hour
+                = given_time[0] | int %}\n{% set given_minute = given_time[1] | int
+                %}\n{% set given_second = given_time[2] | int %}\n\n{% set current_hour
+                = current_time_split[0] | int %}\n{% set current_minute = current_time_split[1]
+                | int %}\n{% set current_second = current_time_split[2] | int %}\n\n{%
+                set delta_hours = current_hour - given_hour %}\n{% set delta_minutes
+                = current_minute - given_minute %}\n{% set delta_seconds = current_second
+                - given_second %}\n\n{% set total_hours_passed = delta_hours + delta_minutes
+                / 60 + delta_seconds / 3600 %}\n\n{% if total_hours_passed >= time_difference_threshold
+                %}\n  true\n{% else %}\n  false\n{% endif %}"
+            - condition: time
+              before: 02:30:00
+              after: '19:45:00'
           sequence:
           - if:
             - condition: state
@@ -2936,6 +3158,17 @@
                   critical: 1
                   volume: 0.3
         else:
+        - condition: or
+          conditions:
+          - condition: numeric_state
+            entity_id: sensor.home_anthony_distance
+            below: 600
+          - condition: state
+            entity_id: input_select.anthony
+            state: Home
+          - condition: state
+            entity_id: input_select.anthony
+            state: Just Arrived
         - service: notify.anthonys_devices
           data:
             message: It's time to give Lola her medicine
@@ -3132,6 +3365,7 @@
     entity_id:
     - binary_sensor.motion_sensor_motion_detection
     - binary_sensor.bed_occupancy
+    - binary_sensor.lumi_lumi_motion_ac02_motion_4
     to: 'on'
     id: enteredroom
   - platform: state
@@ -3160,8 +3394,15 @@
           entity_id: input_select.anthony
           state: Just Arrived
       - condition: state
-        entity_id: device_tracker.taylor
+        entity_id: person.taylor
         state: home
+  - condition: state
+    entity_id: input_boolean.showering
+    state: 'off'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 45
   action:
   - choose:
     - conditions:
@@ -3222,7 +3463,7 @@
         - condition: not
           conditions:
           - condition: state
-            entity_id: device_tracker.taylor
+            entity_id: person.taylor
             state: home
         then:
         - service: switch.turn_off
@@ -3248,7 +3489,8 @@
           target:
             entity_id: input_boolean.bedmotion
         alias: Turn off Motion Bypass
-      - if:
+      - alias: Turn on Kitchen HomePods
+        if:
         - condition: state
           entity_id: media_player.kitchen_speakers
           state: 'off'
@@ -3297,7 +3539,7 @@
               else:
               - service: media_player.volume_set
                 data:
-                  volume_level: 0.45
+                  volume_level: 0.35
                 target:
                   entity_id:
                   - media_player.kitchen_speakers
@@ -3309,7 +3551,6 @@
                 minutes: 0
                 seconds: 2
                 milliseconds: 0
-        alias: Turn on Kitchen HomePods
     - conditions:
       - condition: trigger
         id: enteredroom
@@ -3330,7 +3571,7 @@
       - condition: not
         conditions:
         - condition: state
-          entity_id: device_tracker.taylor
+          entity_id: person.taylor
           state: home
       sequence:
       - parallel:
@@ -4319,14 +4560,27 @@
             - input_boolean.mail_checked
         - stop: ''
         alias: Stop if 0
-      - service: notify.mobile_app_iphone
-        data:
-          message: '{{ states(''sensor.mail_usps_mail'') }} {% if states(''sensor.mail_usps_mail'')|float(0)
-            == 1 %}piece{%else%}pieces{%endif%} of mail {% if states(''sensor.mail_usps_mail'')|float(0)
-            == 1 %}was{%else%}were{%endif%} delivered.'
+      - if:
+        - condition: or
+          conditions:
+          - condition: numeric_state
+            entity_id: sensor.home_anthony_distance
+            below: 600
+          - condition: state
+            entity_id: input_select.anthony
+            state: Home
+          - condition: state
+            entity_id: input_select.anthony
+            state: Just Arrived
+        then:
+        - service: notify.mobile_app_iphone
           data:
-            entity_id: camera.mail_usps_camera
-            tag: mail
+            message: '{{ states(''sensor.mail_usps_mail'') }} {% if states(''sensor.mail_usps_mail'')|float(0)
+              == 1 %}piece{%else%}pieces{%endif%} of mail {% if states(''sensor.mail_usps_mail'')|float(0)
+              == 1 %}was{%else%}were{%endif%} delivered.'
+            data:
+              entity_id: camera.mail_usps_camera
+              tag: mail
       - service: input_boolean.turn_on
         data: {}
         target:
@@ -4411,6 +4665,17 @@
         state: 'on'
       - condition: trigger
         id: night
+      - condition: or
+        conditions:
+        - condition: numeric_state
+          entity_id: sensor.home_anthony_distance
+          below: 600
+        - condition: state
+          entity_id: input_select.anthony
+          state: Home
+        - condition: state
+          entity_id: input_select.anthony
+          state: Just Arrived
       sequence:
       - service: notify.mobile_app_iphone
         data:
@@ -4447,19 +4712,7 @@
 - id: '1668535366974'
   alias: Connected to Car
   description: ''
-  trigger:
-  - platform: homeassistant
-    event: start
-    id: home assistant started
-    enabled: false
-  - platform: time
-    at: 00:00:00
-    id: reset
-    enabled: false
-  - platform: event
-    event_type: automation_reloaded
-    id: reload
-    enabled: false
+  trigger: []
   condition: []
   action:
   - choose:
@@ -4707,9 +4960,8 @@
 
           and not is_state(''person.dana'', ''home'')
 
-          and states(''zone.home'')|int < 2
-
-          }}'
+          and states(''zone.home'')|int < 2 and is_state(''input_boolean.guest'',
+          ''off'')}}'
       - service: notify.mobile_app_iphone
         data:
           message: '{% if is_state(''binary_sensor.front_door'', ''on'') or is_state(''lock.front_door'',
@@ -4726,6 +4978,14 @@
                 name: default
                 critical: 1
                 volume: 0.3
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: input_select.anthony
+          state: Just Arrived
+        - condition: state
+          entity_id: input_select.anthony
+          state: Home
   - alias: Set Spotify Output to iPhone
     repeat:
       while:
@@ -4771,7 +5031,8 @@
           minutes: 0
           seconds: 2
           milliseconds: 0
-  - choose:
+  - alias: Play music
+    choose:
     - conditions:
       - condition: state
         entity_id: media_player.spotify_anthony221121
@@ -4819,14 +5080,17 @@
           - condition: state
             entity_id: media_player.spotify_anthony221121
             state: playing
-    alias: Play music
+            for:
+              hours: 0
+              minutes: 0
+              seconds: 6
   - service: media_player.repeat_set
     data:
       repeat: all
     target:
       entity_id: media_player.spotify_anthony221121
     alias: Turn on repeat all
-  mode: single
+  mode: restart
 - id: '1668564599073'
   alias: Reboot Soundbar AirPort
   description: ''
@@ -4856,6 +5120,11 @@
         hours: 0
         minutes: 0
         seconds: 5
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: switch.sonoff_s31_lite_zb_switch_4
+      state: unavailable
   action:
   - service: switch.turn_off
     data: {}
@@ -5080,7 +5349,7 @@
               entity_id: input_select.anthony
               state: Just Arrived
           - condition: state
-            entity_id: device_tracker.taylor
+            entity_id: person.taylor
             state: home
       - condition: or
         conditions:
@@ -5213,6 +5482,8 @@
                   entity_id:
                   - media_player.owntone_output_anthony_s_desk
                   - media_player.owntone_output_anthony_s_nightstand
+                  - media_player.owntone_output_front_homepod
+                  - media_player.kitchen_speakers
               - delay:
                   hours: 0
                   minutes: 0
@@ -5327,7 +5598,8 @@
             target:
               entity_id: media_player.owntone_output_bathroom
           alias: Turn off homepod
-        - if:
+        - alias: Turn other speakers on if leaving shower
+          if:
           - condition: state
             entity_id: media_player.spotify_anthony221121
             attribute: source
@@ -5352,7 +5624,7 @@
           then:
           - service: media_player.volume_set
             data:
-              volume_level: 0.4
+              volume_level: 0.25
             target:
               entity_id: media_player.spotify_anthony221121
           - parallel:
@@ -5401,7 +5673,7 @@
                     - media_player.owntone_output_anthony_s_desk
                 - service: media_player.volume_set
                   data:
-                    volume_level: 0.3
+                    volume_level: 0.25
                   target:
                     entity_id:
                     - media_player.owntone_output_anthony_s_desk
@@ -5424,7 +5696,6 @@
                   data: {}
                   target:
                     entity_id: cover.bedroom_blinds
-          alias: Turn other speakers on if leaving shower
     - conditions:
       - condition: trigger
         id: showering on
@@ -5674,27 +5945,38 @@
             after: sunset
             before_offset: +00:25:00
           - condition: state
-            entity_id: light.fan_lights
-            state: 'off'
-            alias: Fan Lights are off
-          - condition: state
             entity_id: input_select.anthony
             state: Home
           - condition: or
             conditions:
             - condition: state
-              entity_id: binary_sensor.bed_occupancy
-              state: 'off'
-              alias: probably anthony
-            - condition: state
-              entity_id: device_tracker.taylor
+              entity_id: person.taylor
               state: home
+            - condition: not
+              conditions:
+              - condition: state
+                entity_id: binary_sensor.bed_occupancy
+                state: 'on'
+              alias: probably anthony
+          - condition: not
+            conditions:
+            - alias: Fan Lights are off
+              condition: state
+              entity_id: light.fan_lights
+              state: 'on'
+          - condition: not
+            conditions:
+            - alias: Fan Lights are off
+              condition: state
+              entity_id: light.dana_s_fan_lights
+              state: 'on'
           sequence:
           - type: turn_on
             device_id: 3c08610e07933d66eb5347257aae98aa
             entity_id: light.bathroom_lights
             domain: light
             brightness_pct: 1
+            enabled: true
         default:
         - type: turn_on
           device_id: 3c08610e07933d66eb5347257aae98aa
@@ -5792,9 +6074,6 @@
       - condition: or
         conditions:
         - condition: state
-          entity_id: binary_sensor.bathroom_occupancy
-          state: 'off'
-        - condition: state
           entity_id: switch.exhaust_fan
           state: 'on'
         - condition: state
@@ -5805,6 +6084,11 @@
           entity_id: climate.home
           state: cooling
           attribute: hvac_action
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: binary_sensor.bathroom_occupancy
+            state: 'on'
       - condition: state
         entity_id: input_boolean.bathroom_occupied
         state: 'off'
@@ -5835,6 +6119,9 @@
         state: 'off'
       - condition: state
         entity_id: binary_sensor.bathroom_aqara_motion
+        state: 'off'
+      - condition: state
+        entity_id: binary_sensor.lumi_lumi_motion_ac02_motion_3
         state: 'off'
       sequence:
       - service: timer.start
@@ -5868,6 +6155,7 @@
   - platform: state
     entity_id:
     - switch.christmas_lights
+    - light.christmas_lights
     from: unavailable
   - platform: homeassistant
     event: start
@@ -5879,28 +6167,48 @@
   - choose:
     - conditions:
       - condition: state
-        entity_id: switch.christmas_lights
-        state: 'off'
-      - condition: state
         entity_id: light.kitchen_lights
         state: 'on'
-      sequence:
-      - service: switch.turn_on
-        data: {}
-        target:
+      - condition: or
+        conditions:
+        - condition: state
           entity_id: switch.christmas_lights
+          state: 'off'
+        - condition: state
+          entity_id: light.christmas_lights
+          state: 'off'
+      sequence:
+      - parallel:
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id: switch.christmas_lights
+        - service: light.turn_on
+          target:
+            entity_id: light.christmas_lights
+          data: {}
     - conditions:
       - condition: state
-        entity_id: switch.christmas_lights
-        state: 'on'
-      - condition: state
         entity_id: light.kitchen_lights
         state: 'off'
-      sequence:
-      - service: switch.turn_off
-        data: {}
-        target:
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: light.christmas_lights
+          state: 'on'
+        - condition: state
           entity_id: switch.christmas_lights
+          state: 'on'
+      sequence:
+      - parallel:
+        - service: switch.turn_off
+          data: {}
+          target:
+            entity_id: switch.christmas_lights
+        - service: light.turn_off
+          target:
+            entity_id: light.christmas_lights
+          data: {}
   mode: single
 - id: '1670745513720'
   alias: Hallway Lights
@@ -6047,17 +6355,13 @@
           state: Just Arrived
       - condition: or
         conditions:
-        - condition: not
-          conditions:
-          - condition: time
-            after: '23:15:00'
-            before: 06:00:00
         - condition: state
           entity_id: switch.desktop
           state: 'on'
         - condition: state
           entity_id: input_select.anthony
           state: Just Arrived
+        enabled: false
       - condition: or
         conditions:
         - condition: state
@@ -6066,7 +6370,7 @@
         - condition: and
           conditions:
           - condition: state
-            entity_id: device_tracker.taylor
+            entity_id: person.taylor
             state: home
           - condition: or
             conditions:
@@ -6076,6 +6380,11 @@
             - condition: sun
               before: sunset
               after: sunrise
+      - condition: not
+        conditions:
+        - condition: time
+          after: '23:15:00'
+          before: 06:00:00
       sequence:
       - service: light.turn_on
         data:
@@ -6239,7 +6548,6 @@
         - media_player.owntone_output_guest_left
         - media_player.owntone_output_guest_right
         - media_player.kitchen_speakers
-        - media_player.owntone_output_danas_nightstand
         - media_player.owntone_output_soundbar
   - if:
     - condition: device
@@ -6320,7 +6628,7 @@
       - service: button.press
         data: {}
         target:
-          entity_id: button.white
+          entity_id: button.desktop_pc_satellite_white
       - service: switch.turn_on
         data: {}
         target:
@@ -6396,7 +6704,7 @@
       - service: button.press
         data: {}
         target:
-          entity_id: button.off
+          entity_id: button.desktop_pc_satellite_off
       - service: switch.turn_on
         data: {}
         target:
@@ -6464,6 +6772,22 @@
           target:
             entity_id: media_player.spotify_anthony221121
         alias: Move music to Desktop
+      - service: cover.close_cover
+        metadata: {}
+        data: {}
+        target:
+          entity_id: cover.bedroom_blinds
+      - if:
+        - condition: state
+          entity_id: media_player.spotify_anthony221121
+          attribute: media_playlist
+          state: lofi
+        then:
+        - service: media_player.volume_set
+          target:
+            entity_id: media_player.spotify_anthony221121
+          data:
+            volume_level: 0
       bottom_off:
       - service: script.turn_on
         data: {}
@@ -6472,7 +6796,7 @@
       - service: button.press
         data: {}
         target:
-          entity_id: button.color
+          entity_id: button.desktop_pc_satellite_color
       - service: switch.turn_on
         data: {}
         target:
@@ -6649,33 +6973,630 @@
     path: stephack/core-pico.yaml
     input:
       pico_remote: c51c176058dad4748b6065d54c93bec5
-      auto_mode: parallel
+      auto_mode: restart
       top_on:
-      - type: turn_on
-        device_id: 1fda2d1cd82b506314f647ad891916e4
-        entity_id: switch.guest_bedroom_light
-        domain: switch
+      - parallel:
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_color_ropes
+            - switch.dana_s_incandescant_ropes
+            - switch.dana_s_north_incandescent_rope
+            - switch.dana_s_south_incandescent_rope
+            - switch.dana_s_east_incandescent_rope
+            - switch.dana_s_west_color_rope
+            - switch.dana_s_south_color_rope
+        - service: media_player.turn_on
+          data: {}
+          target:
+            entity_id:
+            - media_player.danas_32_tcl_roku_tv
+            - media_player.guest_tv
+        - service: button.press
+          data: {}
+          target:
+            entity_id:
+            - button.screenon
+        - if:
+          - condition: or
+            conditions:
+            - condition: or
+              conditions:
+              - condition: state
+                entity_id: input_select.anthony
+                state: Just Left
+              - condition: state
+                entity_id: input_select.anthony
+                state: Extended Away
+              - condition: state
+                entity_id: input_select.anthony
+                state: Away
+            - condition: state
+              entity_id: device_tracker.dana
+              state: home
+          - condition: state
+            entity_id: input_boolean.guest
+            state: 'off'
+          then:
+          - service: light.turn_on
+            data:
+              effect: None
+              xy_color:
+              - 0.455
+              - 0.374
+            target:
+              entity_id:
+              - light.dana_s_fan_lights
+          else:
+          - service: light.turn_on
+            data:
+              rgb_color:
+              - 255
+              - 0
+              - 255
+              brightness_pct: 100
+            target:
+              entity_id:
+              - light.dana_s_fan_lights
+            enabled: true
+          enabled: false
+        - service: light.turn_on
+          data:
+            effect: None
+            xy_color:
+            - 0.455
+            - 0.374
+          target:
+            entity_id:
+            - light.dana_s_fan_lights
+        - service: light.turn_on
+          data:
+            brightness_pct: 100
+          target:
+            entity_id:
+            - light.black_cob
+            - light.floor_lamp_2
+            - light.charger2
+            - light.cube
+            - light.floor_lamp
       down_lower:
-      - type: turn_off
-        device_id: 1fda2d1cd82b506314f647ad891916e4
-        entity_id: switch.guest_bedroom_fan
-        domain: switch
+      - choose:
+        - conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: switch.dana_s_south_color_rope
+              state: 'on'
+            - condition: state
+              entity_id: switch.dana_s_west_color_rope
+              state: 'on'
+          sequence:
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id:
+              - switch.dana_s_color_ropes
+              - switch.dana_s_west_color_rope
+              - switch.dana_s_south_color_rope
+        - conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: switch.dana_s_south_color_rope
+              state: 'off'
+            - condition: state
+              entity_id: switch.dana_s_west_color_rope
+              state: 'off'
+          sequence:
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id:
+              - switch.dana_s_color_ropes
+              - switch.dana_s_west_color_rope
+              - switch.dana_s_south_color_rope
+        enabled: false
+      - choose:
+        - conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: switch.dana_s_north_incandescent_rope
+              state: 'on'
+            - condition: state
+              entity_id: switch.dana_s_south_incandescent_rope
+              state: 'on'
+            - condition: state
+              entity_id: switch.dana_s_east_incandescent_rope
+              state: 'on'
+          sequence:
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id:
+              - switch.dana_s_north_incandescent_rope
+              - switch.dana_s_south_incandescent_rope
+              - switch.dana_s_east_incandescent_rope
+        - conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: switch.dana_s_north_incandescent_rope
+              state: 'off'
+            - condition: state
+              entity_id: switch.dana_s_south_incandescent_rope
+              state: 'off'
+            - condition: state
+              entity_id: switch.dana_s_east_incandescent_rope
+              state: 'off'
+          sequence:
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id:
+              - switch.dana_s_north_incandescent_rope
+              - switch.dana_s_south_incandescent_rope
+              - switch.dana_s_east_incandescent_rope
+        enabled: true
       bottom_off:
-      - type: turn_off
-        device_id: 1fda2d1cd82b506314f647ad891916e4
-        entity_id: switch.guest_bedroom_light
-        domain: switch
+      - parallel:
+        - service: switch.turn_off
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_color_ropes
+            - switch.dana_s_incandescant_ropes
+            - switch.polk_omni
+            - switch.dana_s_north_incandescent_rope
+            - switch.dana_s_south_incandescent_rope
+            - switch.dana_s_east_incandescent_rope
+            - switch.dana_s_west_color_rope
+            - switch.dana_s_south_color_rope
+        - service: media_player.turn_off
+          data: {}
+          target:
+            entity_id:
+            - media_player.danas_32_tcl_roku_tv
+            - media_player.owntone_output_soundbar
+            - media_player.guest_tv
+            - media_player.guest_speakers
+        - service: button.press
+          data: {}
+          target:
+            entity_id:
+            - button.screenoff_2
+        - service: light.turn_off
+          target:
+            entity_id:
+            - light.black_cob
+            - light.floor_lamp_2
+            - light.charger2
+            - light.cube
+            - light.dana_s_fan_lights
+            - light.floor_lamp
+          data: {}
       up_raise:
-      - type: turn_on
-        device_id: 1fda2d1cd82b506314f647ad891916e4
-        entity_id: switch.guest_bedroom_fan
-        domain: switch
-      top_on_release: []
-      up_raise_release: []
-      down_lower_release: []
-      middle_stop_release: []
-      middle_stop: []
-      bottom_off_release: []
+      - choose:
+        - conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: switch.dana_s_north_incandescent_rope
+              state: 'on'
+            - condition: state
+              entity_id: switch.dana_s_south_incandescent_rope
+              state: 'on'
+            - condition: state
+              entity_id: switch.dana_s_east_incandescent_rope
+              state: 'on'
+          sequence:
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id:
+              - switch.dana_s_north_incandescent_rope
+              - switch.dana_s_south_incandescent_rope
+              - switch.dana_s_east_incandescent_rope
+        - conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: switch.dana_s_north_incandescent_rope
+              state: 'off'
+            - condition: state
+              entity_id: switch.dana_s_south_incandescent_rope
+              state: 'off'
+            - condition: state
+              entity_id: switch.dana_s_east_incandescent_rope
+              state: 'off'
+          sequence:
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id:
+              - switch.dana_s_north_incandescent_rope
+              - switch.dana_s_south_incandescent_rope
+              - switch.dana_s_east_incandescent_rope
+        enabled: false
+      - parallel:
+        - service: switch.turn_off
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_incandescant_ropes
+            - switch.polk_omni
+            - switch.dana_s_north_incandescent_rope
+            - switch.dana_s_south_incandescent_rope
+            - switch.dana_s_east_incandescent_rope
+            - switch.dana_s_west_color_rope
+        - service: media_player.turn_off
+          data: {}
+          target:
+            entity_id:
+            - media_player.danas_32_tcl_roku_tv
+            - media_player.owntone_output_soundbar
+            - media_player.guest_tv
+            - media_player.guest_speakers
+        - service: button.press
+          data: {}
+          target:
+            entity_id:
+            - button.screenoff_2
+        - service: light.turn_off
+          target:
+            entity_id:
+            - light.black_cob
+            - light.floor_lamp_2
+            - light.charger2
+            - light.cube
+            - light.floor_lamp
+            - light.dana_s_fan_lights
+          data: {}
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id: switch.dana_s_south_color_rope
+      top_on_release:
+      - parallel:
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_color_ropes
+            - switch.dana_s_incandescant_ropes
+            - switch.dana_s_north_incandescent_rope
+            - switch.dana_s_south_incandescent_rope
+            - switch.dana_s_east_incandescent_rope
+            - switch.dana_s_west_color_rope
+            - switch.dana_s_south_color_rope
+        - service: media_player.turn_on
+          data: {}
+          target:
+            entity_id:
+            - media_player.danas_32_tcl_roku_tv
+            - media_player.guest_tv
+        - service: button.press
+          data: {}
+          target:
+            entity_id:
+            - button.screenon
+            - button.server_signalrgb_on
+        - if:
+          - condition: or
+            conditions:
+            - condition: or
+              conditions:
+              - condition: state
+                entity_id: input_select.anthony
+                state: Just Left
+              - condition: state
+                entity_id: input_select.anthony
+                state: Extended Away
+              - condition: state
+                entity_id: input_select.anthony
+                state: Away
+            - condition: state
+              entity_id: device_tracker.dana
+              state: home
+          - condition: state
+            entity_id: input_boolean.guest
+            state: 'off'
+          then:
+          - service: light.turn_on
+            data:
+              effect: None
+              xy_color:
+              - 0.455
+              - 0.374
+            target:
+              entity_id:
+              - light.dana_s_fan_lights
+          else:
+          - service: light.turn_on
+            data:
+              rgb_color:
+              - 255
+              - 0
+              - 255
+              brightness_pct: 100
+            target:
+              entity_id:
+              - light.dana_s_fan_lights
+            enabled: true
+          enabled: false
+        - service: light.turn_on
+          data:
+            effect: None
+            xy_color:
+            - 0.455
+            - 0.374
+          target:
+            entity_id:
+            - light.dana_s_fan_lights
+        - service: light.turn_on
+          data:
+            brightness_pct: 100
+          target:
+            entity_id:
+            - light.black_cob
+            - light.floor_lamp_2
+            - light.charger2
+            - light.cube
+        enabled: false
+      up_raise_release:
+      - parallel:
+        - service: switch.turn_off
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_incandescant_ropes
+            - switch.polk_omni
+            - switch.dana_s_north_incandescent_rope
+            - switch.dana_s_south_incandescent_rope
+            - switch.dana_s_east_incandescent_rope
+            - switch.dana_s_west_color_rope
+        - service: light.turn_off
+          data: {}
+          target:
+            entity_id:
+            - light.dana_s_fan_lights
+        - service: media_player.turn_off
+          data: {}
+          target:
+            entity_id:
+            - media_player.danas_32_tcl_roku_tv
+            - media_player.owntone_output_soundbar
+            - media_player.guest_tv
+            - media_player.guest_speakers
+        - service: button.press
+          data: {}
+          target:
+            entity_id:
+            - button.screenoff_2
+            - button.server_server_signalrgb_off
+        - service: light.turn_off
+          target:
+            entity_id:
+            - light.black_cob
+            - light.floor_lamp_2
+            - light.charger2
+            - light.cube
+          data: {}
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id: switch.dana_s_south_color_rope
+        enabled: false
+      down_lower_release:
+      - choose:
+        - conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: switch.dana_s_south_color_rope
+              state: 'on'
+            - condition: state
+              entity_id: switch.dana_s_west_color_rope
+              state: 'on'
+          sequence:
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id:
+              - switch.dana_s_color_ropes
+              - switch.dana_s_west_color_rope
+              - switch.dana_s_south_color_rope
+        - conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: switch.dana_s_south_color_rope
+              state: 'off'
+            - condition: state
+              entity_id: switch.dana_s_west_color_rope
+              state: 'off'
+          sequence:
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id:
+              - switch.dana_s_color_ropes
+              - switch.dana_s_west_color_rope
+              - switch.dana_s_south_color_rope
+        enabled: false
+      - choose:
+        - conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: switch.dana_s_north_incandescent_rope
+              state: 'on'
+            - condition: state
+              entity_id: switch.dana_s_south_incandescent_rope
+              state: 'on'
+            - condition: state
+              entity_id: switch.dana_s_east_incandescent_rope
+              state: 'on'
+          sequence:
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id:
+              - switch.dana_s_north_incandescent_rope
+              - switch.dana_s_south_incandescent_rope
+              - switch.dana_s_east_incandescent_rope
+        - conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: switch.dana_s_north_incandescent_rope
+              state: 'off'
+            - condition: state
+              entity_id: switch.dana_s_south_incandescent_rope
+              state: 'off'
+            - condition: state
+              entity_id: switch.dana_s_east_incandescent_rope
+              state: 'off'
+          sequence:
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id:
+              - switch.dana_s_north_incandescent_rope
+              - switch.dana_s_south_incandescent_rope
+              - switch.dana_s_east_incandescent_rope
+        enabled: false
+      middle_stop_release:
+      - parallel:
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_north_incandescent_rope
+            - switch.dana_s_south_incandescent_rope
+            - switch.dana_s_west_color_rope
+            - switch.dana_s_east_incandescent_rope
+            - switch.dana_s_south_color_rope
+        - service: media_player.turn_on
+          data: {}
+          target:
+            entity_id:
+            - media_player.danas_32_tcl_roku_tv
+            - media_player.guest_tv
+        - service: button.press
+          data: {}
+          target:
+            entity_id:
+            - button.screenon
+            - button.server_signalrgb_on
+        - service: light.turn_on
+          data:
+            rgb_color:
+            - 255
+            - 0
+            - 255
+            brightness_pct: 100
+          target:
+            entity_id:
+            - light.dana_s_fan_lights
+          enabled: true
+        - service: light.turn_on
+          data:
+            brightness_pct: 100
+          target:
+            entity_id:
+            - light.black_cob
+            - light.floor_lamp_2
+            - light.charger2
+            - light.cube
+        enabled: false
+      middle_stop:
+      - parallel:
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_north_incandescent_rope
+            - switch.dana_s_south_incandescent_rope
+            - switch.dana_s_west_color_rope
+            - switch.dana_s_east_incandescent_rope
+            - switch.dana_s_south_color_rope
+        - service: media_player.turn_on
+          data: {}
+          target:
+            entity_id:
+            - media_player.danas_32_tcl_roku_tv
+            - media_player.guest_tv
+        - service: button.press
+          data: {}
+          target:
+            entity_id:
+            - button.screenon
+        - service: light.turn_on
+          data:
+            rgb_color:
+            - 255
+            - 0
+            - 255
+            brightness_pct: 100
+          target:
+            entity_id:
+            - light.dana_s_fan_lights
+          enabled: true
+        - service: light.turn_on
+          data:
+            brightness_pct: 100
+          target:
+            entity_id:
+            - light.black_cob
+            - light.floor_lamp_2
+            - light.charger2
+            - light.cube
+            - light.floor_lamp
+      bottom_off_release:
+      - parallel:
+        - service: switch.turn_off
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_color_ropes
+            - switch.dana_s_incandescant_ropes
+            - switch.polk_omni
+            - switch.dana_s_north_incandescent_rope
+            - switch.dana_s_south_incandescent_rope
+            - switch.dana_s_east_incandescent_rope
+            - switch.dana_s_west_color_rope
+            - switch.dana_s_south_color_rope
+        - service: light.turn_off
+          data: {}
+          target:
+            entity_id:
+            - light.dana_s_fan_lights
+        - service: media_player.turn_off
+          data: {}
+          target:
+            entity_id:
+            - media_player.danas_32_tcl_roku_tv
+            - media_player.owntone_output_soundbar
+            - media_player.guest_tv
+            - media_player.guest_speakers
+        - service: button.press
+          data: {}
+          target:
+            entity_id:
+            - button.screenoff_2
+            - button.server_server_signalrgb_off
+        - service: light.turn_off
+          target:
+            entity_id:
+            - light.black_cob
+            - light.floor_lamp_2
+            - light.charger2
+            - light.cube
+          data: {}
+        enabled: false
+      mode_max: 15
 - id: '1671606640908'
   alias: Bathroom Occupancy Override
   description: ''
@@ -7070,8 +7991,8 @@
     to:
     - utd
     - raytheon
-    - collin
     - taylor_s_home
+    - collin_frisco
   - platform: state
     entity_id:
     - input_select.anthony
@@ -7086,7 +8007,7 @@
       entity_id: update.bed_esp_firmware
       state: 'on'
     - condition: state
-      entity_id: update.lightswitch_firmware
+      entity_id: update.kauf_rgbsw_63e843_firmware
       state: 'on'
     - condition: state
       entity_id: update.midea_firmware
@@ -7155,7 +8076,7 @@
       entity_id: update.home_assistant_google_drive_backup_update
       state: 'on'
     - condition: state
-      entity_id: update.homepod_connect_update
+      entity_id: update.homepod_connect_dev_update
       state: 'on'
     - condition: state
       entity_id: update.mosquitto_broker_update
@@ -7235,7 +8156,7 @@
         data: {}
         target:
           entity_id: update.z_wave_js_to_mqtt_update
-      enabled: false
+      enabled: true
     - if:
       - condition: state
         entity_id: update.esphome_update
@@ -7346,7 +8267,7 @@
           - update.home_assistant_google_drive_backup_update
     - if:
       - condition: state
-        entity_id: update.homepod_connect_update
+        entity_id: update.homepod_connect_dev_update
         state: 'on'
       then:
       - service: update.install
@@ -7354,7 +8275,7 @@
         data: {}
         target:
           entity_id:
-          - update.homepod_connect_update
+          - update.homepod_connect_dev_update
     - if:
       - condition: state
         entity_id: update.mosquitto_broker_update
@@ -7443,6 +8364,17 @@
         target:
           entity_id:
           - update.kiosk_mode_update
+    - if:
+      - condition: state
+        entity_id: update.battery_state_card_entity_row_update
+        state: 'on'
+      then:
+      - service: update.install
+        continue_on_error: true
+        data: {}
+        target:
+          entity_id:
+          - update.battery_state_card_entity_row_update
   - delay:
       hours: 0
       minutes: 3
@@ -7471,14 +8403,14 @@
           entity_id: update.bed_esp_firmware
     - if:
       - condition: state
-        entity_id: update.lightswitch_firmware
+        entity_id: update.kauf_rgbsw_63e843_firmware
         state: 'on'
       then:
       - service: update.install
         continue_on_error: true
         data: {}
         target:
-          entity_id: update.lightswitch_firmware
+          entity_id: update.kauf_rgbsw_63e843_firmware
     - if:
       - condition: state
         entity_id: update.midea_firmware
@@ -7561,56 +8493,6 @@
           entity_id: update.wyzebulb6_firmware
     - if:
       - condition: state
-        entity_id: update.bkplug1_firmware
-        state: 'on'
-      then:
-      - service: update.install
-        continue_on_error: true
-        data: {}
-        target:
-          entity_id: update.bkplug1_firmware
-    - if:
-      - condition: state
-        entity_id: update.bkplug3_firmware
-        state: 'on'
-      then:
-      - service: update.install
-        continue_on_error: true
-        data: {}
-        target:
-          entity_id: update.bkplug3_firmware
-    - if:
-      - condition: state
-        entity_id: update.bkplug4_firmware
-        state: 'on'
-      then:
-      - service: update.install
-        continue_on_error: true
-        data: {}
-        target:
-          entity_id: update.bkplug4_firmware
-    - if:
-      - condition: state
-        entity_id: update.roundplug2_firmware
-        state: 'on'
-      then:
-      - service: update.install
-        continue_on_error: true
-        data: {}
-        target:
-          entity_id: update.roundplug2_firmware
-    - if:
-      - condition: state
-        entity_id: update.roundplug1_firmware
-        state: 'on'
-      then:
-      - service: update.install
-        continue_on_error: true
-        data: {}
-        target:
-          entity_id: update.roundplug1_firmware
-    - if:
-      - condition: state
         entity_id: update.wyzebulb7_firmware
         state: 'on'
       then:
@@ -7620,17 +8502,6 @@
         target:
           entity_id:
           - update.wyzebulb7_firmware
-    - if:
-      - condition: state
-        state: 'on'
-        entity_id: update.kauf_plug_7aacf2_firmware
-      then:
-      - service: update.install
-        continue_on_error: true
-        data: {}
-        target:
-          entity_id:
-          - update.kauf_plug_7aacf2_firmware
     - if:
       - condition: state
         state: 'on'
@@ -7664,6 +8535,17 @@
         target:
           entity_id:
           - update.couch_right_firmware
+    - if:
+      - condition: state
+        state: 'on'
+        entity_id: update.ratgdov2_5_60b6fc_firmware
+      then:
+      - service: update.install
+        continue_on_error: true
+        data: {}
+        target:
+          entity_id:
+          - update.ratgdov2_5_60b6fc_firmware
   - if:
     - condition: not
       conditions:
@@ -7868,7 +8750,7 @@
       data: {}
       target:
         entity_id: update.home_assistant_operating_system_update
-    enabled: false
+    enabled: true
   - if:
     - condition: state
       entity_id: update.home_assistant_core_update
@@ -7879,7 +8761,7 @@
       target:
         entity_id:
         - update.home_assistant_core_update
-    enabled: false
+    enabled: true
   mode: single
 - id: '1677121828248'
   alias: Turn off TVs
@@ -8010,11 +8892,13 @@
       - condition: or
         conditions:
         - condition: state
-          entity_id: binary_sensor.bed_occupancy
-          state: 'off'
-        - condition: state
-          entity_id: device_tracker.taylor
+          entity_id: person.taylor
           state: home
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: binary_sensor.bed_occupancy
+            state: 'on'
       sequence:
       - type: turn_on
         device_id: 12fdf93ade08d994961d501d7730373c
@@ -8348,11 +9232,12 @@
             entity_id:
             - switch.dana_s_color_ropes
             - switch.dana_s_incandescant_ropes
-            - switch.samsungtv
         - service: media_player.turn_on
           data: {}
           target:
-            entity_id: media_player.danas_32_tcl_roku_tv
+            entity_id:
+            - media_player.danas_32_tcl_roku_tv
+            - media_player.guest_tv
         - service: button.press
           data: {}
           target:
@@ -8400,6 +9285,26 @@
               entity_id:
               - light.dana_s_fan_lights
             enabled: true
+          enabled: false
+        - service: light.turn_on
+          data:
+            effect: None
+            xy_color:
+            - 0.455
+            - 0.374
+          target:
+            entity_id:
+            - light.dana_s_fan_lights
+        - service: light.turn_on
+          data:
+            brightness_pct: 100
+          target:
+            entity_id:
+            - light.black_cob
+            - light.floor_lamp_2
+            - light.charger2
+            - light.cube
+            - light.floor_lamp
     - conditions:
       - condition: or
         conditions:
@@ -8416,22 +9321,28 @@
             - switch.dana_s_color_ropes
             - switch.dana_s_incandescant_ropes
             - switch.polk_omni
-            - switch.samsungtv
         - service: light.turn_off
           data: {}
           target:
             entity_id:
             - light.dana_s_fan_lights
+            - light.black_cob
+            - light.floor_lamp_2
+            - light.charger2
+            - light.cube
+            - light.floor_lamp
         - service: media_player.turn_off
           data: {}
           target:
             entity_id:
             - media_player.danas_32_tcl_roku_tv
             - media_player.owntone_output_soundbar
+            - media_player.guest_tv
         - service: button.press
           data: {}
           target:
-            entity_id: button.screenoff_2
+            entity_id:
+            - button.screenoff_2
   mode: parallel
   max: 10
 - id: '1681276772437'
@@ -8639,32 +9550,28 @@
   use_blueprint:
     path: stephack/core-pico.yaml
     input:
-      pico_remote: c51c176058dad4748b6065d54c93bec5
+      pico_remote: b115f9250ed77b94f398b0f409dd7f63
       auto_mode: parallel
       top_on:
-      - service: switch.turn_on
-        data: {}
+      - service: light.turn_on
         target:
-          entity_id:
-          - switch.guest_bedroom_light
+          entity_id: light.guest_bedroom_light
+        data: {}
       down_lower:
-      - service: switch.turn_off
-        data: {}
+      - service: light.turn_off
         target:
-          entity_id:
-          - switch.guest_bedroom_fan
+          entity_id: light.guest_bedroom_fan
+        data: {}
       bottom_off:
-      - service: switch.turn_off
-        data: {}
+      - service: light.turn_off
         target:
-          entity_id:
-          - switch.guest_bedroom_light
+          entity_id: light.guest_bedroom_light
+        data: {}
       up_raise:
-      - service: switch.turn_on
-        data: {}
+      - service: light.turn_on
         target:
-          entity_id:
-          - switch.guest_bedroom_fan
+          entity_id: light.guest_bedroom_fan
+        data: {}
       top_on_release: []
       up_raise_release: []
       down_lower_release: []
@@ -8674,6 +9581,40 @@
         data: {}
         target:
           entity_id: switch.samsungtv
+      - service: media_player.turn_on
+        target:
+          entity_id:
+          - media_player.guest
+          device_id: []
+          area_id: []
+        data: {}
+      - choose:
+        - conditions:
+          - condition: state
+            entity_id: binary_sensor.guest_bedroom_tv_in_use
+            state: 'on'
+          sequence:
+          - service: media_player.turn_off
+            target:
+              entity_id: media_player.guest
+            data: {}
+          - service: switch.turn_off
+            target:
+              entity_id: switch.samsungtv
+            data: {}
+        - conditions:
+          - condition: state
+            entity_id: binary_sensor.guest_bedroom_tv_in_use
+            state: 'off'
+          sequence:
+          - service: switch.turn_on
+            target:
+              entity_id: switch.samsungtv
+            data: {}
+          - service: media_player.turn_on
+            target:
+              entity_id: media_player.guest
+            data: {}
       bottom_off_release: []
 - id: '1683843733749'
   alias: Turn Off USW LEDs
@@ -8687,6 +9628,10 @@
     data: {}
     target:
       entity_id: switch.usw_leds
+  - service: switch.turn_on
+    data: {}
+    target:
+      entity_id: switch.g4_doorbell_pro_detections_package
   mode: single
 - id: '1686560160740'
   alias: Webcam Profiles & Switch Music to Desktop
@@ -8719,7 +9664,7 @@
             - service: button.press
               data: {}
               target:
-                entity_id: button.color
+                entity_id: button.desktop_pc_satellite_color
             - delay:
                 hours: 0
                 minutes: 0
@@ -8741,7 +9686,7 @@
               data: {}
               target:
                 entity_id:
-                - button.white
+                - button.desktop_pc_satellite_white
             - delay:
                 hours: 0
                 minutes: 0
@@ -8759,7 +9704,7 @@
               data: {}
               target:
                 entity_id:
-                - button.off
+                - button.desktop_pc_satellite_off
             - delay:
                 hours: 0
                 minutes: 0
@@ -8909,7 +9854,7 @@
     event: enter
     id: Just Arrived
   - platform: zone
-    entity_id: device_tracker.taylor
+    entity_id: person.taylor
     zone: zone.home
     event: leave
     id: Just Left
@@ -9062,66 +10007,6 @@
         data: {}
         target:
           entity_id: switch.kauf_plug
-  mode: single
-- id: '1691372119073'
-  alias: Reboot Garage Cam
-  description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - binary_sensor.garage_ping
-    for:
-      hours: 0
-      minutes: 3
-      seconds: 0
-    to: 'off'
-  - platform: state
-    entity_id:
-    - binary_sensor.garage_ping
-    for:
-      hours: 0
-      minutes: 10
-      seconds: 0
-    to: 'off'
-  - platform: state
-    entity_id:
-    - binary_sensor.garage_ping
-    for:
-      hours: 0
-      minutes: 20
-      seconds: 0
-    to: 'off'
-  - platform: state
-    entity_id:
-    - binary_sensor.garage_ping
-    for:
-      hours: 0
-      minutes: 30
-      seconds: 0
-    to: 'off'
-  - platform: state
-    entity_id:
-    - binary_sensor.garage_ping
-    for:
-      hours: 0
-      minutes: 40
-      seconds: 0
-    to: 'off'
-  condition: []
-  action:
-  - service: switch.turn_off
-    data: {}
-    target:
-      entity_id: switch.garage_cam_plug_switch_2
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 5
-      milliseconds: 0
-  - service: switch.turn_on
-    data: {}
-    target:
-      entity_id: switch.garage_cam_plug_switch_2
   mode: single
 - id: '1691372469602'
   alias: Adjust Kitchen HomePod volume
@@ -9401,31 +10286,32 @@
     device_id: 9dd81caf0cf007075f532ae5692c931f
     domain: lutron_caseta
     type: press
-    subtype: 'on'
-    id: on_pressed
+    subtype: 'off'
+    id: off_pressed
   - platform: device
     device_id: 9dd81caf0cf007075f532ae5692c931f
     domain: lutron_caseta
     type: press
-    subtype: 'off'
-    id: off_pressed
+    subtype: 'on'
+    id: on pressed
   condition: []
   action:
   - choose:
     - conditions:
       - condition: trigger
-        id: on_pressed
+        id:
+        - on pressed
       sequence:
       - wait_for_trigger:
         - platform: device
-          device_id: e0d82cb7ed45e4184f837d8ee379f63e
+          device_id: 9dd81caf0cf007075f532ae5692c931f
           domain: lutron_caseta
           type: release
           subtype: 'on'
         timeout:
           hours: 0
           minutes: 0
-          seconds: 3
+          seconds: 1
           milliseconds: 800
       - if:
         - condition: template
@@ -9456,7 +10342,7 @@
       sequence:
       - wait_for_trigger:
         - platform: device
-          device_id: e0d82cb7ed45e4184f837d8ee379f63e
+          device_id: 9dd81caf0cf007075f532ae5692c931f
           domain: lutron_caseta
           type: release
           subtype: 'off'
@@ -9561,8 +10447,8 @@
     id: 'off'
     for:
       hours: 0
-      minutes: 0
-      seconds: 20
+      minutes: 1
+      seconds: 0
   condition: []
   action:
   - choose:
@@ -9574,7 +10460,8 @@
       - service: switch.turn_on
         data: {}
         target:
-          entity_id: switch.sonoff_s31_lite_zb_switch_2
+          entity_id:
+          - switch.goxlr
     - conditions:
       - condition: trigger
         id:
@@ -9583,7 +10470,8 @@
       - service: switch.turn_off
         data: {}
         target:
-          entity_id: switch.sonoff_s31_lite_zb_switch_2
+          entity_id:
+          - switch.goxlr
   mode: single
 - id: '1693288313787'
   alias: Desktop Spotify Volume
@@ -9824,6 +10712,7 @@
   - platform: state
     entity_id:
     - light.shapes_483c
+    - light.shapes_007f
     to: unavailable
     for:
       hours: 0
@@ -9832,7 +10721,7 @@
     id: desk
   - platform: state
     entity_id:
-    - light.shapes_ee82_2
+    - light.shapes_ee82
     to: unavailable
     for:
       hours: 0
@@ -9842,6 +10731,7 @@
   - platform: state
     entity_id:
     - light.shapes_4948_2
+    - light.shapes_4948
     to: unavailable
     for:
       hours: 0
@@ -9866,15 +10756,6 @@
       minutes: 0
       seconds: 10
     id: lightswitch
-  - platform: state
-    entity_id:
-    - climate.bedroom_ac
-    to: unavailable
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 10
-    id: ac
   condition: []
   action:
   - choose:
@@ -9983,14 +10864,6 @@
       - service: unifi.reconnect_client
         data:
           device_id: 9a32bb26971f7740dfdb47ad78f6128b
-    - conditions:
-      - condition: trigger
-        id:
-        - ac
-      sequence:
-      - service: unifi.reconnect_client
-        data:
-          device_id: 32e68440a6bf677e14380d6fd815522d
   mode: parallel
   max: 20
 - id: '1695869227465'
@@ -10004,11 +10877,19 @@
         - sensor.macbook_air_internal_battery_level
         - sensor.anthony_maioranis_ipad_battery_level
         - sensor.ipad_air_2_black_battery_level
+        - sensor.anthonys_ipad_battery_level
+        - sensor.avp_battery_level
+        - sensor.80fd099b_9b465253_browser_battery
       actions:
-      - service: notify.anthonys_devices
-        data:
-          message: '{{sensors}}'
-          title: Low Battery Warning
+      - if:
+        - condition: state
+          entity_id: person.anthony
+          state: home
+        then:
+        - service: notify.anthonys_devices
+          data:
+            message: '{{sensors}}'
+            title: Low Battery Warning
       day: 0
       threshold: 20
       time: '20:00:00'
@@ -10025,6 +10906,7 @@
   - service: notify.anthonys_devices
     data:
       message: Mailbox Guard detected motion
+    enabled: false
   - delay:
       hours: 0
       minutes: 0
@@ -10445,10 +11327,20 @@
       entity_id: media_player.spotify_anthony221121
       attribute: source
       state: Home Assistant
-    - condition: state
-      entity_id: media_player.spotify_anthony221121
-      state: DESKTOP-PC
-      attribute: source
+    - condition: and
+      conditions:
+      - condition: state
+        entity_id: media_player.spotify_anthony221121
+        state: DESKTOP-PC
+        attribute: source
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: binary_sensor.webcam
+          state: unavailable
+  - condition: state
+    entity_id: script.call
+    state: 'off'
   action:
   - choose:
     - conditions:
@@ -10495,3 +11387,285 @@
         milliseconds: 0
   mode: queued
   max: 10
+- id: '1701788153586'
+  alias: Update Shade State
+  description: ''
+  trigger:
+  - platform: time_pattern
+    seconds: /3
+  condition: []
+  action:
+  - service: homeassistant.update_entity
+    data: {}
+    target:
+      entity_id: cover.bedroom_blinds
+  - if:
+    - condition: template
+      value_template: '{{ as_timestamp(now()) | round - as_timestamp(states.cover.bedroom_blinds.last_changed)
+        | round > 20 }}'
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: cover.bedroom_blinds
+        state: opening
+      - condition: state
+        entity_id: cover.bedroom_blinds
+        state: closing
+    then:
+    - service: cover.stop_cover
+      metadata: {}
+      data: {}
+      target:
+        entity_id: cover.bedroom_blinds
+  mode: single
+- id: '1705021795693'
+  alias: Refresh Dashboards
+  description: ''
+  trigger:
+  - platform: time_pattern
+    minutes: /5
+  condition: []
+  action:
+  - parallel:
+    - service: browser_mod.refresh
+      data:
+        browser_id:
+        - 2c8b769e-f4d4e0e9
+      alias: refresh doorbell cam tablet
+    - alias: refresh medicine tablet
+      service: browser_mod.refresh
+      data:
+        browser_id:
+        - 92e9f5b7-92d2f3c4
+    - alias: refresh food tablet
+      service: browser_mod.refresh
+      data:
+        browser_id:
+        - b8229aec-8e77c6cd
+    - alias: refresh doorbell cam tablet (kiosk)
+      service: browser_mod.refresh
+      data:
+        browser_id:
+        - 10f0887f-1c13b283
+    - alias: refresh kitchen tablet (kiosk)
+      service: browser_mod.refresh
+      data:
+        browser_id:
+        - dd568a48-aa2eed83
+    - alias: refresh food tablet (kiosk)
+      service: browser_mod.refresh
+      data:
+        browser_id:
+        - fdc1c06b-fbd3cc1b
+  mode: single
+- id: '1707858790335'
+  alias: Light Switch
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.colorloopstate
+    id: change color
+  - platform: state
+    entity_id:
+    - binary_sensor.kauf_rgb_sw_hold
+    to: 'on'
+    from: 'off'
+    id: hold
+  - platform: state
+    entity_id:
+    - binary_sensor.kauf_rgb_sw_double_press
+    to: 'on'
+    from: 'off'
+    id: double press
+  - platform: state
+    entity_id:
+    - binary_sensor.kauf_rgb_sw_single_press
+    to: 'on'
+    from: 'off'
+    id: press
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - change color
+      sequence:
+      - choose:
+        - conditions:
+          - condition: state
+            entity_id: sensor.colorloopstate
+            state: '0'
+          - condition: state
+            entity_id: switch.bedroomtoggle
+            state: 'on'
+          sequence:
+          - service: light.turn_on
+            target:
+              entity_id:
+              - light.light_switch
+              - light.light_switch_corner
+            data:
+              brightness_pct: 100
+              rgb_color:
+              - 114
+              - 250
+              - 100
+              transition: 3
+        - conditions:
+          - condition: state
+            entity_id: sensor.colorloopstate
+            state: '1'
+          - condition: state
+            entity_id: switch.bedroomtoggle
+            state: 'on'
+          sequence:
+          - service: light.turn_on
+            target:
+              entity_id:
+              - light.light_switch
+              - light.light_switch_corner
+            data:
+              brightness_pct: 100
+              rgb_color:
+              - 114
+              - 250
+              - 237
+              transition: 3
+        - conditions:
+          - condition: state
+            entity_id: sensor.colorloopstate
+            state: '2'
+          - condition: state
+            entity_id: switch.bedroomtoggle
+            state: 'on'
+          sequence:
+          - service: light.turn_on
+            target:
+              entity_id:
+              - light.light_switch
+              - light.light_switch_corner
+            data:
+              brightness_pct: 100
+              rgb_color:
+              - 97
+              - 38
+              - 244
+              transition: 3
+        - conditions:
+          - condition: state
+            entity_id: sensor.colorloopstate
+            state: '3'
+          - condition: state
+            entity_id: switch.bedroomtoggle
+            state: 'on'
+          sequence:
+          - service: light.turn_on
+            target:
+              entity_id:
+              - light.light_switch
+              - light.light_switch_corner
+            data:
+              brightness_pct: 100
+              rgb_color:
+              - 128
+              - 43
+              - 249
+              transition: 3
+        - conditions:
+          - condition: state
+            entity_id: sensor.colorloopstate
+            state: '4'
+          - condition: state
+            entity_id: switch.bedroomtoggle
+            state: 'on'
+          sequence:
+          - service: light.turn_on
+            target:
+              entity_id:
+              - light.light_switch
+              - light.light_switch_corner
+            data:
+              brightness_pct: 100
+              rgb_color:
+              - 234
+              - 51
+              - 69
+              transition: 3
+    - conditions:
+      - condition: trigger
+        id:
+        - hold
+      sequence:
+      - service: script.turn_on
+        target:
+          entity_id: script.morning
+        data: {}
+    - conditions:
+      - condition: trigger
+        id:
+        - double press
+      sequence:
+      - service: switch.toggle
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - switch.light_switch_relay
+    - conditions:
+      - condition: trigger
+        id:
+        - press
+      sequence:
+      - service: switch.toggle
+        target:
+          entity_id: switch.bedroomtoggle
+        data: {}
+  mode: parallel
+  max: 10
+- id: '1708113443018'
+  alias: Dial
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_number.dial
+  condition: []
+  action:
+  - service: cover.set_cover_position
+    target:
+      entity_id: cover.bedroom_blinds
+    data:
+      position: '{{ state_attr(''cover.bedroom_blinds'', ''current_position'') + states(''input_number.dial'')|int}}'
+  mode: queued
+  max: 50
+- id: '1709831743088'
+  alias: Cover Height
+  description: ''
+  use_blueprint:
+    path: langestefan/auto_sun_blind.yaml
+    input:
+      condition:
+      - condition: state
+        entity_id: cover.bedroom_blinds
+        state: open
+      - condition: numeric_state
+        entity_id: sensor.pirateweather_cloud_coverage
+        below: 60
+        enabled: false
+      - condition: numeric_state
+        entity_id: weather.dark_sky
+        attribute: temperature
+        below: 75
+        enabled: false
+      cover_entity:
+        entity_id: cover.bedroom_blinds
+      azimuth: 96
+      max_height: 1.22
+      default_height: 100
+      distance: 0.3
+      minimum_position: 50
+      condition_mode: or
+      change_threshold: 1
+      time_out: 1

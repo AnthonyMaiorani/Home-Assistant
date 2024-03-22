@@ -20,7 +20,7 @@ api:
 ota:
 
 substitutions:
-  name: "Dana's North Incandescent Rope"
+  name: "Dana's West Color Rope"
 
 binary_sensor:
   - platform: gpio
