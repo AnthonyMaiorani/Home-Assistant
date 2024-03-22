@@ -21,6 +21,7 @@
 !/themes/
 !/themes/ios-themes
 !/themes/ios-themes/*
+/pyscript/delete_song.py
 
 # Ignore folders.
 /custom_components
