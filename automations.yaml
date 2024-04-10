@@ -955,7 +955,26 @@
       - condition: state
         entity_id: switch.desktop
         state: 'on'
+      - alias: not playing steam game
+        condition: template
+        value_template: '{{ is_state(''sensor.steam_76561198069805211'', ''unavailable'')
+          or state_attr(''sensor.steam_76561198069805211'', ''game'') ==  None }}'
       sequence:
+      - if:
+        - condition: state
+          entity_id: binary_sensor.bedroom_chair
+          state: 'on'
+        then:
+        - wait_for_trigger:
+          - platform: state
+            entity_id:
+            - binary_sensor.bed_occupancy
+            to: 'on'
+            for:
+              hours: 0
+              minutes: 0
+              seconds: 10
+          continue_on_timeout: false
       - service: script.turn_on
         data: {}
         target:
@@ -2889,20 +2908,42 @@
       - condition: state
         entity_id: input_boolean.privacy
         state: 'on'
+      - condition: state
+        entity_id: switch.g5_flex_privacy_mode
+        state: 'off'
       sequence:
       - service: switch.turn_on
         data: {}
         target:
           entity_id: switch.g5_flex_privacy_mode
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 2
+          milliseconds: 0
     - conditions:
       - condition: state
         entity_id: input_boolean.privacy
         state: 'off'
+      - condition: state
+        entity_id: switch.g5_flex_privacy_mode
+        state: 'on'
       sequence:
       - service: switch.turn_off
         target:
           entity_id: switch.g5_flex_privacy_mode
         data: {}
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 1
+          milliseconds: 0
+      - service: select.select_option
+        metadata: {}
+        data:
+          option: Always
+        target:
+          entity_id: select.g5_flex_recording_mode
   mode: single
 - id: '1665186115040'
   alias: Dog Medicine Reminder
@@ -3361,11 +3402,13 @@
     - binary_sensor.back_door
     to: unlocked
     id: leftroom3
+    enabled: false
   - platform: state
     entity_id:
     - binary_sensor.motion_sensor_motion_detection
     - binary_sensor.bed_occupancy
     - binary_sensor.lumi_lumi_motion_ac02_motion_4
+    - binary_sensor.bedroom_chair
     to: 'on'
     id: enteredroom
   - platform: state
@@ -3744,6 +3787,12 @@
     - conditions:
       - condition: trigger
         id: done
+      sequence:
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 1
+          milliseconds: 0
       - condition: not
         conditions:
         - condition: state
@@ -3759,7 +3808,6 @@
           entity_id: input_boolean.bathroom_occupied
           state: 'on'
         alias: Confirm fan is off, shower is off, timer is off
-      sequence:
       - service: switch.turn_off
         data: {}
         target:
@@ -5130,7 +5178,7 @@
     data: {}
     target:
       entity_id:
-      - switch.sonoff_s31_lite_zb_switch_4
+      - switch.soundbar_airport
   - delay:
       hours: 0
       minutes: 0
@@ -5140,7 +5188,7 @@
     data: {}
     target:
       entity_id:
-      - switch.sonoff_s31_lite_zb_switch_4
+      - switch.soundbar_airport
   - if:
     - condition: not
       conditions:
@@ -5324,6 +5372,17 @@
     - condition: state
       entity_id: input_select.anthony
       state: Just Arrived
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: input_boolean.guest
+      state: 'on'
+    - condition: state
+      entity_id: binary_sensor.bedroom_chair
+      state: 'on'
+    - condition: state
+      entity_id: binary_sensor.bed_occupancy
+      state: 'on'
   action:
   - choose:
     - conditions:
@@ -6991,8 +7050,8 @@
           data: {}
           target:
             entity_id:
-            - media_player.danas_32_tcl_roku_tv
             - media_player.guest_tv
+            - media_player.hisense_tv
         - service: button.press
           data: {}
           target:
@@ -7060,6 +7119,7 @@
             - light.charger2
             - light.cube
             - light.floor_lamp
+          enabled: false
       down_lower:
       - choose:
         - conditions:
@@ -7138,7 +7198,37 @@
               - switch.dana_s_north_incandescent_rope
               - switch.dana_s_south_incandescent_rope
               - switch.dana_s_east_incandescent_rope
-        enabled: true
+        enabled: false
+      - parallel:
+        - service: switch.turn_off
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_incandescant_ropes
+            - switch.polk_omni
+            - switch.dana_s_north_incandescent_rope
+            - switch.dana_s_south_incandescent_rope
+            - switch.dana_s_east_incandescent_rope
+            - switch.dana_s_west_color_rope
+        - service: media_player.turn_off
+          data: {}
+          target:
+            entity_id:
+            - media_player.owntone_output_soundbar
+        - service: button.press
+          data: {}
+          target:
+            entity_id:
+            - button.screenoff_2
+        - service: light.turn_off
+          target:
+            entity_id:
+            - light.dana_s_fan_lights
+          data: {}
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id: switch.dana_s_south_color_rope
       bottom_off:
       - parallel:
         - service: switch.turn_off
@@ -7157,10 +7247,10 @@
           data: {}
           target:
             entity_id:
-            - media_player.danas_32_tcl_roku_tv
             - media_player.owntone_output_soundbar
             - media_player.guest_tv
             - media_player.guest_speakers
+            - media_player.hisense_tv
         - service: button.press
           data: {}
           target:
@@ -7169,13 +7259,9 @@
         - service: light.turn_off
           target:
             entity_id:
-            - light.black_cob
-            - light.floor_lamp_2
-            - light.charger2
-            - light.cube
             - light.dana_s_fan_lights
-            - light.floor_lamp
           data: {}
+          enabled: true
       up_raise:
       - choose:
         - conditions:
@@ -7234,10 +7320,7 @@
           data: {}
           target:
             entity_id:
-            - media_player.danas_32_tcl_roku_tv
             - media_player.owntone_output_soundbar
-            - media_player.guest_tv
-            - media_player.guest_speakers
         - service: button.press
           data: {}
           target:
@@ -7257,7 +7340,7 @@
           data: {}
           target:
             entity_id: switch.dana_s_south_color_rope
-      top_on_release:
+        enabled: false
       - parallel:
         - service: switch.turn_on
           data: {}
@@ -7274,243 +7357,31 @@
           data: {}
           target:
             entity_id:
-            - media_player.danas_32_tcl_roku_tv
             - media_player.guest_tv
+            - media_player.hisense_tv
         - service: button.press
           data: {}
           target:
             entity_id:
             - button.screenon
-            - button.server_signalrgb_on
-        - if:
-          - condition: or
-            conditions:
-            - condition: or
-              conditions:
-              - condition: state
-                entity_id: input_select.anthony
-                state: Just Left
-              - condition: state
-                entity_id: input_select.anthony
-                state: Extended Away
-              - condition: state
-                entity_id: input_select.anthony
-                state: Away
-            - condition: state
-              entity_id: device_tracker.dana
-              state: home
-          - condition: state
-            entity_id: input_boolean.guest
-            state: 'off'
-          then:
-          - service: light.turn_on
-            data:
-              effect: None
-              xy_color:
-              - 0.455
-              - 0.374
-            target:
-              entity_id:
-              - light.dana_s_fan_lights
-          else:
-          - service: light.turn_on
-            data:
-              rgb_color:
-              - 255
-              - 0
-              - 255
-              brightness_pct: 100
-            target:
-              entity_id:
-              - light.dana_s_fan_lights
-            enabled: true
           enabled: false
-        - service: light.turn_on
-          data:
-            effect: None
-            xy_color:
-            - 0.455
-            - 0.374
-          target:
-            entity_id:
-            - light.dana_s_fan_lights
-        - service: light.turn_on
-          data:
-            brightness_pct: 100
-          target:
-            entity_id:
-            - light.black_cob
-            - light.floor_lamp_2
-            - light.charger2
-            - light.cube
-        enabled: false
-      up_raise_release:
-      - parallel:
-        - service: switch.turn_off
-          data: {}
-          target:
-            entity_id:
-            - switch.dana_s_incandescant_ropes
-            - switch.polk_omni
-            - switch.dana_s_north_incandescent_rope
-            - switch.dana_s_south_incandescent_rope
-            - switch.dana_s_east_incandescent_rope
-            - switch.dana_s_west_color_rope
-        - service: light.turn_off
-          data: {}
-          target:
-            entity_id:
-            - light.dana_s_fan_lights
-        - service: media_player.turn_off
-          data: {}
-          target:
-            entity_id:
-            - media_player.danas_32_tcl_roku_tv
-            - media_player.owntone_output_soundbar
-            - media_player.guest_tv
-            - media_player.guest_speakers
-        - service: button.press
-          data: {}
-          target:
-            entity_id:
-            - button.screenoff_2
-            - button.server_server_signalrgb_off
         - service: light.turn_off
           target:
             entity_id:
-            - light.black_cob
-            - light.floor_lamp_2
-            - light.charger2
-            - light.cube
+            - light.wyze_bulb_4
+            - light.wyze_bulb_5
+            - light.wyze_bulb_6
+            - light.wyze_bulb_7
           data: {}
-        - service: switch.turn_on
-          data: {}
-          target:
-            entity_id: switch.dana_s_south_color_rope
-        enabled: false
-      down_lower_release:
-      - choose:
-        - conditions:
-          - condition: or
-            conditions:
-            - condition: state
-              entity_id: switch.dana_s_south_color_rope
-              state: 'on'
-            - condition: state
-              entity_id: switch.dana_s_west_color_rope
-              state: 'on'
-          sequence:
-          - service: switch.turn_off
-            data: {}
-            target:
-              entity_id:
-              - switch.dana_s_color_ropes
-              - switch.dana_s_west_color_rope
-              - switch.dana_s_south_color_rope
-        - conditions:
-          - condition: or
-            conditions:
-            - condition: state
-              entity_id: switch.dana_s_south_color_rope
-              state: 'off'
-            - condition: state
-              entity_id: switch.dana_s_west_color_rope
-              state: 'off'
-          sequence:
-          - service: switch.turn_on
-            data: {}
-            target:
-              entity_id:
-              - switch.dana_s_color_ropes
-              - switch.dana_s_west_color_rope
-              - switch.dana_s_south_color_rope
-        enabled: false
-      - choose:
-        - conditions:
-          - condition: or
-            conditions:
-            - condition: state
-              entity_id: switch.dana_s_north_incandescent_rope
-              state: 'on'
-            - condition: state
-              entity_id: switch.dana_s_south_incandescent_rope
-              state: 'on'
-            - condition: state
-              entity_id: switch.dana_s_east_incandescent_rope
-              state: 'on'
-          sequence:
-          - service: switch.turn_off
-            data: {}
-            target:
-              entity_id:
-              - switch.dana_s_north_incandescent_rope
-              - switch.dana_s_south_incandescent_rope
-              - switch.dana_s_east_incandescent_rope
-        - conditions:
-          - condition: or
-            conditions:
-            - condition: state
-              entity_id: switch.dana_s_north_incandescent_rope
-              state: 'off'
-            - condition: state
-              entity_id: switch.dana_s_south_incandescent_rope
-              state: 'off'
-            - condition: state
-              entity_id: switch.dana_s_east_incandescent_rope
-              state: 'off'
-          sequence:
-          - service: switch.turn_on
-            data: {}
-            target:
-              entity_id:
-              - switch.dana_s_north_incandescent_rope
-              - switch.dana_s_south_incandescent_rope
-              - switch.dana_s_east_incandescent_rope
-        enabled: false
-      middle_stop_release:
-      - parallel:
-        - service: switch.turn_on
-          data: {}
-          target:
-            entity_id:
-            - switch.dana_s_north_incandescent_rope
-            - switch.dana_s_south_incandescent_rope
-            - switch.dana_s_west_color_rope
-            - switch.dana_s_east_incandescent_rope
-            - switch.dana_s_south_color_rope
-        - service: media_player.turn_on
-          data: {}
-          target:
-            entity_id:
-            - media_player.danas_32_tcl_roku_tv
-            - media_player.guest_tv
-        - service: button.press
-          data: {}
-          target:
-            entity_id:
-            - button.screenon
-            - button.server_signalrgb_on
         - service: light.turn_on
-          data:
-            rgb_color:
-            - 255
-            - 0
-            - 255
-            brightness_pct: 100
           target:
             entity_id:
-            - light.dana_s_fan_lights
-          enabled: true
-        - service: light.turn_on
-          data:
-            brightness_pct: 100
-          target:
-            entity_id:
-            - light.black_cob
-            - light.floor_lamp_2
-            - light.charger2
-            - light.cube
-        enabled: false
+            - light.smart_bulb_3
+          data: {}
+      top_on_release: []
+      up_raise_release: []
+      down_lower_release: []
+      middle_stop_release: []
       middle_stop:
       - parallel:
         - service: switch.turn_on
@@ -7554,48 +7425,8 @@
             - light.charger2
             - light.cube
             - light.floor_lamp
-      bottom_off_release:
-      - parallel:
-        - service: switch.turn_off
-          data: {}
-          target:
-            entity_id:
-            - switch.dana_s_color_ropes
-            - switch.dana_s_incandescant_ropes
-            - switch.polk_omni
-            - switch.dana_s_north_incandescent_rope
-            - switch.dana_s_south_incandescent_rope
-            - switch.dana_s_east_incandescent_rope
-            - switch.dana_s_west_color_rope
-            - switch.dana_s_south_color_rope
-        - service: light.turn_off
-          data: {}
-          target:
-            entity_id:
-            - light.dana_s_fan_lights
-        - service: media_player.turn_off
-          data: {}
-          target:
-            entity_id:
-            - media_player.danas_32_tcl_roku_tv
-            - media_player.owntone_output_soundbar
-            - media_player.guest_tv
-            - media_player.guest_speakers
-        - service: button.press
-          data: {}
-          target:
-            entity_id:
-            - button.screenoff_2
-            - button.server_server_signalrgb_off
-        - service: light.turn_off
-          target:
-            entity_id:
-            - light.black_cob
-            - light.floor_lamp_2
-            - light.charger2
-            - light.cube
-          data: {}
-        enabled: false
+          enabled: false
+      bottom_off_release: []
       mode_max: 15
 - id: '1671606640908'
   alias: Bathroom Occupancy Override
@@ -8375,12 +8206,14 @@
         target:
           entity_id:
           - update.battery_state_card_entity_row_update
+    alias: addon/hass updates
   - delay:
       hours: 0
       minutes: 3
       seconds: 0
       milliseconds: 0
-  - parallel:
+  - alias: esphome updates
+    parallel:
     - if:
       - condition: state
         entity_id: update.alarm_firmware
@@ -8431,6 +8264,7 @@
         data: {}
         target:
           entity_id: update.usbswitch_firmware
+      enabled: false
     - if:
       - condition: state
         entity_id: update.wyzebulb1_firmware
@@ -8546,6 +8380,59 @@
         target:
           entity_id:
           - update.ratgdov2_5_60b6fc_firmware
+    - if:
+      - condition: state
+        entity_id: update.wyzebulb7_firmware
+        state: 'on'
+      then:
+      - service: update.install
+        continue_on_error: true
+        data: {}
+        target:
+          entity_id:
+          - update.wyzebulb7_firmware
+    - if:
+      - condition: state
+        entity_id: update.ethrelay1_firmware
+        state: 'on'
+      then:
+      - service: update.install
+        continue_on_error: true
+        data: {}
+        target:
+          entity_id:
+          - update.ethrelay1_firmware
+    - if:
+      - condition: state
+        entity_id: update.ethrelay2_firmware
+        state: 'on'
+      then:
+      - service: update.install
+        continue_on_error: true
+        data: {}
+        target:
+          entity_id:
+          - update.ethrelay2_firmware
+    - if:
+      - condition: state
+        entity_id: update.ethrelay3_firmware
+        state: 'on'
+      then:
+      - service: update.install
+        continue_on_error: true
+        data: {}
+        target:
+          entity_id: update.ethrelay3_firmware
+    - if:
+      - condition: state
+        entity_id: update.athombulb3_firmware
+        state: 'on'
+      then:
+      - service: update.install
+        continue_on_error: true
+        data: {}
+        target:
+          entity_id: update.athombulb3_firmware
   - if:
     - condition: not
       conditions:
@@ -8581,6 +8468,7 @@
         data: {}
         target:
           entity_id: update.home_assistant_supervisor_update
+    alias: tare and turn off bedroom
   - if:
     - condition: or
       conditions:
@@ -10847,7 +10735,7 @@
       sequence:
       - service: unifi.reconnect_client
         data:
-          device_id: 6f6c06677e18334e6dcd4bfe91cdf67b
+          device_id: 6ddb18fe3172bc14e92418d8fa68c8e3
     - conditions:
       - condition: trigger
         id:
@@ -11669,3 +11557,465 @@
       condition_mode: or
       change_threshold: 1
       time_out: 1
+- id: '1712035442279'
+  alias: Power off Razer Headphones
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.desktop
+    from: 'on'
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+    id: desktop off
+  - platform: sun
+    event: sunrise
+    offset: 0
+    id: sunrise
+  - platform: state
+    entity_id:
+    - switch.headphone_charger
+    from: 'on'
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 30
+      seconds: 0
+    id: off for 30 mins
+  - platform: state
+    entity_id:
+    - switch.desktop
+    to: 'on'
+    id: desktop on
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - desktop off
+      sequence:
+      - service: switch.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.headphone_charger
+    - conditions:
+      - condition: trigger
+        id:
+        - sunrise
+        - off for 30 mins
+        - desktop on
+      sequence:
+      - service: switch.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.headphone_charger
+  mode: single
+- id: '1712611470945'
+  alias: Dana's Wall Pico
+  description: ''
+  use_blueprint:
+    path: stephack/core-pico.yaml
+    input:
+      pico_remote: dd591f6e4ecf82cee922c2a70d22325b
+      auto_mode: restart
+      top_on:
+      - parallel:
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_color_ropes
+            - switch.dana_s_incandescant_ropes
+            - switch.dana_s_north_incandescent_rope
+            - switch.dana_s_south_incandescent_rope
+            - switch.dana_s_east_incandescent_rope
+            - switch.dana_s_west_color_rope
+            - switch.dana_s_south_color_rope
+        - service: media_player.turn_on
+          data: {}
+          target:
+            entity_id:
+            - media_player.guest_tv
+            - media_player.hisense_tv
+        - service: button.press
+          data: {}
+          target:
+            entity_id:
+            - button.screenon
+        - if:
+          - condition: or
+            conditions:
+            - condition: or
+              conditions:
+              - condition: state
+                entity_id: input_select.anthony
+                state: Just Left
+              - condition: state
+                entity_id: input_select.anthony
+                state: Extended Away
+              - condition: state
+                entity_id: input_select.anthony
+                state: Away
+            - condition: state
+              entity_id: device_tracker.dana
+              state: home
+          - condition: state
+            entity_id: input_boolean.guest
+            state: 'off'
+          then:
+          - service: light.turn_on
+            data:
+              effect: None
+              xy_color:
+              - 0.455
+              - 0.374
+            target:
+              entity_id:
+              - light.dana_s_fan_lights
+          else:
+          - service: light.turn_on
+            data:
+              rgb_color:
+              - 255
+              - 0
+              - 255
+              brightness_pct: 100
+            target:
+              entity_id:
+              - light.dana_s_fan_lights
+            enabled: true
+          enabled: false
+        - service: light.turn_on
+          data:
+            effect: None
+            xy_color:
+            - 0.455
+            - 0.374
+          target:
+            entity_id:
+            - light.dana_s_fan_lights
+        - service: light.turn_on
+          data:
+            brightness_pct: 100
+          target:
+            entity_id:
+            - light.black_cob
+            - light.floor_lamp_2
+            - light.charger2
+            - light.cube
+            - light.floor_lamp
+          enabled: false
+      down_lower:
+      - choose:
+        - conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: switch.dana_s_south_color_rope
+              state: 'on'
+            - condition: state
+              entity_id: switch.dana_s_west_color_rope
+              state: 'on'
+          sequence:
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id:
+              - switch.dana_s_color_ropes
+              - switch.dana_s_west_color_rope
+              - switch.dana_s_south_color_rope
+        - conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: switch.dana_s_south_color_rope
+              state: 'off'
+            - condition: state
+              entity_id: switch.dana_s_west_color_rope
+              state: 'off'
+          sequence:
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id:
+              - switch.dana_s_color_ropes
+              - switch.dana_s_west_color_rope
+              - switch.dana_s_south_color_rope
+        enabled: false
+      - choose:
+        - conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: switch.dana_s_north_incandescent_rope
+              state: 'on'
+            - condition: state
+              entity_id: switch.dana_s_south_incandescent_rope
+              state: 'on'
+            - condition: state
+              entity_id: switch.dana_s_east_incandescent_rope
+              state: 'on'
+          sequence:
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id:
+              - switch.dana_s_north_incandescent_rope
+              - switch.dana_s_south_incandescent_rope
+              - switch.dana_s_east_incandescent_rope
+        - conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: switch.dana_s_north_incandescent_rope
+              state: 'off'
+            - condition: state
+              entity_id: switch.dana_s_south_incandescent_rope
+              state: 'off'
+            - condition: state
+              entity_id: switch.dana_s_east_incandescent_rope
+              state: 'off'
+          sequence:
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id:
+              - switch.dana_s_north_incandescent_rope
+              - switch.dana_s_south_incandescent_rope
+              - switch.dana_s_east_incandescent_rope
+        enabled: false
+      - parallel:
+        - service: switch.turn_off
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_incandescant_ropes
+            - switch.polk_omni
+            - switch.dana_s_north_incandescent_rope
+            - switch.dana_s_south_incandescent_rope
+            - switch.dana_s_east_incandescent_rope
+            - switch.dana_s_west_color_rope
+        - service: media_player.turn_off
+          data: {}
+          target:
+            entity_id:
+            - media_player.owntone_output_soundbar
+        - service: button.press
+          data: {}
+          target:
+            entity_id:
+            - button.screenoff_2
+        - service: light.turn_off
+          target:
+            entity_id:
+            - light.dana_s_fan_lights
+          data: {}
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id: switch.dana_s_south_color_rope
+      bottom_off:
+      - parallel:
+        - service: switch.turn_off
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_color_ropes
+            - switch.dana_s_incandescant_ropes
+            - switch.polk_omni
+            - switch.dana_s_north_incandescent_rope
+            - switch.dana_s_south_incandescent_rope
+            - switch.dana_s_east_incandescent_rope
+            - switch.dana_s_west_color_rope
+            - switch.dana_s_south_color_rope
+        - service: media_player.turn_off
+          data: {}
+          target:
+            entity_id:
+            - media_player.owntone_output_soundbar
+            - media_player.guest_tv
+            - media_player.guest_speakers
+            - media_player.hisense_tv
+        - service: button.press
+          data: {}
+          target:
+            entity_id:
+            - button.screenoff_2
+        - service: light.turn_off
+          target:
+            entity_id:
+            - light.dana_s_fan_lights
+          data: {}
+          enabled: true
+      up_raise:
+      - choose:
+        - conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: switch.dana_s_north_incandescent_rope
+              state: 'on'
+            - condition: state
+              entity_id: switch.dana_s_south_incandescent_rope
+              state: 'on'
+            - condition: state
+              entity_id: switch.dana_s_east_incandescent_rope
+              state: 'on'
+          sequence:
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id:
+              - switch.dana_s_north_incandescent_rope
+              - switch.dana_s_south_incandescent_rope
+              - switch.dana_s_east_incandescent_rope
+        - conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: switch.dana_s_north_incandescent_rope
+              state: 'off'
+            - condition: state
+              entity_id: switch.dana_s_south_incandescent_rope
+              state: 'off'
+            - condition: state
+              entity_id: switch.dana_s_east_incandescent_rope
+              state: 'off'
+          sequence:
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id:
+              - switch.dana_s_north_incandescent_rope
+              - switch.dana_s_south_incandescent_rope
+              - switch.dana_s_east_incandescent_rope
+        enabled: false
+      - parallel:
+        - service: switch.turn_off
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_incandescant_ropes
+            - switch.polk_omni
+            - switch.dana_s_north_incandescent_rope
+            - switch.dana_s_south_incandescent_rope
+            - switch.dana_s_east_incandescent_rope
+            - switch.dana_s_west_color_rope
+        - service: media_player.turn_off
+          data: {}
+          target:
+            entity_id:
+            - media_player.owntone_output_soundbar
+        - service: button.press
+          data: {}
+          target:
+            entity_id:
+            - button.screenoff_2
+        - service: light.turn_off
+          target:
+            entity_id:
+            - light.black_cob
+            - light.floor_lamp_2
+            - light.charger2
+            - light.cube
+            - light.floor_lamp
+            - light.dana_s_fan_lights
+          data: {}
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id: switch.dana_s_south_color_rope
+        enabled: false
+      - parallel:
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_color_ropes
+            - switch.dana_s_incandescant_ropes
+            - switch.dana_s_north_incandescent_rope
+            - switch.dana_s_south_incandescent_rope
+            - switch.dana_s_east_incandescent_rope
+            - switch.dana_s_west_color_rope
+            - switch.dana_s_south_color_rope
+        - service: media_player.turn_on
+          data: {}
+          target:
+            entity_id:
+            - media_player.guest_tv
+            - media_player.hisense_tv
+        - service: button.press
+          data: {}
+          target:
+            entity_id:
+            - button.screenon
+          enabled: false
+        - service: light.turn_off
+          target:
+            entity_id:
+            - light.wyze_bulb_4
+            - light.wyze_bulb_5
+            - light.wyze_bulb_6
+            - light.wyze_bulb_7
+          data: {}
+        - service: light.turn_on
+          target:
+            entity_id:
+            - light.smart_bulb_3
+          data: {}
+      top_on_release: []
+      up_raise_release: []
+      down_lower_release: []
+      middle_stop_release: []
+      middle_stop:
+      - parallel:
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id:
+            - switch.dana_s_north_incandescent_rope
+            - switch.dana_s_south_incandescent_rope
+            - switch.dana_s_west_color_rope
+            - switch.dana_s_east_incandescent_rope
+            - switch.dana_s_south_color_rope
+        - service: media_player.turn_on
+          data: {}
+          target:
+            entity_id:
+            - media_player.danas_32_tcl_roku_tv
+            - media_player.guest_tv
+        - service: button.press
+          data: {}
+          target:
+            entity_id:
+            - button.screenon
+        - service: light.turn_on
+          data:
+            rgb_color:
+            - 255
+            - 0
+            - 255
+            brightness_pct: 100
+          target:
+            entity_id:
+            - light.dana_s_fan_lights
+          enabled: true
+        - service: light.turn_on
+          data:
+            brightness_pct: 100
+          target:
+            entity_id:
+            - light.black_cob
+            - light.floor_lamp_2
+            - light.charger2
+            - light.cube
+            - light.floor_lamp
+          enabled: false
+      bottom_off_release: []
+      mode_max: 15

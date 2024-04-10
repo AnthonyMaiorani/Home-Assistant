@@ -4,11 +4,14 @@ esphome:
 
 esp32:
   board: esp32dev
+  framework:
+    type: esp-idf
 
 wifi:
   ssid: !secret ssid
   password: !secret password
   fast_connect: on
+  enable_btm: true
   #output_power: 8.5dB
   manual_ip:
     static_ip: ${static_ip}

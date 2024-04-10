@@ -197,7 +197,7 @@ color_loop:
       - condition: numeric_state
         entity_id: weather.dark_sky
         attribute: temperature
-        below: 85
+        below: 75
       - condition: state
         entity_id: input_boolean.showering
         state: 'off'
@@ -211,6 +211,9 @@ color_loop:
       - condition: state
         entity_id: cover.bedroom_blinds
         state: closed
+      - condition: state
+        entity_id: switch.desktop
+        state: 'off'
       then:
       - service: cover.open_cover
         data: {}
@@ -442,7 +445,7 @@ call:
     - event: event_change_nanoleaf
       event_data: {}
     - repeat:
-        count: 200
+        count: 250
         sequence:
         - service: light.turn_off
           data: {}
@@ -950,7 +953,7 @@ morning:
       - condition: numeric_state
         entity_id: weather.dark_sky
         attribute: temperature
-        below: 85
+        below: 75
       - condition: state
         entity_id: input_boolean.showering
         state: 'off'
@@ -964,6 +967,9 @@ morning:
       - condition: state
         entity_id: cover.bedroom_blinds
         state: closed
+      - condition: state
+        entity_id: switch.desktop
+        state: 'off'
       then:
       - service: cover.open_cover
         data: {}

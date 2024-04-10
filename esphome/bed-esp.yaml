@@ -71,7 +71,7 @@ binary_sensor:
       - delayed_on: 1000ms #avoid bump/press being reported as detected
       - delayed_off: 6s #avoid shifting being reported as clear
     lambda: |-
-      if (id(bed_weight).state >= (id(zero) + 30000) ) {
+      if (id(bed_weight).state >= (id(zero) + 40000) ) {
         return true;
       } else {
         return false;

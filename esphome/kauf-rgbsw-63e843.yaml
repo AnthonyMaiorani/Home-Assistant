@@ -16,7 +16,8 @@ wifi:
     bssid: 9C:05:D6:37:4A:30
   fast_connect: off
   power_save_mode: none
-  output_power: 20dB
+  reboot_timeout: 5min
+  #output_power: 20dB
   manual_ip:
     static_ip: ${static_ip}
     gateway: !secret gateway

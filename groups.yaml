@@ -25,12 +25,12 @@ home:
     - cover.couch_left_left
     - cover.couch_right_right
     - switch.lrtv
-    - switch.fronttv
-    - switch.guesttv
-    - switch.mastertv
+    - switch.guest_bedroom_light
+    - switch.guest_bedroom_fan
     - light.hallway_lights
     - switch.exhaust_fan
     - input_boolean.privacy
+
 indoor_cams:
   name: Indoor Wyze Cams
   entities:

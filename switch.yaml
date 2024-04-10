@@ -62,7 +62,7 @@
   method: patch
   unique_id: bed
 - platform: rest
-  resource: http://192.168.1.180/json/state
+  resource: http://192.168.1.104/json/state
   name: Rope
   body_on: '{"on":true}'
   body_off: '{"on":false}'
@@ -401,6 +401,70 @@
           target:
             entity_id:
               - light.caseta_lamp_dimmer
+    caseta_lamp_plug_2:
+      unique_id: caseta_lamp_plug_2
+      friendly_name: Caseta Lamp Plug 2
+      value_template: "{{ is_state('light.caseta_lamp_plug_2', 'on') }}"
+      turn_on:
+        - service: light.turn_on
+          data:
+            brightness_pct: 100
+          target:
+            entity_id:
+              - light.caseta_lamp_plug_2
+      turn_off:
+        - service: light.turn_off
+          target:
+            entity_id:
+              - light.caseta_lamp_plug_2
+    caseta_lamp_plug_3:
+      unique_id: caseta_lamp_plug_3
+      friendly_name: Caseta Lamp Plug 3
+      value_template: "{{ is_state('light.dana_s_bedroom_north_holiday_lights', 'on') }}"
+      turn_on:
+        - service: light.turn_on
+          data:
+            brightness_pct: 100
+          target:
+            entity_id:
+              - light.dana_s_bedroom_north_holiday_lights
+      turn_off:
+        - service: light.turn_off
+          target:
+            entity_id:
+              - light.dana_s_bedroom_north_holiday_lights
+    caseta_lamp_plug_4:
+      unique_id: caseta_lamp_plug_4
+      friendly_name: Caseta Lamp Plug 4
+      value_template: "{{ is_state('light.dana_s_bedroom_south_holiday_lights', 'on') }}"
+      turn_on:
+        - service: light.turn_on
+          data:
+            brightness_pct: 100
+          target:
+            entity_id:
+              - light.dana_s_bedroom_south_holiday_lights
+      turn_off:
+        - service: light.turn_off
+          target:
+            entity_id:
+              - light.dana_s_bedroom_south_holiday_lights
+    caseta_lamp_plug_5:
+      unique_id: caseta_lamp_plug_5
+      friendly_name: Caseta Lamp Plug 5
+      value_template: "{{ is_state('light.dana_s_bedroom_soundbar_airport', 'on') }}"
+      turn_on:
+        - service: light.turn_on
+          data:
+            brightness_pct: 100
+          target:
+            entity_id:
+              - light.dana_s_bedroom_soundbar_airport
+      turn_off:
+        - service: light.turn_off
+          target:
+            entity_id:
+              - light.dana_s_bedroom_soundbar_airport
     desktop:
       unique_id: desktop
       friendly_name: Desktop
