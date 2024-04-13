@@ -23,7 +23,6 @@ fan_off:
       target:
         entity_id:
         - switch.lumi_lumi_plug_maus01_switch_2
-        - light.shapes_483c
         - light.shapes_4948_2
         - light.shapes_007f
         - light.shapes_4948
@@ -61,6 +60,7 @@ fan_off:
         - light.wled
         - light.rope
         - light.lines
+        - light.closet_lights
     - if:
       - condition: state
         entity_id: automation.nanoleaf_scene_changer_and_auto_brightness
@@ -165,10 +165,10 @@ color_loop:
         - light.wled
         - light.bed
         - light.govee
-        - light.shapes_483c
         - light.shapes_4948_2
         - light.rope
         - light.lines
+        - light.closet_lights
     - service: switch.turn_on
       data: {}
       target:
@@ -452,6 +452,7 @@ call:
           target:
             entity_id:
             - light.wled
+            - light.closet_lights
         - service: light.turn_on
           data:
             brightness: 10
@@ -527,8 +528,8 @@ night:
         - light.bed
         - light.rope
         - light.lines
-        - light.shapes_483c
         - light.shapes_4948_2
+        - light.closet_lights
     - service: cover.close_cover
       data: {}
       target:
@@ -853,6 +854,7 @@ morning:
         - light.bed
         - light.rope
         - light.lines
+        - light.closet_lights
     - data:
         brightness: 255
         effect: Color Loop

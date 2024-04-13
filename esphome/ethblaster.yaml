@@ -1,0 +1,90 @@
+esphome:
+  name: ethblaster
+
+esp32:
+  board: wt32-eth01
+
+#wifi:
+#  ssid: !secret ssid
+#  password: !secret password
+#  fast_connect: on
+#  enable_btm: true
+#  manual_ip:
+#    static_ip: ${static_ip}
+#    gateway: !secret gateway
+#    subnet: !secret subnet
+#    dns1: !secret dns1
+
+binary_sensor:
+  - platform: gpio
+    pin: GPIO36
+    id: usbpower
+    internal: true
+
+ethernet:
+  type: LAN8720
+  mdc_pin: GPIO23
+  mdio_pin: GPIO18
+  clk_mode: GPIO0_IN
+  phy_addr: 1
+  power_pin: GPIO16
+  manual_ip:
+    static_ip: ${static_ip}
+    gateway: !secret gateway
+    subnet: !secret subnet
+    dns1: !secret dns1
+
+substitutions:
+  static_ip: 192.168.1.59
+
+bluetooth_proxy:
+  active: true
+esp32_ble_tracker:
+  scan_parameters:
+    interval: 1100ms
+    window: 1100ms
+
+logger:
+api:
+ota:
+
+switch:
+  - platform: template
+    name: Samsung TV
+    lambda: |-
+      if (id(usbpower).state) {
+        return true;
+      } else {
+        return false;
+      }
+    turn_on_action:
+      - remote_transmitter.transmit_pronto:
+          transmitter_id: tx_ir
+          repeat:
+            times: 5
+            wait_time: 30ms
+          data: "0000 006D 0000 0022 00ac 00ac 0016 0040 0016 0040 0016 0040 0016 0015 0016 0015 0016 0015 0016 0015 0016 0015 0016 0040 0016 0040 0016 0040 0016 0015 0016 0015 0016 0015 0016 0015 0016 0015 0016 0040 0016 0015 0016 0015 0016 0040 0016 0040 0016 0015 0016 0015 0016 0040 0016 0015 0016 0040 0016 0040 0016 0015 0016 0015 0016 0040 0016 0040 0016 0015 0016 071c"
+    turn_off_action:
+      - remote_transmitter.transmit_pronto:
+          transmitter_id: tx_ir
+          repeat:
+            times: 5
+            wait_time: 30ms
+          data: "0000 006D 0022 0000 00ad 00ad 0015 0041 0015 0041 0015 0041 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 0041 0015 0041 0015 0041 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 0041 0015 0041 0015 0015 0015 0015 0015 0041 0015 0041 0015 0041 0015 0041 0015 0015 0015 0015 0015 0041 0015 0041 0015 0015 0015 0728"
+
+remote_transmitter:
+  - pin: GPIO4 # IR Transmitter 
+    carrier_duty_percent: 50%
+    id: tx_ir
+  - pin: GPIO32 # 433 Transmitter 
+    carrier_duty_percent: 100%
+    id: tx_433
+
+remote_receiver:
+  - pin: 
+      number: GPIO14 # IR Receiver 
+      inverted: true
+    id: rx_ir
+    #dump: all
+  - pin: GPIO33 # 433 Receiver 
+    id: rx_433

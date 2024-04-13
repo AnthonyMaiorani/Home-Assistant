@@ -2,9 +2,7 @@ esphome:
   name: ethrelay1
 
 esp32:
-  board: esp32dev
-  framework:
-    type: esp-idf
+  board: wt32-eth01
 
 #wifi:
 #  ssid: !secret ssid

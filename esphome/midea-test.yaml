@@ -3,9 +3,7 @@ esphome:
   friendly_name: midea
 
 esp32:
-  board: esp32dev
-  framework:
-    type: arduino
+  board: wt32-eth01
 
 ethernet:
   type: LAN8720

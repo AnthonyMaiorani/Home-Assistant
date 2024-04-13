@@ -5034,6 +5034,9 @@
         - condition: state
           entity_id: input_select.anthony
           state: Home
+    - service: notify.mobile_app_iphone
+      data:
+        message: request_location_update
   - alias: Set Spotify Output to iPhone
     repeat:
       while:
@@ -9439,27 +9442,33 @@
     path: stephack/core-pico.yaml
     input:
       pico_remote: b115f9250ed77b94f398b0f409dd7f63
-      auto_mode: parallel
+      auto_mode: restart
       top_on:
-      - service: light.turn_on
-        target:
-          entity_id: light.guest_bedroom_light
+      - service: switch.turn_on
+        metadata: {}
         data: {}
+        target:
+          entity_id: switch.guest_bedroom_light
       down_lower:
-      - service: light.turn_off
-        target:
-          entity_id: light.guest_bedroom_fan
+      - service: switch.turn_off
+        metadata: {}
         data: {}
+        target:
+          entity_id:
+          - switch.guest_bedroom_fan
       bottom_off:
-      - service: light.turn_off
-        target:
-          entity_id: light.guest_bedroom_light
+      - service: switch.turn_off
+        metadata: {}
         data: {}
+        target:
+          entity_id: switch.guest_bedroom_light
       up_raise:
-      - service: light.turn_on
-        target:
-          entity_id: light.guest_bedroom_fan
+      - service: switch.turn_on
+        metadata: {}
         data: {}
+        target:
+          entity_id:
+          - switch.guest_bedroom_fan
       top_on_release: []
       up_raise_release: []
       down_lower_release: []
@@ -9468,7 +9477,8 @@
       - service: switch.toggle
         data: {}
         target:
-          entity_id: switch.samsungtv
+          entity_id: switch.samsung_tv
+        enabled: true
       - service: media_player.turn_on
         target:
           entity_id:
@@ -9476,10 +9486,11 @@
           device_id: []
           area_id: []
         data: {}
+        enabled: false
       - choose:
         - conditions:
           - condition: state
-            entity_id: binary_sensor.guest_bedroom_tv_in_use
+            entity_id: switch.samsung_tv
             state: 'on'
           sequence:
           - service: media_player.turn_off
@@ -9488,21 +9499,22 @@
             data: {}
           - service: switch.turn_off
             target:
-              entity_id: switch.samsungtv
+              entity_id: switch.samsung_tv
             data: {}
         - conditions:
           - condition: state
-            entity_id: binary_sensor.guest_bedroom_tv_in_use
+            entity_id: switch.samsung_tv
             state: 'off'
           sequence:
           - service: switch.turn_on
             target:
-              entity_id: switch.samsungtv
+              entity_id: switch.samsung_tv
             data: {}
           - service: media_player.turn_on
             target:
               entity_id: media_player.guest
             data: {}
+        enabled: true
       bottom_off_release: []
 - id: '1683843733749'
   alias: Turn Off USW LEDs
@@ -10296,6 +10308,15 @@
     from: 'on'
     to: 'off'
     id: door closed
+  - platform: state
+    entity_id:
+    - binary_sensor.motion_sensor_motion_detection
+    id: clear
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
   condition: []
   action:
   - choose:
@@ -10316,6 +10337,24 @@
           effect: Closet Lights
         target:
           entity_id: light.wled
+    - conditions:
+      - condition: trigger
+        id:
+        - clear
+        - door closed
+      - condition: state
+        entity_id: light.wled
+        state: 'off'
+      - condition: state
+        entity_id: light.closet_lights
+        state: 'on'
+      sequence:
+      - service: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - light.closet_lights
   mode: single
 - id: '1693256810267'
   alias: GoXLR

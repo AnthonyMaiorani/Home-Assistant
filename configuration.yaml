@@ -70,7 +70,9 @@ notify:
 
 rest_command:
   set_wled_brightness:
-    url: http://192.168.1.57/win&A={{ states("input_number.wled_brightness") }}
+    url: http://192.168.1.57/win&SS=0&SB={{ states("input_number.wled_brightness") }}
+  set_closet_brightness:
+    url: http://192.168.1.57/win&SS=1&SB={{ states("input_number.wled_brightness") }}
   set_wled_preset:
     url: http://192.168.1.57/win&PL={{ state_attr('input_select.wled_preset', 'options').index(states('input_select.wled_preset')) + 1 }}
   set_bed_brightness:
