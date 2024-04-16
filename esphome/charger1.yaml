@@ -1,5 +1,5 @@
 esphome:
-  name: ethrelay2
+  name: charger1
 
 esp32:
   board: wt32-eth01
@@ -31,7 +31,11 @@ ethernet:
     dns1: !secret dns1
 
 substitutions:
-  static_ip: 192.168.1.217
+  static_ip: 192.168.1.183
+  # red: GPIO05
+  # green: GPIO33
+  # blue: GPIO32
+  # friendly_name: "Bed Lights"
 
 bluetooth_proxy:
   active: true
@@ -43,8 +47,3 @@ esp32_ble_tracker:
 logger:
 api:
 ota:
-
-switch:
-  - platform: gpio
-    name: "Relay"
-    pin: 32

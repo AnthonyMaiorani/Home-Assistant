@@ -999,7 +999,7 @@
           conditions:
           - condition: numeric_state
             entity_id: climate.home
-            attribute: temperature
+            attribute: current_temperature
             above: 70
           - condition: numeric_state
             entity_id: weather.dark_sky
@@ -1011,6 +1011,7 @@
           target:
             entity_id:
             - switch.ac
+        alias: turn on ac
       - if:
         - condition: state
           entity_id: light.fan_lights
@@ -1021,13 +1022,16 @@
           target:
             entity_id: script.fan_off
         alias: Fan Lights Off
-      - if:
+      - alias: if home alone, turn off stuff
+        if:
         - condition: state
           entity_id: binary_sensor.home_alone
           state: 'on'
-        - condition: state
-          entity_id: binary_sensor.bathroom_occupancy
-          state: 'off'
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: binary_sensor.bathroom_occupancy
+            state: 'on'
         then:
         - service: light.turn_off
           data: {}
@@ -1073,7 +1077,6 @@
                 - media_player.kitchen_speakers
                 - media_player.owntone_output_kitchen_right
                 - media_player.owntone_output_kitchen_left
-        alias: if home alone, turn off stuff
       - service: media_player.turn_off
         data: {}
         target:
@@ -1088,9 +1091,12 @@
           - media_player.owntone_output_garage_homepod
           - media_player.owntone_output_front_homepod
           - media_player.owntone_output_master_bedroom_tv
-          - media_player.owntone_output_danas_nightstand
           - media_player.owntone_output_guest_left
           - media_player.owntone_output_guest_right
+          - media_player.owntone_output_front_left
+          - media_player.owntone_output_bathroom
+          - media_player.owntone_output_living_room_speakers
+          - media_player.owntone_output_guest_room_tv
       - if:
         - condition: or
           conditions:
@@ -1712,7 +1718,6 @@
   - platform: state
     entity_id:
     - light.shapes_007f
-    - light.shapes_483c
     from: unavailable
     to: 'on'
     id: desk available
@@ -2029,7 +2034,7 @@
     - repeat:
         until:
         - condition: template
-          value_template: "{{ \n(state_attr('light.shapes_483c', \"brightness\")|int(0)
+          value_template: "{{ \n(state_attr('light.shapes_007f', \"brightness\")|int(0)
             - states('sensor.nanoleaf_auto_brightness')|int(0))|abs <= 2 \nand \n(state_attr('light.shapes_ee82',
             \"brightness\")|int(0) - states('sensor.nanoleaf_auto_brightness')|int(0))|abs
             <= 2 \nand\n(state_attr('light.shapes_4948_2', \"brightness\")|int(0)
@@ -2142,9 +2147,6 @@
         - condition: or
           conditions:
           - condition: state
-            entity_id: light.shapes_483c
-            state: 'on'
-          - condition: state
             entity_id: light.shapes_4948_2
             state: 'on'
           - condition: state
@@ -2167,9 +2169,6 @@
               state: 'on'
             - condition: or
               conditions:
-              - condition: state
-                entity_id: light.shapes_483c
-                state: 'on'
               - condition: state
                 entity_id: light.shapes_4948_2
                 state: 'on'
@@ -2223,9 +2222,6 @@
                   state: 'on'
             - condition: or
               conditions:
-              - condition: state
-                entity_id: light.shapes_483c
-                state: 'on'
               - condition: state
                 entity_id: light.shapes_4948_2
                 state: 'on'
@@ -2317,7 +2313,7 @@
       - delay:
           hours: 0
           minutes: 0
-          seconds: 15
+          seconds: 20
           milliseconds: 0
   mode: single
 - id: '1661880635465'
@@ -3560,6 +3556,7 @@
                 - media_player.owntone_output_kitchen_left
                 - media_player.owntone_output_kitchen_right
                 - media_player.owntone_output_front_homepod
+                - media_player.owntone_output_front_left
             - delay:
                 hours: 0
                 minutes: 0
@@ -3579,6 +3576,7 @@
                   - media_player.owntone_output_kitchen_left
                   - media_player.owntone_output_kitchen_right
                   - media_player.owntone_output_front_homepod
+                  - media_player.owntone_output_front_left
               else:
               - service: media_player.volume_set
                 data:
@@ -3625,6 +3623,8 @@
             - media_player.kitchen_speakers
             - media_player.owntone_output_kitchen_right
             - media_player.owntone_output_kitchen_left
+            - media_player.owntone_output_front_left
+            - media_player.owntone_output_front_homepod
         - if:
           - condition: or
             conditions:
@@ -3641,8 +3641,8 @@
             alias: Hot
           - condition: numeric_state
             entity_id: climate.home
-            attribute: temperature
-            above: 73
+            attribute: current_temperature
+            above: 70
           then:
           - service: switch.turn_on
             data: {}
@@ -5171,11 +5171,6 @@
         hours: 0
         minutes: 0
         seconds: 5
-  - condition: not
-    conditions:
-    - condition: state
-      entity_id: switch.sonoff_s31_lite_zb_switch_4
-      state: unavailable
   action:
   - service: switch.turn_off
     data: {}
@@ -5235,7 +5230,7 @@
   - wait_for_trigger:
     - platform: state
       entity_id:
-      - media_player.owntone_output_anthony_s_desk
+      - media_player.owntone_output_soundbar
       from: unavailable
     continue_on_timeout: true
     timeout:
@@ -5243,40 +5238,6 @@
       minutes: 2
       seconds: 0
       milliseconds: 0
-  - repeat:
-      until:
-      - condition: state
-        entity_id: media_player.owntone_output_anthony_s_desk
-        state: 'on'
-      sequence:
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 4
-          milliseconds: 0
-      - service: media_player.turn_on
-        data: {}
-        target:
-          entity_id: media_player.owntone_output_anthony_s_desk
-    enabled: false
-  - repeat:
-      until:
-      - condition: template
-        value_template: '{{ state_attr(''media_player.owntone_output_anthony_s_desk'',
-          ''volume_level'') == state_attr(''media_player.spotify_anthony221121'',
-          ''volume_level'') }}
-
-          '
-      sequence:
-      - service: media_player.volume_set
-        data:
-          volume_level: '{{ state_attr(''media_player.spotify_anthony221121'', ''volume_level'')
-            }}
-
-            '
-        target:
-          entity_id: media_player.owntone_output_anthony_s_desk
-    enabled: false
   mode: single
 - id: '1668917163074'
   alias: Turn off lights at night
@@ -8308,6 +8269,7 @@
         data: {}
         target:
           entity_id: update.wyzebulb4_firmware
+      enabled: false
     - if:
       - condition: state
         entity_id: update.wyzebulb5_firmware
@@ -8318,6 +8280,7 @@
         data: {}
         target:
           entity_id: update.wyzebulb5_firmware
+      enabled: false
     - if:
       - condition: state
         entity_id: update.wyzebulb6_firmware
@@ -8328,6 +8291,7 @@
         data: {}
         target:
           entity_id: update.wyzebulb6_firmware
+      enabled: false
     - if:
       - condition: state
         entity_id: update.wyzebulb7_firmware
@@ -8339,6 +8303,7 @@
         target:
           entity_id:
           - update.wyzebulb7_firmware
+      enabled: false
     - if:
       - condition: state
         state: 'on'
@@ -8350,6 +8315,7 @@
         target:
           entity_id:
           - update.guest_bedroom_tv_plug_firmware
+      enabled: false
     - if:
       - condition: state
         state: 'on'
@@ -8394,6 +8360,7 @@
         target:
           entity_id:
           - update.wyzebulb7_firmware
+      enabled: false
     - if:
       - condition: state
         entity_id: update.ethrelay1_firmware
@@ -8436,6 +8403,7 @@
         data: {}
         target:
           entity_id: update.athombulb3_firmware
+      enabled: false
   - if:
     - condition: not
       conditions:
@@ -10638,7 +10606,6 @@
     id: wyze7
   - platform: state
     entity_id:
-    - light.shapes_483c
     - light.shapes_007f
     to: unavailable
     for:

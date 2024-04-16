@@ -2,9 +2,9 @@ esphome:
   name: bed-esp
 
 esp32:
-  board: esp32dev
+  board: wt32-eth01
   framework:
-    type: arduino
+    type: esp-idf
 
 ethernet:
   type: LAN8720
