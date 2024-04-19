@@ -33,12 +33,12 @@ ethernet:
 substitutions:
   static_ip: 192.168.1.217
 
-bluetooth_proxy:
-  active: true
-esp32_ble_tracker:
-  scan_parameters:
-    interval: 1100ms
-    window: 1100ms
+#bluetooth_proxy:
+#  active: true
+#esp32_ble_tracker:
+#  scan_parameters:
+#    interval: 1100ms
+#    window: 1100ms
 
 logger:
 api:

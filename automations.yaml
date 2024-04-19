@@ -331,6 +331,9 @@
         entity_id:
         - switch.airport_express
         - switch.lumi_lumi_plug_maus01_switch_3
+        - switch.soundbar_airport
+        - switch.headphone_charger
+        - switch.sonoff_s31_lite_zb_switch_3
     - if:
       - condition: state
         entity_id: switch.desktop
@@ -979,6 +982,7 @@
         data: {}
         target:
           entity_id: script.call
+      alias: night call
     default:
     - parallel:
       - if:
@@ -3650,7 +3654,7 @@
               entity_id:
               - switch.ac
           else: []
-  mode: single
+  mode: restart
 - id: '1665996041801'
   alias: Katchy
   description: ''
@@ -7169,7 +7173,6 @@
           target:
             entity_id:
             - switch.dana_s_incandescant_ropes
-            - switch.polk_omni
             - switch.dana_s_north_incandescent_rope
             - switch.dana_s_south_incandescent_rope
             - switch.dana_s_east_incandescent_rope
@@ -7201,7 +7204,6 @@
             entity_id:
             - switch.dana_s_color_ropes
             - switch.dana_s_incandescant_ropes
-            - switch.polk_omni
             - switch.dana_s_north_incandescent_rope
             - switch.dana_s_south_incandescent_rope
             - switch.dana_s_east_incandescent_rope
@@ -7275,7 +7277,6 @@
           target:
             entity_id:
             - switch.dana_s_incandescant_ropes
-            - switch.polk_omni
             - switch.dana_s_north_incandescent_rope
             - switch.dana_s_south_incandescent_rope
             - switch.dana_s_east_incandescent_rope
@@ -7853,9 +7854,6 @@
       entity_id: update.alexa_media_player_update
       state: 'on'
     - condition: state
-      entity_id: update.wyze_update
-      state: 'on'
-    - condition: state
       entity_id: update.pirate_weather_update
       state: 'on'
     - condition: state
@@ -8404,6 +8402,28 @@
         target:
           entity_id: update.athombulb3_firmware
       enabled: false
+    - if:
+      - condition: state
+        entity_id: update.ethblaster_firmware
+        state: 'on'
+      then:
+      - service: update.install
+        continue_on_error: true
+        data: {}
+        target:
+          entity_id:
+          - update.ethblaster_firmware
+    - if:
+      - condition: state
+        entity_id: update.lamp1_firmware
+        state: 'on'
+      then:
+      - service: update.install
+        continue_on_error: true
+        data: {}
+        target:
+          entity_id:
+          - update.lamp1_firmware
   - if:
     - condition: not
       conditions:
@@ -8460,9 +8480,6 @@
         state: 'on'
       - condition: state
         entity_id: update.alexa_media_player_update
-        state: 'on'
-      - condition: state
-        entity_id: update.wyze_update
         state: 'on'
       - condition: state
         entity_id: update.pirate_weather_update
@@ -8537,16 +8554,7 @@
           data: {}
           target:
             entity_id: update.alexa_media_player_update
-      - if:
-        - condition: state
-          entity_id: update.wyze_update
-          state: 'on'
-        then:
-        - service: update.install
-          data: {}
-          target:
-            entity_id:
-            - update.wyze_update
+        enabled: false
       - if:
         - condition: state
           entity_id: update.pirate_weather_update
@@ -9030,7 +9038,8 @@
       - service: switch.turn_on
         data: {}
         target:
-          entity_id: switch.polk_omni
+          entity_id:
+          - switch.subwoofer
     - conditions:
       - condition: state
         entity_id: pyscript.airport_2_playing
@@ -9043,7 +9052,8 @@
       - service: switch.turn_off
         data: {}
         target:
-          entity_id: switch.polk_omni
+          entity_id:
+          - switch.subwoofer
   mode: restart
 - id: '1680252272232'
   alias: Dana's Bedroom Toggle
@@ -9179,7 +9189,6 @@
             entity_id:
             - switch.dana_s_color_ropes
             - switch.dana_s_incandescant_ropes
-            - switch.polk_omni
         - service: light.turn_off
           data: {}
           target:
@@ -9843,11 +9852,20 @@
         id:
         - arrived
         - home
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.riana
+          state: Home
+        - condition: state
+          entity_id: input_select.riana
+          state: Just Arrived
       sequence:
-      - service: switch.turn_off
+      - service: switch.turn_on
         data: {}
         target:
-          entity_id: switch.kauf_plug
+          entity_id:
+          - switch.privacy
     - conditions:
       - condition: trigger
         id:
@@ -9871,10 +9889,11 @@
             state: Just Arrived
         alias: check if home
       sequence:
-      - service: switch.turn_on
+      - service: switch.turn_off
         data: {}
         target:
-          entity_id: switch.kauf_plug
+          entity_id:
+          - switch.privacy
   mode: single
 - id: '1691372469602'
   alias: Adjust Kitchen HomePod volume
@@ -11802,7 +11821,6 @@
           target:
             entity_id:
             - switch.dana_s_incandescant_ropes
-            - switch.polk_omni
             - switch.dana_s_north_incandescent_rope
             - switch.dana_s_south_incandescent_rope
             - switch.dana_s_east_incandescent_rope
@@ -11834,7 +11852,6 @@
             entity_id:
             - switch.dana_s_color_ropes
             - switch.dana_s_incandescant_ropes
-            - switch.polk_omni
             - switch.dana_s_north_incandescent_rope
             - switch.dana_s_south_incandescent_rope
             - switch.dana_s_east_incandescent_rope
@@ -11908,7 +11925,6 @@
           target:
             entity_id:
             - switch.dana_s_incandescant_ropes
-            - switch.polk_omni
             - switch.dana_s_north_incandescent_rope
             - switch.dana_s_south_incandescent_rope
             - switch.dana_s_east_incandescent_rope
@@ -12025,3 +12041,36 @@
           enabled: false
       bottom_off_release: []
       mode_max: 15
+- id: '1713299820394'
+  alias: Set Doorbell
+  description: Mute Doorbell when Home
+  trigger:
+  - platform: homeassistant
+    event: start
+  - platform: state
+    entity_id:
+    - input_select.anthony
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.anthony_home
+        state: 'on'
+      sequence:
+      - service: select.select_option
+        target:
+          entity_id: select.g4_doorbell_pro_chime_type
+        data:
+          option: None
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.anthony_home
+        state: 'off'
+      sequence:
+      - service: select.select_option
+        target:
+          entity_id: select.g4_doorbell_pro_chime_type
+        data:
+          option: Mechanical
+  mode: single

@@ -455,6 +455,22 @@
           target:
             entity_id:
               - light.dana_s_bedroom_soundbar_airport
+    caseta_lamp_plug_6:
+      unique_id: caseta_lamp_plug_6
+      friendly_name: Caseta Lamp Plug 6
+      value_template: "{{ is_state('light.dana_s_bedroom_subwoofer', 'on') }}"
+      turn_on:
+        - service: light.turn_on
+          data:
+            brightness_pct: 100
+          target:
+            entity_id:
+              - light.dana_s_bedroom_subwoofer
+      turn_off:
+        - service: light.turn_off
+          target:
+            entity_id:
+              - light.dana_s_bedroom_subwoofer
     desktop:
       unique_id: desktop
       friendly_name: Desktop

@@ -1,5 +1,5 @@
 esphome:
-  name: charger1
+  name: lamp1
 
 esp32:
   board: wt32-eth01
@@ -31,7 +31,7 @@ ethernet:
     dns1: !secret dns1
 
 substitutions:
-  static_ip: 192.168.1.183
+  static_ip: 192.168.1.221
   # red: GPIO05
   # green: GPIO33
   # blue: GPIO32

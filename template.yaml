@@ -42,6 +42,16 @@
         target:
           entity_id: media_player.anthony_s_echo_show
 - binary_sensor:
+  - name: "Anthony Home"
+    state: >
+      {{ is_state('input_select.anthony', 'Home') or 
+      is_state('input_select.anthony', 'Just Arrived') }}
+    unique_id: anthony_home
+  - name: "Riana Home"
+    state: >
+      {{ is_state('input_select.riana', 'Home') or 
+      is_state('input_select.riana', 'Just Arrived') }}
+    unique_id: riana_home
   - name: "Desktop Power"
     state: >
       {{ is_state('binary_sensor.desktop_ping', 'on') or

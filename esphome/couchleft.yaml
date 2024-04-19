@@ -26,8 +26,8 @@ captive_portal:
 logger:
 api:
 ota:
-bluetooth_proxy:
-  active: true
+#bluetooth_proxy:
+#  active: true
 #esp32_ble_tracker:
 
 button:
