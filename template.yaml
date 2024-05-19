@@ -200,7 +200,7 @@
       {% elif is_state('binary_sensor.desktop_power', 'on') and 
       is_state('light.fan_lights', 'on') -%} 153
       {# Window open #}
-      {% elif is_state('cover.bedroom_blinds', 'open') -%} 153
+      {% elif is_state('cover.bedroom_blinds', 'open') -%} 102
       {# At desk with lights off #}
       {% elif is_state('binary_sensor.desktop_power', 'on') and 
       is_state('binary_sensor.bed_occupancy', 'off')-%} 102

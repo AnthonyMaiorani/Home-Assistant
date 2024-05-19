@@ -173,18 +173,6 @@
         - service: input_boolean.turn_off
           target:
               entity_id: input_boolean.ac_boost
-    privacy:
-      friendly_name: "Privacy"
-      unique_id: privacy
-      value_template: "{{ is_state('input_boolean.privacy', 'on') }}"
-      turn_on:
-        - service: input_boolean.turn_on
-          target:
-              entity_id: input_boolean.privacy
-      turn_off:
-        - service: input_boolean.turn_off
-          target:
-              entity_id: input_boolean.privacy
     bedroomtoggle:
       unique_id: bedroom_toggle
       value_template: "{{ is_state('light.bedroom_lights', 'on') 
@@ -351,11 +339,19 @@
       friendly_name: Guest TV
       value_template: "{{ is_state('switch.samsung_tv', 'on') }} "
       turn_on:
+        - service: switch.turn_on
+          target:
+            entity_id:
+              - switch.samsung_tv
         - service: media_player.turn_on
           target:
             entity_id:
               - media_player.guest_tv
       turn_off:
+        - service: switch.turn_off
+          target:
+            entity_id:
+              - switch.samsung_tv
         - service: media_player.turn_off
           target:
             entity_id:
@@ -471,17 +467,35 @@
           target:
             entity_id:
               - light.dana_s_bedroom_subwoofer
+    caseta_lamp_plug_7:
+      unique_id: caseta_lamp_plug_7
+      friendly_name: Caseta Lamp Plug 7
+      value_template: "{{ is_state('light.anthony_s_bedroom_usb_hub', 'on') }}"
+      turn_on:
+        - service: light.turn_on
+          data:
+            brightness_pct: 100
+          target:
+            entity_id:
+              - light.dana_s_bedroom_subwoofer
+      turn_off:
+        - service: light.turn_off
+          target:
+            entity_id:
+              - light.dana_s_bedroom_subwoofer
     desktop:
       unique_id: desktop
       friendly_name: Desktop
       value_template: "{{ not is_state('button.desktop_pc_satellite_shutdown', 'unavailable') }} "
       turn_on:
+        - service: switch.turn_on
+          target: 
+            entity_id: 
+              - switch.usb_hub
+              - switch.goxlr
         - service: wake_on_lan.send_magic_packet
           data:
             mac: !secret desktop
-        - service: switch.turn_on
-          target: 
-            entity_id: switch.goxlr
       turn_off:
         - service: button.press
           target:

@@ -18,6 +18,7 @@ exclude:
     - automation.nanoleaf_scene_changer_and_auto_brightness
     - automation.turn_off_usw_leds
     - automation.update_shade_state
+    - automation.privacy_control
     - sensor.colorloopstate
     - sensor.desktop_idle_time
     - sensor.hacs

@@ -12,7 +12,6 @@ smart_home:
       - cover.garage_door
       - cover.bedroom_blinds
       - switch.ac_boost
-      - switch.privacy
       - climate.bedroom_ac
       - lock.front_door
       - input_button.activategoveerainbow
