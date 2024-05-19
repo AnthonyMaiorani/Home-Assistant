@@ -477,12 +477,12 @@
             brightness_pct: 100
           target:
             entity_id:
-              - light.dana_s_bedroom_subwoofer
+              - light.anthony_s_bedroom_usb_hub
       turn_off:
         - service: light.turn_off
           target:
             entity_id:
-              - light.dana_s_bedroom_subwoofer
+              - light.anthony_s_bedroom_usb_hub
     desktop:
       unique_id: desktop
       friendly_name: Desktop
