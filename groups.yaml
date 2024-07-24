@@ -16,6 +16,7 @@ room: # used for ha menu
     - script.lofi
     - script.play_music
     - script.stop_music
+    - switch.lumi_lumi_plug_maus01_switch_2
 home:
   name: Home
   entities: 

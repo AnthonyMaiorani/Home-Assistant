@@ -160,7 +160,7 @@
       {% elif is_state("binary_sensor.bedroom_door", "on") and is_state("person.riana", "home") -%} 75
       {% elif is_state("switch.desktop", "on") and not is_state("binary_sensor.bed_occupancy", "on") -%} 73
       {% elif is_state("light.fan_lights", "on") -%} 72 
-      {%- else -%} 67
+      {%- else -%} 65
       {%- endif %}
   - name: "Alarm Display"
     unique_id: alarm_display

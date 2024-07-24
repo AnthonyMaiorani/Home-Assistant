@@ -47,3 +47,4 @@ esp32_ble_tracker:
 logger:
 api:
 ota:
+  platform: esphome

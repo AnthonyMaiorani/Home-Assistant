@@ -410,7 +410,8 @@ call:
               minutes: 0
               seconds: 1
               milliseconds: 0
-    - if:
+    - alias: turn off home lights if alone and night
+      if:
       - condition: time
         after: '23:00:00'
         before: 06:00:00
@@ -438,10 +439,26 @@ call:
           entity_id:
           - switch.gym_fan
           - switch.living_room_fan
-          - switch.porch_light
           - switch.laundry_room_light
           - switch.garage_light
-      alias: turn off home lights if alone and night
+      - if:
+        - condition: not
+          conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: cover.garage_door
+              state: closing
+            - condition: state
+              entity_id: cover.garage_door
+              state: closed
+          alias: garage door open
+        then:
+        - service: cover.close_cover
+          metadata: {}
+          data: {}
+          target:
+            entity_id: cover.garage_door
     - event: event_change_nanoleaf
       event_data: {}
     - repeat:
@@ -555,7 +572,8 @@ night:
       data: {}
       target:
         entity_id: input_boolean.bedmotion
-    - if:
+    - alias: turn off home lights if alone and night
+      if:
       - condition: time
         after: '23:00:00'
         before: 06:00:00
@@ -583,10 +601,26 @@ night:
           entity_id:
           - switch.gym_fan
           - switch.living_room_fan
-          - switch.porch_light
           - switch.laundry_room_light
           - switch.garage_light
-      alias: turn off home lights if alone and night
+      - if:
+        - condition: not
+          conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: cover.garage_door
+              state: closing
+            - condition: state
+              entity_id: cover.garage_door
+              state: closed
+          alias: garage door open
+        then:
+        - service: cover.close_cover
+          metadata: {}
+          data: {}
+          target:
+            entity_id: cover.garage_door
     - repeat:
         count: '120'
         sequence:

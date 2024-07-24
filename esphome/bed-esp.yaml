@@ -36,6 +36,7 @@ substitutions:
 logger:
 api:
 ota:
+  platform: esphome
 
 sensor:
   - platform: hx711
@@ -45,7 +46,7 @@ sensor:
     clk_pin: GPIO32
     filters:
       - delta: 500
-      - offset: 100000
+      - offset: 200000
       - lambda: |-
           if (x >= 0 && x < 600000) return x;
           else return {};
@@ -81,7 +82,7 @@ globals:
   - id: zero
     type: float
     restore_value: yes
-    initial_value: '90000'
+    initial_value: '190000'
 
 # light:
 #   - platform: rgb

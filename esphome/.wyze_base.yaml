@@ -20,6 +20,7 @@ captive_portal:
 logger:
 api:
 ota:
+  platform: esphome
 sensor:
   - platform: homeassistant
     entity_id: sensor.colorloopstate

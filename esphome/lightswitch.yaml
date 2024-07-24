@@ -6,7 +6,7 @@ esp8266:
   board: esp01_1m
 
 wifi:
-  ssid: !secret ssid
+  ssid: !secret iotSSID
   password: !secret password
   fast_connect: on
   #output_power: 8.5dB
@@ -23,6 +23,7 @@ logger:
 api:
   #reboot_timeout: 0s
 ota:
+  platform: esphome
 
 substitutions:
   name: "Light Switch"

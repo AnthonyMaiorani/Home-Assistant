@@ -23,6 +23,7 @@ substitutions:
 
 api:
 ota:
+  platform: esphome
 
 # Disable logging over UART (required)
 logger:

@@ -86,6 +86,7 @@ logger:
   level: DEBUG
 api:
 ota:
+  platform: esphome
 
 #status_led:
  # pin:
