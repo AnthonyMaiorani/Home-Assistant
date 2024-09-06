@@ -18,7 +18,6 @@ smart_home:
       - input_button.activategoveecyan
       - input_button.activategoveemusic
       - input_button.activategoveeoff
-      - switch.lrtv
       - switch.fronttv
       - switch.living_room_fan
       - switch.porch_light

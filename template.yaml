@@ -77,14 +77,6 @@
       state_attr('sensor.macbook_air_active_audio_output', 
       'All Audio Output') }}
     unique_id: airpods_connected
-  - name: "Expand Card"
-    unique_id: expand_card
-    state: > 
-      {% if states('switch.ac') is defined and states('switch.lrtv') is defined 
-      and states('media_player.owntone_server') is defined %} 
-      {{ not is_state('switch.ac', 'on') and not is_state('switch.lrtv', 'on') 
-      and not is_state('media_player.owntone_server', 'playing') }}
-      {% endif %}
   - name: "Bedroom On"
     state: >
       {{ is_state('switch.bedroomtoggle', 'on') }}

@@ -381,7 +381,6 @@
         - media_player.owntone_output_anthony_s_desk
         - media_player.owntone_output_kitchen_left
         - media_player.owntone_output_kitchen_right
-        - media_player.owntone_output_living_room_tv
         - media_player.owntone_output_master_bedroom_tv
         - media_player.owntone_output_anthony_s_nightstand
         - media_player.owntone_output_guest_room_tv
@@ -390,15 +389,6 @@
       target:
         entity_id: button.desktop_pc_satellite_restart_iotlink
       data: {}
-    - if:
-      - condition: state
-        entity_id: switch.lrtv
-        state: 'off'
-      then:
-      - service: light.turn_off
-        target:
-          entity_id: light.first_led_instance
-        data: {}
   - service: automation.turn_on
     data: {}
     target:
@@ -544,13 +534,11 @@
           - light.kitchen_lights
           - light.hallway_lights
           - light.bathroom_lights
-          - switch.lrtv
           - switch.living_room_fan
           - switch.porch_light
           - switch.laundry_room_light
           - switch.dining_room_light
           - light.master_hallway_light
-          - media_player.living_room_denon
           - switch.fronttv
           - light.living_room_fan
           - switch.gym_fan
@@ -1117,7 +1105,6 @@
         target:
           entity_id:
           - media_player.owntone_output_front
-          - media_player.owntone_output_living_room_tv
           - media_player.guest_speakers
           - media_player.owntone_output_soundbar
           - media_player.kitchen_speakers
@@ -1125,7 +1112,6 @@
           - media_player.owntone_output_kitchen_right
           - media_player.owntone_output_master_bedroom_tv
           - media_player.owntone_output_bathroom
-          - media_player.owntone_output_living_room_speakers
           - media_player.owntone_output_guest_room_tv
       - if:
         - condition: or
@@ -2603,21 +2589,6 @@
       enabled: false
       action: button.press
   mode: single
-- id: '1664570555449'
-  alias: Turn on TV
-  description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - media_player.living_room_tv
-    to: playing
-  condition: []
-  action:
-  - service: media_player.turn_on
-    data: {}
-    target:
-      entity_id: media_player.living_room
-  mode: single
 - id: '1665076615181'
   alias: Dog Food Reminder
   description: ''
@@ -3377,12 +3348,12 @@
           entity_id: light.kitchen_lights
           state: 'off'
         then:
-        - service: light.turn_on
-          data:
+        - data:
             brightness_pct: 40
           target:
             entity_id:
             - light.kitchen_lights
+          action: light.turn_on
         alias: Kitchen Lights
       - if:
         - condition: state
@@ -3400,36 +3371,13 @@
           entity_id: binary_sensor.bed_occupancy
           state: 'off'
         then:
-        - service: light.turn_on
-          data:
+        - data:
             brightness_pct: 22
           target:
             entity_id:
             - light.hallway_lights
+          action: light.turn_on
         alias: Hallway Lights
-      - if:
-        - condition: state
-          entity_id: light.living_room_lights
-          state: 'off'
-        - condition: or
-          conditions:
-          - condition: state
-            entity_id: input_select.taylor_presence
-            state: Home
-          - condition: state
-            entity_id: input_select.taylor_presence
-            state: Just Arrived
-        - condition: state
-          entity_id: switch.lrtv
-          state: 'on'
-        then:
-        - service: light.turn_on
-          data:
-            brightness_pct: 65
-          target:
-            entity_id:
-            - light.living_room_lights
-        alias: Living Room Lights
     - conditions:
       - condition: trigger
         id: Sunrise
@@ -3437,51 +3385,21 @@
         entity_id: weather.dark_sky
         state: sunny
       sequence:
-      - service: light.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id:
           - light.kitchen_lights
           - light.hallway_lights
-      - service: switch.turn_off
-        data: {}
+        action: light.turn_off
+      - data: {}
         target:
           entity_id: switch.porch_light
-    - conditions:
-      - condition: state
-        entity_id: light.living_room_lights
-        state: 'off'
-      - condition: or
-        conditions:
-        - condition: state
-          entity_id: input_select.taylor_presence
-          state: Home
-        - condition: state
-          entity_id: input_select.taylor_presence
-          state: Just Arrived
-      - condition: state
-        entity_id: switch.lrtv
-        state: 'on'
-      - condition: trigger
-        id:
-        - living room
-      sequence:
-      - service: light.turn_on
-        data:
-          brightness_pct: 65
-        target:
-          entity_id:
-          - light.living_room_lights
+        action: switch.turn_off
   mode: single
 - id: '1665630463210'
   alias: 'Only one home automations '
   description: ''
   trigger:
-  - platform: state
-    entity_id:
-    - media_player.living_room_tv
-    to: playing
-    id: leftroom1
   - platform: state
     entity_id:
     - light.living_room_lights
@@ -3603,7 +3521,6 @@
           state: Just Arrived
       - condition: trigger
         id:
-        - leftroom1
         - leftroom2
         - leftroom3
         - left room 4
@@ -3618,28 +3535,28 @@
             entity_id: person.taylor
             state: home
         then:
-        - service: switch.turn_off
-          data: {}
+        - data: {}
           target:
             entity_id: switch.ac
-        - service: timer.cancel
-          data: {}
+          action: switch.turn_off
+        - data: {}
           target:
             entity_id: timer.ac
-        - service: input_boolean.turn_off
-          data: {}
+          action: timer.cancel
+        - data: {}
           target:
             entity_id: input_boolean.ac_boost
+          action: input_boolean.turn_off
         alias: AC
       - if:
         - condition: state
           entity_id: input_boolean.bedmotion
           state: 'on'
         then:
-        - service: input_boolean.turn_off
-          data: {}
+        - data: {}
           target:
             entity_id: input_boolean.bedmotion
+          action: input_boolean.turn_off
         alias: Turn off Motion Bypass
       - alias: Turn on Kitchen HomePods
         if:
@@ -3661,40 +3578,26 @@
         - repeat:
             count: '20'
             sequence:
-            - service: media_player.turn_on
-              data: {}
+            - data: {}
               target:
                 entity_id:
                 - media_player.kitchen_speakers
                 - media_player.owntone_output_kitchen_left
                 - media_player.owntone_output_kitchen_right
+              action: media_player.turn_on
             - delay:
                 hours: 0
                 minutes: 0
                 seconds: 2
                 milliseconds: 0
-            - if:
-              - condition: state
-                entity_id: media_player.living_room_tv
-                state: playing
-              then:
-              - service: media_player.volume_set
-                data:
-                  volume_level: 0.2
-                target:
-                  entity_id:
-                  - media_player.kitchen_speakers
-                  - media_player.owntone_output_kitchen_left
-                  - media_player.owntone_output_kitchen_right
-              else:
-              - service: media_player.volume_set
-                data:
-                  volume_level: 0.35
-                target:
-                  entity_id:
-                  - media_player.kitchen_speakers
-                  - media_player.owntone_output_kitchen_left
-                  - media_player.owntone_output_kitchen_right
+            - data:
+                volume_level: 0.35
+              target:
+                entity_id:
+                - media_player.kitchen_speakers
+                - media_player.owntone_output_kitchen_left
+                - media_player.owntone_output_kitchen_right
+              action: media_player.volume_set
             - delay:
                 hours: 0
                 minutes: 0
@@ -3724,13 +3627,13 @@
           state: home
       sequence:
       - parallel:
-        - service: media_player.turn_off
-          data: {}
+        - data: {}
           target:
             entity_id:
             - media_player.kitchen_speakers
             - media_player.owntone_output_kitchen_right
             - media_player.owntone_output_kitchen_left
+          action: media_player.turn_off
         - if:
           - condition: or
             conditions:
@@ -3750,11 +3653,11 @@
             attribute: current_temperature
             above: 70
           then:
-          - service: switch.turn_on
-            data: {}
+          - data: {}
             target:
               entity_id:
               - switch.ac
+            action: switch.turn_on
           else: []
   mode: restart
 - id: '1665996041801'
@@ -5336,9 +5239,6 @@
           - condition: state
             entity_id: media_player.guest_speakers
             state: 'on'
-          - condition: state
-            entity_id: media_player.owntone_output_living_room_tv
-            state: 'on'
           - condition: template
             value_template: "{{ as_local(state_attr('script.lofi', \n        'last_triggered'))
               > now() - timedelta( minutes = 1 ) \nor as_local(state_attr('script.test',
@@ -5410,13 +5310,6 @@
       hours: 0
       minutes: 3
       seconds: 0
-  - condition: state
-    entity_id: switch.lrtv
-    for:
-      hours: 0
-      minutes: 10
-      seconds: 0
-    state: 'off'
   - condition: state
     entity_id: binary_sensor.kitchen
     state: 'off'
@@ -5615,7 +5508,6 @@
               entity_id:
               - media_player.owntone_output_anthony_s_desk
               - media_player.owntone_output_front
-              - media_player.owntone_output_living_room_tv
               - media_player.owntone_output_master_bedroom_tv
               - media_player.owntone_output_anthony_s_nightstand
               - media_player.guest_speakers
@@ -6570,112 +6462,6 @@
           entity_id:
           - light.hallway_lights
   mode: single
-- id: '1670794990971'
-  alias: Living Room Fan Pico
-  description: ''
-  trigger:
-  - platform: device
-    device_id: e0d82cb7ed45e4184f837d8ee379f63e
-    domain: lutron_caseta
-    type: press
-    subtype: 'on'
-    id: on_pressed
-  - platform: device
-    device_id: e0d82cb7ed45e4184f837d8ee379f63e
-    domain: lutron_caseta
-    type: press
-    subtype: 'off'
-    id: off_pressed
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: on_pressed
-      sequence:
-      - wait_for_trigger:
-        - platform: device
-          device_id: e0d82cb7ed45e4184f837d8ee379f63e
-          domain: lutron_caseta
-          type: release
-          subtype: 'on'
-        timeout:
-          hours: 0
-          minutes: 0
-          seconds: 1
-          milliseconds: 800
-      - if:
-        - condition: template
-          value_template: '{{ wait.trigger is none }}'
-          alias: If button hold
-        then:
-        - parallel:
-          - service: cover.set_cover_position
-            data:
-              position: 80
-            target:
-              entity_id: cover.couch_left_left
-          - service: media_player.turn_on
-            data: {}
-            target:
-              entity_id:
-              - media_player.living_room_tv
-              - media_player.living_room_denon
-        else:
-        - type: turn_on
-          device_id: 12f08520bdd6649730246bea3568917f
-          entity_id: switch.living_room_fan
-          domain: switch
-    - conditions:
-      - condition: trigger
-        id: off_pressed
-      sequence:
-      - wait_for_trigger:
-        - platform: device
-          device_id: e0d82cb7ed45e4184f837d8ee379f63e
-          domain: lutron_caseta
-          type: release
-          subtype: 'off'
-        timeout:
-          hours: 0
-          minutes: 0
-          seconds: 1
-          milliseconds: 800
-      - if:
-        - condition: template
-          value_template: '{{ wait.trigger is none }}'
-          alias: If button hold
-        then:
-        - parallel:
-          - service: media_player.turn_off
-            data: {}
-            target:
-              entity_id:
-              - media_player.living_room_tv
-              - media_player.living_room_denon
-          - service: cover.close_cover
-            data: {}
-            target:
-              entity_id:
-              - cover.couch_left_left
-              - cover.couch_right_right
-          - service: light.turn_off
-            data: {}
-            target:
-              entity_id:
-              - light.living_room_lights
-              - light.living_room_fan
-          - service: switch.turn_off
-            data: {}
-            target:
-              entity_id: switch.living_room_fan
-        else:
-        - type: turn_off
-          device_id: 12f08520bdd6649730246bea3568917f
-          entity_id: switch.living_room_fan
-          domain: switch
-  mode: queued
-  max: 10
 - id: '1670799817434'
   alias: Riana Arrived Home
   description: ''
@@ -6696,9 +6482,6 @@
         entity_id: media_player.kitchen_speakers
         state: 'on'
       - condition: state
-        entity_id: media_player.owntone_output_living_room_tv
-        state: 'on'
-      - condition: state
         entity_id: media_player.guest_speakers
         state: 'on'
       - condition: state
@@ -6712,7 +6495,6 @@
         - media_player.owntone_output_front
         - media_player.owntone_output_kitchen_left
         - media_player.owntone_output_kitchen_right
-        - media_player.owntone_output_living_room_tv
         - media_player.owntone_output_master_bedroom_tv
         - media_player.kitchen_speakers
         - media_player.owntone_output_soundbar
@@ -7120,7 +6902,6 @@
             - media_player.owntone_output_gym
             - media_player.owntone_output_kitchen_left
             - media_player.owntone_output_kitchen_right
-            - media_player.owntone_output_living_room_tv
             - media_player.owntone_output_macbook_air
             - media_player.owntone_output_master_bedroom_tv
             - media_player.owntone_output_soundbar
@@ -8793,15 +8574,11 @@
     - condition: state
       entity_id: media_player.owntone_output_front
       state: 'on'
-    - condition: state
-      entity_id: media_player.owntone_output_living_room_tv
-      state: 'on'
   action:
   - service: switch.turn_off
     data: {}
     target:
       entity_id:
-      - switch.lrtv
       - switch.fronttv
   mode: single
 - id: '1678008305202'
@@ -9993,11 +9770,6 @@
     to: Away
     id: away
     enabled: true
-  - platform: state
-    entity_id:
-    - media_player.living_room_tv
-    to: 'on'
-    enabled: false
   - platform: time_pattern
     seconds: /3
   condition: []
@@ -10014,19 +9786,11 @@
       - condition: or
         conditions:
         - condition: state
-          entity_id: switch.lrtv
-          state: 'on'
-        - condition: state
           entity_id: cover.couch_left_left
           state: 'on'
         - condition: state
           entity_id: cover.couch_right_right
           state: 'on'
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: media_player.living_room_denon
-          state: unavailable
       sequence:
       - service: input_boolean.turn_on
         target:
@@ -10060,68 +9824,6 @@
           entity_id: input_boolean.privacy
         data: {}
   mode: single
-- id: '1691372469602'
-  alias: Adjust Kitchen HomePod volume
-  description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - media_player.living_room_tv
-    to: playing
-    id: playing
-  - platform: state
-    entity_id:
-    - media_player.living_room_tv
-    to:
-    - paused
-    - standby
-    - idle
-    - 'off'
-    - unavailable
-    id: paused
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 3
-  condition:
-  - condition: state
-    entity_id: media_player.kitchen_speakers
-    state: 'on'
-  action:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: media_player.living_room_tv
-        state: playing
-      sequence:
-      - repeat:
-          count: '10'
-          sequence:
-          - service: media_player.volume_set
-            data:
-              volume_level: 0.2
-            target:
-              entity_id:
-              - media_player.kitchen_speakers
-              - media_player.owntone_output_kitchen_left
-              - media_player.owntone_output_kitchen_right
-    - conditions:
-      - condition: trigger
-        id:
-        - paused
-      sequence:
-      - repeat:
-          count: '10'
-          sequence:
-          - service: media_player.volume_set
-            data:
-              volume_level: 0.38
-            target:
-              entity_id:
-              - media_player.kitchen_speakers
-              - media_player.owntone_output_kitchen_left
-              - media_player.owntone_output_kitchen_right
-  mode: restart
 - id: '1691908601968'
   alias: Turn off bed light
   description: ''
@@ -10328,114 +10030,6 @@
           data:
             tag: watering
   mode: single
-- id: '1692303610367'
-  alias: Living Room Right Fan Pico
-  description: ''
-  trigger:
-  - platform: device
-    device_id: 9dd81caf0cf007075f532ae5692c931f
-    domain: lutron_caseta
-    type: press
-    subtype: 'off'
-    id: off_pressed
-  - platform: device
-    device_id: 9dd81caf0cf007075f532ae5692c931f
-    domain: lutron_caseta
-    type: press
-    subtype: 'on'
-    id: on pressed
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id:
-        - on pressed
-      sequence:
-      - wait_for_trigger:
-        - platform: device
-          device_id: 9dd81caf0cf007075f532ae5692c931f
-          domain: lutron_caseta
-          type: release
-          subtype: 'on'
-        timeout:
-          hours: 0
-          minutes: 0
-          seconds: 1
-          milliseconds: 800
-      - if:
-        - condition: template
-          value_template: '{{ wait.trigger is none }}'
-          alias: If button hold
-        then:
-        - parallel:
-          - service: media_player.turn_on
-            data: {}
-            target:
-              entity_id:
-              - media_player.living_room_tv
-              - media_player.living_room_denon
-          - service: cover.set_cover_position
-            data:
-              position: 80
-            target:
-              entity_id:
-              - cover.couch_right_right
-        else:
-        - type: turn_on
-          device_id: 12f08520bdd6649730246bea3568917f
-          entity_id: switch.living_room_fan
-          domain: switch
-    - conditions:
-      - condition: trigger
-        id: off_pressed
-      sequence:
-      - wait_for_trigger:
-        - platform: device
-          device_id: 9dd81caf0cf007075f532ae5692c931f
-          domain: lutron_caseta
-          type: release
-          subtype: 'off'
-        timeout:
-          hours: 0
-          minutes: 0
-          seconds: 1
-          milliseconds: 800
-      - if:
-        - condition: template
-          value_template: '{{ wait.trigger is none }}'
-          alias: If button hold
-        then:
-        - parallel:
-          - service: cover.close_cover
-            data: {}
-            target:
-              entity_id:
-              - cover.couch_right_right
-              - cover.couch_left_left
-          - service: light.turn_off
-            data: {}
-            target:
-              entity_id:
-              - light.living_room_lights
-              - light.living_room_fan
-          - service: switch.turn_off
-            data: {}
-            target:
-              entity_id: switch.living_room_fan
-          - service: media_player.turn_off
-            data: {}
-            target:
-              entity_id:
-              - media_player.living_room_tv
-              - media_player.living_room_denon
-        else:
-        - type: turn_off
-          device_id: 12f08520bdd6649730246bea3568917f
-          entity_id: switch.living_room_fan
-          domain: switch
-  mode: queued
-  max: 10
 - id: '1692642019621'
   alias: Closet Lights
   description: ''
@@ -10652,9 +10246,6 @@
           - condition: state
             entity_id: media_player.guest_speakers
             state: 'on'
-          - condition: state
-            entity_id: media_player.owntone_output_living_room_tv
-            state: 'on'
           - condition: template
             value_template: "{{ as_local(state_attr('script.lofi', \n        'last_triggered'))
               > now() - timedelta( minutes = 1 ) \nor as_local(state_attr('script.test',
@@ -10834,11 +10425,6 @@
       seconds: 10
     id: lightswitch
     enabled: false
-  - platform: state
-    entity_id:
-    - media_player.living_room_denon
-    id: denon
-    to: unavailable
   condition: []
   action:
   - choose:
@@ -10960,28 +10546,6 @@
             conditions:
             - condition: state
               entity_id: light.light_switch
-              state: unavailable
-    - conditions:
-      - condition: trigger
-        id:
-        - denon
-      sequence:
-      - repeat:
-          sequence:
-          - service: homeassistant.reload_config_entry
-            target:
-              entity_id: media_player.living_room_denon
-            data: {}
-          - delay:
-              hours: 0
-              minutes: 0
-              seconds: 5
-              milliseconds: 0
-          until:
-          - condition: not
-            conditions:
-            - condition: state
-              entity_id: media_player.living_room_denon
               state: unavailable
   mode: parallel
   max: 20
@@ -12290,36 +11854,6 @@
           entity_id: select.g4_doorbell_pro_chime_type
         data:
           option: Mechanical
-  mode: single
-- id: '1720327436338'
-  alias: HyperHDR / Living Room Ambient Lighting Power
-  description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - media_player.living_room_denon
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: media_player.living_room_denon
-        state: 'on'
-      sequence:
-      - service: light.turn_on
-        target:
-          entity_id: light.first_led_instance
-        data: {}
-    - conditions:
-      - condition: state
-        entity_id: media_player.living_room_denon
-        state: 'off'
-      sequence:
-      - service: light.turn_off
-        target:
-          entity_id:
-          - light.first_led_instance
-        data: {}
   mode: single
 - id: '1720592302328'
   alias: VR Cooling
