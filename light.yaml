@@ -26,11 +26,14 @@
       turn_on:
         service: switch.turn_on
         data:
-            entity_id: switch.wled
+            entity_id: 
+              - switch.wled
+              - switch.wled_main_power
       turn_off:
         service: switch.turn_off
         data:
-            entity_id: switch.wled
+          entity_id: 
+            - switch.wled
       set_level:
         - service: input_number.set_value
           data:
@@ -54,7 +57,9 @@
       turn_on:
         service: switch.turn_on
         data:
-            entity_id: switch.closet_lights
+            entity_id: 
+              - switch.closet_lights
+              - switch.wled_main_power
       turn_off:
         service: switch.turn_off
         data:

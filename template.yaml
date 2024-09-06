@@ -158,9 +158,9 @@
       or not is_state('switch.ac', "on") %} unknown
       {% elif is_state("input_boolean.ac_boost", "on") -%} 61 
       {% elif is_state("binary_sensor.bedroom_door", "on") and is_state("person.riana", "home") -%} 75
-      {% elif is_state("switch.desktop", "on") and not is_state("binary_sensor.bed_occupancy", "on") -%} 73
-      {% elif is_state("light.fan_lights", "on") -%} 72 
-      {%- else -%} 65
+      {% elif is_state("binary_sensor.bedroom_chair", "on") and not is_state("binary_sensor.bed_occupancy", "on") -%} 73
+      {% elif is_state("light.fan_lights", "on") -%} 71
+      {%- else -%} 71
       {%- endif %}
   - name: "Alarm Display"
     unique_id: alarm_display
@@ -287,7 +287,7 @@
 
         {# Regular Scenes #}
         {% set defaultScenes = ['Cosmos', 'Dynamic Blue', 'Ocean', 
-        'Vaporwave', 'Rainbow', 'energy'] %}
+        'Rainbow'] %}
         {% set nightScenes = ['moonlight', 'Lightscape', 'Night light',
         'Pink To Blue', 'Playstation Blue', 'Bedtime', 
         'Aurora magic', 'Holodek'] %}
@@ -299,7 +299,7 @@
         'Water Cooler', 'Clubbing', 'Snowy Holiday', 'Lofi Sound'] %}
         {% set lessChillMusicScenes = ['cool thing', 'Hip Hop', 
         'Tachyon Light2', 'Oceanworks'] %}
-        {% set darkScenes = ['TRON CITY', 'Tron Legacy'] %}
+        {% set darkScenes = ['TRON CITY', 'Tron Legacy', 'Vaporwave', 'energy'] %}
 
         {# Build List of Scenes #}
         {% set sceneChoices = defaultScenes %}

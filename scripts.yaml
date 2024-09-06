@@ -1,25 +1,30 @@
 fan_off:
   alias: Lights Off
   sequence:
-  - service: script.turn_off
-    data: {}
+  - data: {}
     target:
       entity_id:
       - script.morning
       - script.call
       - script.color_loop
       - script.night
+    action: script.turn_off
+  - action: automation.turn_off
+    metadata: {}
+    data:
+      stop_actions: true
+    target:
+      entity_id: automation.morning_lights_on
   - parallel:
-    - service: homeassistant.turn_off
-      data: {}
+    - data: {}
       target:
         entity_id:
         - light.fan_lights
         - input_boolean.bedmotion
         - switch.katchy
         - light.hallway_lights
-    - service: homeassistant.turn_on
-      data: {}
+      action: homeassistant.turn_off
+    - data: {}
       target:
         entity_id:
         - switch.lumi_lumi_plug_maus01_switch_2
@@ -27,32 +32,32 @@ fan_off:
         - light.shapes_007f
         - light.shapes_4948
         - light.shapes_ee82
+      action: homeassistant.turn_on
     - data:
         brightness: 255
         effect: Color Loop
         color_name: cyan
-      service: light.turn_on
       target:
         entity_id:
         - light.light_switch
         - light.light_switch_corner
+      action: light.turn_on
     - if:
       - condition: state
         entity_id: switch.desktop
         state: 'on'
       then:
-      - service: switch.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: switch.goxlr
+        action: switch.turn_on
       else:
-      - service: switch.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id: switch.goxlr
+        action: switch.turn_off
       enabled: false
-    - service: light.turn_on
-      data:
+    - data:
         brightness_pct: 35
       target:
         entity_id:
@@ -61,25 +66,31 @@ fan_off:
         - light.rope
         - light.lines
         - light.closet_lights
+      action: light.turn_on
     - if:
       - condition: state
         entity_id: automation.nanoleaf_scene_changer_and_auto_brightness
         state: 'off'
       then:
-      - service: automation.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: automation.nanoleaf_scene_changer_and_auto_brightness
+        action: automation.turn_on
       - delay:
           hours: 0
           minutes: 0
           seconds: 0
           milliseconds: 500
-      - service: automation.trigger
-        data:
+      - data:
           skip_condition: true
         target:
           entity_id: automation.nanoleaf_scene_changer_and_auto_brightness
+        action: automation.trigger
+    - action: automation.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: automation.morning_lights_on
   mode: restart
   icon: mdi:ceiling-light
 color_loop:
@@ -330,7 +341,6 @@ call:
         entity_id:
         - switch.desktop
         - switch.usb_hub
-        - switch.lumi_lumi_plug_maus01_switch_2
     - service: light.turn_off
       data: {}
       target:
@@ -557,7 +567,6 @@ night:
       target:
         entity_id:
         - switch.desktop
-        - switch.lumi_lumi_plug_maus01_switch_2
     - if:
       - condition: state
         state: 'on'
@@ -1292,15 +1301,11 @@ lofi:
         - media_player.owntone_output_bathroom
         - media_player.owntone_output_anthony_s_desk
         - media_player.owntone_output_front
-        - media_player.owntone_output_front_homepod
         - media_player.owntone_output_kitchen_left
         - media_player.owntone_output_kitchen_right
         - media_player.owntone_output_living_room_tv
         - media_player.owntone_output_master_bedroom_tv
         - media_player.owntone_output_anthony_s_nightstand
-        - media_player.owntone_output_garage_homepod
-        - media_player.owntone_output_guest_left
-        - media_player.owntone_output_guest_right
     - wait_for_trigger:
       - platform: state
         entity_id:
@@ -1322,15 +1327,11 @@ lofi:
             - media_player.owntone_output_bathroom
             - media_player.owntone_output_anthony_s_desk
             - media_player.owntone_output_front
-            - media_player.owntone_output_front_homepod
             - media_player.owntone_output_kitchen_left
             - media_player.owntone_output_kitchen_right
             - media_player.owntone_output_living_room_tv
             - media_player.owntone_output_master_bedroom_tv
             - media_player.owntone_output_anthony_s_nightstand
-            - media_player.owntone_output_garage_homepod
-            - media_player.owntone_output_guest_left
-            - media_player.owntone_output_guest_right
     - service: homeassistant.reload_config_entry
       data: {}
       target:
@@ -1351,16 +1352,11 @@ lofi:
       - media_player.owntone_output_living_room_tv
       - media_player.owntone_output_master_bedroom_tv
       - media_player.owntone_output_anthony_s_nightstand
-      - media_player.owntone_output_garage_homepod
       - media_player.guest_speakers
       - media_player.owntone_output_kitchen_left
       - media_player.owntone_output_kitchen_right
-      - media_player.owntone_output_front_homepod
-      - media_player.owntone_output_front_left
       - media_player.kitchen_speakers
       - media_player.owntone_output_soundbar
-      - media_player.owntone_output_guest_right
-      - media_player.owntone_output_guest_left
   - repeat:
       count: '7'
       sequence:
@@ -1424,15 +1420,11 @@ lofi:
         - media_player.owntone_output_bathroom
         - media_player.owntone_output_anthony_s_desk
         - media_player.owntone_output_front
-        - media_player.owntone_output_front_homepod
         - media_player.owntone_output_kitchen_left
         - media_player.owntone_output_kitchen_right
         - media_player.owntone_output_living_room_tv
         - media_player.owntone_output_master_bedroom_tv
         - media_player.owntone_output_anthony_s_nightstand
-        - media_player.owntone_output_garage_homepod
-        - media_player.owntone_output_guest_left
-        - media_player.owntone_output_guest_right
     - wait_for_trigger:
       - platform: state
         entity_id:
@@ -1454,15 +1446,11 @@ lofi:
             - media_player.owntone_output_bathroom
             - media_player.owntone_output_anthony_s_desk
             - media_player.owntone_output_front
-            - media_player.owntone_output_front_homepod
             - media_player.owntone_output_kitchen_left
             - media_player.owntone_output_kitchen_right
             - media_player.owntone_output_living_room_tv
             - media_player.owntone_output_master_bedroom_tv
             - media_player.owntone_output_anthony_s_nightstand
-            - media_player.owntone_output_garage_homepod
-            - media_player.owntone_output_guest_left
-            - media_player.owntone_output_guest_right
     - service: homeassistant.reload_config_entry
       data: {}
       target:
@@ -1914,40 +1902,6 @@ lofi:
                   seconds: 2
                   milliseconds: 0
           alias: Turn on Kitchen HomePod
-        - if:
-          - condition: state
-            entity_id: media_player.owntone_output_garage_homepod
-            state: 'off'
-          then:
-          - service: media_player.turn_on
-            data: {}
-            target:
-              entity_id:
-              - media_player.owntone_output_garage_homepod
-          - service: media_player.volume_set
-            data:
-              volume_level: 0.45
-            target:
-              entity_id: media_player.owntone_output_garage_homepod
-          alias: Turn on Garage Speaker
-          enabled: false
-        - if:
-          - condition: state
-            entity_id: media_player.owntone_output_front_homepod
-            state: 'off'
-          then:
-          - service: media_player.turn_on
-            data: {}
-            target:
-              entity_id:
-              - media_player.owntone_output_front_homepod
-          - service: media_player.volume_set
-            data:
-              volume_level: 0.5
-            target:
-              entity_id:
-              - media_player.owntone_output_front_homepod
-          alias: Turn on Front HomePod
         alias: Turn on other speakers
       else: []
       enabled: true
@@ -1994,16 +1948,11 @@ lofi:
         - media_player.owntone_output_bathroom
         - media_player.owntone_output_anthony_s_desk
         - media_player.owntone_output_front
-        - media_player.owntone_output_front_homepod
         - media_player.owntone_output_kitchen_left
         - media_player.owntone_output_kitchen_right
         - media_player.owntone_output_living_room_tv
         - media_player.owntone_output_master_bedroom_tv
         - media_player.owntone_output_anthony_s_nightstand
-        - media_player.owntone_output_garage_homepod
-        - media_player.owntone_output_guest_left
-        - media_player.owntone_output_guest_right
-        - media_player.owntone_output_front_left
         - media_player.owntone_output_soundbar
     - wait_for_trigger:
       - platform: state
@@ -2026,16 +1975,11 @@ lofi:
             - media_player.owntone_output_bathroom
             - media_player.owntone_output_anthony_s_desk
             - media_player.owntone_output_front
-            - media_player.owntone_output_front_homepod
             - media_player.owntone_output_kitchen_left
             - media_player.owntone_output_kitchen_right
             - media_player.owntone_output_living_room_tv
             - media_player.owntone_output_master_bedroom_tv
             - media_player.owntone_output_anthony_s_nightstand
-            - media_player.owntone_output_garage_homepod
-            - media_player.owntone_output_guest_left
-            - media_player.owntone_output_guest_right
-            - media_player.owntone_output_front_left
             - media_player.owntone_output_soundbar
     - service: script.turn_on
       data: {}
@@ -2089,16 +2033,11 @@ play_music:
       - media_player.owntone_output_living_room_tv
       - media_player.owntone_output_master_bedroom_tv
       - media_player.owntone_output_anthony_s_nightstand
-      - media_player.owntone_output_garage_homepod
       - media_player.guest_speakers
       - media_player.owntone_output_kitchen_left
       - media_player.owntone_output_kitchen_right
-      - media_player.owntone_output_front_homepod
-      - media_player.owntone_output_front_left
       - media_player.kitchen_speakers
       - media_player.owntone_output_soundbar
-      - media_player.owntone_output_guest_right
-      - media_player.owntone_output_guest_left
   - repeat:
       count: '7'
       sequence:
@@ -2162,15 +2101,11 @@ play_music:
         - media_player.owntone_output_bathroom
         - media_player.owntone_output_anthony_s_desk
         - media_player.owntone_output_front
-        - media_player.owntone_output_front_homepod
         - media_player.owntone_output_kitchen_left
         - media_player.owntone_output_kitchen_right
         - media_player.owntone_output_living_room_tv
         - media_player.owntone_output_master_bedroom_tv
         - media_player.owntone_output_anthony_s_nightstand
-        - media_player.owntone_output_garage_homepod
-        - media_player.owntone_output_guest_left
-        - media_player.owntone_output_guest_right
     - wait_for_trigger:
       - platform: state
         entity_id:
@@ -2192,15 +2127,11 @@ play_music:
             - media_player.owntone_output_bathroom
             - media_player.owntone_output_anthony_s_desk
             - media_player.owntone_output_front
-            - media_player.owntone_output_front_homepod
             - media_player.owntone_output_kitchen_left
             - media_player.owntone_output_kitchen_right
             - media_player.owntone_output_living_room_tv
             - media_player.owntone_output_master_bedroom_tv
             - media_player.owntone_output_anthony_s_nightstand
-            - media_player.owntone_output_garage_homepod
-            - media_player.owntone_output_guest_left
-            - media_player.owntone_output_guest_right
     - service: homeassistant.reload_config_entry
       data: {}
       target:
@@ -2644,40 +2575,6 @@ play_music:
                   seconds: 1
                   milliseconds: 0
           alias: Turn on Kitchen HomePod
-        - if:
-          - condition: state
-            entity_id: media_player.owntone_output_garage_homepod
-            state: 'off'
-          then:
-          - service: media_player.turn_on
-            data: {}
-            target:
-              entity_id:
-              - media_player.owntone_output_garage_homepod
-          - service: media_player.volume_set
-            data:
-              volume_level: 0.45
-            target:
-              entity_id: media_player.owntone_output_garage_homepod
-          alias: Turn on Garage Speaker
-          enabled: false
-        - if:
-          - condition: state
-            entity_id: media_player.owntone_output_front_homepod
-            state: 'off'
-          then:
-          - service: media_player.turn_on
-            data: {}
-            target:
-              entity_id:
-              - media_player.owntone_output_front_homepod
-          - service: media_player.volume_set
-            data:
-              volume_level: 0.5
-            target:
-              entity_id:
-              - media_player.owntone_output_front_homepod
-          alias: Turn on Front HomePod
         alias: Turn on other speakers
       else: []
       enabled: true
@@ -2723,16 +2620,11 @@ play_music:
         - media_player.owntone_output_bathroom
         - media_player.owntone_output_anthony_s_desk
         - media_player.owntone_output_front
-        - media_player.owntone_output_front_homepod
         - media_player.owntone_output_kitchen_left
         - media_player.owntone_output_kitchen_right
         - media_player.owntone_output_living_room_tv
         - media_player.owntone_output_master_bedroom_tv
         - media_player.owntone_output_anthony_s_nightstand
-        - media_player.owntone_output_garage_homepod
-        - media_player.owntone_output_guest_left
-        - media_player.owntone_output_guest_right
-        - media_player.owntone_output_front_left
         - media_player.owntone_output_soundbar
     - wait_for_trigger:
       - platform: state
@@ -2755,16 +2647,11 @@ play_music:
             - media_player.owntone_output_bathroom
             - media_player.owntone_output_anthony_s_desk
             - media_player.owntone_output_front
-            - media_player.owntone_output_front_homepod
             - media_player.owntone_output_kitchen_left
             - media_player.owntone_output_kitchen_right
             - media_player.owntone_output_living_room_tv
             - media_player.owntone_output_master_bedroom_tv
             - media_player.owntone_output_anthony_s_nightstand
-            - media_player.owntone_output_garage_homepod
-            - media_player.owntone_output_guest_left
-            - media_player.owntone_output_guest_right
-            - media_player.owntone_output_front_left
             - media_player.owntone_output_soundbar
     - service: script.turn_on
       data: {}
@@ -2798,16 +2685,11 @@ stop_music:
       - media_player.owntone_output_bathroom
       - media_player.owntone_output_anthony_s_desk
       - media_player.owntone_output_front
-      - media_player.owntone_output_front_homepod
       - media_player.owntone_output_kitchen_left
       - media_player.owntone_output_kitchen_right
       - media_player.owntone_output_living_room_tv
       - media_player.owntone_output_master_bedroom_tv
       - media_player.owntone_output_anthony_s_nightstand
-      - media_player.owntone_output_garage_homepod
-      - media_player.owntone_output_guest_left
-      - media_player.owntone_output_guest_right
-      - media_player.owntone_output_front_left
       - media_player.owntone_output_soundbar
       - media_player.guest_speakers
       - media_player.kitchen_speakers
@@ -2832,18 +2714,86 @@ stop_music:
           - media_player.owntone_output_bathroom
           - media_player.owntone_output_anthony_s_desk
           - media_player.owntone_output_front
-          - media_player.owntone_output_front_homepod
           - media_player.owntone_output_kitchen_left
           - media_player.owntone_output_kitchen_right
           - media_player.owntone_output_living_room_tv
           - media_player.owntone_output_master_bedroom_tv
           - media_player.owntone_output_anthony_s_nightstand
-          - media_player.owntone_output_garage_homepod
-          - media_player.owntone_output_guest_left
-          - media_player.owntone_output_guest_right
   - service: homeassistant.reload_config_entry
     data: {}
     target:
       entity_id: media_player.spotify_anthony221121
   mode: single
   icon: mdi:stop
+power_saving:
+  alias: Power Saving
+  sequence:
+  - action: automation.turn_off
+    target:
+      entity_id:
+      - automation.nanoleaf_automation_reset
+      - automation.nanoleaf_scene_changer_and_auto_brightness
+    data:
+      stop_actions: true
+  - parallel:
+    - action: eight_sleep.side_off
+      metadata: {}
+      data: {}
+      target:
+        device_id: 17a6004d942531511690868095af6521
+    - action: light.turn_off
+      metadata: {}
+      data: {}
+      target:
+        entity_id:
+        - light.bedroom_lights
+        - light.closet_lights
+        - light.bed
+        - light.shapes_4948
+        - light.shapes_4948_2
+        - light.shapes_ee82
+        - light.govee
+        - light.rope
+        - light.wled
+        - light.wyze_bulb_1
+        - light.wyze_bulb_2
+        - light.wyze_bulb_3
+        - light.lines
+    - action: switch.turn_off
+      target:
+        entity_id:
+        - switch.lumi_lumi_plug_maus01_switch_2
+        - switch.wled_main_power
+      data: {}
+    - action: switch.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id:
+        - switch.usb_hub
+        - switch.goxlr
+    - if:
+      - condition: state
+        entity_id: binary_sensor.webcam
+        state: 'on'
+      then:
+      - action: button.press
+        metadata: {}
+        data: {}
+        target:
+          entity_id: button.desktop_pc_satellite_desktop_pc_satellite_energy
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_pct: 40
+          effect: Webcam
+        target:
+          entity_id: light.shapes_007f
+      else:
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: light.shapes_007f
+  description: ''
+  icon: mdi:lightning-bolt

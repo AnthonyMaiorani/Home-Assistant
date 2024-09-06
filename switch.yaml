@@ -1,4 +1,13 @@
 - platform: rest
+  resource: http://192.168.1.57/json/state
+  name: WLED Main Power
+  body_on: '{"on":true}'
+  body_off: '{"on":false}'
+  is_on_template: "{{ value_json.on }}"
+  unique_id: wled_main_power
+  method: patch
+  scan_interval: 5
+- platform: rest
   resource: http://192.168.1.57/json/state/seg
   name: WLED
   body_on: '{"seg": [{"id": 0, "on": true}]}'
@@ -504,6 +513,9 @@
         - service: wake_on_lan.send_magic_packet
           data:
             mac: !secret desktop
+        - service: wake_on_lan.send_magic_packet
+          data:
+            mac: !secret desktop2
       turn_off:
         - service: button.press
           target:
