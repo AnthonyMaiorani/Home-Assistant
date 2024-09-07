@@ -439,18 +439,13 @@ call:
           entity_id:
           - light.kitchen_lights
           - light.living_room_lights
-          - light.rotunda_lights
           - light.living_room_fan
-          - light.kitchen_cabinet_lights
-          - light.master_hallway_light
       - service: switch.turn_off
         data: {}
         target:
           entity_id:
-          - switch.gym_fan
           - switch.living_room_fan
           - switch.laundry_room_light
-          - switch.garage_light
       - if:
         - condition: not
           conditions:
@@ -600,18 +595,13 @@ night:
           entity_id:
           - light.kitchen_lights
           - light.living_room_lights
-          - light.rotunda_lights
           - light.living_room_fan
-          - light.kitchen_cabinet_lights
-          - light.master_hallway_light
       - service: switch.turn_off
         data: {}
         target:
           entity_id:
-          - switch.gym_fan
           - switch.living_room_fan
           - switch.laundry_room_light
-          - switch.garage_light
       - if:
         - condition: not
           conditions:
@@ -1299,7 +1289,6 @@ lofi:
         - media_player.owntone_server
         - media_player.owntone_output_bathroom
         - media_player.owntone_output_anthony_s_desk
-        - media_player.owntone_output_front
         - media_player.owntone_output_kitchen_left
         - media_player.owntone_output_kitchen_right
         - media_player.owntone_output_master_bedroom_tv
@@ -1324,7 +1313,6 @@ lofi:
             - media_player.owntone_server
             - media_player.owntone_output_bathroom
             - media_player.owntone_output_anthony_s_desk
-            - media_player.owntone_output_front
             - media_player.owntone_output_kitchen_left
             - media_player.owntone_output_kitchen_right
             - media_player.owntone_output_master_bedroom_tv
@@ -1345,10 +1333,8 @@ lofi:
       - media_player.owntone_server
       - media_player.owntone_output_bathroom
       - media_player.owntone_output_anthony_s_desk
-      - media_player.owntone_output_front
       - media_player.owntone_output_master_bedroom_tv
       - media_player.owntone_output_anthony_s_nightstand
-      - media_player.guest_speakers
       - media_player.owntone_output_kitchen_left
       - media_player.owntone_output_kitchen_right
       - media_player.kitchen_speakers
@@ -1415,7 +1401,6 @@ lofi:
         - media_player.owntone_server
         - media_player.owntone_output_bathroom
         - media_player.owntone_output_anthony_s_desk
-        - media_player.owntone_output_front
         - media_player.owntone_output_kitchen_left
         - media_player.owntone_output_kitchen_right
         - media_player.owntone_output_master_bedroom_tv
@@ -1440,7 +1425,6 @@ lofi:
             - media_player.owntone_server
             - media_player.owntone_output_bathroom
             - media_player.owntone_output_anthony_s_desk
-            - media_player.owntone_output_front
             - media_player.owntone_output_kitchen_left
             - media_player.owntone_output_kitchen_right
             - media_player.owntone_output_master_bedroom_tv
@@ -1830,7 +1814,6 @@ lofi:
         - media_player.owntone_server
         - media_player.owntone_output_bathroom
         - media_player.owntone_output_anthony_s_desk
-        - media_player.owntone_output_front
         - media_player.owntone_output_kitchen_left
         - media_player.owntone_output_kitchen_right
         - media_player.owntone_output_master_bedroom_tv
@@ -1856,7 +1839,6 @@ lofi:
             - media_player.owntone_server
             - media_player.owntone_output_bathroom
             - media_player.owntone_output_anthony_s_desk
-            - media_player.owntone_output_front
             - media_player.owntone_output_kitchen_left
             - media_player.owntone_output_kitchen_right
             - media_player.owntone_output_master_bedroom_tv
@@ -1910,10 +1892,8 @@ play_music:
       - media_player.owntone_server
       - media_player.owntone_output_bathroom
       - media_player.owntone_output_anthony_s_desk
-      - media_player.owntone_output_front
       - media_player.owntone_output_master_bedroom_tv
       - media_player.owntone_output_anthony_s_nightstand
-      - media_player.guest_speakers
       - media_player.owntone_output_kitchen_left
       - media_player.owntone_output_kitchen_right
       - media_player.kitchen_speakers
@@ -1980,7 +1960,6 @@ play_music:
         - media_player.owntone_server
         - media_player.owntone_output_bathroom
         - media_player.owntone_output_anthony_s_desk
-        - media_player.owntone_output_front
         - media_player.owntone_output_kitchen_left
         - media_player.owntone_output_kitchen_right
         - media_player.owntone_output_master_bedroom_tv
@@ -2005,7 +1984,6 @@ play_music:
             - media_player.owntone_server
             - media_player.owntone_output_bathroom
             - media_player.owntone_output_anthony_s_desk
-            - media_player.owntone_output_front
             - media_player.owntone_output_kitchen_left
             - media_player.owntone_output_kitchen_right
             - media_player.owntone_output_master_bedroom_tv
@@ -2400,7 +2378,6 @@ play_music:
         - media_player.owntone_server
         - media_player.owntone_output_bathroom
         - media_player.owntone_output_anthony_s_desk
-        - media_player.owntone_output_front
         - media_player.owntone_output_kitchen_left
         - media_player.owntone_output_kitchen_right
         - media_player.owntone_output_master_bedroom_tv
@@ -2426,7 +2403,6 @@ play_music:
             - media_player.owntone_server
             - media_player.owntone_output_bathroom
             - media_player.owntone_output_anthony_s_desk
-            - media_player.owntone_output_front
             - media_player.owntone_output_kitchen_left
             - media_player.owntone_output_kitchen_right
             - media_player.owntone_output_master_bedroom_tv
@@ -2464,13 +2440,11 @@ stop_music:
       - media_player.owntone_server
       - media_player.owntone_output_bathroom
       - media_player.owntone_output_anthony_s_desk
-      - media_player.owntone_output_front
       - media_player.owntone_output_kitchen_left
       - media_player.owntone_output_kitchen_right
       - media_player.owntone_output_master_bedroom_tv
       - media_player.owntone_output_anthony_s_nightstand
       - media_player.owntone_output_soundbar
-      - media_player.guest_speakers
       - media_player.kitchen_speakers
   - wait_for_trigger:
     - platform: state
@@ -2492,7 +2466,6 @@ stop_music:
           - media_player.owntone_server
           - media_player.owntone_output_bathroom
           - media_player.owntone_output_anthony_s_desk
-          - media_player.owntone_output_front
           - media_player.owntone_output_kitchen_left
           - media_player.owntone_output_kitchen_right
           - media_player.owntone_output_master_bedroom_tv

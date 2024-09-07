@@ -383,7 +383,6 @@
         - media_player.owntone_output_kitchen_right
         - media_player.owntone_output_master_bedroom_tv
         - media_player.owntone_output_anthony_s_nightstand
-        - media_player.owntone_output_guest_room_tv
         - media_player.owntone_output_soundbar
     - service: button.press
       target:
@@ -535,16 +534,8 @@
           - light.hallway_lights
           - light.bathroom_lights
           - switch.living_room_fan
-          - switch.porch_light
           - switch.laundry_room_light
-          - switch.dining_room_light
-          - light.master_hallway_light
-          - switch.fronttv
           - light.living_room_fan
-          - switch.gym_fan
-          - light.rotunda_lights
-          - switch.main_hall_light
-          - switch.garage_light
           - switch.guesttv
         action: homeassistant.turn_off
       - if:
@@ -1061,11 +1052,8 @@
           target:
             entity_id:
             - light.living_room_lights
-            - light.kitchen_cabinet_lights
             - light.bathroom_lights
             - light.hallway_lights
-            - light.rotunda_lights
-            - light.master_hallway_light
             - light.living_room_fan
         - service: switch.turn_off
           data: {}
@@ -1073,12 +1061,6 @@
             entity_id:
             - switch.living_room_fan
             - switch.laundry_room_light
-            - switch.gym_fan
-            - switch.dining_room_light
-            - light.master_hallway_light
-            - light.rotunda_lights
-            - switch.garage_light
-            - switch.main_hall_light
         - service: media_player.turn_off
           data: {}
           target:
@@ -1104,15 +1086,12 @@
         data: {}
         target:
           entity_id:
-          - media_player.owntone_output_front
-          - media_player.guest_speakers
           - media_player.owntone_output_soundbar
           - media_player.kitchen_speakers
           - media_player.owntone_output_kitchen_left
           - media_player.owntone_output_kitchen_right
           - media_player.owntone_output_master_bedroom_tv
           - media_player.owntone_output_bathroom
-          - media_player.owntone_output_guest_room_tv
       - if:
         - condition: or
           conditions:
@@ -2432,64 +2411,6 @@
           ignore_result: ignore
       message: Start car?
   mode: single
-- id: '1664335198513'
-  alias: Backyard Light
-  description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - binary_sensor.back_door
-  - platform: homeassistant
-    event: start
-  - platform: sun
-    event: sunset
-    offset: 0
-    enabled: true
-  - platform: sun
-    event: sunrise
-    offset: 0
-  - platform: event
-    event_type: automation_reloaded
-  condition: []
-  action:
-  - if:
-    - condition: state
-      entity_id: binary_sensor.back_door
-      state: 'on'
-    - condition: sun
-      before: sunrise
-      after: sunset
-    - condition: not
-      conditions:
-      - condition: or
-        conditions:
-        - condition: state
-          entity_id: input_select.riana
-          state: Home
-        - condition: state
-          entity_id: input_select.riana
-          state: Just Arrived
-    then:
-    - service: switch.turn_on
-      data: {}
-      target:
-        entity_id: switch.porch_light
-      enabled: true
-    else:
-    - condition: or
-      conditions:
-      - condition: state
-        entity_id: binary_sensor.back_door
-        state: 'off'
-      - condition: sun
-        after: sunrise
-        before: sunset
-    - service: switch.turn_off
-      data: {}
-      target:
-        entity_id: switch.porch_light
-  mode: parallel
-  max: 10
 - id: '1664505341968'
   alias: Arrived Home
   description: ''
@@ -3391,10 +3312,6 @@
           - light.kitchen_lights
           - light.hallway_lights
         action: light.turn_off
-      - data: {}
-        target:
-          entity_id: switch.porch_light
-        action: switch.turn_off
   mode: single
 - id: '1665630463210'
   alias: 'Only one home automations '
@@ -3412,10 +3329,6 @@
     - binary_sensor.laundry_room_motion
     - binary_sensor.kitchen
     - binary_sensor.entry_doors
-    - light.kitchen_cabinet_lights
-    - switch.dining_room_light
-    - light.rotunda_lights
-    - switch.gym_fan
     - binary_sensor.dining_room_occupancy
     - binary_sensor.master_hall_motion
     - binary_sensor.lumi_lumi_motion_ac02_motion
@@ -4091,50 +4004,14 @@
   - platform: state
     entity_id:
     - switch.katchy
-    - switch.gym_fan
-    - switch.living_room_fan
-    - switch.porch_light
-    - switch.dining_room_light
-    - light.master_hallway_light
-    - light.rotunda_lights
-    - light.kitchen_cabinet_lights
-    - switch.garage_light
-    - switch.main_hall_light
     to: unavailable
   condition:
-  - condition: or
+  - alias: Any device unavailable
+    condition: or
     conditions:
     - condition: state
       entity_id: switch.katchy
       state: unavailable
-    - condition: state
-      entity_id: switch.gym_fan
-      state: unavailable
-    - condition: state
-      entity_id: switch.living_room_fan
-      state: unavailable
-    - condition: state
-      entity_id: switch.porch_light
-      state: unavailable
-    - condition: state
-      entity_id: switch.dining_room_light
-      state: unavailable
-    - condition: state
-      entity_id: light.master_hallway_light
-      state: unavailable
-    - condition: state
-      entity_id: light.rotunda_lights
-      state: unavailable
-    - condition: state
-      entity_id: light.kitchen_cabinet_lights
-      state: unavailable
-    - condition: state
-      entity_id: switch.garage_light
-      state: unavailable
-    - condition: state
-      entity_id: switch.main_hall_light
-      state: unavailable
-    alias: Any device unavailable
   action:
   - delay:
       hours: 0
@@ -4150,33 +4027,6 @@
           - condition: state
             entity_id: switch.katchy
             state: unavailable
-          - condition: state
-            entity_id: switch.gym_fan
-            state: unavailable
-          - condition: state
-            entity_id: switch.living_room_fan
-            state: unavailable
-          - condition: state
-            entity_id: switch.porch_light
-            state: unavailable
-          - condition: state
-            entity_id: switch.dining_room_light
-            state: unavailable
-          - condition: state
-            entity_id: light.master_hallway_light
-            state: unavailable
-          - condition: state
-            entity_id: light.rotunda_lights
-            state: unavailable
-          - condition: state
-            entity_id: light.kitchen_cabinet_lights
-            state: unavailable
-          - condition: state
-            entity_id: switch.garage_light
-            state: unavailable
-          - condition: state
-            entity_id: switch.main_hall_light
-            state: unavailable
           alias: Any device unavailable
         alias: Until all devices available
       sequence:
@@ -4186,101 +4036,11 @@
             entity_id: switch.katchy
             state: unavailable
           then:
-          - service: button.press
-            data: {}
+          - data: {}
             target:
               entity_id:
               - button.node_22_ping
-        - if:
-          - condition: state
-            entity_id: switch.gym_fan
-            state: unavailable
-          then:
-          - service: button.press
-            data: {}
-            target:
-              entity_id:
-              - button.gym_fan_ping
-        - if:
-          - condition: state
-            entity_id: switch.living_room_fan
-            state: unavailable
-          then:
-          - service: button.press
-            data: {}
-            target:
-              entity_id:
-              - button.living_room_fan_ping
-        - if:
-          - condition: state
-            entity_id: switch.porch_light
-            state: unavailable
-          then:
-          - service: button.press
-            data: {}
-            target:
-              entity_id:
-              - button.node_26_ping
-        - if:
-          - condition: state
-            entity_id: switch.dining_room_light
-            state: unavailable
-          then:
-          - service: button.press
-            data: {}
-            target:
-              entity_id:
-              - button.dining_room_light_ping
-        - if:
-          - condition: state
-            entity_id: light.master_hallway_light
-            state: unavailable
-          then:
-          - service: button.press
-            data: {}
-            target:
-              entity_id:
-              - button.node_25_ping
-        - if:
-          - condition: state
-            entity_id: light.kitchen_cabinet_lights
-            state: unavailable
-          then:
-          - service: button.press
-            data: {}
-            target:
-              entity_id:
-              - button.node_19_ping
-        - if:
-          - condition: state
-            entity_id: switch.garage_light
-            state: unavailable
-          then:
-          - service: button.press
-            data: {}
-            target:
-              entity_id:
-              - button.garage_light_ping
-        - if:
-          - condition: state
-            entity_id: switch.main_hall_light
-            state: unavailable
-          then:
-          - service: button.press
-            data: {}
-            target:
-              entity_id:
-              - button.node_17_ping
-        - if:
-          - condition: state
-            entity_id: light.rotunda_lights
-            state: unavailable
-          then:
-          - service: button.press
-            data: {}
-            target:
-              entity_id:
-              - button.node_64_ping
+            action: button.press
       - delay:
           hours: 0
           minutes: 0
@@ -5233,12 +4993,6 @@
           - condition: state
             entity_id: media_player.owntone_output_bathroom
             state: 'on'
-          - condition: state
-            entity_id: media_player.owntone_output_front
-            state: 'on'
-          - condition: state
-            entity_id: media_player.guest_speakers
-            state: 'on'
           - condition: template
             value_template: "{{ as_local(state_attr('script.lofi', \n        'last_triggered'))
               > now() - timedelta( minutes = 1 ) \nor as_local(state_attr('script.test',
@@ -5322,7 +5076,6 @@
     target:
       entity_id:
       - light.kitchen_lights
-      - light.kitchen_cabinet_lights
     action: light.turn_off
   - action: switch.turn_off
     metadata: {}
@@ -5507,10 +5260,8 @@
             target:
               entity_id:
               - media_player.owntone_output_anthony_s_desk
-              - media_player.owntone_output_front
               - media_player.owntone_output_master_bedroom_tv
               - media_player.owntone_output_anthony_s_nightstand
-              - media_player.guest_speakers
               - media_player.owntone_output_kitchen_left
               - media_player.owntone_output_kitchen_right
             action: media_player.turn_off
@@ -6199,21 +5950,6 @@
         target:
           entity_id: timer.bathroom_light
   mode: restart
-- id: '1670483390344'
-  alias: Kitchen Cabinet Pico
-  description: ''
-  use_blueprint:
-    path: cymone-smart/lutron_pico_5_light.yaml
-    input:
-      pico_1: fb561243a18ef4b5ee04c3ca72dea9e1
-      middle_button_action:
-      - type: turn_on
-        device_id: 12fdf93ade08d994961d501d7730373c
-        entity_id: light.kitchen_cabinet_lights
-        domain: light
-        brightness_pct: 40
-      entity:
-      - light.kitchen_cabinet_lights
 - id: '1670729021317'
   alias: Christmas Lights
   description: Sync with Kitchen Lights
@@ -6481,18 +6217,11 @@
       - condition: state
         entity_id: media_player.kitchen_speakers
         state: 'on'
-      - condition: state
-        entity_id: media_player.guest_speakers
-        state: 'on'
-      - condition: state
-        entity_id: media_player.owntone_output_front
-        state: 'on'
     then:
     - service: media_player.turn_off
       data: {}
       target:
         entity_id:
-        - media_player.owntone_output_front
         - media_player.owntone_output_kitchen_left
         - media_player.owntone_output_kitchen_right
         - media_player.owntone_output_master_bedroom_tv
@@ -6522,10 +6251,6 @@
       entity_id: light.kitchen_lights
       domain: light
       brightness_pct: 18
-  - type: turn_off
-    device_id: 7c247296aac3c00b267bb165baab5a7c
-    entity_id: switch.porch_light
-    domain: switch
   mode: single
 - id: '1670894312639'
   alias: Notification
@@ -6898,11 +6623,8 @@
             - media_player.owntone_output_anthony_s_desk
             - media_player.owntone_output_anthony_s_nightstand
             - media_player.owntone_output_bathroom
-            - media_player.owntone_output_front
-            - media_player.owntone_output_gym
             - media_player.owntone_output_kitchen_left
             - media_player.owntone_output_kitchen_right
-            - media_player.owntone_output_macbook_air
             - media_player.owntone_output_master_bedroom_tv
             - media_player.owntone_output_soundbar
           action: media_player.turn_off
@@ -6931,12 +6653,6 @@
             - switch.dana_s_east_incandescent_rope
             - switch.dana_s_west_color_rope
             - switch.dana_s_south_color_rope
-        - service: media_player.turn_on
-          data: {}
-          target:
-            entity_id:
-            - media_player.guest_tv
-            - media_player.hisense_tv
         - service: button.press
           data: {}
           target:
@@ -7126,14 +6842,6 @@
             - switch.dana_s_east_incandescent_rope
             - switch.dana_s_west_color_rope
             - switch.dana_s_south_color_rope
-        - service: media_player.turn_off
-          data: {}
-          target:
-            entity_id:
-            - media_player.owntone_output_soundbar
-            - media_player.guest_tv
-            - media_player.guest_speakers
-            - media_player.hisense_tv
         - service: button.press
           data: {}
           target:
@@ -7235,12 +6943,6 @@
             - switch.dana_s_east_incandescent_rope
             - switch.dana_s_west_color_rope
             - switch.dana_s_south_color_rope
-        - service: media_player.turn_on
-          data: {}
-          target:
-            entity_id:
-            - media_player.guest_tv
-            - media_player.hisense_tv
         - service: button.press
           data: {}
           target:
@@ -7280,7 +6982,6 @@
           target:
             entity_id:
             - media_player.danas_32_tcl_roku_tv
-            - media_player.guest_tv
         - service: button.press
           data: {}
           target:
@@ -7469,45 +7170,6 @@
           entity_id: input_boolean.bathroom_occupied
   mode: queued
   max: 10
-- id: '1671929632563'
-  alias: Dining Room Light
-  description: ''
-  trigger:
-  - device_id: 767effc5535cb9c6264f0419d61cfeb7
-    domain: zha
-    platform: device
-    type: Leave
-    subtype: sensor
-    id: sensor leave
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: sensor leave
-      - condition: state
-        entity_id: switch.dining_room_light
-        state: 'on'
-      sequence:
-      - service: switch.turn_off
-        data: {}
-        target:
-          entity_id: switch.dining_room_light
-  mode: single
-- id: '1672034605114'
-  alias: Master Bedroom Kitchen Light Pico
-  description: ''
-  use_blueprint:
-    path: stephack/core-pico.yaml
-    input:
-      pico_remote: 71473ec4967297f4adc37260dfb2d76a
-      auto_mode: single
-      down_lower: []
-      bottom_off:
-      - service: light.turn_off
-        data: {}
-        target:
-          entity_id: light.kitchen_cabinet_lights
 - id: '1672543042441'
   alias: Bathroom Exhaust Pico
   description: ''
@@ -8558,29 +8220,6 @@
         - update.home_assistant_core_update
     enabled: true
   mode: single
-- id: '1677121828248'
-  alias: Turn off TVs
-  description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - media_player.spotify_anthony221121
-    attribute: source
-    to: DESKTOP-PC
-    from: Home Assistant
-  condition:
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: media_player.owntone_output_front
-      state: 'on'
-  action:
-  - service: switch.turn_off
-    data: {}
-    target:
-      entity_id:
-      - switch.fronttv
-  mode: single
 - id: '1678008305202'
   alias: Start music after shutting down computer
   description: ''
@@ -8607,132 +8246,6 @@
   action:
   - service: script.lofi
     data: {}
-  mode: single
-- id: '1678685123749'
-  alias: Kitchen Night Light
-  description: ''
-  trigger:
-  - device_id: 73df54d198e3ccede0b9431266ce71c6
-    domain: zha
-    platform: device
-    type: Enter
-    subtype: sensor
-    id: enter
-  - device_id: 73df54d198e3ccede0b9431266ce71c6
-    domain: zha
-    platform: device
-    type: Leave
-    subtype: sensor
-    id: leave
-  - type: not_opened
-    platform: device
-    device_id: 40b6acb50076a1f15ff0e73120d2f04e
-    entity_id: binary_sensor.bedroom_door
-    domain: binary_sensor
-    id: door closed
-  - platform: state
-    entity_id:
-    - binary_sensor.bed_occupancy
-    to: 'on'
-    id: bed
-  - platform: device
-    type: turned_on
-    device_id: aa29287a53774cb599c5658e30e48d9d
-    entity_id: light.kitchen_lights
-    domain: light
-    id: lights on
-  - type: motion
-    platform: device
-    device_id: 636093ce084fceeb09083a7a66a2efe6
-    entity_id: ca871a2082db2d3f829b9e50ff599285
-    domain: binary_sensor
-    id: kitchen motion
-    enabled: false
-  condition:
-  - condition: time
-    after: '22:00:00'
-    before: 08:00:00
-  - condition: sun
-    before: sunrise
-    after: sunset
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id:
-        - enter
-        - kitchen motion
-      - condition: or
-        conditions:
-        - condition: state
-          entity_id: input_select.anthony
-          state: Home
-        - condition: state
-          entity_id: input_select.anthony
-          state: Just Arrived
-      - condition: device
-        type: is_off
-        device_id: aa29287a53774cb599c5658e30e48d9d
-        entity_id: light.kitchen_lights
-        domain: light
-      - condition: device
-        type: is_off
-        device_id: 12fdf93ade08d994961d501d7730373c
-        entity_id: light.kitchen_cabinet_lights
-        domain: light
-      - condition: or
-        conditions:
-        - condition: state
-          entity_id: person.taylor
-          state: home
-        - condition: not
-          conditions:
-          - condition: state
-            entity_id: binary_sensor.bed_occupancy
-            state: 'on'
-      sequence:
-      - type: turn_on
-        device_id: 12fdf93ade08d994961d501d7730373c
-        entity_id: light.kitchen_cabinet_lights
-        domain: light
-        brightness_pct: 50
-    - conditions:
-      - condition: or
-        conditions:
-        - condition: trigger
-          id: leave
-        - condition: trigger
-          id: door closed
-        - condition: trigger
-          id: bed
-      - condition: device
-        type: is_on
-        device_id: 12fdf93ade08d994961d501d7730373c
-        entity_id: light.kitchen_cabinet_lights
-        domain: light
-      sequence:
-      - type: turn_off
-        device_id: 12fdf93ade08d994961d501d7730373c
-        entity_id: light.kitchen_cabinet_lights
-        domain: light
-      - service: media_player.turn_off
-        data: {}
-        target:
-          entity_id:
-          - media_player.kitchen_speakers
-    - conditions:
-      - condition: trigger
-        id: lights on
-      sequence:
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 1
-          milliseconds: 0
-      - type: turn_off
-        device_id: 12fdf93ade08d994961d501d7730373c
-        entity_id: light.kitchen_cabinet_lights
-        domain: light
   mode: single
 - id: '1678704758356'
   alias: Resume Music After Macbook Stops It
@@ -9030,7 +8543,6 @@
           target:
             entity_id:
             - media_player.danas_32_tcl_roku_tv
-            - media_player.guest_tv
         - service: button.press
           data: {}
           target:
@@ -9129,212 +8641,12 @@
             entity_id:
             - media_player.danas_32_tcl_roku_tv
             - media_player.owntone_output_soundbar
-            - media_player.guest_tv
         - service: button.press
           data: {}
           target:
             entity_id:
             - button.screenoff_2
   mode: parallel
-  max: 10
-- id: '1681276772437'
-  alias: Guest Exhaust Fan
-  description: ''
-  trigger:
-  - platform: event
-    event_type: timer.finished
-    event_data:
-      entity_id: timer.guest_exhaust
-    id: done
-    alias: When timer finishes
-  - platform: homeassistant
-    event: start
-    id: restart
-  - platform: event
-    event_type: automation_reloaded
-    alias: reload
-    id: reload
-  - platform: template
-    value_template: "{% if states.switch.guest_bathroom_exhaust_fan.last_changed is
-      defined %}\n  {% if as_timestamp(states.switch.guest_bathroom_exhaust_fan.last_changed)|timestamp_local
-      is defined %}\n    {{ is_state('switch.guest_bathroom_exhaust_fan', 'on') and
-      is_state('switch.guest_bathroom_vanity_lights', 'on') and\n       as_timestamp(states.switch.guest_bathroom_exhaust_fan.last_changed)
-      > as_timestamp(now()) - (3600) }}\n  {%endif%}\n{%endif%}"
-    alias: turn off
-    id: turn off
-    enabled: false
-  - platform: device
-    type: turned_off
-    device_id: fe6f7334ca82ed9a53ef4b7fc752e65c
-    entity_id: switch.guest_bathroom_vanity_lights
-    domain: switch
-    id: lights turned off
-  - platform: device
-    type: turned_on
-    device_id: b4f6d5bb367bde974f52305be8ef1d3c
-    entity_id: switch.guest_bathroom_exhaust_fan
-    domain: switch
-    id: turned on
-  - platform: device
-    type: turned_off
-    device_id: b4f6d5bb367bde974f52305be8ef1d3c
-    entity_id: switch.guest_bathroom_exhaust_fan
-    domain: switch
-    id: turned off
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: device
-        type: is_on
-        device_id: b4f6d5bb367bde974f52305be8ef1d3c
-        entity_id: switch.guest_bathroom_exhaust_fan
-        domain: switch
-      - condition: device
-        type: is_off
-        device_id: fe6f7334ca82ed9a53ef4b7fc752e65c
-        entity_id: switch.guest_bathroom_vanity_lights
-        domain: switch
-      - condition: or
-        conditions:
-        - condition: trigger
-          id: lights turned off
-        - condition: trigger
-          id: turned on
-      - condition: or
-        conditions:
-        - condition: not
-          conditions:
-          - condition: state
-            entity_id: timer.guest_exhaust
-            state: active
-          alias: Timer not active
-        - condition: template
-          value_template: '{{ is_state(''input_boolean.bathroom_occupied'', ''off'')
-            and
-
-            (now() - states.input_boolean.bathroom_occupied.last_changed).total_seconds()
-            < 5 }}'
-          alias: Bathroom Occupied was on prior to light turning off
-          enabled: false
-      sequence:
-      - service: timer.start
-        data:
-          duration: 00:15:00
-        target:
-          entity_id:
-          - timer.guest_exhaust
-    - conditions:
-      - condition: trigger
-        id: done
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: timer.guest_exhaust
-          state: active
-        - condition: state
-          entity_id: input_boolean.showering
-          state: 'on'
-          enabled: false
-        - condition: state
-          entity_id: input_boolean.bathroom_occupied
-          state: 'on'
-          enabled: false
-        - condition: device
-          type: is_off
-          device_id: b4f6d5bb367bde974f52305be8ef1d3c
-          entity_id: switch.guest_bathroom_exhaust_fan
-          domain: switch
-        alias: Confirm fan is off, shower is off, timer is off
-      sequence:
-      - service: switch.turn_off
-        data: {}
-        target:
-          entity_id:
-          - switch.guest_bathroom_exhaust_fan
-    - conditions:
-      - condition: trigger
-        id: showerstart
-        enabled: false
-      sequence:
-      - service: switch.turn_on
-        data: {}
-        target:
-          entity_id:
-          - switch.exhaust_fan
-        enabled: false
-    - conditions:
-      - condition: or
-        conditions:
-        - condition: trigger
-          id: restart
-        - condition: trigger
-          id: reload
-        alias: restart/reload
-      - condition: or
-        conditions:
-        - condition: state
-          entity_id: input_boolean.showering
-          state: 'on'
-          enabled: false
-        - condition: state
-          entity_id: switch.guest_bathroom_exhaust_fan
-          state: 'on'
-        alias: shower / fan on
-      sequence:
-      - if:
-        - condition: state
-          entity_id: input_boolean.showering
-          state: 'on'
-          enabled: false
-        then:
-        - service: timer.cancel
-          data: {}
-          target:
-            entity_id: timer.exhaust
-          enabled: false
-        - service: switch.turn_on
-          data: {}
-          target:
-            entity_id: switch.exhaust_fan
-          enabled: false
-        else:
-        - condition: state
-          entity_id: input_boolean.showering
-          state: 'off'
-          enabled: false
-        - condition: state
-          entity_id: timer.guest_exhaust
-          state: idle
-        - condition: device
-          type: is_off
-          device_id: fe6f7334ca82ed9a53ef4b7fc752e65c
-          entity_id: switch.guest_bathroom_vanity_lights
-          domain: switch
-        - service: timer.start
-          data: {}
-          target:
-            entity_id:
-            - timer.guest_exhaust
-    - conditions:
-      - condition: or
-        conditions:
-        - condition: trigger
-          id: turn off
-        - condition: trigger
-          id: turned off
-      sequence:
-      - service: switch.turn_off
-        data: {}
-        target:
-          entity_id:
-          - switch.guest_bathroom_exhaust_fan
-      - service: timer.cancel
-        data: {}
-        target:
-          entity_id:
-          - timer.guest_exhaust
-  mode: queued
   max: 10
 - id: '1681346504601'
   alias: Guest Bedroom Pedestal Pico
@@ -9380,24 +8692,12 @@
         target:
           entity_id: switch.samsung_tv
         enabled: true
-      - service: media_player.turn_on
-        target:
-          entity_id:
-          - media_player.guest
-          device_id: []
-          area_id: []
-        data: {}
-        enabled: false
       - choose:
         - conditions:
           - condition: state
             entity_id: switch.samsung_tv
             state: 'on'
           sequence:
-          - service: media_player.turn_off
-            target:
-              entity_id: media_player.guest
-            data: {}
           - service: switch.turn_off
             target:
               entity_id: switch.samsung_tv
@@ -9410,10 +8710,6 @@
           - service: switch.turn_on
             target:
               entity_id: switch.samsung_tv
-            data: {}
-          - service: media_player.turn_on
-            target:
-              entity_id: media_player.guest
             data: {}
         enabled: true
       bottom_off_release: []
@@ -9594,26 +8890,6 @@
               milliseconds: 0
       alias: Move music to Desktop
   mode: single
-- id: '1689228398983'
-  alias: Kitchen Wall Pico
-  description: ''
-  use_blueprint:
-    path: stephack/core-pico.yaml
-    input:
-      pico_remote: e269e8e9d624964d36a72c6846e30d01
-      down_lower:
-      - if:
-        - condition: state
-          entity_id: light.kitchen_lights
-          state: 'off'
-        - condition: state
-          entity_id: light.kitchen_cabinet_lights
-          state: 'on'
-        then:
-        - service: light.turn_off
-          data: {}
-          target:
-            entity_id: light.kitchen_cabinet_lights
 - id: '1689234248891'
   alias: Update Alarm
   description: ''
@@ -10239,12 +9515,6 @@
           conditions:
           - condition: state
             entity_id: media_player.owntone_output_bathroom
-            state: 'on'
-          - condition: state
-            entity_id: media_player.owntone_output_front
-            state: 'on'
-          - condition: state
-            entity_id: media_player.guest_speakers
             state: 'on'
           - condition: template
             value_template: "{{ as_local(state_attr('script.lofi', \n        'last_triggered'))
@@ -11447,7 +10717,6 @@
           data: {}
           target:
             entity_id:
-            - media_player.guest_tv
             - media_player.hisense_tv
         - service: button.press
           data: {}
@@ -11643,8 +10912,6 @@
           target:
             entity_id:
             - media_player.owntone_output_soundbar
-            - media_player.guest_tv
-            - media_player.guest_speakers
             - media_player.hisense_tv
         - service: button.press
           data: {}
@@ -11751,7 +11018,6 @@
           data: {}
           target:
             entity_id:
-            - media_player.guest_tv
             - media_player.hisense_tv
         - service: button.press
           data: {}
@@ -11792,7 +11058,6 @@
           target:
             entity_id:
             - media_player.danas_32_tcl_roku_tv
-            - media_player.guest_tv
         - service: button.press
           data: {}
           target:

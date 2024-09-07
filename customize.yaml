@@ -10,8 +10,6 @@ switch.ac:
   icon: mdi:air-conditioner
 sensor.ac_thermostat_temperature:
   icon: mdi:thermostat
-switch.fronttv:
-  icon: mdi:youtube-tv
 switch.guesttv:
   icon: mdi:youtube-tv
 switch.mastertv:

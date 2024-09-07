@@ -251,41 +251,6 @@
       - service: switch.turn_off
         target:
           entity_id: switch.ac_boost
-    fronttv:
-      unique_id: fronttv
-      friendly_name: Front TV
-      value_template: "{{ states('media_player.hisense_tv') }}"
-      turn_on:
-        - service: switch.turn_on
-          target:
-            entity_id:
-              - switch.hisense_tv
-      turn_off:
-        - condition: state
-          entity_id: switch.fronttv
-          state: "on"
-        - service: media_player.turn_off
-          target:
-            entity_id:
-              - media_player.owntone_output_front
-        - service: switch.turn_off
-          target:
-            entity_id:
-              - switch.hisense_tv
-    brtv:
-      unique_id: brtv
-      friendly_name: Bedroom TV
-      value_template: "{{ not is_state('media_player.front', 'standby') }}"
-      turn_on:
-        - service: media_player.turn_on
-          target:
-            entity_id:
-              - media_player.front
-      turn_off:
-        - service: media_player.turn_off
-          target:
-            entity_id:
-              - media_player.front
     acfanhigh:
       unique_id: acfanhigh
       friendly_name: AC Fan High
@@ -335,19 +300,11 @@
           target:
             entity_id:
               - switch.samsung_tv
-        - service: media_player.turn_on
-          target:
-            entity_id:
-              - media_player.guest_tv
       turn_off:
         - service: switch.turn_off
           target:
             entity_id:
               - switch.samsung_tv
-        - service: media_player.turn_off
-          target:
-            entity_id:
-              - media_player.guest_tv
     mastertv:
       unique_id: mastertv
       friendly_name: Master TV
