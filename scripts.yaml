@@ -2491,7 +2491,7 @@ power_saving:
       metadata: {}
       data: {}
       target:
-        device_id: 17a6004d942531511690868095af6521
+        device_id: 1807d01837ccf4f85178b48dd72b10f6
     - action: light.turn_off
       metadata: {}
       data: {}

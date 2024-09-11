@@ -221,7 +221,7 @@
           duration: 1500
           target: -100
         target:
-          device_id: 17a6004d942531511690868095af6521
+          device_id: 1807d01837ccf4f85178b48dd72b10f6
     else:
     - if:
       - condition: state
@@ -576,7 +576,7 @@
       enabled: false
       action: select.select_option
     - target:
-        device_id: 17a6004d942531511690868095af6521
+        device_id: 1807d01837ccf4f85178b48dd72b10f6
       data: {}
       action: eight_sleep.side_off
   mode: single
@@ -1516,7 +1516,7 @@
       duration: 28800
       target: -100
     target:
-      device_id: 17a6004d942531511690868095af6521
+      device_id: 1807d01837ccf4f85178b48dd72b10f6
     action: eight_sleep.heat_set
   - wait_for_trigger:
     - platform: state
@@ -1534,7 +1534,7 @@
       entity_id: switch.ac_boost
     action: switch.turn_off
   - target:
-      device_id: 17a6004d942531511690868095af6521
+      device_id: 1807d01837ccf4f85178b48dd72b10f6
     data: {}
     action: eight_sleep.side_off
   mode: single
@@ -5392,7 +5392,7 @@
               target: -100
               duration: 28800
             target:
-              device_id: 17a6004d942531511690868095af6521
+              device_id: 1807d01837ccf4f85178b48dd72b10f6
     - conditions:
       - condition: device
         type: is_off
@@ -7513,240 +7513,240 @@
       entity_id: input_select.taylor_presence
       state: Just Arrived
   action:
-  - service: switch.turn_on
-    data: {}
+  - data: {}
     target:
       entity_id: switch.light_switch_relay
+    action: switch.turn_on
   - parallel:
     - if:
       - condition: state
         entity_id: update.z_wave_js_to_mqtt_update
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id: update.z_wave_js_to_mqtt_update
+        action: update.install
       enabled: true
     - if:
       - condition: state
         entity_id: update.esphome_update
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id: update.esphome_update
+        action: update.install
     - if:
       - condition: state
         entity_id: update.studio_code_server_update
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id: update.studio_code_server_update
+        action: update.install
     - if:
       - condition: state
         entity_id: update.card_mod_update
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id:
           - update.card_mod_update
+        action: update.install
     - if:
       - condition: state
         entity_id: update.ios_themes_dark_mode_and_light_mode_update
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id:
           - update.ios_themes_dark_mode_and_light_mode_update
+        action: update.install
     - if:
       - condition: state
         entity_id: update.mini_graph_card_update
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id:
           - update.mini_graph_card_update
+        action: update.install
     - if:
       - condition: state
         entity_id: update.fold_entity_row_update
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id:
           - update.fold_entity_row_update
+        action: update.install
     - if:
       - condition: state
         entity_id: update.button_card_update
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id:
           - update.button_card_update
+        action: update.install
     - if:
       - condition: state
         entity_id: update.mini_media_player_update
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id:
           - update.mini_media_player_update
+        action: update.install
     - if:
       - condition: state
         entity_id: update.timer_bar_card_update
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id:
           - update.timer_bar_card_update
+        action: update.install
     - if:
       - condition: state
         entity_id: update.home_assistant_google_drive_backup_update
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id:
           - update.home_assistant_google_drive_backup_update
+        action: update.install
     - if:
       - condition: state
         entity_id: update.homepod_connect_dev_update
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id:
           - update.homepod_connect_dev_update
+        action: update.install
     - if:
       - condition: state
         entity_id: update.mosquitto_broker_update
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id:
           - update.mosquitto_broker_update
+        action: update.install
     - if:
       - condition: state
         entity_id: update.network_ups_tools_update
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id:
           - update.network_ups_tools_update
+        action: update.install
     - if:
       - condition: state
         entity_id: update.rtl_433_mqtt_auto_discovery_update
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id:
           - update.rtl_433_mqtt_auto_discovery_update
+        action: update.install
     - if:
       - condition: state
         entity_id: update.rtl_433_update
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id:
           - update.rtl_433_update
+        action: update.install
     - if:
       - condition: state
         entity_id: update.samba_share_update
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id:
           - update.samba_share_update
+        action: update.install
     - if:
       - condition: state
         entity_id: update.terminal_ssh_update
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id:
           - update.terminal_ssh_update
+        action: update.install
     - if:
       - condition: state
         entity_id: update.vaultwarden_bitwarden_update
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id:
           - update.vaultwarden_bitwarden_update
+        action: update.install
     - if:
       - condition: state
         entity_id: update.kiosk_mode_update
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id:
           - update.kiosk_mode_update
+        action: update.install
     - if:
       - condition: state
         entity_id: update.battery_state_card_entity_row_update
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id:
           - update.battery_state_card_entity_row_update
+        action: update.install
     alias: addon/hass updates
   - delay:
       hours: 0
@@ -7760,260 +7760,250 @@
         entity_id: update.alarm_firmware
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id: update.alarm_firmware
+        action: update.install
     - if:
       - condition: state
         entity_id: update.bed_esp_firmware
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id: update.bed_esp_firmware
+        action: update.install
     - if:
       - condition: state
         entity_id: update.kauf_rgbsw_63e843_firmware
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id: update.kauf_rgbsw_63e843_firmware
+        action: update.install
+      enabled: false
     - if:
       - condition: state
         entity_id: update.midea_firmware
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id: update.midea_firmware
+        action: update.install
     - if:
       - condition: state
         entity_id: update.usbswitch_firmware
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id: update.usbswitch_firmware
+        action: update.install
       enabled: false
     - if:
       - condition: state
         entity_id: update.wyzebulb1_firmware
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id: update.wyzebulb1_firmware
+        action: update.install
     - if:
       - condition: state
         entity_id: update.wyzebulb2_firmware
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id: update.wyzebulb2_firmware
+        action: update.install
     - if:
       - condition: state
         entity_id: update.wyzebulb3_firmware
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id: update.wyzebulb3_firmware
+        action: update.install
     - if:
       - condition: state
         entity_id: update.wyzebulb4_firmware
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id: update.wyzebulb4_firmware
+        action: update.install
       enabled: false
     - if:
       - condition: state
         entity_id: update.wyzebulb5_firmware
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id: update.wyzebulb5_firmware
+        action: update.install
       enabled: false
     - if:
       - condition: state
         entity_id: update.wyzebulb6_firmware
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id: update.wyzebulb6_firmware
+        action: update.install
       enabled: false
     - if:
       - condition: state
         entity_id: update.wyzebulb7_firmware
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id:
           - update.wyzebulb7_firmware
+        action: update.install
       enabled: false
     - if:
       - condition: state
         state: 'on'
         entity_id: update.guest_bedroom_tv_plug_firmware
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id:
           - update.guest_bedroom_tv_plug_firmware
+        action: update.install
       enabled: false
     - if:
       - condition: state
         state: 'on'
         entity_id: update.couch_left_firmware
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id:
           - update.couch_left_firmware
+        action: update.install
     - if:
       - condition: state
         state: 'on'
         entity_id: update.couch_right_firmware
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id:
           - update.couch_right_firmware
-    - if:
-      - condition: state
-        state: 'on'
-        entity_id: update.ratgdov2_5_60b6fc_firmware
-      then:
-      - service: update.install
-        continue_on_error: true
-        data: {}
-        target:
-          entity_id:
-          - update.ratgdov2_5_60b6fc_firmware
+        action: update.install
     - if:
       - condition: state
         entity_id: update.wyzebulb7_firmware
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id:
           - update.wyzebulb7_firmware
+        action: update.install
       enabled: false
     - if:
       - condition: state
         entity_id: update.ethrelay1_firmware
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id:
           - update.ethrelay1_firmware
+        action: update.install
     - if:
       - condition: state
         entity_id: update.ethrelay2_firmware
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id:
           - update.ethrelay2_firmware
+        action: update.install
     - if:
       - condition: state
         entity_id: update.ethrelay3_firmware
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id: update.ethrelay3_firmware
+        action: update.install
     - if:
       - condition: state
         entity_id: update.athombulb3_firmware
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id: update.athombulb3_firmware
+        action: update.install
       enabled: false
     - if:
       - condition: state
         entity_id: update.ethblaster_firmware
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id:
           - update.ethblaster_firmware
+        action: update.install
     - if:
       - condition: state
         entity_id: update.lamp1_firmware
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id:
           - update.lamp1_firmware
+        action: update.install
     - if:
       - condition: state
         entity_id: update.lamp2_firmware
         state: 'on'
       then:
-      - service: update.install
-        continue_on_error: true
+      - continue_on_error: true
         data: {}
         target:
           entity_id:
           - update.lamp2_firmware
+        action: update.install
   - if:
     - condition: not
       conditions:
@@ -8029,26 +8019,26 @@
           entity_id: input_select.anthony
           state: Home
     then:
-    - service: button.press
-      data: {}
+    - data: {}
       target:
         entity_id: button.tare
+      action: button.press
     - delay:
         hours: 0
         minutes: 1
         seconds: 0
         milliseconds: 0
-    - service: script.night
-      data: {}
+    - data: {}
+      action: script.night
     - if:
       - condition: state
         entity_id: update.home_assistant_supervisor_update
         state: 'on'
       then:
-      - service: update.install
-        data: {}
+      - data: {}
         target:
           entity_id: update.home_assistant_supervisor_update
+        action: update.install
     alias: tare and turn off bedroom
   - if:
     - condition: or
@@ -8090,102 +8080,102 @@
           entity_id: update.hacs_update
           state: 'on'
         then:
-        - service: update.install
-          data: {}
+        - data: {}
           target:
             entity_id:
             - update.hacs_update
+          action: update.install
       - if:
         - condition: state
           entity_id: update.blueiris_nvr_update
           state: 'on'
         then:
-        - service: update.install
-          data: {}
+        - data: {}
           target:
             entity_id:
             - update.blueiris_nvr_update
+          action: update.install
       - if:
         - condition: state
           entity_id: update.generic_hygrostat_update
           state: 'on'
         then:
-        - service: update.install
-          data: {}
+        - data: {}
           target:
             entity_id:
             - update.generic_hygrostat_update
+          action: update.install
       - if:
         - condition: state
           entity_id: update.pyscript_update
           state: 'on'
         then:
-        - service: update.install
-          data: {}
+        - data: {}
           target:
             entity_id:
             - update.pyscript_update
+          action: update.install
       - if:
         - condition: state
           entity_id: update.mail_and_packages_update
           state: 'on'
         then:
-        - service: update.install
-          data: {}
+        - data: {}
           target:
             entity_id:
             - update.mail_and_packages_update
+          action: update.install
       - if:
         - condition: state
           entity_id: update.alexa_media_player_update
           state: 'on'
         then:
-        - service: update.install
-          data: {}
+        - data: {}
           target:
             entity_id: update.alexa_media_player_update
+          action: update.install
         enabled: false
       - if:
         - condition: state
           entity_id: update.pirate_weather_update
           state: 'on'
         then:
-        - service: update.install
-          data: {}
+        - data: {}
           target:
             entity_id:
             - update.pirate_weather_update
+          action: update.install
       - if:
         - condition: state
           entity_id: update.dronemobile_update
           state: 'on'
         then:
-        - service: update.install
-          data: {}
+        - data: {}
           target:
             entity_id:
             - update.dronemobile_update
+          action: update.install
       - if:
         - condition: state
           entity_id: update.nest_protect_update
           state: 'on'
         then:
-        - service: update.install
-          data: {}
+        - data: {}
           target:
             entity_id:
             - update.nest_protect_update
+          action: update.install
         enabled: false
       - if:
         - condition: state
           entity_id: update.hisense_tv_update
           state: 'on'
         then:
-        - service: update.install
-          data: {}
+        - data: {}
           target:
             entity_id:
             - update.hisense_tv_update
+          action: update.install
     - condition: not
       conditions:
       - condition: or
@@ -8196,28 +8186,28 @@
         - condition: state
           entity_id: input_select.anthony
           state: Home
-    - service: homeassistant.restart
-      data: {}
+    - data: {}
+      action: homeassistant.restart
   - if:
     - condition: state
       entity_id: update.home_assistant_operating_system_update
       state: 'on'
     then:
-    - service: update.install
-      data: {}
+    - data: {}
       target:
         entity_id: update.home_assistant_operating_system_update
+      action: update.install
     enabled: true
   - if:
     - condition: state
       entity_id: update.home_assistant_core_update
       state: 'on'
     then:
-    - service: update.install
-      data: {}
+    - data: {}
       target:
         entity_id:
         - update.home_assistant_core_update
+      action: update.install
     enabled: true
   mode: single
 - id: '1678008305202'
@@ -11260,7 +11250,7 @@
   condition: []
   action:
   - target:
-      device_id: 17a6004d942531511690868095af6521
+      device_id: 1807d01837ccf4f85178b48dd72b10f6
     data:
       bed_side_state: solo
     enabled: false
@@ -11280,7 +11270,7 @@
           duration: 28800
           target: -58
         target:
-          device_id: 17a6004d942531511690868095af6521
+          device_id: 1807d01837ccf4f85178b48dd72b10f6
         action: eight_sleep.heat_set
     - conditions:
       - condition: or
@@ -11303,7 +11293,7 @@
             - chair
       sequence:
       - target:
-          device_id: 17a6004d942531511690868095af6521
+          device_id: 1807d01837ccf4f85178b48dd72b10f6
         data: {}
         action: eight_sleep.side_off
   mode: single
