@@ -23,8 +23,6 @@ home:
     - light.kitchen_lights
     - light.living_room_lights
     - switch.living_room_fan
-    - cover.couch_left_left
-    - cover.couch_right_right
     - switch.guest_bedroom_light
     - switch.guest_bedroom_fan
     - light.hallway_lights

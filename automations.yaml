@@ -545,12 +545,6 @@
         then:
         - data: {}
           action: script.stop_music
-      - data: {}
-        target:
-          entity_id:
-          - cover.couch_left_left
-          - cover.couch_right_right
-        action: cover.close_cover
       alias: If home empty, turn off
     - if:
       - condition: state
@@ -3351,12 +3345,6 @@
     - binary_sensor.bedroom_chair
     to: 'on'
     id: enteredroom
-  - platform: state
-    entity_id:
-    - cover.couch_left_left
-    - cover.couch_right_right
-    from: closing
-    id: left room 4
   condition:
   - condition: or
     conditions:
@@ -7896,28 +7884,6 @@
       enabled: false
     - if:
       - condition: state
-        state: 'on'
-        entity_id: update.couch_left_firmware
-      then:
-      - continue_on_error: true
-        data: {}
-        target:
-          entity_id:
-          - update.couch_left_firmware
-        action: update.install
-    - if:
-      - condition: state
-        state: 'on'
-        entity_id: update.couch_right_firmware
-      then:
-      - continue_on_error: true
-        data: {}
-        target:
-          entity_id:
-          - update.couch_right_firmware
-        action: update.install
-    - if:
-      - condition: state
         entity_id: update.wyzebulb7_firmware
         state: 'on'
       then:
@@ -9041,27 +9007,6 @@
   condition: []
   action:
   - choose:
-    - conditions:
-      - condition: state
-        entity_id: binary_sensor.home_alone
-        state: 'on'
-        for:
-          hours: 0
-          minutes: 1
-          seconds: 0
-      - condition: or
-        conditions:
-        - condition: state
-          entity_id: cover.couch_left_left
-          state: 'on'
-        - condition: state
-          entity_id: cover.couch_right_right
-          state: 'on'
-      sequence:
-      - service: input_boolean.turn_on
-        target:
-          entity_id: input_boolean.privacy
-        data: {}
     - conditions:
       - condition: trigger
         id:

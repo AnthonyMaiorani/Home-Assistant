@@ -2,10 +2,20 @@ esphome:
   name: couchright
   friendly_name: "Couch Right"
 
+external_components:
+  source: github://rednblkx/HAP-ESPHome@main
+  refresh: 0s
+
 esp32:
   board: esp32dev
   framework:
     type: esp-idf
+    version: 5.2.1
+    platform_version: 6.7.0
+    sdkconfig_options:
+      CONFIG_COMPILER_OPTIMIZATION_SIZE: y
+      CONFIG_LWIP_MAX_SOCKETS: "16"
+      CONFIG_MBEDTLS_HKDF_C: y
 
 wifi:
   ssid: !secret ssid
@@ -30,10 +40,56 @@ ota:
 #bluetooth_proxy:
 #  active: true
 #esp32_ble_tracker:
-
 button:
-  - platform: restart
-    name: "Restart"
+- platform: homekit_base
+  factory_reset:
+    name: "Reset HomeKit pairings"
+- platform: restart
+  name: "Restart"
+
+homekit_base:
+  setup_code: '159-35-777'
+  setup_id: "CRGT"
+
+homekit:
+  light:
+    - id: couch_right
+
+light:
+  - id: couch_right
+    platform: monochromatic
+    name: "Couch Right"
+    output: couchRightOutput
+
+output:
+  - platform: template
+    id: couchRightOutput
+    type: float
+    write_action:
+      - cover.stop: couchRight
+      - if:
+          condition:
+            lambda: return ((state > 0) && (state < 100));
+          then:
+          - lambda: |-
+              if (state > id(couchRight).position) { id(openCouchRight).turn_on(); } 
+              else if (state < id(couchRight).position) { id(closeCouchRight).turn_on(); }
+          - delay: !lambda "return abs(state - (id(couchRight).position)) * 8000;" # Delay based on desired vs current pos
+      - if:
+          condition:
+            lambda: return (state == 0);
+          then:
+          - cover.stop: couchRight
+          - switch.turn_on: closeCouchRight
+          - delay: 8500ms
+      - if:
+          condition:
+            lambda: return (state == 100);
+          then:
+          - cover.stop: couchRight
+          - switch.turn_on: openCouchRight
+          - delay: 8500ms
+      - cover.stop: couchRight
 
 cover:
   - platform: template
