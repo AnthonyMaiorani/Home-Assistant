@@ -348,7 +348,6 @@
         - switch.airport_express
         - switch.lumi_lumi_plug_maus01_switch_3
         - switch.soundbar_airport
-        - switch.headphone_charger
         - switch.sonoff_s31_lite_zb_switch_3
     - if:
       - condition: state
@@ -381,7 +380,6 @@
         - media_player.owntone_output_anthony_s_desk
         - media_player.owntone_output_kitchen_left
         - media_player.owntone_output_kitchen_right
-        - media_player.owntone_output_master_bedroom_tv
         - media_player.owntone_output_anthony_s_nightstand
         - media_player.owntone_output_soundbar
     - service: button.press
@@ -1084,7 +1082,6 @@
           - media_player.kitchen_speakers
           - media_player.owntone_output_kitchen_left
           - media_player.owntone_output_kitchen_right
-          - media_player.owntone_output_master_bedroom_tv
           - media_player.owntone_output_bathroom
       - if:
         - condition: or
@@ -5248,7 +5245,6 @@
             target:
               entity_id:
               - media_player.owntone_output_anthony_s_desk
-              - media_player.owntone_output_master_bedroom_tv
               - media_player.owntone_output_anthony_s_nightstand
               - media_player.owntone_output_kitchen_left
               - media_player.owntone_output_kitchen_right
@@ -6197,14 +6193,9 @@
   condition: []
   action:
   - if:
-    - condition: or
-      conditions:
-      - condition: state
-        entity_id: media_player.owntone_output_master_bedroom_tv
-        state: 'on'
-      - condition: state
-        entity_id: media_player.kitchen_speakers
-        state: 'on'
+    - condition: state
+      entity_id: media_player.kitchen_speakers
+      state: 'on'
     then:
     - service: media_player.turn_off
       data: {}
@@ -6212,7 +6203,6 @@
         entity_id:
         - media_player.owntone_output_kitchen_left
         - media_player.owntone_output_kitchen_right
-        - media_player.owntone_output_master_bedroom_tv
         - media_player.kitchen_speakers
         - media_player.owntone_output_soundbar
   - if:
@@ -6613,7 +6603,6 @@
             - media_player.owntone_output_bathroom
             - media_player.owntone_output_kitchen_left
             - media_player.owntone_output_kitchen_right
-            - media_player.owntone_output_master_bedroom_tv
             - media_player.owntone_output_soundbar
           action: media_player.turn_off
       - action: switch.toggle
@@ -7372,12 +7361,14 @@
     - condition: state
       entity_id: update.kauf_rgbsw_63e843_firmware
       state: 'on'
+      enabled: false
     - condition: state
       entity_id: update.midea_firmware
       state: 'on'
     - condition: state
       entity_id: update.usbswitch_firmware
       state: 'on'
+      enabled: false
     - condition: state
       entity_id: update.wyzebulb1_firmware
       state: 'on'
@@ -7404,9 +7395,6 @@
       state: 'on'
     - condition: state
       entity_id: update.hacs_update
-      state: 'on'
-    - condition: state
-      entity_id: update.blueiris_nvr_update
       state: 'on'
     - condition: state
       entity_id: update.generic_hygrostat_update
@@ -7462,18 +7450,23 @@
     - condition: state
       entity_id: update.bkplug1_firmware
       state: 'on'
+      enabled: false
     - condition: state
       entity_id: update.bkplug3_firmware
       state: 'on'
+      enabled: false
     - condition: state
       entity_id: update.bkplug4_firmware
       state: 'on'
+      enabled: false
     - condition: state
       entity_id: update.roundplug2_firmware
       state: 'on'
+      enabled: false
     - condition: state
       entity_id: update.roundplug1_firmware
       state: 'on'
+      enabled: false
     - condition: state
       entity_id: update.wyzebulb4_firmware
       state: 'on'
@@ -7491,6 +7484,9 @@
       state: 'on'
     - condition: state
       entity_id: update.kiosk_mode_update
+      state: 'on'
+    - condition: state
+      entity_id: update.music_assistant_update
       state: 'on'
   - condition: not
     conditions:
@@ -8191,6 +8187,7 @@
     - condition: state
       entity_id: media_player.spotify_anthony221121
       state: playing
+    enabled: false
   - condition: or
     conditions:
     - condition: state
@@ -8200,8 +8197,8 @@
       entity_id: input_select.anthony
       state: Home
   action:
-  - service: script.lofi
-    data: {}
+  - data: {}
+    action: script.lofi
   mode: single
 - id: '1678704758356'
   alias: Resume Music After Macbook Stops It
@@ -11273,4 +11270,155 @@
         device_id: fbb1905baf4decb516c7eb6bd9226da4
         entity_id: media_player.anthony_s_echo_show
       data: {}
+  mode: single
+- id: '1672034605114'
+  alias: Master Bedroom Kitchen Light Pico
+  description: ''
+  mode: single
+  use_blueprint:
+    path: stephack/core-pico.yaml
+    input:
+      pico_remote: 71473ec4967297f4adc37260dfb2d76a
+      auto_mode: single
+      down_lower: []
+      bottom_off:
+      - data: {}
+        target:
+          entity_id: light.kitchen_cabinet_lights
+        action: light.turn_off
+- id: '1727412494917'
+  alias: Master Bedroom Kitchen Light Pico
+  description: ''
+  mode: single
+  use_blueprint:
+    path: stephack/core-pico.yaml
+    input:
+      pico_remote: 71473ec4967297f4adc37260dfb2d76a
+      auto_mode: single
+      down_lower: []
+      bottom_off:
+      - data: {}
+        target:
+          entity_id: light.kitchen_cabinet_lights
+        action: light.turn_off
+- id: '1678685123749'
+  alias: Kitchen Night Light
+  description: ''
+  trigger:
+  - device_id: 73df54d198e3ccede0b9431266ce71c6
+    domain: zha
+    platform: device
+    type: Enter
+    subtype: sensor
+    id: enter
+  - device_id: 73df54d198e3ccede0b9431266ce71c6
+    domain: zha
+    platform: device
+    type: Leave
+    subtype: sensor
+    id: leave
+  - type: not_opened
+    platform: device
+    device_id: 40b6acb50076a1f15ff0e73120d2f04e
+    entity_id: binary_sensor.bedroom_door
+    domain: binary_sensor
+    id: door closed
+  - platform: state
+    entity_id:
+    - binary_sensor.bed_occupancy
+    to: 'on'
+    id: bed
+  - platform: device
+    type: turned_on
+    device_id: aa29287a53774cb599c5658e30e48d9d
+    entity_id: light.kitchen_lights
+    domain: light
+    id: lights on
+  - type: motion
+    platform: device
+    device_id: 636093ce084fceeb09083a7a66a2efe6
+    entity_id: ca871a2082db2d3f829b9e50ff599285
+    domain: binary_sensor
+    id: kitchen motion
+    enabled: false
+  condition:
+  - condition: time
+    after: '22:00:00'
+    before: 08:00:00
+  - condition: sun
+    before: sunrise
+    after: sunset
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - enter
+        - kitchen motion
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: input_select.anthony
+          state: Home
+        - condition: state
+          entity_id: input_select.anthony
+          state: Just Arrived
+      - condition: device
+        type: is_off
+        device_id: aa29287a53774cb599c5658e30e48d9d
+        entity_id: light.kitchen_lights
+        domain: light
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: person.taylor
+          state: home
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: binary_sensor.bed_occupancy
+            state: 'on'
+      - condition: state
+        entity_id: light.kitchen_cabinet_lights
+        state: 'off'
+      sequence:
+      - action: light.turn_on
+        target:
+          entity_id: light.kitchen_cabinet_lights
+        data: {}
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: leave
+        - condition: trigger
+          id: door closed
+        - condition: trigger
+          id: bed
+      - condition: state
+        entity_id: light.kitchen_cabinet_lights
+        state: 'on'
+      sequence:
+      - action: light.turn_off
+        target:
+          entity_id: light.kitchen_cabinet_lights
+        data: {}
+      - data: {}
+        target:
+          entity_id:
+          - media_player.kitchen_speakers
+        action: media_player.turn_off
+    - conditions:
+      - condition: trigger
+        id: lights on
+      sequence:
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 1
+          milliseconds: 0
+      - action: light.turn_off
+        target:
+          entity_id: light.kitchen_cabinet_lights
+        data: {}
   mode: single

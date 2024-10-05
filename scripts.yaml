@@ -1291,7 +1291,6 @@ lofi:
         - media_player.owntone_output_anthony_s_desk
         - media_player.owntone_output_kitchen_left
         - media_player.owntone_output_kitchen_right
-        - media_player.owntone_output_master_bedroom_tv
         - media_player.owntone_output_anthony_s_nightstand
       action: homeassistant.reload_config_entry
     - wait_for_trigger:
@@ -1315,7 +1314,6 @@ lofi:
             - media_player.owntone_output_anthony_s_desk
             - media_player.owntone_output_kitchen_left
             - media_player.owntone_output_kitchen_right
-            - media_player.owntone_output_master_bedroom_tv
             - media_player.owntone_output_anthony_s_nightstand
           action: media_player.turn_off
     - data: {}
@@ -1333,7 +1331,6 @@ lofi:
       - media_player.owntone_server
       - media_player.owntone_output_bathroom
       - media_player.owntone_output_anthony_s_desk
-      - media_player.owntone_output_master_bedroom_tv
       - media_player.owntone_output_anthony_s_nightstand
       - media_player.owntone_output_kitchen_left
       - media_player.owntone_output_kitchen_right
@@ -1403,7 +1400,6 @@ lofi:
         - media_player.owntone_output_anthony_s_desk
         - media_player.owntone_output_kitchen_left
         - media_player.owntone_output_kitchen_right
-        - media_player.owntone_output_master_bedroom_tv
         - media_player.owntone_output_anthony_s_nightstand
       action: homeassistant.reload_config_entry
     - wait_for_trigger:
@@ -1427,7 +1423,6 @@ lofi:
             - media_player.owntone_output_anthony_s_desk
             - media_player.owntone_output_kitchen_left
             - media_player.owntone_output_kitchen_right
-            - media_player.owntone_output_master_bedroom_tv
             - media_player.owntone_output_anthony_s_nightstand
           action: media_player.turn_off
     - data: {}
@@ -1776,7 +1771,7 @@ lofi:
   - delay:
       hours: 0
       minutes: 0
-      seconds: 5
+      seconds: 20
       milliseconds: 0
   - alias: If Owntone not playing, restart Addon and start over
     if:
@@ -1798,6 +1793,9 @@ lofi:
         - condition: state
           entity_id: media_player.owntone_output_anthony_s_nightstand
           state: 'on'
+        - condition: state
+          entity_id: media_player.owntone_output_anthony_s_desk
+          state: 'on'
         enabled: true
     then:
     - data:
@@ -1816,7 +1814,6 @@ lofi:
         - media_player.owntone_output_anthony_s_desk
         - media_player.owntone_output_kitchen_left
         - media_player.owntone_output_kitchen_right
-        - media_player.owntone_output_master_bedroom_tv
         - media_player.owntone_output_anthony_s_nightstand
         - media_player.owntone_output_soundbar
       action: homeassistant.reload_config_entry
@@ -1841,7 +1838,6 @@ lofi:
             - media_player.owntone_output_anthony_s_desk
             - media_player.owntone_output_kitchen_left
             - media_player.owntone_output_kitchen_right
-            - media_player.owntone_output_master_bedroom_tv
             - media_player.owntone_output_anthony_s_nightstand
             - media_player.owntone_output_soundbar
           action: media_player.turn_off
@@ -1892,7 +1888,6 @@ play_music:
       - media_player.owntone_server
       - media_player.owntone_output_bathroom
       - media_player.owntone_output_anthony_s_desk
-      - media_player.owntone_output_master_bedroom_tv
       - media_player.owntone_output_anthony_s_nightstand
       - media_player.owntone_output_kitchen_left
       - media_player.owntone_output_kitchen_right
@@ -1962,7 +1957,6 @@ play_music:
         - media_player.owntone_output_anthony_s_desk
         - media_player.owntone_output_kitchen_left
         - media_player.owntone_output_kitchen_right
-        - media_player.owntone_output_master_bedroom_tv
         - media_player.owntone_output_anthony_s_nightstand
       action: homeassistant.reload_config_entry
     - wait_for_trigger:
@@ -1986,7 +1980,6 @@ play_music:
             - media_player.owntone_output_anthony_s_desk
             - media_player.owntone_output_kitchen_left
             - media_player.owntone_output_kitchen_right
-            - media_player.owntone_output_master_bedroom_tv
             - media_player.owntone_output_anthony_s_nightstand
           action: media_player.turn_off
     - data: {}
@@ -2380,7 +2373,6 @@ play_music:
         - media_player.owntone_output_anthony_s_desk
         - media_player.owntone_output_kitchen_left
         - media_player.owntone_output_kitchen_right
-        - media_player.owntone_output_master_bedroom_tv
         - media_player.owntone_output_anthony_s_nightstand
         - media_player.owntone_output_soundbar
       action: homeassistant.reload_config_entry
@@ -2405,7 +2397,6 @@ play_music:
             - media_player.owntone_output_anthony_s_desk
             - media_player.owntone_output_kitchen_left
             - media_player.owntone_output_kitchen_right
-            - media_player.owntone_output_master_bedroom_tv
             - media_player.owntone_output_anthony_s_nightstand
             - media_player.owntone_output_soundbar
           action: media_player.turn_off
@@ -2442,7 +2433,6 @@ stop_music:
       - media_player.owntone_output_anthony_s_desk
       - media_player.owntone_output_kitchen_left
       - media_player.owntone_output_kitchen_right
-      - media_player.owntone_output_master_bedroom_tv
       - media_player.owntone_output_anthony_s_nightstand
       - media_player.owntone_output_soundbar
       - media_player.kitchen_speakers
@@ -2468,7 +2458,6 @@ stop_music:
           - media_player.owntone_output_anthony_s_desk
           - media_player.owntone_output_kitchen_left
           - media_player.owntone_output_kitchen_right
-          - media_player.owntone_output_master_bedroom_tv
           - media_player.owntone_output_anthony_s_nightstand
   - service: homeassistant.reload_config_entry
     data: {}
