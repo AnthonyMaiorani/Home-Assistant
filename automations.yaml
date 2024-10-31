@@ -2415,13 +2415,37 @@
   - wait_for_trigger:
     - platform: state
       entity_id:
-      - binary_sensor.entry_doors
+      - cover.garage_door
+      to: closing
+    - platform: state
+      entity_id:
+      - cover.garage_door
+      to: closed
+    - platform: state
+      entity_id:
+      - sensor.accord_enginestatus
+      to: 'off'
+    - platform: state
+      entity_id:
+      - media_player.spotify_anthony221121
+      to: paused
+    - platform: state
+      entity_id:
+      - binary_sensor.lumi_lumi_motion_ac02_motion_4
+      to: 'on'
+    - platform: state
+      entity_id:
+      - lock.front_door
+      - lock.front_door_cloud
+      - binary_sensor.front_door
+      - binary_sensor.bedroom_door
     continue_on_timeout: true
     timeout:
       hours: 0
       minutes: 2
       seconds: 0
       milliseconds: 0
+    enabled: true
   - parallel:
     - if:
       - condition: state
@@ -2441,7 +2465,7 @@
             target:
               entity_id: switch.living_room_fan
             action: switch.turn_on
-          enabled: true
+          enabled: false
         - data: {}
           target:
             entity_id: lock.back_door
@@ -2500,7 +2524,7 @@
       data: {}
       enabled: false
       action: button.press
-  mode: single
+  mode: restart
 - id: '1665076615181'
   alias: Dog Food Reminder
   description: ''
@@ -3982,57 +4006,6 @@
           entity_id: timer.laundry_room_light
   mode: queued
   max: 10
-- id: '1666594099613'
-  alias: Ping Z-Wave Devices
-  description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - switch.katchy
-    to: unavailable
-  condition:
-  - alias: Any device unavailable
-    condition: or
-    conditions:
-    - condition: state
-      entity_id: switch.katchy
-      state: unavailable
-  action:
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 3
-      milliseconds: 0
-  - repeat:
-      until:
-      - condition: not
-        conditions:
-        - condition: or
-          conditions:
-          - condition: state
-            entity_id: switch.katchy
-            state: unavailable
-          alias: Any device unavailable
-        alias: Until all devices available
-      sequence:
-      - parallel:
-        - if:
-          - condition: state
-            entity_id: switch.katchy
-            state: unavailable
-          then:
-          - data: {}
-            target:
-              entity_id:
-              - button.node_22_ping
-            action: button.press
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 4
-          milliseconds: 0
-  mode: queued
-  max: 10
 - id: '1666852312966'
   alias: Frigate
   description: ''
@@ -4554,21 +4527,21 @@
           entity_id: input_select.anthony
           state: Just Left
         enabled: false
-      - service: input_boolean.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: input_boolean.weather_notification_sent
         enabled: false
+        action: input_boolean.turn_on
     - conditions:
       - condition: trigger
         id: reset
         enabled: false
       sequence:
-      - service: input_boolean.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id: input_boolean.weather_notification_sent
         enabled: false
+        action: input_boolean.turn_off
     default:
     - if:
       - condition: state
@@ -4576,10 +4549,10 @@
         attribute: source
         state: Home Assistant
       then:
-      - service: script.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: script.stop_music
+        action: script.turn_on
     - if:
       - condition: or
         conditions:
@@ -4607,17 +4580,17 @@
           enabled: false
       then:
       - parallel:
-        - service: button.press
-          data: {}
+        - data: {}
           target:
             entity_id:
             - button.back_door_wake
             - button.front_door_wake
-        - service: notify.mobile_app_iphone
-          data:
+          action: button.press
+        - data:
             message: clear_notification
             data:
               tag: car-reminder
+          action: notify.mobile_app_iphone
       - delay:
           hours: 0
           minutes: 0
@@ -4655,8 +4628,7 @@
           and states(''zone.home'')|int < 2
 
           }}'
-      - service: notify.mobile_app_iphone
-        data:
+      - data:
           message: '{% if is_state(''binary_sensor.front_door'', ''on'') or is_state(''lock.front_door'',
             ''unlocked'') %}The front door is unlocked.{% endif %}{% if is_state(''binary_sensor.back_door'',
             ''on'') or is_state(''lock.back_door'', ''unlocked'') %}The back door
@@ -4671,11 +4643,12 @@
                 name: default
                 critical: 1
                 volume: 0.3
-    - service: input_boolean.turn_on
-      data: {}
+        action: notify.mobile_app_iphone
+    - data: {}
       target:
         entity_id: input_boolean.weather_notification_sent
       enabled: false
+      action: input_boolean.turn_on
     enabled: false
   - parallel:
     - if:
@@ -4684,14 +4657,14 @@
         attribute: source
         state: Home Assistant
       then:
-      - service: script.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: script.stop_music
-    - service: button.press
-      data: {}
+        action: script.turn_on
+    - data: {}
       target:
         entity_id: button.tare
+      action: button.press
     - if:
       - condition: or
         conditions:
@@ -4719,29 +4692,29 @@
           enabled: false
       then:
       - parallel:
-        - service: button.press
-          data: {}
+        - data: {}
           target:
             entity_id:
             - button.back_door_wake
             - button.front_door_wake
-        - service: notify.mobile_app_iphone
-          data:
+          action: button.press
+        - data:
             message: clear_notification
             data:
               tag: car-reminder
-        - service: homeassistant.update_entity
-          data: {}
+          action: notify.mobile_app_iphone
+        - data: {}
           target:
             entity_id:
             - lock.back_door
             - lock.front_door
-      - service: homeassistant.update_entity
-        data: {}
+          action: homeassistant.update_entity
+      - data: {}
         target:
           entity_id:
           - lock.back_door
           - lock.front_door
+        action: homeassistant.update_entity
       - delay:
           hours: 0
           minutes: 0
@@ -4786,8 +4759,7 @@
         - condition: state
           entity_id: input_select.anthony
           state: Home
-      - service: notify.mobile_app_iphone
-        data:
+      - data:
           message: '{% if is_state(''binary_sensor.front_door'', ''on'') or is_state(''lock.front_door'',
             ''unlocked'') %}The front door is unlocked.{% endif %}{% if is_state(''binary_sensor.back_door'',
             ''on'') or is_state(''lock.back_door_z_wave'', ''unlocked'') %}The back
@@ -4802,9 +4774,11 @@
                 name: default
                 critical: 1
                 volume: 0.3
-    - service: notify.mobile_app_iphone
-      data:
+        action: notify.mobile_app_iphone
+      enabled: false
+    - data:
         message: request_location_update
+      action: notify.mobile_app_iphone
   - alias: Set Spotify Output to iPhone
     repeat:
       while:
@@ -4820,25 +4794,25 @@
           value_template: '{{ "iPhone" not in state_attr(''media_player.spotify_anthony221121'',
             ''source_list'')}}'
         then:
-        - service: homeassistant.reload_config_entry
-          data: {}
+        - data: {}
           target:
             entity_id: media_player.spotify_anthony221121
+          action: homeassistant.reload_config_entry
         - delay:
             hours: 0
             minutes: 0
             seconds: 10
             milliseconds: 0
-      - service: homeassistant.update_entity
-        data: {}
+      - data: {}
         target:
           entity_id: media_player.spotify_anthony221121
-      - service: media_player.select_source
-        continue_on_error: true
+        action: homeassistant.update_entity
+      - continue_on_error: true
         data:
           source: iPhone
         target:
           entity_id: media_player.spotify_anthony221121
+        action: media_player.select_source
       - wait_for_trigger:
         - platform: state
           entity_id:
@@ -4862,14 +4836,29 @@
         attribute: media_playlist
         state: lofi
       sequence:
-      - service: media_player.play_media
-        continue_on_error: true
+      - continue_on_error: true
         data:
           media_content_type: playlist
           media_content_id: https://open.spotify.com/playlist/1FXZPGh51QQyNUmADd5ssN
           enqueue: play
         target:
           entity_id: media_player.spotify_anthony221121
+        action: media_player.play_media
+      - action: media_player.shuffle_set
+        target:
+          entity_id: media_player.spotify_anthony221121
+        data:
+          shuffle: false
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 2
+          milliseconds: 0
+      - action: media_player.shuffle_set
+        target:
+          entity_id: media_player.spotify_anthony221121
+        data:
+          shuffle: true
     - conditions:
       - condition: state
         entity_id: media_player.spotify_anthony221121
@@ -4888,8 +4877,8 @@
       sequence:
       - repeat:
           sequence:
-          - service: media_player.media_play
-            entity_id: media_player.spotify_anthony221121
+          - entity_id: media_player.spotify_anthony221121
+            action: media_player.media_play
           - delay:
               hours: 0
               minutes: 0
@@ -4903,22 +4892,45 @@
               hours: 0
               minutes: 0
               seconds: 6
-  - service: media_player.repeat_set
-    data:
+      - if:
+        - condition: state
+          entity_id: media_player.spotify_anthony221121
+          attribute: shuffle
+          state: true
+        then:
+        - action: media_player.shuffle_set
+          target:
+            entity_id: media_player.spotify_anthony221121
+          data:
+            shuffle: false
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 3
+            milliseconds: 0
+        - action: media_player.shuffle_set
+          target:
+            entity_id: media_player.spotify_anthony221121
+          data:
+            shuffle: true
+  - data:
       repeat: all
     target:
       entity_id: media_player.spotify_anthony221121
     alias: Turn on repeat all
+    action: media_player.repeat_set
   - delay:
       hours: 0
       minutes: 2
       seconds: 0
       milliseconds: 0
-  - service: notify.mobile_app_iphone
-    data:
+    enabled: false
+  - data:
       message: clear_notification
       data:
         tag: car-reminder
+    action: notify.mobile_app_iphone
+    enabled: false
   mode: restart
 - id: '1668564599073'
   alias: Reboot Soundbar AirPort
@@ -5204,13 +5216,14 @@
                 milliseconds: 0
           alias: Turn on HomePod
         alias: Turn on homepod
-      - repeat:
+      - alias: Set volume
+        repeat:
           count: '5'
           sequence:
           - data:
               volume_level: '{% if states(''input_boolean.showering'') is defined
                 and is_state(''input_boolean.showering'', ''on'') %} {% set vol =
-                0.55 %} {% elif states(''switch.exhaust_fan'') is defined and is_state(''switch.exhaust_fan'',
+                0.5 %} {% elif states(''switch.exhaust_fan'') is defined and is_state(''switch.exhaust_fan'',
                 ''on'') %} {% set vol = 0.5 %} {% elif state_attr(''media_player.owntone_output_anthony_s_nightstand'',
                 ''volume_level'') is defined and state_attr(''media_player.owntone_output_anthony_s_nightstand'',
                 ''volume_level'') is not none %}  {% set vol =  state_attr(''media_player.owntone_output_anthony_s_nightstand'',
@@ -5227,7 +5240,6 @@
               minutes: 0
               seconds: 1
               milliseconds: 0
-        alias: Set volume
       - if:
         - condition: trigger
           id: showering on
@@ -5268,7 +5280,7 @@
               count: '5'
               sequence:
               - data:
-                  volume_level: 0.6
+                  volume_level: 0.5
                 target:
                   entity_id:
                   - media_player.spotify_anthony221121
@@ -6192,43 +6204,61 @@
     to: Just Arrived
   condition: []
   action:
-  - if:
-    - condition: state
-      entity_id: media_player.kitchen_speakers
-      state: 'on'
-    then:
-    - service: media_player.turn_off
-      data: {}
-      target:
-        entity_id:
-        - media_player.owntone_output_kitchen_left
-        - media_player.owntone_output_kitchen_right
-        - media_player.kitchen_speakers
-        - media_player.owntone_output_soundbar
-  - if:
-    - condition: device
-      type: is_off
-      device_id: aa29287a53774cb599c5658e30e48d9d
-      entity_id: light.kitchen_lights
-      domain: light
-    - condition: sun
-      after: sunset
-      after_offset: -00:25:00
-    then:
-    - wait_for_trigger:
-      - platform: state
-        entity_id:
-        - cover.garage_door
-      - platform: state
-        entity_id:
-        - lock.front_door
-      continue_on_timeout: false
-      timeout: 00:30:00
-    - type: turn_on
-      device_id: aa29287a53774cb599c5658e30e48d9d
-      entity_id: light.kitchen_lights
-      domain: light
-      brightness_pct: 18
+  - parallel:
+    - if:
+      - condition: state
+        entity_id: media_player.kitchen_speakers
+        state: 'on'
+      then:
+      - repeat:
+          sequence:
+          - data: {}
+            target:
+              entity_id:
+              - media_player.owntone_output_kitchen_left
+              - media_player.owntone_output_kitchen_right
+              - media_player.kitchen_speakers
+              - media_player.owntone_output_soundbar
+            action: media_player.turn_off
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 3
+              milliseconds: 0
+          until:
+          - condition: state
+            entity_id: media_player.kitchen_speakers
+            state: 'off'
+          - condition: state
+            entity_id: media_player.owntone_output_kitchen_left
+            state: 'off'
+          - condition: state
+            entity_id: media_player.owntone_output_kitchen_right
+            state: 'off'
+    - if:
+      - condition: device
+        type: is_off
+        device_id: aa29287a53774cb599c5658e30e48d9d
+        entity_id: light.kitchen_lights
+        domain: light
+      - condition: sun
+        after: sunset
+        after_offset: -00:25:00
+      then:
+      - wait_for_trigger:
+        - platform: state
+          entity_id:
+          - cover.garage_door
+        - platform: state
+          entity_id:
+          - lock.front_door
+        continue_on_timeout: false
+        timeout: 00:30:00
+      - type: turn_on
+        device_id: aa29287a53774cb599c5658e30e48d9d
+        entity_id: light.kitchen_lights
+        domain: light
+        brightness_pct: 18
   mode: single
 - id: '1670894312639'
   alias: Notification
@@ -8711,10 +8741,10 @@
         - repeat:
             count: '6'
             sequence:
-            - service: button.press
-              data: {}
+            - data: {}
               target:
                 entity_id: button.desktop_pc_satellite_color
+              action: button.press
             - delay:
                 hours: 0
                 minutes: 0
@@ -8732,11 +8762,11 @@
         - repeat:
             count: '6'
             sequence:
-            - service: button.press
-              data: {}
+            - data: {}
               target:
                 entity_id:
                 - button.desktop_pc_satellite_white
+              action: button.press
             - delay:
                 hours: 0
                 minutes: 0
@@ -8750,17 +8780,18 @@
         - repeat:
             count: '6'
             sequence:
-            - service: button.press
-              data: {}
+            - data: {}
               target:
                 entity_id:
                 - button.desktop_pc_satellite_off
+              action: button.press
             - delay:
                 hours: 0
                 minutes: 0
                 seconds: 0
                 milliseconds: 500
-    - if:
+    - alias: Move music to Desktop
+      if:
       - condition: or
         conditions:
         - condition: state
@@ -8772,10 +8803,10 @@
           attribute: media_playlist
           state: lofi
       then:
-      - service: homeassistant.reload_config_entry
-        data: {}
+      - data: {}
         target:
           entity_id: media_player.spotify_anthony221121
+        action: homeassistant.reload_config_entry
       - delay:
           hours: 0
           minutes: 0
@@ -8783,12 +8814,12 @@
           milliseconds: 0
       - condition: template
         value_template: '{{ not is_state_attr(''media_player.spotify_anthony221121'',
-          ''source'', ''DESKTOP-PC'') and "DESKTOP-PC" in state_attr(''media_player.spotify_anthony221121'',
+          ''source'', ''DESKTOP'') and "DESKTOP" in state_attr(''media_player.spotify_anthony221121'',
           ''source_list'')}}'
-      - service: script.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: script.stop_music
+        action: script.turn_on
       - delay:
           hours: 0
           minutes: 0
@@ -8799,49 +8830,48 @@
           - condition: state
             entity_id: media_player.spotify_anthony221121
             attribute: source
-            state: DESKTOP-PC
+            state: DESKTOP
           sequence:
-          - service: media_player.select_source
-            data:
-              source: DESKTOP-PC
+          - data:
+              source: DESKTOP
             target:
               entity_id: media_player.spotify_anthony221121
+            action: media_player.select_source
           - delay:
               hours: 0
               minutes: 0
               seconds: 2
               milliseconds: 0
-      - service: media_player.play_media
-        data:
+      - data:
           media_content_type: playlist
           media_content_id: https://open.spotify.com/playlist/1FXZPGh51QQyNUmADd5ssN
           enqueue: play
         target:
           entity_id: media_player.spotify_anthony221121
-      - service: media_player.volume_set
-        data:
+        action: media_player.play_media
+      - data:
           volume_level: 1
         target:
           entity_id: media_player.spotify_anthony221121
-      - service: media_player.shuffle_set
-        data:
+        action: media_player.volume_set
+      - data:
           shuffle: true
         target:
           entity_id: media_player.spotify_anthony221121
+        action: media_player.shuffle_set
       - repeat:
           count: 30
           sequence:
-          - service: media_player.volume_set
-            data:
+          - data:
               volume_level: 1
             target:
               entity_id: media_player.spotify_anthony221121
+            action: media_player.volume_set
           - delay:
               hours: 0
               minutes: 0
               seconds: 2
               milliseconds: 0
-      alias: Move music to Desktop
   mode: single
 - id: '1689234248891'
   alias: Update Alarm
@@ -9763,18 +9793,18 @@
         - sensor.anthony_maioranis_ipad_battery_level
         - sensor.ipad_air_2_black_battery_level
         - sensor.anthonys_ipad_battery_level
-        - sensor.avp_battery_level
         - sensor.80fd099b_9b465253_browser_battery
+        - sensor.ipad_3_battery_level
       actions:
       - if:
         - condition: state
           entity_id: person.anthony
           state: home
         then:
-        - service: notify.anthonys_devices
-          data:
+        - data:
             message: '{{sensors}}'
             title: Low Battery Warning
+          action: notify.anthonys_devices
       day: 0
       threshold: 20
       time: '20:00:00'
@@ -9876,7 +9906,7 @@
             timeout:
               hours: 0
               minutes: 0
-              seconds: 3
+              seconds: 4
               milliseconds: 0
           while:
           - alias: iPhone not in Connect outputs
@@ -11420,5 +11450,52 @@
       - action: light.turn_off
         target:
           entity_id: light.kitchen_cabinet_lights
+        data: {}
+  mode: single
+- id: '1729461708922'
+  alias: Blinds Control
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id:
+    - weather.dark_sky
+    attribute: temperature
+    above: 74
+    id: hot
+  - platform: numeric_state
+    entity_id:
+    - weather.dark_sky
+    attribute: temperature
+    below: 75
+    id: not hot
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - hot
+      sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.vertical_toggle_control_bedroom_shade
+        data: {}
+    - conditions:
+      - condition: trigger
+        id:
+        - not hot
+      - condition: state
+        entity_id: binary_sensor.anthony_home
+        state: 'on'
+      - condition: state
+        entity_id: sun.sun
+        state: above_horizon
+      - condition: numeric_state
+        entity_id: sensor.pirateweather_daytime_high_temperature_0d
+        below: 80
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.vertical_toggle_control_bedroom_shade
         data: {}
   mode: single

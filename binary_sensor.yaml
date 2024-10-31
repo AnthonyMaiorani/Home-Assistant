@@ -1,6 +1,6 @@
 - platform: generic_hygrostat
   name: Shower
-  sensor: sensor.bathroom_humidity
+  sensor: sensor.acurite_bathroom_humidity
   delta_trigger: 4
   target_offset: 6
   min_on_time: 5

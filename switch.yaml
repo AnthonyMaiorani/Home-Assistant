@@ -388,19 +388,19 @@
     caseta_lamp_plug_6:
       unique_id: caseta_lamp_plug_6
       friendly_name: Caseta Lamp Plug 6
-      value_template: "{{ is_state('light.dana_s_bedroom_subwoofer', 'on') }}"
+      value_template: "{{ is_state('light.katchy', 'on') }}"
       turn_on:
         - service: light.turn_on
           data:
             brightness_pct: 100
           target:
             entity_id:
-              - light.dana_s_bedroom_subwoofer
+              - light.katchy
       turn_off:
         - service: light.turn_off
           target:
             entity_id:
-              - light.dana_s_bedroom_subwoofer
+              - light.katchy
     caseta_lamp_plug_7:
       unique_id: caseta_lamp_plug_7
       friendly_name: Caseta Lamp Plug 7

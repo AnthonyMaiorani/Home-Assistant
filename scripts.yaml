@@ -62,7 +62,6 @@ fan_off:
       target:
         entity_id:
         - light.bed
-        - light.wled
         - light.rope
         - light.lines
         - light.closet_lights
@@ -91,6 +90,12 @@ fan_off:
       data: {}
       target:
         entity_id: automation.morning_lights_on
+    - data:
+        brightness_pct: 15
+      target:
+        entity_id:
+        - light.wled
+      action: light.turn_on
   mode: restart
   icon: mdi:ceiling-light
 color_loop:
@@ -320,101 +325,101 @@ music:
 call:
   alias: Call
   sequence:
-  - service: script.turn_off
-    data: {}
+  - data: {}
     target:
       entity_id:
       - script.night
       - script.morning
       - script.color_loop
       - script.fan_off
+    action: script.turn_off
   - parallel:
-    - service: input_boolean.turn_off
-      data: {}
+    - data: {}
       target:
         entity_id:
         - input_boolean.bedmotion
         - input_boolean.privacy
-    - service: switch.turn_off
-      data: {}
+      action: input_boolean.turn_off
+    - data: {}
       target:
         entity_id:
         - switch.desktop
         - switch.usb_hub
-    - service: light.turn_off
-      data: {}
+      action: switch.turn_off
+    - data: {}
       target:
         entity_id:
         - light.fan_lights
         - light.hallway_lights
+      action: light.turn_off
     - if:
       - condition: state
         entity_id: media_player.spotify_anthony221121
         attribute: media_playlist
         state: Music
       then:
-      - service: script.lofi
-        data: {}
-      - service: media_player.volume_set
-        data:
+      - data: {}
+        action: script.lofi
+      - data:
           volume_level: 0.07
         target:
           entity_id:
           - media_player.spotify_anthony221121
+        action: media_player.volume_set
       - repeat:
           count: 100
           sequence:
-          - service: media_player.turn_on
-            data: {}
+          - data: {}
             target:
               entity_id:
               - media_player.owntone_output_anthony_s_desk
               - media_player.owntone_output_anthony_s_nightstand
-          - service: media_player.volume_set
-            data:
+            action: media_player.turn_on
+          - data:
               volume_level: 0.07
             target:
               entity_id:
               - media_player.owntone_output_anthony_s_desk
-          - service: media_player.volume_set
-            data:
+            action: media_player.volume_set
+          - data:
               volume_level: 0.14
             target:
               entity_id:
               - media_player.owntone_output_anthony_s_nightstand
+            action: media_player.volume_set
           - delay:
               hours: 0
               minutes: 0
               seconds: 1
               milliseconds: 0
       else:
-      - service: media_player.volume_set
-        data:
+      - data:
           volume_level: 0.12
         target:
           entity_id:
           - media_player.spotify_anthony221121
+        action: media_player.volume_set
       - repeat:
           count: 100
           sequence:
-          - service: media_player.turn_on
-            data: {}
+          - data: {}
             target:
               entity_id:
               - media_player.owntone_output_anthony_s_desk
               - media_player.owntone_output_anthony_s_nightstand
-          - service: media_player.volume_set
-            data:
+            action: media_player.turn_on
+          - data:
               volume_level: 0.11
             target:
               entity_id:
               - media_player.owntone_output_anthony_s_desk
-          - service: media_player.volume_set
-            data:
+            action: media_player.volume_set
+          - data:
               volume_level: 0.21
             target:
               entity_id:
               - media_player.owntone_output_anthony_s_nightstand
+            action: media_player.volume_set
           - delay:
               hours: 0
               minutes: 0
@@ -433,19 +438,19 @@ call:
         entity_id: binary_sensor.bed_occupancy
         state: 'on'
       then:
-      - service: light.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id:
           - light.kitchen_lights
           - light.living_room_lights
           - light.living_room_fan
-      - service: switch.turn_off
-        data: {}
+        action: light.turn_off
+      - data: {}
         target:
           entity_id:
           - switch.living_room_fan
           - switch.laundry_room_light
+        action: switch.turn_off
       - if:
         - condition: not
           conditions:
@@ -459,44 +464,42 @@ call:
               state: closed
           alias: garage door open
         then:
-        - service: cover.close_cover
-          metadata: {}
+        - metadata: {}
           data: {}
           target:
             entity_id: cover.garage_door
+          action: cover.close_cover
     - event: event_change_nanoleaf
       event_data: {}
     - repeat:
         count: 250
         sequence:
-        - service: light.turn_off
-          data: {}
+        - data: {}
           target:
             entity_id:
             - light.wled
             - light.closet_lights
-        - service: light.turn_on
-          data:
+            - light.lines
+          action: light.turn_off
+        - data:
             brightness: 10
           target:
             entity_id:
             - light.bed
             - light.rope
-            - light.lines
-        - service: light.turn_on
-          data:
+          action: light.turn_on
+        - data:
             brightness: 5
           target:
             entity_id:
             - light.govee
-        - service: switch.turn_off
-          data: {}
+          action: light.turn_on
+        - data: {}
           target:
             entity_id:
             - switch.usb_hub
-            - switch.goxlr
-        - service: light.turn_on
-          target:
+          action: switch.turn_off
+        - target:
             entity_id:
             - light.light_switch
             - light.light_switch_corner
@@ -507,23 +510,24 @@ call:
             - 255
             - 255
             brightness_pct: 30
+          action: light.turn_on
         - delay:
             hours: 0
             minutes: 0
             seconds: 0
             milliseconds: 500
-        - service: light.turn_on
-          data:
+        - data:
             brightness: 23
           target:
             entity_id:
             - light.shapes_4948_2
             - light.shapes_ee82
             - light.shapes_007f
-    - service: cover.close_cover
-      data: {}
+          action: light.turn_on
+    - data: {}
       target:
         entity_id: cover.bedroom_blinds
+      action: cover.close_cover
   mode: restart
   icon: mdi:phone
 night:
@@ -868,18 +872,17 @@ night:
 morning:
   alias: Morning
   sequence:
-  - service: script.turn_off
-    data: {}
+  - data: {}
     target:
       entity_id:
       - script.night
       - script.color_loop
       - script.call
       - script.fan_off
+    action: script.turn_off
   - parallel:
     - data:
         brightness_pct: 100
-      service: light.turn_on
       target:
         entity_id:
         - light.govee
@@ -888,20 +891,21 @@ morning:
         - light.rope
         - light.lines
         - light.closet_lights
+      action: light.turn_on
     - data:
         brightness: 255
         effect: Color Loop
         color_name: cyan
-      service: light.turn_on
       target:
         entity_id:
         - light.light_switch
         - light.light_switch_corner
-    - service: input_select.select_option
-      data:
+      action: light.turn_on
+    - data:
         option: Home
       target:
         entity_id: input_select.anthony
+      action: input_select.select_option
     - if:
       - condition: or
         conditions:
@@ -920,59 +924,58 @@ morning:
           attribute: media_playlist
           state: Music
         then:
-        - service: media_player.volume_set
-          data:
+        - data:
             volume_level: 0.18
           target:
             entity_id: media_player.spotify_anthony221121
+          action: media_player.volume_set
         - repeat:
             count: '3'
             sequence:
-            - service: media_player.volume_set
-              data:
+            - data:
                 volume_level: 0.18
               target:
                 entity_id:
                 - media_player.owntone_output_anthony_s_desk
-            - service: media_player.volume_set
-              data:
+              action: media_player.volume_set
+            - data:
                 volume_level: 0.36
               target:
                 entity_id:
                 - media_player.owntone_output_anthony_s_nightstand
+              action: media_player.volume_set
             - delay:
                 hours: 0
                 minutes: 0
                 seconds: 1
                 milliseconds: 0
         else:
-        - service: media_player.volume_set
-          data:
+        - data:
             volume_level: 0.13
           target:
             entity_id: media_player.spotify_anthony221121
+          action: media_player.volume_set
         - repeat:
             count: '3'
             sequence:
-            - service: media_player.volume_set
-              data:
+            - data:
                 volume_level: 0.13
               target:
                 entity_id:
                 - media_player.owntone_output_anthony_s_desk
-            - service: media_player.volume_set
-              data:
+              action: media_player.volume_set
+            - data:
                 volume_level: 0.26
               target:
                 entity_id:
                 - media_player.owntone_output_anthony_s_nightstand
+              action: media_player.volume_set
             - delay:
                 hours: 0
                 minutes: 0
                 seconds: 1
                 milliseconds: 0
-    - service: homeassistant.turn_on
-      data: {}
+    - data: {}
       target:
         entity_id:
         - switch.lumi_lumi_plug_maus01_switch_2
@@ -980,6 +983,7 @@ morning:
         - light.shapes_007f
         - light.shapes_4948
         - light.shapes_ee82
+      action: homeassistant.turn_on
     - if:
       - condition: sun
         after: sunrise
@@ -997,7 +1001,7 @@ morning:
           seconds: 0
       - condition: numeric_state
         entity_id: sensor.pirateweather_daytime_high_temperature_0d
-        below: 95
+        below: 80
       - condition: state
         entity_id: cover.bedroom_blinds
         state: closed
@@ -1005,14 +1009,14 @@ morning:
         entity_id: switch.desktop
         state: 'off'
       then:
-      - service: cover.open_cover
-        data: {}
+      - data: {}
         target:
           entity_id: cover.bedroom_blinds
-    - service: switch.turn_off
-      data: {}
+        action: cover.open_cover
+    - data: {}
       target:
         entity_id: switch.acfanhigh
+      action: switch.turn_off
     - if:
       - condition: state
         entity_id: binary_sensor.bed_occupancy
@@ -1026,26 +1030,26 @@ morning:
           entity_id: input_select.taylor_presence
           state: Just Arrived
       then:
-      - service: input_boolean.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: input_boolean.bedmotion
+        action: input_boolean.turn_on
       enabled: true
     - if:
       - condition: state
         entity_id: switch.desktop
         state: 'on'
       then:
-      - service: switch.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: switch.goxlr
+        action: switch.turn_on
       else:
-      - service: switch.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id: switch.goxlr
         enabled: false
+        action: switch.turn_off
     - if:
       - condition: and
         conditions:
@@ -1062,8 +1066,7 @@ morning:
       then:
       - repeat:
           sequence:
-          - service: light.turn_on
-            data:
+          - data:
               brightness_pct: 100
               hs_color:
               - 30.353
@@ -1071,6 +1074,7 @@ morning:
               effect: None
             target:
               entity_id: light.fan_lights
+            action: light.turn_on
           until:
           - condition: state
             entity_id: light.wyze_bulb_1
@@ -1094,8 +1098,7 @@ morning:
               minutes: 0
               seconds: 1
       else:
-      - service: light.turn_on
-        data:
+      - data:
           brightness_pct: 100
           hs_color:
           - 30.353
@@ -1103,29 +1106,30 @@ morning:
           effect: None
         target:
           entity_id: light.fan_lights
-    - service: switch.turn_on
-      data: {}
+        action: light.turn_on
+    - data: {}
       target:
         entity_id: switch.light_switch_relay
+      action: switch.turn_on
     - if:
       - condition: state
         entity_id: automation.nanoleaf_scene_changer_and_auto_brightness
         state: 'off'
       then:
-      - service: automation.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: automation.nanoleaf_scene_changer_and_auto_brightness
+        action: automation.turn_on
       - delay:
           hours: 0
           minutes: 0
           seconds: 0
           milliseconds: 500
-      - service: automation.trigger
-        data:
+      - data:
           skip_condition: true
         target:
           entity_id: automation.nanoleaf_scene_changer_and_auto_brightness
+        action: automation.trigger
   mode: single
   icon: mdi:white-balance-sunny
 start_car:

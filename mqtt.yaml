@@ -9,3 +9,34 @@
 #       payload_on: "on"
 #       off_delay: 600000
 #       device_class: motion
+sensor:
+  - state_topic: "rtl_433/events/Acurite-Tower/15750"
+    name: "Bathroom Temperature"
+    unit_of_measurement: "°F"
+    value_template: '{{ (value_json.temperature_C * 9 / 5 + 32)}}'
+    json_attributes_topic: "rtl_433/events/Acurite-Tower/15750"
+    force_update: true
+    unique_id: bathroom_temperature
+    device_class: temperature
+  - state_topic: "rtl_433/events/Acurite-Tower/15750"
+    name: "Bathroom Humidity"
+    unit_of_measurement: "%"
+    value_template: '{{ value_json.humidity }}'
+    force_update: true
+    unique_id: bathroom_humidity
+    device_class: humidity
+  - state_topic: "rtl_433/events/Acurite-Tower/414"
+    name: "Bedroom Temperature"
+    unit_of_measurement: "°F"
+    value_template: '{{ (value_json.temperature_C * 9 / 5 + 32)}}'
+    json_attributes_topic: "rtl_433/events/Acurite-Tower/15750"
+    force_update: true
+    unique_id: bedroom_temperature
+    device_class: temperature
+  - state_topic: "rtl_433/events/Acurite-Tower/414"
+    name: "Bedroom Humidity"
+    unit_of_measurement: "%"
+    value_template: '{{ value_json.humidity }}'
+    force_update: true
+    unique_id: bedroom_humidity
+    device_class: humidity
