@@ -42,21 +42,6 @@ fan_off:
         - light.light_switch
         - light.light_switch_corner
       action: light.turn_on
-    - if:
-      - condition: state
-        entity_id: switch.desktop
-        state: 'on'
-      then:
-      - data: {}
-        target:
-          entity_id: switch.goxlr
-        action: switch.turn_on
-      else:
-      - data: {}
-        target:
-          entity_id: switch.goxlr
-        action: switch.turn_off
-      enabled: false
     - data:
         brightness_pct: 35
       target:
@@ -191,21 +176,6 @@ color_loop:
         entity_id:
         - switch.usb_hub
         - switch.lumi_lumi_plug_maus01_switch_2
-    - if:
-      - condition: state
-        entity_id: switch.desktop
-        state: 'on'
-      then:
-      - service: switch.turn_on
-        data: {}
-        target:
-          entity_id: switch.goxlr
-      else:
-      - service: switch.turn_off
-        data: {}
-        target:
-          entity_id: switch.goxlr
-        enabled: false
     - if:
       - condition: sun
         after: sunrise
@@ -852,20 +822,6 @@ night:
         entity_id:
         - automation.nanoleaf_scene_changer_and_auto_brightness
         - automation.bed_occupancy
-    - if:
-      - condition: state
-        entity_id: switch.desktop
-        state: 'on'
-      then:
-      - service: switch.turn_on
-        data: {}
-        target:
-          entity_id: switch.goxlr
-      else:
-      - service: switch.turn_off
-        data: {}
-        target:
-          entity_id: switch.goxlr
   alias: Night
   mode: restart
   icon: mdi:weather-night
@@ -1035,21 +991,6 @@ morning:
           entity_id: input_boolean.bedmotion
         action: input_boolean.turn_on
       enabled: true
-    - if:
-      - condition: state
-        entity_id: switch.desktop
-        state: 'on'
-      then:
-      - data: {}
-        target:
-          entity_id: switch.goxlr
-        action: switch.turn_on
-      else:
-      - data: {}
-        target:
-          entity_id: switch.goxlr
-        enabled: false
-        action: switch.turn_off
     - if:
       - condition: and
         conditions:
@@ -2515,7 +2456,6 @@ power_saving:
       target:
         entity_id:
         - switch.usb_hub
-        - switch.goxlr
     - if:
       - condition: state
         entity_id: binary_sensor.webcam

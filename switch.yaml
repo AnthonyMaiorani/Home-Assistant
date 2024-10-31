@@ -426,7 +426,6 @@
           target: 
             entity_id: 
               - switch.usb_hub
-              - switch.goxlr
         - service: wake_on_lan.send_magic_packet
           data:
             mac: !secret desktop
@@ -438,6 +437,3 @@
           target:
             entity_id:
               - button.desktop_pc_satellite_shutdown
-        - service: switch.turn_off
-          target: 
-            entity_id: switch.goxlr
