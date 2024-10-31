@@ -332,11 +332,6 @@
         data: {}
         target:
           entity_id: timer.ac
-    - service: automation.trigger
-      data:
-        skip_condition: true
-      target:
-        entity_id: automation.ping_z_wave_devices
     - service: input_boolean.turn_off
       data: {}
       target:
