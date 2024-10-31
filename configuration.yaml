@@ -79,24 +79,8 @@ rest_command:
     url: http://192.168.1.132/win&A={{ states("input_number.bed_brightness") }}
   set_rope_brightness:
     url: http://192.168.1.104/win&A={{ states("input_number.rope_brightness") }}
-  set_lamp_1_brightness:
-    url: http://192.168.1.221/win&A={{ states("input_number.lamp_1_brightness") }}
-  set_lamp_2_brightness:
-    url: http://192.168.1.200/win&A={{ states("input_number.lamp_2_brightness") }}
-  set_charger_1_brightness:
-    url: http://192.168.1.110/win&A={{ states("input_number.charger_1_brightness") }}
   set_cube_brightness:
     url: http://192.168.1.78/win&A={{ states("input_number.cube_brightness") }}
-  set_charger_2_brightness:
-    url: http://192.168.1.38/win&A={{ states("input_number.charger_2_brightness") }}
-  set_floor_lamp_brightness:
-    url: http://192.168.1.167/win&A={{ states("input_number.floor_lamp_brightness") }}
-  set_floor_lamp_2_brightness:
-    url: http://192.168.1.51/win&A={{ states("input_number.floor_lamp_2_brightness") }}
-  set_black_cob_brightness:
-    url: http://192.168.1.177/win&A={{ states("input_number.black_cob_brightness") }}
-  set_lines_brightness:
-    url: http://192.168.1.196/win&A={{ states("input_number.lines_brightness") }}
   set_govee_brightness:
     url: http://192.168.1.193/win&A={{ states("input_number.govee_brightness") }}
   set_govee_preset:

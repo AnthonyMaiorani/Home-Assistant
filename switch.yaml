@@ -26,42 +26,6 @@
   method: patch
   scan_interval: 5
 - platform: rest
-  resource: http://192.168.1.167/json/state
-  name: Floor Lamp
-  body_on: '{"on":true}'
-  body_off: '{"on":false}'
-  is_on_template: "{{ value_json.on }}"
-  unique_id: floor_lamp
-  method: patch
-  scan_interval: 5
-- platform: rest
-  resource: http://192.168.1.51/json/state
-  name: Floor Lamp 2
-  body_on: '{"on":true}'
-  body_off: '{"on":false}'
-  is_on_template: "{{ value_json.on }}"
-  unique_id: floor_lamp_2
-  method: patch
-  scan_interval: 5
-- platform: rest
-  resource: http://192.168.1.177/json/state
-  name: Black COB
-  body_on: '{"on":true}'
-  body_off: '{"on":false}'
-  is_on_template: "{{ value_json.on }}"
-  unique_id: black_cob
-  method: patch
-  scan_interval: 5
-- platform: rest
-  resource: http://192.168.1.196/json/state
-  name: Lines
-  body_on: '{"on":true}'
-  body_off: '{"on":false}'
-  is_on_template: "{{ value_json.on }}"
-  unique_id: lines
-  method: patch
-  scan_interval: 5
-- platform: rest
   resource: http://192.168.1.193/json/state
   name: Govee
   body_on: '{"on":true}'
@@ -89,33 +53,6 @@
   method: patch
   unique_id: rope
 - platform: rest
-  resource: http://192.168.1.221/json/state
-  name: Lamp 1
-  body_on: '{"on":true}'
-  body_off: '{"on":false}'
-  is_on_template: "{{ value_json.on }}"
-  scan_interval: 5
-  method: patch
-  unique_id: lamp1
-- platform: rest
-  resource: http://192.168.1.200/json/state
-  name: Lamp 2
-  body_on: '{"on":true}'
-  body_off: '{"on":false}'
-  is_on_template: "{{ value_json.on }}"
-  scan_interval: 5
-  method: patch
-  unique_id: lamp2
-- platform: rest
-  resource: http://192.168.1.110/json/state
-  name: Charger 1
-  body_on: '{"on":true}'
-  body_off: '{"on":false}'
-  is_on_template: "{{ value_json.on }}"
-  scan_interval: 5
-  method: patch
-  unique_id: charger1
-- platform: rest
   resource: http://192.168.1.78/json/state
   name: Cube
   body_on: '{"on":true}'
@@ -124,15 +61,6 @@
   scan_interval: 5
   method: patch
   unique_id: cube
-- platform: rest
-  resource: http://192.168.1.38/json/state
-  name: Charger 2
-  body_on: '{"on":true}'
-  body_off: '{"on":false}'
-  is_on_template: "{{ value_json.on }}"
-  scan_interval: 5
-  method: patch
-  unique_id: charger2
 - platform: template
   switches:
     # case_rgb:
