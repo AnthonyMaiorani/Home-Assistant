@@ -2260,26 +2260,8 @@
                 brightness_pct: 13
               action: light.turn_on
           - conditions:
-            - condition: not
-              conditions:
-              - condition: and
-                conditions:
-                - condition: or
-                  conditions:
-                  - condition: state
-                    entity_id: input_select.taylor_presence
-                    state: Home
-                  - condition: state
-                    entity_id: input_select.taylor_presence
-                    state: Just Arrived
-                - condition: state
-                  entity_id: switch.brtv
-                  state: 'on'
             - condition: or
               conditions:
-              - condition: state
-                entity_id: light.shapes_4948
-                state: 'on'
               - condition: state
                 entity_id: light.shapes_4948
                 state: 'on'
@@ -2294,7 +2276,7 @@
                 entity_id:
                 - light.govee
               data:
-                brightness: 5
+                brightness: 20
               action: light.turn_on
         - delay:
             hours: 0
@@ -5768,6 +5750,9 @@
                 entity_id: binary_sensor.bed_occupancy
                 state: 'on'
               alias: probably anthony
+            - condition: state
+              entity_id: binary_sensor.bedroom_door_recently_opened
+              state: 'on'
           - condition: not
             conditions:
             - alias: Fan Lights are off
@@ -6165,6 +6150,9 @@
             - condition: sun
               before: sunset
               after: sunrise
+        - condition: state
+          entity_id: binary_sensor.bedroom_door_recently_opened
+          state: 'on'
       - condition: not
         conditions:
         - condition: time

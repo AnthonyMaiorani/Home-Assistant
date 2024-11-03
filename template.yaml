@@ -372,3 +372,17 @@
 
         {# Pick a scene #}
         {{ sceneChoices | random }}
+- trigger:
+  - platform: state
+    entity_id: binary_sensor.bedroom_door
+    to: 'on'
+  binary_sensor:
+    - name: "Bedroom Door Recently Opened"
+      unique_id: bedroom_door_recently_opened
+      state: >           
+        {% if trigger.platform == 'state' %}
+        true
+        {% else %}
+        false
+        {% endif %}
+      auto_off: 5
