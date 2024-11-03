@@ -6089,27 +6089,26 @@
         entity_id: binary_sensor.lumi_lumi_motion_ac02_motion
         state: 'off'
       sequence:
-      - service: light.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id:
           - light.hallway_lights
+        action: light.turn_off
     - conditions:
-      - condition: or
+      - alias: door opened
+        condition: or
         conditions:
         - condition: trigger
           id: motion
         - condition: and
           conditions:
-          - condition: or
-            conditions:
-            - condition: trigger
-              id: bed door
-            - condition: trigger
-              id: bath door
           - condition: state
             entity_id: binary_sensor.bedroom_on
             state: 'on'
+          - condition: trigger
+            id:
+            - bed door
+            - bath door
         - condition: and
           conditions:
           - condition: or
@@ -6125,7 +6124,6 @@
           - condition: state
             entity_id: binary_sensor.bedroom_door
             state: 'on'
-        alias: door opened
       - condition: state
         entity_id: light.hallway_lights
         state: 'off'
@@ -6140,14 +6138,6 @@
           above: 0.9
         alias: dark
         enabled: false
-      - condition: or
-        conditions:
-        - condition: state
-          entity_id: input_select.anthony
-          state: Home
-        - condition: state
-          entity_id: input_select.anthony
-          state: Just Arrived
       - condition: or
         conditions:
         - condition: state
@@ -6179,15 +6169,19 @@
         conditions:
         - condition: time
           after: '23:15:00'
-          before: 06:00:00
+          before: 06:25:00
+      - condition: state
+        entity_id: binary_sensor.anthony_home
+        state: 'on'
       sequence:
-      - service: light.turn_on
-        data:
+      - data:
           brightness_pct: 22
         target:
           entity_id:
           - light.hallway_lights
-  mode: single
+        action: light.turn_on
+  mode: queued
+  max: 10
 - id: '1670799817434'
   alias: Riana Arrived Home
   description: ''
@@ -7018,15 +7012,6 @@
   trigger:
   - platform: state
     entity_id:
-    - binary_sensor.bathroom_multi_sensor_motion
-    to: 'on'
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 30
-    id: 'on'
-  - platform: state
-    entity_id:
     - binary_sensor.bathroom_door
     to: 'on'
     from: 'off'
@@ -7048,14 +7033,7 @@
     - light.bathroom_lights
     to: 'on'
     from: 'off'
-    id: wave
-  - platform: device
-    type: turned_on
-    device_id: c63a794911c38d9e98cbf969b2bc471b
-    entity_id: switch.exhaust_fan
-    domain: switch
-    id: turned on
-    enabled: false
+    id: lights turned on
   - platform: state
     entity_id:
     - input_boolean.showering
@@ -7064,17 +7042,12 @@
     id: showering
   - platform: state
     entity_id:
-    - binary_sensor.bathroom_multi_sensor_motion
-    to: 'on'
-    from: 'off'
-    id: other wave
-  - platform: state
-    entity_id:
     - binary_sensor.bathroom_aqara_motion
     - binary_sensor.lumi_lumi_motion_ac02_motion_3
+    - binary_sensor.bathroom_occupancy
     from: 'off'
     to: 'on'
-    id: motion2
+    id: motion
   - platform: state
     entity_id:
     - input_boolean.bathroom_occupied
@@ -7084,8 +7057,6 @@
       minutes: 50
       seconds: 0
     id: 2hrs
-  - platform: state
-    entity_id: []
   condition: []
   action:
   - choose:
@@ -7111,25 +7082,20 @@
               hours: 0
               minutes: 1
               seconds: 0
-          - condition: or
-            conditions:
-            - condition: trigger
-              id: wave
-            - condition: trigger
-              id: other wave
+          - condition: trigger
+            id:
+            - motion2
+            - wave
         - condition: trigger
-          id: 'on'
-        - condition: trigger
-          id: turned on
-        - condition: trigger
-          id: showering
-        - condition: trigger
-          id: motion2
+          id:
+          - turned on
+          - showering
+          - motion2
       sequence:
-      - service: input_boolean.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: input_boolean.bathroom_occupied
+        action: input_boolean.turn_on
     - conditions:
       - condition: state
         entity_id: input_boolean.bathroom_occupied
@@ -7137,20 +7103,18 @@
       - condition: or
         conditions:
         - condition: trigger
-          id: 'off'
+          id:
+          - 'off'
+          - lights turned off
         - condition: and
           conditions:
-          - condition: or
-            conditions:
-            - condition: trigger
-              id: reload
-            - condition: trigger
-              id: start
           - condition: state
             entity_id: light.bathroom_lights
             state: 'off'
-        - condition: trigger
-          id: lights turned off
+          - condition: trigger
+            id:
+            - reload
+            - start
         - condition: and
           conditions:
           - condition: trigger
@@ -7159,16 +7123,16 @@
             entity_id: binary_sensor.bathroom_aqara_motion
             state: 'off'
           - condition: state
-            entity_id: binary_sensor.bathroom_multi_sensor_motion
+            entity_id: binary_sensor.anthony_s_bathroom_occupancy
             state: 'off'
           - condition: state
             entity_id: input_boolean.showering
             state: 'off'
       sequence:
-      - service: input_boolean.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id: input_boolean.bathroom_occupied
+        action: input_boolean.turn_off
   mode: queued
   max: 10
 - id: '1672543042441'
@@ -11169,6 +11133,7 @@
     - binary_sensor.bedroom_chair
     to: 'on'
     id: chair
+    enabled: false
   condition: []
   action:
   - target:
@@ -11218,6 +11183,7 @@
           device_id: 1807d01837ccf4f85178b48dd72b10f6
         data: {}
         action: eight_sleep.side_off
+        enabled: false
   mode: single
 - id: '1724222512346'
   alias: Reload Alexa Media Player
