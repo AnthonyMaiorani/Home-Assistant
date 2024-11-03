@@ -1794,7 +1794,6 @@
   - platform: state
     entity_id:
     - light.shapes_4948
-    - light.shapes_4948_2
     from: unavailable
     to: 'on'
     id: corner available
@@ -1916,7 +1915,6 @@
         - light.shapes_007f
         - light.shapes_ee82
         - light.shapes_4948
-        - light.shapes_4948_2
       action: light.turn_off
     - stop: ''
   - condition: state
@@ -2094,8 +2092,8 @@
           value_template: "{{ \n(state_attr('light.shapes_007f', \"brightness\")|int(0)
             - states('sensor.nanoleaf_auto_brightness')|int(0))|abs <= 2 \nand \n(state_attr('light.shapes_ee82',
             \"brightness\")|int(0) - states('sensor.nanoleaf_auto_brightness')|int(0))|abs
-            <= 2 \nand\n(state_attr('light.shapes_4948_2', \"brightness\")|int(0)
-            - states('sensor.nanoleaf_auto_brightness')|int(0))|abs <= 2 \n}}"
+            <= 2 \nand\n(state_attr('light.shapes_4948', \"brightness\")|int(0) -
+            states('sensor.nanoleaf_auto_brightness')|int(0))|abs <= 2 \n}}"
         sequence:
         - alias: set brightness
           parallel:
@@ -2122,18 +2120,18 @@
             if:
             - alias: brightness incorrect
               condition: template
-              value_template: '{{ (state_attr(''light.shapes_4948_2'', "brightness")|int(0)
+              value_template: '{{ (state_attr(''light.shapes_4948'', "brightness")|int(0)
                 - states(''sensor.nanoleaf_auto_brightness'')|int(0))|abs >= 2 }}'
             - condition: not
               conditions:
               - condition: state
-                entity_id: light.shapes_4948_2
+                entity_id: light.shapes_4948
                 state: unavailable
             then:
             - continue_on_error: true
               target:
                 entity_id:
-                - light.shapes_4948_2
+                - light.shapes_4948
               data:
                 brightness: '{{ states(''sensor.nanoleaf_auto_brightness'') }}'
               action: light.turn_on
@@ -2204,7 +2202,7 @@
         - condition: or
           conditions:
           - condition: state
-            entity_id: light.shapes_4948_2
+            entity_id: light.shapes_4948
             state: 'on'
           - condition: state
             entity_id: light.shapes_4948
@@ -2227,7 +2225,7 @@
             - condition: or
               conditions:
               - condition: state
-                entity_id: light.shapes_4948_2
+                entity_id: light.shapes_4948
                 state: 'on'
               - condition: state
                 entity_id: light.shapes_4948
@@ -2280,7 +2278,7 @@
             - condition: or
               conditions:
               - condition: state
-                entity_id: light.shapes_4948_2
+                entity_id: light.shapes_4948
                 state: 'on'
               - condition: state
                 entity_id: light.shapes_4948
@@ -4908,6 +4906,7 @@
             entity_id: media_player.spotify_anthony221121
           data:
             shuffle: true
+        enabled: false
   - data:
       repeat: all
     target:
@@ -5602,13 +5601,13 @@
     id: lights turned off
   - platform: state
     entity_id:
-    - binary_sensor.bathroom_multi_sensor_motion
+    - binary_sensor.anthony_s_bathroom_occupancy
     to: 'on'
     from: 'off'
     id: motion detected
   - platform: state
     entity_id:
-    - binary_sensor.bathroom_multi_sensor_motion
+    - binary_sensor.anthony_s_bathroom_occupancy
     to: 'off'
     from: 'on'
     id: motion clear
@@ -5677,12 +5676,12 @@
         alias: not dark outside
         after_offset: +00:25:00
       sequence:
-      - service: light.turn_on
-        data:
+      - data:
           brightness_pct: 100
         target:
           entity_id: light.bathroom_lights
         alias: set to max brightness
+        action: light.turn_on
     - conditions:
       - condition: trigger
         id: occupied_boolean
@@ -5699,10 +5698,10 @@
           entity_id: light.bathroom_lights
           domain: light
           brightness_pct: 100
-      - service: timer.cancel
-        data: {}
+      - data: {}
         target:
           entity_id: timer.bathroom_light
+        action: timer.cancel
     - conditions:
       - condition: or
         conditions:
@@ -5794,10 +5793,10 @@
           entity_id: light.bathroom_lights
           domain: light
           brightness_pct: 100
-      - service: timer.cancel
-        data: {}
+      - data: {}
         target:
           entity_id: timer.bathroom_light
+        action: timer.cancel
     - conditions:
       - condition: state
         entity_id: input_boolean.showering
@@ -5831,7 +5830,7 @@
                   minutes: 0
                   seconds: 20
               - condition: state
-                entity_id: binary_sensor.bathroom_multi_sensor_motion
+                entity_id: binary_sensor.anthony_s_bathroom_occupancy
                 state: 'off'
             - condition: trigger
               id: motion clear
@@ -5850,10 +5849,10 @@
         device_id: 3c08610e07933d66eb5347257aae98aa
         entity_id: light.bathroom_lights
         domain: light
-      - service: timer.cancel
-        data: {}
+      - data: {}
         target:
           entity_id: timer.bathroom_light
+        action: timer.cancel
     - conditions:
       - condition: trigger
         id: lights turned off
@@ -5871,10 +5870,10 @@
       - condition: state
         entity_id: input_boolean.bathroom_occupied
         state: 'off'
-      - service: button.press
-        data: {}
+      - data: {}
         target:
           entity_id: button.bathroom_presence_status_reset
+        action: button.press
     - conditions:
       - condition: state
         entity_id: light.bathroom_lights
@@ -5926,7 +5925,7 @@
           id:
           - showering off
       - condition: state
-        entity_id: binary_sensor.bathroom_multi_sensor_motion
+        entity_id: binary_sensor.anthony_s_bathroom_occupancy
         state: 'off'
       - condition: state
         entity_id: binary_sensor.bathroom_aqara_motion
@@ -5935,11 +5934,11 @@
         entity_id: binary_sensor.lumi_lumi_motion_ac02_motion_3
         state: 'off'
       sequence:
-      - service: timer.start
-        data:
+      - data:
           duration: 00:01:30
         target:
           entity_id: timer.bathroom_light
+        action: timer.start
   mode: restart
 - id: '1670729021317'
   alias: Christmas Lights
