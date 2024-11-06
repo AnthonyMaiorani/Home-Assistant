@@ -84,14 +84,14 @@ fan_off:
 color_loop:
   alias: Color
   sequence:
-  - service: script.turn_off
-    data: {}
+  - data: {}
     target:
       entity_id:
       - script.call
       - script.fan_off
       - script.morning
       - script.night
+    action: script.turn_off
   - parallel:
     - data:
         brightness: 255
@@ -101,10 +101,10 @@ color_loop:
         - 255
         - 255
         - 0
-      service: light.turn_on
       target:
         entity_id:
         - light.bedroom_lights
+      action: light.turn_on
     - if:
       - condition: or
         conditions:
@@ -126,14 +126,14 @@ color_loop:
         - repeat:
             count: '3'
             sequence:
-            - service: media_player.volume_set
-              data:
+            - data:
                 volume_level: 0.18
               target:
                 entity_id:
                 - media_player.spotify_anthony221121
                 - media_player.owntone_output_anthony_s_desk
                 - media_player.owntone_output_anthony_s_nightstand
+              action: media_player.volume_set
             - delay:
                 hours: 0
                 minutes: 0
@@ -143,21 +143,20 @@ color_loop:
         - repeat:
             count: '3'
             sequence:
-            - service: media_player.volume_set
-              data:
+            - data:
                 volume_level: 0.13
               target:
                 entity_id:
                 - media_player.spotify_anthony221121
                 - media_player.owntone_output_anthony_s_desk
                 - media_player.owntone_output_anthony_s_nightstand
+              action: media_player.volume_set
             - delay:
                 hours: 0
                 minutes: 0
                 seconds: 1
                 milliseconds: 0
-    - service: light.turn_on
-      data:
+    - data:
         brightness_pct: 100
       target:
         entity_id:
@@ -167,12 +166,13 @@ color_loop:
         - light.shapes_4948
         - light.rope
         - light.closet_lights
-    - service: switch.turn_on
-      data: {}
+      action: light.turn_on
+    - data: {}
       target:
         entity_id:
         - switch.usb_hub
         - switch.lumi_lumi_plug_maus01_switch_2
+      action: switch.turn_on
     - if:
       - condition: sun
         after: sunrise
@@ -198,10 +198,12 @@ color_loop:
         entity_id: switch.desktop
         state: 'off'
       then:
-      - service: cover.open_cover
-        data: {}
+      - action: cover.set_cover_position
         target:
-          entity_id: cover.bedroom_blinds
+          entity_id:
+          - cover.bedroom_blinds
+        data:
+          position: '{{ states("sensor.vertical_cover_position_bedroom_shade") }}'
     - if:
       - condition: and
         conditions:
@@ -237,10 +239,10 @@ color_loop:
           - 255
           - 255
           - 0
-        service: light.turn_on
         target:
           entity_id:
           - light.fan_lights
+        action: light.turn_on
       else:
       - data:
           brightness: 255
@@ -250,14 +252,14 @@ color_loop:
           - 255
           - 255
           - 0
-        service: light.turn_on
         target:
           entity_id:
           - light.fan_lights
-    - service: switch.turn_on
-      data: {}
+        action: light.turn_on
+    - data: {}
       target:
         entity_id: switch.light_switch_relay
+      action: switch.turn_on
   mode: single
   icon: mdi:lightbulb-on
 music:
@@ -955,10 +957,12 @@ morning:
         entity_id: switch.desktop
         state: 'off'
       then:
-      - data: {}
+      - action: cover.set_cover_position
         target:
-          entity_id: cover.bedroom_blinds
-        action: cover.open_cover
+          entity_id:
+          - cover.bedroom_blinds
+        data:
+          position: '{{ states("sensor.vertical_cover_position_bedroom_shade") }}'
     - data: {}
       target:
         entity_id: switch.acfanhigh
