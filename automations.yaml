@@ -8358,7 +8358,7 @@
         entity_id: binary_sensor.bathroom_aqara_motion
         state: 'off'
       - condition: state
-        entity_id: binary_sensor.bathroom_multi_sensor_motion
+        entity_id: binary_sensor.anthony_s_bathroom_occupancy
         state: 'off'
       - condition: state
         entity_id: binary_sensor.shower
