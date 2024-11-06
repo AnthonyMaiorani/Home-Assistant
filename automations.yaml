@@ -7024,7 +7024,7 @@
     id: lights turned on
   - platform: state
     entity_id:
-    - input_boolean.showering
+    - binary_sensor.shower
     to: 'on'
     from: 'off'
     id: showering
@@ -7033,6 +7033,7 @@
     - binary_sensor.bathroom_aqara_motion
     - binary_sensor.lumi_lumi_motion_ac02_motion_3
     - binary_sensor.bathroom_occupancy
+    - binary_sensor.anthony_s_bathroom_occupancy
     from: 'off'
     to: 'on'
     id: motion
@@ -7072,13 +7073,11 @@
               seconds: 0
           - condition: trigger
             id:
-            - motion2
-            - wave
+            - motion
         - condition: trigger
           id:
-          - turned on
           - showering
-          - motion2
+          - lights turned on
       sequence:
       - data: {}
         target:
@@ -9531,7 +9530,6 @@
     id: corner
   - platform: state
     entity_id:
-    - light.shapes_4948_2
     - light.shapes_4948
     to: unavailable
     for:

@@ -28,7 +28,6 @@ fan_off:
       target:
         entity_id:
         - switch.lumi_lumi_plug_maus01_switch_2
-        - light.shapes_4948_2
         - light.shapes_007f
         - light.shapes_4948
         - light.shapes_ee82
@@ -48,7 +47,6 @@ fan_off:
         entity_id:
         - light.bed
         - light.rope
-        - light.lines
         - light.closet_lights
       action: light.turn_on
     - if:
@@ -166,9 +164,8 @@ color_loop:
         - light.wled
         - light.bed
         - light.govee
-        - light.shapes_4948_2
+        - light.shapes_4948
         - light.rope
-        - light.lines
         - light.closet_lights
     - service: switch.turn_on
       data: {}
@@ -449,7 +446,6 @@ call:
             entity_id:
             - light.wled
             - light.closet_lights
-            - light.lines
           action: light.turn_off
         - data:
             brightness: 10
@@ -490,7 +486,7 @@ call:
             brightness: 23
           target:
             entity_id:
-            - light.shapes_4948_2
+            - light.shapes_4948
             - light.shapes_ee82
             - light.shapes_007f
           action: light.turn_on
@@ -524,8 +520,6 @@ night:
         - light.wled
         - light.bed
         - light.rope
-        - light.lines
-        - light.shapes_4948_2
         - light.closet_lights
     - service: cover.close_cover
       data: {}
@@ -605,8 +599,6 @@ night:
             - light.shapes_4948
             - light.shapes_007f
             - light.wled
-            - light.shapes_4948_2
-            - light.lines
             - light.rope
             - light.govee
             - light.bed
@@ -845,7 +837,6 @@ morning:
         - light.wled
         - light.bed
         - light.rope
-        - light.lines
         - light.closet_lights
       action: light.turn_on
     - data:
@@ -935,7 +926,6 @@ morning:
       target:
         entity_id:
         - switch.lumi_lumi_plug_maus01_switch_2
-        - light.shapes_4948_2
         - light.shapes_007f
         - light.shapes_4948
         - light.shapes_ee82
@@ -2435,7 +2425,6 @@ power_saving:
         - light.closet_lights
         - light.bed
         - light.shapes_4948
-        - light.shapes_4948_2
         - light.shapes_ee82
         - light.govee
         - light.rope
@@ -2443,7 +2432,6 @@ power_saving:
         - light.wyze_bulb_1
         - light.wyze_bulb_2
         - light.wyze_bulb_3
-        - light.lines
     - action: switch.turn_off
       target:
         entity_id:
