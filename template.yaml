@@ -70,11 +70,11 @@
     unique_id: signalrgb_active
   - name: "AirPods Connected"
     state: >
-      {{ "Anthony’s AirPods Pro" in state_attr('sensor.macbook_air_active_audio_output', 
+      {{ "Anthony’s AirPods Pro" in state_attr('sensor.m4_pro_macbook_pro_active_audio_output', 
       'All Audio Output') or "Anthony’s AirPods Pro #2" in 
-      state_attr('sensor.macbook_air_active_audio_output', 
+      state_attr('sensor.m4_pro_macbook_pro_active_audio_output', 
       'All Audio Output') or "Anthony’s AirPods" in 
-      state_attr('sensor.macbook_air_active_audio_output', 
+      state_attr('sensor.m4_pro_macbook_pro_active_audio_output', 
       'All Audio Output') }}
     unique_id: airpods_connected
   - name: "Bedroom On"
@@ -232,7 +232,7 @@
 #      - "paused"
   - platform: state
     entity_id:
-      - binary_sensor.macbook_air_camera_in_use
+      - binary_sensor.m4_pro_macbook_pro_camera_in_use
     from: "off"
     to: "on"
   - platform: state
@@ -302,7 +302,7 @@
         {% set sceneChoices = sceneChoices + nightScenes %}
 
           {# If in call on laptop #}
-          {% if states('sensor.macbook_air_active_camera') in ['unavailable', 'Inactive'] %}
+          {% if states('sensor.m4_pro_macbook_pro_active_camera') in ['unavailable', 'Inactive'] %}
           {% set sceneChoices = sceneChoices + darkScenes %}
           {%- endif %} 
         {%- endif %}  
@@ -328,8 +328,8 @@
         is_state('media_player.spotify_anthony221121', 'playing')
         and state_attr('media_player.spotify_anthony221121', 'volume_level') >= 0.42) and not 
         state_attr('light.bed_lights', 'rgb_color')| join(' ') == '0 255 255'
-        and not is_state('binary_sensor.macbook_audio_input_in_use', 'on') 
-        and not is_state('binary_sensor.macbook_camera_in_use', 'on')  -%} 
+        and not is_state('binary_sensor.m4_pro_macbook_pro_audio_input_in_use', 'on') 
+        and not is_state('binary_sensor.m4_pro_macbook_pro_camera_in_use', 'on')  -%} 
         {% set sceneChoices = musicScenes %}
         {% if state_attr('media_player.spotify_anthony221121', 'media_playlist') 
         is defined and 
@@ -344,8 +344,8 @@
         state_attr('media_player.owntone_output_anthony_s_desk', 'volume_level') >= 0.25 and 
         is_state('media_player.spotify_anthony221121', 'playing')
         and state_attr('media_player.spotify_anthony221121', 'volume_level') >= 0.42)
-        and not is_state('binary_sensor.macbook_audio_input_in_use', 'on') 
-        and not is_state('binary_sensor.macbook_camera_in_use', 'on')  -%} 
+        and not is_state('binary_sensor.m4_pro_macbook_pro_audio_input_in_use', 'on') 
+        and not is_state('binary_sensor.m4_pro_macbook_pro_camera_in_use', 'on')  -%} 
         {% set sceneChoices = musicScenes %}
         {% if state_attr('media_player.spotify_anthony221121', 'media_playlist') 
         is defined and 

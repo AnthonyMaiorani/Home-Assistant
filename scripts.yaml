@@ -190,7 +190,7 @@ color_loop:
           seconds: 0
       - condition: numeric_state
         entity_id: sensor.pirateweather_daytime_high_temperature_0d
-        below: 95
+        below: 80
       - condition: state
         entity_id: cover.bedroom_blinds
         state: closed
@@ -198,12 +198,25 @@ color_loop:
         entity_id: switch.desktop
         state: 'off'
       then:
-      - action: cover.set_cover_position
-        target:
-          entity_id:
-          - cover.bedroom_blinds
-        data:
-          position: '{{ states("sensor.vertical_cover_position_bedroom_shade") }}'
+      - if:
+        - condition: state
+          entity_id: switch.vertical_toggle_control_bedroom_shade
+          state: 'on'
+        - condition: time
+          after: '14:00:00'
+        then:
+        - action: cover.set_cover_position
+          target:
+            entity_id:
+            - cover.bedroom_blinds
+          data:
+            position: '{{ states("sensor.vertical_cover_position_bedroom_shade") }}'
+        else:
+        - action: cover.open_cover
+          target:
+            entity_id:
+            - cover.bedroom_blinds
+          data: {}
     - if:
       - condition: and
         conditions:
@@ -219,18 +232,18 @@ color_loop:
         alias: relay was turned off
       then:
       - wait_for_trigger:
-        - platform: state
-          entity_id:
+        - entity_id:
           - light.wyze_bulb_1
           from: unavailable
-        - platform: state
-          entity_id:
+          trigger: state
+        - entity_id:
           - light.wyze_bulb_2
           from: unavailable
-        - platform: state
-          entity_id:
+          trigger: state
+        - entity_id:
           - light.wyze_bulb_3
           from: unavailable
+          trigger: state
       - data:
           brightness: 255
           effect: Color Loop
@@ -457,7 +470,7 @@ call:
             - light.rope
           action: light.turn_on
         - data:
-            brightness: 5
+            brightness: 20
           target:
             entity_id:
             - light.govee
@@ -957,12 +970,25 @@ morning:
         entity_id: switch.desktop
         state: 'off'
       then:
-      - action: cover.set_cover_position
-        target:
-          entity_id:
-          - cover.bedroom_blinds
-        data:
-          position: '{{ states("sensor.vertical_cover_position_bedroom_shade") }}'
+      - if:
+        - condition: state
+          entity_id: switch.vertical_toggle_control_bedroom_shade
+          state: 'on'
+        - condition: time
+          after: '14:00:00'
+        then:
+        - action: cover.set_cover_position
+          target:
+            entity_id:
+            - cover.bedroom_blinds
+          data:
+            position: '{{ states("sensor.vertical_cover_position_bedroom_shade") }}'
+        else:
+        - action: cover.open_cover
+          target:
+            entity_id:
+            - cover.bedroom_blinds
+          data: {}
     - data: {}
       target:
         entity_id: switch.acfanhigh
@@ -1193,10 +1219,10 @@ lofi:
       state: 'on'
     then:
     - wait_for_trigger:
-      - platform: state
-        entity_id:
+      - entity_id:
         - script.stop_music
         to: 'off'
+        trigger: state
       timeout:
         hours: 0
         minutes: 0
@@ -1233,10 +1259,10 @@ lofi:
         - media_player.owntone_output_anthony_s_nightstand
       action: homeassistant.reload_config_entry
     - wait_for_trigger:
-      - platform: state
-        entity_id:
+      - entity_id:
         - media_player.owntone_output_bathroom
         from: unavailable
+        trigger: state
       timeout:
         hours: 0
         minutes: 0
@@ -1304,17 +1330,18 @@ lofi:
           entity_id: media_player.spotify_anthony221121
         action: homeassistant.update_entity
       - wait_for_trigger:
-        - platform: state
-          entity_id:
+        - entity_id:
           - media_player.spotify_anthony221121
           attribute: source
           to: Home Assistant
+          trigger: state
         timeout:
           hours: 0
           minutes: 0
           seconds: 2
           milliseconds: 0
     alias: Set Spotify Output to Home Assistant
+    enabled: true
   - if:
     - condition: not
       conditions:
@@ -1342,10 +1369,10 @@ lofi:
         - media_player.owntone_output_anthony_s_nightstand
       action: homeassistant.reload_config_entry
     - wait_for_trigger:
-      - platform: state
-        entity_id:
+      - entity_id:
         - media_player.owntone_output_bathroom
         from: unavailable
+        trigger: state
       timeout:
         hours: 0
         minutes: 0
@@ -1369,6 +1396,7 @@ lofi:
         entity_id: media_player.spotify_anthony221121
       action: homeassistant.reload_config_entry
     alias: Restart Addon if couldn't set Spotify to Home Assistant
+    enabled: true
   - repeat:
       while:
       - condition: not
@@ -1403,17 +1431,18 @@ lofi:
           entity_id: media_player.spotify_anthony221121
         action: homeassistant.update_entity
       - wait_for_trigger:
-        - platform: state
-          entity_id:
+        - entity_id:
           - media_player.spotify_anthony221121
           attribute: source
           to: Home Assistant
+          trigger: state
         timeout:
           hours: 0
           minutes: 0
           seconds: 2
           milliseconds: 0
     alias: Set Spotify Output to Home Assistant
+    enabled: true
   - data:
       volume_level: "{% if states('binary_sensor.bed_occupancy') is defined and is_state('binary_sensor.bed_occupancy',
         'on') %}\n    {% set vol =  0.08 %}\n{% elif now().hour >= 23 or now().hour
@@ -1450,6 +1479,7 @@ lofi:
           minutes: 0
           seconds: 1
           milliseconds: 0
+    enabled: true
   - continue_on_error: true
     data:
       repeat: all
@@ -1757,10 +1787,10 @@ lofi:
         - media_player.owntone_output_soundbar
       action: homeassistant.reload_config_entry
     - wait_for_trigger:
-      - platform: state
-        entity_id:
+      - entity_id:
         - media_player.owntone_output_bathroom
         from: unavailable
+        trigger: state
       timeout:
         hours: 0
         minutes: 0
@@ -1784,6 +1814,7 @@ lofi:
       target:
         entity_id: script.lofi
       action: script.turn_on
+    enabled: true
   mode: restart
   icon: mdi:meditation
 play_music:

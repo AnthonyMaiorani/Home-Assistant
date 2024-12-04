@@ -164,22 +164,22 @@
 - id: '1653601692731'
   alias: AC Boost Control
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - input_boolean.ac_boost
     id: buttonpress
     to: 'on'
-  - platform: event
-    event_type: timer.finished
+    trigger: state
+  - event_type: timer.finished
     event_data:
       entity_id: timer.ac
-  - platform: state
-    entity_id:
+    trigger: event
+  - entity_id:
     - input_boolean.ac_boost
     - switch.ac
     to: 'off'
-  condition:
+    trigger: state
+  conditions:
   - condition: or
     conditions:
     - condition: state
@@ -191,7 +191,7 @@
     - condition: state
       entity_id: person.taylor
       state: home
-  action:
+  actions:
   - if:
     - condition: trigger
       id: buttonpress
@@ -221,7 +221,10 @@
           duration: 1500
           target: -100
         target:
-          device_id: 1807d01837ccf4f85178b48dd72b10f6
+          device_id:
+          - 1807d01837ccf4f85178b48dd72b10f6
+          - da76e4d329b4368e1e9c254dadfdf348
+          - da0aee03d5b8f7fc84c67cedee605139
     else:
     - if:
       - condition: state
@@ -277,39 +280,39 @@
 - id: 43a25b65afed4a4680f5ec81172f11e8
   alias: Startup Actions
   description: Set Theme, Ensure Location Input Select is Updated
-  trigger:
+  triggers:
   - event: start
-    platform: homeassistant
-  action:
-  - service: automation.turn_off
-    data:
+    trigger: homeassistant
+  actions:
+  - data:
       stop_actions: false
     target:
       entity_id: automation.ac_controls
+    action: automation.turn_off
   - parallel:
     - data:
         name: ios-dark-mode-dark-blue
         mode: light
-      service: frontend.set_theme
+      action: frontend.set_theme
     - if:
       - condition: state
         entity_id: person.anthony
         state: home
       then:
-      - service: input_select.select_option
-        target:
+      - target:
           entity_id: input_select.anthony
         data:
           option: Home
+        action: input_select.select_option
       else:
       - condition: template
         value_template: '{{ states(''person.anthony'')|lower in [''utd'', ''raytheon'',
           ''away'', ''not_home''] }}'
-      - service: input_select.select_option
-        data:
+      - data:
           option: Away
         target:
           entity_id: input_select.anthony
+        action: input_select.select_option
     - if:
       - condition: state
         entity_id: switch.ac
@@ -318,32 +321,31 @@
         entity_id: input_boolean.ac_boost
         state: 'on'
       then:
-      - service: timer.start
-        data:
+      - data:
           duration: 0
         target:
           entity_id: timer.ac
+        action: timer.start
       else:
-      - service: input_boolean.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id: input_boolean.ac_boost
-      - service: timer.cancel
-        data: {}
+        action: input_boolean.turn_off
+      - data: {}
         target:
           entity_id: timer.ac
-    - service: input_boolean.turn_off
-      data: {}
+        action: timer.cancel
+    - data: {}
       target:
         entity_id: input_boolean.alexa_notification_sent
-    - service: switch.turn_on
-      data: {}
+      action: input_boolean.turn_off
+    - data: {}
       target:
         entity_id:
         - switch.airport_express
         - switch.lumi_lumi_plug_maus01_switch_3
         - switch.soundbar_airport
-        - switch.sonoff_s31_lite_zb_switch_3
+      action: switch.turn_on
     - if:
       - condition: state
         entity_id: switch.desktop
@@ -353,21 +355,15 @@
       - condition: sun
         before: sunrise
       then:
-      - service: switch.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id: switch.usb_hub
-    - service: mqtt.publish
-      data:
+        action: switch.turn_off
+    - data:
         topic: homeassistant/binary_sensor/mailbox/state
         payload: empty
-    - service: automation.trigger
-      target:
-        entity_id: automation.adjust_kitchen_homepod_volume
-      data:
-        skip_condition: true
-    - service: homeassistant.reload_config_entry
-      data: {}
+      action: mqtt.publish
+    - data: {}
       target:
         entity_id:
         - media_player.owntone_server
@@ -377,14 +373,15 @@
         - media_player.owntone_output_kitchen_right
         - media_player.owntone_output_anthony_s_nightstand
         - media_player.owntone_output_soundbar
-    - service: button.press
-      target:
+      action: homeassistant.reload_config_entry
+    - target:
         entity_id: button.desktop_pc_satellite_restart_iotlink
       data: {}
-  - service: automation.turn_on
-    data: {}
+      action: button.press
+  - data: {}
     target:
       entity_id: automation.ac_controls
+    action: automation.turn_on
   - if:
     - condition: state
       entity_id: media_player.owntone_output_bathroom
@@ -393,10 +390,10 @@
       entity_id: light.bathroom_lights
       state: 'off'
     then:
-    - service: media_player.turn_off
-      data: {}
+    - data: {}
       target:
         entity_id: media_player.owntone_output_bathroom
+      action: media_player.turn_off
   - if:
     - condition: or
       conditions:
@@ -415,31 +412,27 @@
         entity_id: media_player.spotify_anthony221121
         state: unavailable
     then:
-    - service: script.turn_on
-      target:
+    - target:
         entity_id: script.lofi
       data: {}
+      action: script.turn_on
   - parallel:
-    - service: browser_mod.refresh
+    - alias: refresh doorbell cam tablet
       data:
-        browser_id:
-        - 2c8b769e-f4d4e0e9
-      alias: refresh doorbell cam tablet
+        browser_id: []
+      action: browser_mod.refresh
     - alias: refresh medicine tablet
-      service: browser_mod.refresh
       data:
-        browser_id:
-        - 92e9f5b7-92d2f3c4
+        browser_id: []
+      action: browser_mod.refresh
     - alias: refresh food tablet
-      service: browser_mod.refresh
       data:
-        browser_id:
-        - b8229aec-8e77c6cd
+        browser_id: []
+      action: browser_mod.refresh
     - alias: refresh bedroom tablet
-      service: browser_mod.refresh
       data:
-        browser_id:
-        - f1e02257-8ed3a647
+        browser_id: []
+      action: browser_mod.refresh
   initial_state: true
   mode: single
 - id: '1620642299524'
@@ -1527,12 +1520,11 @@
 - id: '1658727301790'
   alias: USB Control
   description: ''
-  trigger:
-  - platform: sun
-    event: sunrise
+  triggers:
+  - event: sunrise
     offset: 0
-  - platform: state
-    entity_id:
+    trigger: sun
+  - entity_id:
     - light.wled
     - light.fan_lights
     - binary_sensor.desktop_power
@@ -1541,23 +1533,33 @@
       hours: 0
       minutes: 0
       seconds: 1
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - input_select.anthony
     from: home
     to: Just Left
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - switch.usb_hub
     from: unavailable
     for:
       hours: 0
       minutes: 0
       seconds: 20
-  - platform: event
-    event_type: automation_reloaded
+    trigger: state
+  - event_type: automation_reloaded
     id: reloaded
-  condition:
+    trigger: event
+  - trigger: state
+    entity_id:
+    - switch.usb_hub
+    to: 'off'
+    id: turned off
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 1
+  conditions:
   - condition: state
     entity_id: switch.usb_hub
     state: 'off'
@@ -1568,11 +1570,11 @@
       state: 'on'
     - condition: sun
       after: sunrise
-  action:
-  - service: switch.turn_on
-    data: {}
+  actions:
+  - data: {}
     target:
       entity_id: switch.usb_hub
+    action: switch.turn_on
   mode: queued
 - id: '1660977660346'
   alias: Set Temperature
@@ -2380,40 +2382,44 @@
 - id: '1664505341968'
   alias: Arrived Home
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - input_select.anthony
     to: Just Arrived
-  condition: []
-  action:
+    trigger: state
+  conditions: []
+  actions:
   - wait_for_trigger:
-    - platform: state
-      entity_id:
+    - entity_id:
       - cover.garage_door
       to: closing
-    - platform: state
-      entity_id:
+      trigger: state
+    - entity_id:
       - cover.garage_door
       to: closed
-    - platform: state
-      entity_id:
+      trigger: state
+    - entity_id:
       - sensor.accord_enginestatus
       to: 'off'
-    - platform: state
-      entity_id:
+      trigger: state
+    - entity_id:
       - media_player.spotify_anthony221121
       to: paused
-    - platform: state
-      entity_id:
-      - binary_sensor.lumi_lumi_motion_ac02_motion_4
+      trigger: state
+      enabled: false
+    - entity_id:
+      - binary_sensor.anthony_s_room
+      - binary_sensor.anthony_s_closet_occupancy
       to: 'on'
-    - platform: state
-      entity_id:
+      trigger: state
+    - entity_id:
       - lock.front_door
-      - lock.front_door_cloud
       - binary_sensor.front_door
       - binary_sensor.bedroom_door
+      - lock.back_door
+      - binary_sensor.back_door
+      - lock.aqara_smart_lock_u300_lock
+      trigger: state
     continue_on_timeout: true
     timeout:
       hours: 0
@@ -2939,22 +2945,23 @@
 - id: '1665186115040'
   alias: Dog Medicine Reminder
   description: ''
-  trigger:
-  - platform: time
-    at: '12:00:00'
+  triggers:
+  - at: '12:00:00'
     id: Morning
-  - platform: time
-    at: '22:00:00'
+    trigger: time
+  - at: '22:00:00'
     id: Night
-  - platform: time
-    at: 03:30:01
+    trigger: time
+  - at: 03:30:01
     id: Reset
-  - platform: state
-    entity_id:
-    - binary_sensor.shock
+    trigger: time
+  - entity_id:
+    - binary_sensor.dog_medicine_vibration_vibration
     id: GivingPill
-  - platform: state
-    entity_id:
+    trigger: state
+    to: 'on'
+    from: 'off'
+  - entity_id:
     - input_boolean.morning_medicine
     to: 'on'
     for:
@@ -2963,11 +2970,38 @@
       seconds: 0
     alias: night medicine reminder
     id: night medicine reminder
-  - platform: time
-    at: 00:00:00
+    trigger: state
+  - at: 00:00:00
     id: midnight
-  condition: []
-  action:
+    trigger: time
+  - device_id: 1ef8ba0f8589870fda78d5ad25eeacb1
+    domain: zha
+    type: device_tilted
+    subtype: device_tilted
+    trigger: device
+    id: tilt
+  - trigger: event
+    event_type: zha_event
+    event_data:
+      device_ieee: 00:15:8d:00:8b:11:42:8b
+      unique_id: 00:15:8d:00:8b:11:42:8b:1:0x0500
+      device_id: 1ef8ba0f8589870fda78d5ad25eeacb1
+      endpoint_id: 1
+      cluster_id: 1280
+      command: current_orientation
+    id: orientation
+  - event_type: zha_event
+    event_data:
+      device_ieee: 00:15:8d:00:8b:11:42:8b
+      unique_id: 00:15:8d:00:8b:11:42:8b:1:0x0500
+      device_id: 1ef8ba0f8589870fda78d5ad25eeacb1
+      endpoint_id: 1
+      cluster_id: 1280
+      command: vibration_strength
+    trigger: event
+    id: vibration strength
+  conditions: []
+  actions:
   - choose:
     - conditions:
       - condition: trigger
@@ -2976,11 +3010,11 @@
         entity_id: input_boolean.morning_medicine
         state: 'off'
       sequence:
-      - service: notify.anthonys_devices
-        data:
+      - data:
           message: clear_notification
           data:
             tag: dog-medicine
+        action: notify.anthonys_devices
       - if:
         - condition: or
           conditions:
@@ -2994,8 +3028,7 @@
           entity_id: binary_sensor.home_alone
           state: 'on'
         then:
-        - service: notify.anthonys_devices
-          data:
+        - data:
             message: Lola hasn't gotten her medicine yet
             data:
               tag: dog-medicine
@@ -3004,6 +3037,7 @@
                   name: default
                   critical: 1
                   volume: 0.3
+          action: notify.anthonys_devices
         else:
         - condition: or
           conditions:
@@ -3016,11 +3050,11 @@
           - condition: state
             entity_id: input_select.anthony
             state: Just Arrived
-        - service: notify.anthonys_devices
-          data:
+        - data:
             message: Lola hasn't gotten her medicine yet
             data:
               tag: dog-medicine
+          action: notify.anthonys_devices
     - conditions:
       - condition: state
         entity_id: input_boolean.night_medicine
@@ -3032,11 +3066,11 @@
         - condition: trigger
           id: midnight
       sequence:
-      - service: notify.anthonys_devices
-        data:
+      - data:
           message: clear_notification
           data:
             tag: dog-medicine
+        action: notify.anthonys_devices
       - if:
         - condition: or
           conditions:
@@ -3050,8 +3084,7 @@
           entity_id: binary_sensor.home_alone
           state: 'on'
         then:
-        - service: notify.anthonys_devices
-          data:
+        - data:
             message: Lola hasn't gotten her medicine yet
             data:
               tag: dog-medicine
@@ -3060,6 +3093,7 @@
                   name: default
                   critical: 1
                   volume: 0.3
+          action: notify.anthonys_devices
         else:
         - condition: or
           conditions:
@@ -3072,24 +3106,28 @@
           - condition: state
             entity_id: input_select.anthony
             state: Just Arrived
-        - service: notify.anthonys_devices
-          data:
+        - data:
             message: Lola hasn't gotten her medicine yet
             data:
               tag: dog-medicine
+          action: notify.anthonys_devices
     - conditions:
       - condition: trigger
         id: Reset
       sequence:
-      - service: input_boolean.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id:
           - input_boolean.morning_medicine
           - input_boolean.night_medicine
+        action: input_boolean.turn_off
     - conditions:
       - condition: trigger
-        id: GivingPill
+        id:
+        - GivingPill
+        - tilt
+        - vibration strength
+        - orientation
       sequence:
       - choose:
         - conditions:
@@ -3102,15 +3140,15 @@
               entity_id: input_boolean.morning_medicine
               state: 'off'
             then:
-            - service: input_boolean.turn_on
-              data: {}
+            - data: {}
               target:
                 entity_id: input_boolean.morning_medicine
-            - service: input_datetime.set_datetime
-              data:
+              action: input_boolean.turn_on
+            - data:
                 datetime: '{{ now() }}'
               target:
                 entity_id: input_datetime.morning_medicine_given
+              action: input_datetime.set_datetime
             else: []
         - conditions:
           - condition: or
@@ -3141,16 +3179,16 @@
               entity_id: input_boolean.night_medicine
               state: 'off'
             then:
-            - service: input_boolean.turn_on
-              data: {}
+            - data: {}
               target:
                 entity_id: input_boolean.night_medicine
+              action: input_boolean.turn_on
             else: []
-      - service: notify.anthonys_devices
-        data:
+      - data:
           message: clear_notification
           data:
             tag: dog-medicine
+        action: notify.anthonys_devices
     - conditions:
       - condition: trigger
         id: night medicine reminder
@@ -3161,11 +3199,11 @@
         entity_id: input_boolean.night_medicine
         state: 'off'
       sequence:
-      - service: notify.anthonys_devices
-        data:
+      - data:
           message: clear_notification
           data:
             tag: dog-medicine
+        action: notify.anthonys_devices
       - if:
         - condition: or
           conditions:
@@ -3179,8 +3217,7 @@
           entity_id: binary_sensor.home_alone
           state: 'on'
         then:
-        - service: notify.anthonys_devices
-          data:
+        - data:
             message: It's time to give Lola her medicine
             data:
               tag: dog-medicine
@@ -3189,6 +3226,7 @@
                   name: default
                   critical: 1
                   volume: 0.3
+          action: notify.anthonys_devices
         else:
         - condition: or
           conditions:
@@ -3201,11 +3239,11 @@
           - condition: state
             entity_id: input_select.anthony
             state: Just Arrived
-        - service: notify.anthonys_devices
-          data:
+        - data:
             message: It's time to give Lola her medicine
             data:
               tag: dog-medicine
+          action: notify.anthonys_devices
   mode: single
 - id: '1665630167045'
   alias: Turn on home lights at night
@@ -3306,9 +3344,8 @@
 - id: '1665630463210'
   alias: 'Only one home automations '
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - light.living_room_lights
     - switch.living_room_fan
     - input_boolean.morning_medicine
@@ -3326,22 +3363,23 @@
     to: 'on'
     from: 'off'
     id: leftroom2
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - lock.front_door
     - binary_sensor.back_door
     to: unlocked
     id: leftroom3
     enabled: false
-  - platform: state
-    entity_id:
-    - binary_sensor.motion_sensor_motion_detection
+    trigger: state
+  - entity_id:
+    - binary_sensor.anthony_s_closet_occupancy
     - binary_sensor.bed_occupancy
-    - binary_sensor.lumi_lumi_motion_ac02_motion_4
+    - binary_sensor.anthony_s_room
     - binary_sensor.bedroom_chair
     to: 'on'
     id: enteredroom
-  condition:
+    trigger: state
+  conditions:
   - condition: or
     conditions:
     - condition: state
@@ -3370,7 +3408,7 @@
       hours: 0
       minutes: 0
       seconds: 45
-  action:
+  actions:
   - choose:
     - conditions:
       - condition: or
@@ -3804,82 +3842,63 @@
 - id: '1666480822238'
   alias: Laundry Room Light
   description: ''
-  trigger:
-  - platform: state
+  triggers:
+  - alias: cleared
     entity_id:
-    - binary_sensor.laundry_room_motion
+    - binary_sensor.laundry_room_occupancy
     from: 'on'
     to: 'off'
-    alias: cleared
     id: cleared
-  - platform: state
+    trigger: state
+  - alias: detected
     entity_id:
-    - binary_sensor.laundry_room_motion
+    - binary_sensor.laundry_room_occupancy
     from: 'off'
     to: 'on'
-    alias: detected
     id: detected
-  - platform: event
-    event_type: timer.finished
+    trigger: state
+  - event_type: timer.finished
     event_data:
       entity_id: timer.laundry_room_light
     alias: timer finished
     id: timer finished
-  - platform: state
-    entity_id:
+    trigger: event
+  - entity_id:
     - switch.laundry_room_light
     from: 'on'
     to: 'off'
     alias: manually turned off
     id: manually turned off
-  - platform: homeassistant
-    event: start
+    trigger: state
+  - event: start
     id: startup
-  - platform: event
-    event_type: automation_reloaded
+    trigger: homeassistant
+  - event_type: automation_reloaded
     id: reload
-  - platform: state
-    entity_id:
+    trigger: event
+  - entity_id:
     - binary_sensor.laundry_room_door
     from: 'off'
     to: 'on'
     id: door opened
     alias: door opened
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.laundry_room_door
     from: 'on'
     to: 'off'
     alias: door closed
     id: door closed
-  - device_id: 646618a4497e6564b3f03617283d2a35
-    domain: zha
-    platform: device
-    type: Leave
-    subtype: sensor
-    id: fp1 leave
-  - device_id: 646618a4497e6564b3f03617283d2a35
-    domain: zha
-    platform: device
-    type: Enter
-    subtype: sensor
-    id: fp1 enter
-    enabled: false
-  condition: []
-  action:
+    trigger: state
+  conditions: []
+  actions:
   - choose:
     - conditions:
-      - condition: or
+      - alias: door opened or motion detected
+        condition: or
         conditions:
         - condition: trigger
           id: detected
-        - condition: and
-          conditions:
-          - condition: trigger
-            id: fp1 enter
-          - condition: state
-            entity_id: binary_sensor.laundry_room_door
-            state: 'on'
         - condition: and
           conditions:
           - condition: trigger
@@ -3891,7 +3910,6 @@
               hours: 0
               minutes: 0
               seconds: 6
-        alias: door opened or motion detected
       sequence:
       - if:
         - condition: not
@@ -3901,16 +3919,16 @@
             state: 'on'
           alias: if light off
         then:
-        - service: switch.turn_on
-          data: {}
+        - data: {}
           target:
             entity_id: switch.laundry_room_light
+          action: switch.turn_on
         else:
-        - service: timer.start
-          data:
+        - data:
             duration: 00:02:00
           target:
             entity_id: timer.laundry_room_light
+          action: timer.start
     - conditions:
       - condition: state
         entity_id: switch.laundry_room_light
@@ -3932,16 +3950,14 @@
             state: idle
         alias: no motion or home assistant/automations reloaded
       sequence:
-      - service: timer.start
-        data:
+      - data:
           duration: 00:02:00
         target:
           entity_id: timer.laundry_room_light
+        action: timer.start
     - conditions:
       - condition: or
         conditions:
-        - condition: trigger
-          id: fp1 leave
         - condition: and
           conditions:
           - condition: trigger
@@ -3968,17 +3984,17 @@
               entity_id: switch.laundry_room_light
               state: 'off'
             - condition: state
-              entity_id: binary_sensor.laundry_room_motion
+              entity_id: binary_sensor.laundry_room_occupancy
               state: 'on'
       sequence:
-      - service: switch.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id: switch.laundry_room_light
-      - service: timer.cancel
-        data: {}
+        action: switch.turn_off
+      - data: {}
         target:
           entity_id: timer.laundry_room_light
+        action: timer.cancel
   mode: queued
   max: 10
 - id: '1666852312966'
@@ -4476,9 +4492,9 @@
 - id: '1668535366974'
   alias: Connected to Car
   description: ''
-  trigger: []
-  condition: []
-  action:
+  triggers: []
+  conditions: []
+  actions:
   - choose:
     - conditions:
       - condition: or
@@ -4626,16 +4642,6 @@
       action: input_boolean.turn_on
     enabled: false
   - parallel:
-    - if:
-      - condition: state
-        entity_id: media_player.spotify_anthony221121
-        attribute: source
-        state: Home Assistant
-      then:
-      - data: {}
-        target:
-          entity_id: script.stop_music
-        action: script.turn_on
     - data: {}
       target:
         entity_id: button.tare
@@ -4737,8 +4743,8 @@
       - data:
           message: '{% if is_state(''binary_sensor.front_door'', ''on'') or is_state(''lock.front_door'',
             ''unlocked'') %}The front door is unlocked.{% endif %}{% if is_state(''binary_sensor.back_door'',
-            ''on'') or is_state(''lock.back_door_z_wave'', ''unlocked'') %}The back
-            door is unlocked.{% endif %} {% if state_attr(''weather.dark_sky'', ''temperature'')
+            ''on'') or is_state(''lock.back_door'', ''unlocked'') %}The back door
+            is unlocked.{% endif %} {% if state_attr(''weather.dark_sky'', ''temperature'')
             is defined %}{% if state_attr(''weather.dark_sky'', ''temperature'')|float(48)
             < 48 %}It is {{state_attr(''weather.dark_sky'', ''temperature'')}}°.{%
             endif %}{% endif %}'
@@ -4754,6 +4760,10 @@
     - data:
         message: request_location_update
       action: notify.mobile_app_iphone
+    - data: {}
+      target:
+        entity_id: script.stop_music
+      action: script.turn_on
   - alias: Set Spotify Output to iPhone
     repeat:
       while:
@@ -4789,11 +4799,11 @@
           entity_id: media_player.spotify_anthony221121
         action: media_player.select_source
       - wait_for_trigger:
-        - platform: state
-          entity_id:
+        - entity_id:
           - media_player.spotify_anthony221121
           attribute: source
           to: iPhone
+          trigger: state
         timeout:
           hours: 0
           minutes: 0
@@ -5529,16 +5539,15 @@
 - id: '1668919655434'
   alias: Bathroom Lights
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - binary_sensor.bathroom_door
     from: 'off'
     to: 'on'
     alias: door opened
     id: door opened
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.bathroom_door
     to: 'off'
     from: 'on'
@@ -5548,47 +5557,47 @@
       hours: 0
       minutes: 0
       seconds: 3
-  - platform: homeassistant
-    event: start
+    trigger: state
+  - event: start
     id: startup
-  - platform: event
-    event_type: automation_reloaded
+    trigger: homeassistant
+  - event_type: automation_reloaded
     id: reload
-  - platform: state
-    entity_id:
+    trigger: event
+  - entity_id:
     - input_boolean.showering
     to: 'on'
     id: shower started
     alias: shower started
+    trigger: state
   - device_id: e016de0f5a668458b727b4b8e2d4db6c
     domain: zha
-    platform: device
     type: Enter
     subtype: sensor
     alias: occupancy detected
     id: fp1 enter
+    trigger: device
   - device_id: e016de0f5a668458b727b4b8e2d4db6c
     domain: zha
-    platform: device
     type: Leave
     subtype: sensor
     id: occupancy clear
     alias: occupancy clear
-  - platform: state
-    entity_id:
+    trigger: device
+  - entity_id:
     - light.bathroom_lights
     from: 'on'
     to: 'off'
     alias: lights turned off
     id: lights turned off
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.anthony_s_bathroom_occupancy
     to: 'on'
     from: 'off'
     id: motion detected
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.anthony_s_bathroom_occupancy
     to: 'off'
     from: 'on'
@@ -5597,50 +5606,33 @@
       hours: 0
       minutes: 1
       seconds: 30
-  - platform: event
-    event_type: timer.finished
+    trigger: state
+  - event_type: timer.finished
     event_data:
       entity_id: timer.bathroom_light
     alias: timer finished
     id: timer finished
-  - platform: state
-    entity_id:
+    trigger: event
+  - entity_id:
     - input_boolean.bathroom_occupied
     to: 'on'
     from: 'off'
     id: occupied_boolean
-  - platform: state
-    entity_id:
-    - binary_sensor.bathroom_aqara_motion
-    - binary_sensor.lumi_lumi_motion_ac02_motion_3
-    from: 'off'
-    to: 'on'
-    id: motion2
-  - platform: state
-    entity_id:
-    - binary_sensor.bathroom_aqara_motion
-    - binary_sensor.lumi_lumi_motion_ac02_motion_3
-    from: 'on'
-    to: 'off'
-    id: motion clear2
-    for:
-      hours: 0
-      minutes: 1
-      seconds: 30
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - input_boolean.showering
     to: 'off'
     from: 'on'
     id: showering off
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - light.bathroom_lights
     from: 'off'
     to: 'on'
     id: lights on
-  condition: []
-  action:
+    trigger: state
+  conditions: []
+  actions:
   - choose:
     - conditions:
       - condition: trigger
@@ -5685,7 +5677,8 @@
           entity_id: timer.bathroom_light
         action: timer.cancel
     - conditions:
-      - condition: or
+      - alias: Presence Detected
+        condition: or
         conditions:
         - condition: trigger
           id: shower started
@@ -5722,9 +5715,6 @@
               hours: 0
               minutes: 0
               seconds: 4
-        - condition: trigger
-          id: motion2
-        alias: Presence Detected
       - condition: state
         entity_id: light.bathroom_lights
         state: 'off'
@@ -5905,18 +5895,10 @@
             entity_id: timer.bathroom_light
             state: idle
         - condition: trigger
-          id: motion clear2
-        - condition: trigger
           id:
           - showering off
       - condition: state
         entity_id: binary_sensor.anthony_s_bathroom_occupancy
-        state: 'off'
-      - condition: state
-        entity_id: binary_sensor.bathroom_aqara_motion
-        state: 'off'
-      - condition: state
-        entity_id: binary_sensor.lumi_lumi_motion_ac02_motion_3
         state: 'off'
       sequence:
       - data:
@@ -5993,39 +5975,36 @@
 - id: '1670745513720'
   alias: Hallway Lights
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - binary_sensor.lumi_lumi_motion_ac02_motion
-    - binary_sensor.lumi_lumi_motion_ac02_iaszone
+  triggers:
+  - entity_id:
+    - binary_sensor.anthony_s_hallway_occupancy
     to: 'off'
     from: 'on'
     for:
       hours: 0
-      minutes: 5
+      minutes: 0
       seconds: 0
     id: clear
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.bedroom_door
     from: 'off'
     to: 'on'
     id: bed door
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.bathroom_door
     from: 'off'
     to: 'on'
     id: bath door
-  - platform: state
-    entity_id:
-    - binary_sensor.lumi_lumi_motion_ac02_iaszone
-    - binary_sensor.lumi_lumi_motion_ac02_motion
+    trigger: state
+  - entity_id:
+    - binary_sensor.anthony_s_hallway_occupancy
     to: 'on'
     from: 'off'
     id: motion
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - automation.hallway_lights_off
     to: 'on'
     for:
@@ -6033,20 +6012,21 @@
       minutes: 5
       seconds: 0
     id: 5mins
-  - platform: homeassistant
-    event: start
+    trigger: state
+  - event: start
     id: start
-  - platform: state
-    entity_id:
+    trigger: homeassistant
+  - entity_id:
     - binary_sensor.bed_occupancy
     from: 'on'
     to: 'off'
     id: out of bed
-  - platform: event
-    event_type: automation_reloaded
+    trigger: state
+  - event_type: automation_reloaded
     id: reloaded
-  condition: []
-  action:
+    trigger: event
+  conditions: []
+  actions:
   - choose:
     - conditions:
       - condition: not
@@ -6068,10 +6048,7 @@
         entity_id: light.hallway_lights
         state: 'on'
       - condition: state
-        entity_id: binary_sensor.lumi_lumi_motion_ac02_iaszone
-        state: 'off'
-      - condition: state
-        entity_id: binary_sensor.lumi_lumi_motion_ac02_motion
+        entity_id: binary_sensor.hallway_occupancy
         state: 'off'
       sequence:
       - data: {}
@@ -6096,14 +6073,6 @@
             - bath door
         - condition: and
           conditions:
-          - condition: or
-            conditions:
-            - condition: state
-              entity_id: binary_sensor.lumi_lumi_motion_ac02_motion
-              state: 'on'
-            - condition: state
-              entity_id: binary_sensor.lumi_lumi_motion_ac02_iaszone
-              state: 'on'
           - condition: trigger
             id: out of bed
           - condition: state
@@ -6122,15 +6091,6 @@
           entity_id: sensor.pirateweather_cloud_coverage
           above: 0.9
         alias: dark
-        enabled: false
-      - condition: or
-        conditions:
-        - condition: state
-          entity_id: switch.desktop
-          state: 'on'
-        - condition: state
-          entity_id: input_select.anthony
-          state: Just Arrived
         enabled: false
       - condition: or
         conditions:
@@ -6997,48 +6957,45 @@
 - id: '1671606640908'
   alias: Bathroom Occupancy Override
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - binary_sensor.bathroom_door
     to: 'on'
     from: 'off'
     id: 'off'
-  - platform: event
-    event_type: automation_reloaded
+    trigger: state
+  - event_type: automation_reloaded
     id: reload
-  - platform: homeassistant
-    event: start
+    trigger: event
+  - event: start
     id: start
-  - platform: state
-    entity_id:
+    trigger: homeassistant
+  - entity_id:
     - light.bathroom_lights
     to: 'off'
     from: 'on'
     id: lights turned off
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - light.bathroom_lights
     to: 'on'
     from: 'off'
     id: lights turned on
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.shower
     to: 'on'
     from: 'off'
     id: showering
-  - platform: state
-    entity_id:
-    - binary_sensor.bathroom_aqara_motion
-    - binary_sensor.lumi_lumi_motion_ac02_motion_3
+    trigger: state
+  - entity_id:
     - binary_sensor.bathroom_occupancy
     - binary_sensor.anthony_s_bathroom_occupancy
     from: 'off'
     to: 'on'
     id: motion
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - input_boolean.bathroom_occupied
     to: 'on'
     for:
@@ -7046,8 +7003,9 @@
       minutes: 50
       seconds: 0
     id: 2hrs
-  condition: []
-  action:
+    trigger: state
+  conditions: []
+  actions:
   - choose:
     - conditions:
       - condition: state
@@ -7106,9 +7064,6 @@
           conditions:
           - condition: trigger
             id: 2hrs
-          - condition: state
-            entity_id: binary_sensor.bathroom_aqara_motion
-            state: 'off'
           - condition: state
             entity_id: binary_sensor.anthony_s_bathroom_occupancy
             state: 'off'
@@ -8181,7 +8136,7 @@
   trigger:
   - platform: state
     entity_id:
-    - binary_sensor.macbook_air_active
+    - binary_sensor.m4_pro_macbook_pro_active
     attribute: Screen Off
     from: 'false'
     to: 'true'
@@ -8250,27 +8205,26 @@
 - id: '1679721361656'
   alias: Showering Boolean
   description: ''
-  trigger:
-  - platform: template
-    value_template: "      {{ is_state('binary_sensor.shower', 'on') and \n      is_state('binary_sensor.bathroom_door',
+  triggers:
+  - value_template: "      {{ is_state('binary_sensor.shower', 'on') and \n      is_state('binary_sensor.bathroom_door',
       'off') and\n      is_state('input_boolean.bathroom_occupied', 'on') and\n      is_state('light.bathroom_lights',
       'on') and \n      is_state_attr('light.bathroom_lights', 'brightness', 255)
       and \n      (utcnow() > states.light.bathroom_lights.last_changed + timedelta(minutes=2))}}"
     id: shower start
-  - platform: device
-    type: turned_off
+    trigger: template
+  - type: turned_off
     device_id: 3c08610e07933d66eb5347257aae98aa
     entity_id: light.bathroom_lights
     domain: light
     id: lights off
-  - platform: homeassistant
-    event: start
+    trigger: device
+  - event: start
     id: startup
-  - platform: event
-    event_type: automation_reloaded
+    trigger: homeassistant
+  - event_type: automation_reloaded
     id: reloaded
-  - platform: state
-    entity_id:
+    trigger: event
+  - entity_id:
     - binary_sensor.bathroom_door
     from: 'off'
     to: 'on'
@@ -8279,8 +8233,8 @@
       minutes: 5
       seconds: 0
     id: dooropen
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.bathroom_door
     from: 'off'
     to: 'on'
@@ -8289,14 +8243,14 @@
       minutes: 10
       seconds: 0
     id: dooropen2
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - input_boolean.showering
     to: 'off'
     from: 'on'
     id: showeringoff
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.bathroom_door
     from: 'off'
     to: 'on'
@@ -8305,8 +8259,9 @@
       minutes: 15
       seconds: 0
     id: dooropen3
-  condition: []
-  action:
+    trigger: state
+  conditions: []
+  actions:
   - choose:
     - conditions:
       - condition: trigger
@@ -8316,10 +8271,10 @@
         attribute: brightness
         state: 255
       sequence:
-      - service: input_boolean.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: input_boolean.showering
+        action: input_boolean.turn_on
     - conditions:
       - condition: device
         type: is_off
@@ -8335,10 +8290,10 @@
         - condition: trigger
           id: lights off
       sequence:
-      - service: input_boolean.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id: input_boolean.showering
+        action: input_boolean.turn_off
     - conditions:
       - condition: or
         conditions:
@@ -8355,9 +8310,6 @@
           id:
           - dooropen3
       - condition: state
-        entity_id: binary_sensor.bathroom_aqara_motion
-        state: 'off'
-      - condition: state
         entity_id: binary_sensor.anthony_s_bathroom_occupancy
         state: 'off'
       - condition: state
@@ -8367,10 +8319,10 @@
         entity_id: binary_sensor.bathroom_door
         state: 'on'
       sequence:
-      - service: input_boolean.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id: input_boolean.showering
+        action: input_boolean.turn_off
   mode: single
 - id: '1680247258391'
   alias: Soundbar
@@ -9216,36 +9168,36 @@
 - id: '1692642019621'
   alias: Closet Lights
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - binary_sensor.motion_sensor_motion_detection
+  triggers:
+  - entity_id:
+    - binary_sensor.anthony_s_closet_occupancy
     id: motion
     to: 'on'
     from: 'off'
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.closet
     from: 'off'
     to: 'on'
     id: door open
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.closet
     from: 'on'
     to: 'off'
     id: door closed
-  - platform: state
-    entity_id:
-    - binary_sensor.motion_sensor_motion_detection
+    trigger: state
+  - entity_id:
+    - binary_sensor.anthony_s_closet_occupancy
     id: clear
     to: 'off'
     for:
       hours: 0
       minutes: 2
       seconds: 0
-  condition: []
-  action:
+    trigger: state
+  conditions: []
+  actions:
   - choose:
     - conditions:
       - condition: trigger
@@ -9259,11 +9211,11 @@
         entity_id: light.wled
         state: 'off'
       sequence:
-      - service: light.turn_on
-        data:
+      - data:
           effect: Closet Lights
         target:
           entity_id: light.wled
+        action: light.turn_on
     - conditions:
       - condition: trigger
         id:
@@ -9276,12 +9228,12 @@
         entity_id: light.closet_lights
         state: 'on'
       sequence:
-      - service: light.turn_off
-        metadata: {}
+      - metadata: {}
         data: {}
         target:
           entity_id:
           - light.closet_lights
+        action: light.turn_off
   mode: single
 - id: '1693288313787'
   alias: Desktop Spotify Volume
@@ -9446,9 +9398,8 @@
 - id: '1694314775941'
   alias: Reconnect Devices
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - light.wyze_bulb_1
     to: unavailable
     for:
@@ -9456,8 +9407,8 @@
       minutes: 0
       seconds: 10
     id: wyze1
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - light.wyze_bulb_2
     to: unavailable
     for:
@@ -9465,8 +9416,8 @@
       minutes: 0
       seconds: 10
     id: wyze2
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - light.wyze_bulb_3
     to: unavailable
     for:
@@ -9474,8 +9425,8 @@
       minutes: 0
       seconds: 10
     id: wyze3
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - light.wyze_bulb_4
     to: unavailable
     for:
@@ -9483,8 +9434,8 @@
       minutes: 0
       seconds: 10
     id: wyze4
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - light.wyze_bulb_5
     to: unavailable
     for:
@@ -9492,8 +9443,8 @@
       minutes: 0
       seconds: 10
     id: wyze5
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - light.wyze_bulb_6
     to: unavailable
     for:
@@ -9501,8 +9452,8 @@
       minutes: 0
       seconds: 10
     id: wyze6
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - light.wyze_bulb_7
     to: unavailable
     for:
@@ -9510,8 +9461,8 @@
       minutes: 0
       seconds: 10
     id: wyze7
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - light.shapes_007f
     to: unavailable
     for:
@@ -9519,8 +9470,8 @@
       minutes: 1
       seconds: 0
     id: desk
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - light.shapes_ee82
     to: unavailable
     for:
@@ -9528,8 +9479,8 @@
       minutes: 1
       seconds: 0
     id: corner
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - light.shapes_4948
     to: unavailable
     for:
@@ -9537,8 +9488,8 @@
       minutes: 1
       seconds: 0
     id: vertical
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - switch.usb_hub
     to: unavailable
     for:
@@ -9546,8 +9497,8 @@
       minutes: 0
       seconds: 10
     id: usb
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - light.light_switch
     - light.light_switch_corner
     to: unavailable
@@ -9557,8 +9508,9 @@
       seconds: 10
     id: lightswitch
     enabled: false
-  condition: []
-  action:
+    trigger: state
+  conditions: []
+  actions:
   - choose:
     - conditions:
       - condition: trigger
@@ -9568,9 +9520,9 @@
         entity_id: switch.light_switch_relay
         state: 'on'
       sequence:
-      - service: unifi.reconnect_client
-        data:
+      - data:
           device_id: a70e82946e63319e164a4da0e22d4914
+        action: unifi.reconnect_client
     - conditions:
       - condition: trigger
         id:
@@ -9579,9 +9531,9 @@
         entity_id: switch.light_switch_relay
         state: 'on'
       sequence:
-      - service: unifi.reconnect_client
-        data:
+      - data:
           device_id: a99f1a10374d0da5dfff1ec7cfcc5167
+        action: unifi.reconnect_client
     - conditions:
       - condition: trigger
         id:
@@ -9590,73 +9542,83 @@
         entity_id: switch.light_switch_relay
         state: 'on'
       sequence:
-      - service: unifi.reconnect_client
-        data:
+      - data:
           device_id: 576a724b67bd453192cd5fe4a07f4c5c
+        action: unifi.reconnect_client
     - conditions:
       - condition: trigger
         id:
         - wyze4
       sequence:
-      - service: unifi.reconnect_client
-        data:
+      - data:
           device_id: 49d87e72a8f0f7bcb69a206582ea6193
+        action: unifi.reconnect_client
     - conditions:
       - condition: trigger
         id:
         - wyze5
       sequence:
-      - service: unifi.reconnect_client
-        data:
+      - data:
           device_id: b3114ce194084d0c57723164f3843d6a
+        action: unifi.reconnect_client
     - conditions:
       - condition: trigger
         id:
         - wyze6
       sequence:
-      - service: unifi.reconnect_client
-        data:
+      - data:
           device_id: 997bfba8f6c661648c72ce69eb4c0086
+        action: unifi.reconnect_client
     - conditions:
       - condition: trigger
         id:
         - wyze7
       sequence:
-      - service: unifi.reconnect_client
-        data:
+      - data:
           device_id: 4375fe2a4cb7d679c724b4ea785c6a4b
+        action: unifi.reconnect_client
     - conditions:
       - condition: trigger
         id:
         - desk
       sequence:
-      - service: unifi.reconnect_client
-        data:
+      - data:
           device_id: a527267e8064d2c3323e4e9009482636
+        action: unifi.reconnect_client
     - conditions:
       - condition: trigger
         id:
         - corner
       sequence:
-      - service: unifi.reconnect_client
-        data:
+      - data:
           device_id: ba96691142b71d4ece3ecb55aa1d1f75
+        action: unifi.reconnect_client
     - conditions:
       - condition: trigger
         id:
         - vertical
       sequence:
-      - service: unifi.reconnect_client
-        data:
+      - wait_for_trigger:
+        - trigger: state
+          entity_id:
+          - light.shapes_ee82
+          from: unavailable
+      - data:
           device_id: 6ddb18fe3172bc14e92418d8fa68c8e3
+        action: unifi.reconnect_client
+      - delay:
+          hours: 0
+          minutes: 1
+          seconds: 0
+          milliseconds: 0
     - conditions:
       - condition: trigger
         id:
         - usb
       sequence:
-      - service: unifi.reconnect_client
-        data:
+      - data:
           device_id: 9a32bb26971f7740dfdb47ad78f6128b
+        action: unifi.reconnect_client
     - conditions:
       - condition: trigger
         id:
@@ -9664,9 +9626,9 @@
       sequence:
       - repeat:
           sequence:
-          - service: unifi.reconnect_client
-            data:
+          - data:
               device_id: d17b85b4018141749b9c7775aacb2336
+            action: unifi.reconnect_client
           - wait_for_trigger: []
             timeout:
               hours: 0
@@ -9689,7 +9651,7 @@
     input:
       exclude:
         entity_id:
-        - sensor.macbook_air_internal_battery_level
+        - sensor.m4_pro_macbook_pro_internal_battery_level
         - sensor.anthony_maioranis_ipad_battery_level
         - sensor.ipad_air_2_black_battery_level
         - sensor.anthonys_ipad_battery_level
@@ -10116,7 +10078,7 @@
       seconds: 1
   - platform: state
     entity_id:
-    - binary_sensor.macbook_air_active
+    - binary_sensor.m4_pro_macbook_pro_active
     attribute: Screen Off
     from: 'false'
     to: 'true'
@@ -10985,15 +10947,22 @@
 - id: '1720592302328'
   alias: VR Cooling
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - sensor.steam_76561198069805211
-  condition:
+    trigger: state
+    id: state
+  - trigger: state
+    entity_id:
+    - timer.ac
+    attribute: remaining
+    to: 00:01:00
+    id: extend
+  conditions:
   - condition: state
     entity_id: switch.desktop
     state: 'on'
-  action:
+  actions:
   - choose:
     - conditions:
       - condition: or
@@ -11021,7 +10990,7 @@
         - condition: state
           entity_id: sensor.steam_76561198069805211
           attribute: game
-          state: EA SPORTS™ WRC
+          state: EA SPORTS™ WRC 24
         - condition: state
           entity_id: sensor.steam_76561198069805211
           attribute: game
@@ -11038,6 +11007,9 @@
           entity_id: sensor.steam_76561198069805211
           attribute: game
           state: Gravel
+      - condition: trigger
+        id:
+        - state
       sequence:
       - delay:
           hours: 0
@@ -11069,7 +11041,7 @@
         - condition: state
           entity_id: sensor.steam_76561198069805211
           attribute: game
-          state: EA SPORTS™ WRC
+          state: EA SPORTS™ WRC 24
         - condition: state
           entity_id: sensor.steam_76561198069805211
           attribute: game
@@ -11086,22 +11058,72 @@
           entity_id: sensor.steam_76561198069805211
           attribute: game
           state: Gravel
-      - service: input_boolean.turn_on
-        target:
+      - target:
           entity_id: input_boolean.ac_boost
         data: {}
+        action: input_boolean.turn_on
       - delay:
           hours: 0
           minutes: 0
           seconds: 5
           milliseconds: 0
-      - service: timer.start
-        target:
+      - target:
           entity_id: timer.ac
         data:
           duration: 01:00:00
-    - conditions: []
-      sequence: []
+        action: timer.start
+    - conditions:
+      - condition: trigger
+        id:
+        - extend
+      sequence:
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: sensor.steam_76561198069805211
+          attribute: game
+          state: Beat Saber
+        - condition: state
+          entity_id: sensor.steam_76561198069805211
+          attribute: game
+          state: BeamNG.drive
+        - condition: state
+          entity_id: sensor.steam_76561198069805211
+          attribute: game
+          state: Forza Horizon 5
+        - condition: state
+          entity_id: sensor.steam_76561198069805211
+          attribute: game
+          state: F1® 24
+        - condition: state
+          entity_id: sensor.steam_76561198069805211
+          attribute: game
+          state: DiRT Rally 2.0
+        - condition: state
+          entity_id: sensor.steam_76561198069805211
+          attribute: game
+          state: EA SPORTS™ WRC 24
+        - condition: state
+          entity_id: sensor.steam_76561198069805211
+          attribute: game
+          state: Assetto Corsa
+        - condition: state
+          entity_id: sensor.steam_76561198069805211
+          attribute: game
+          state: Assetto Corsa Competizione
+        - condition: state
+          entity_id: sensor.steam_76561198069805211
+          attribute: game
+          state: GRID Legends
+        - condition: state
+          entity_id: sensor.steam_76561198069805211
+          attribute: game
+          state: Gravel
+      - target:
+          entity_id: timer.ac
+        data:
+          duration: 01:00:00
+        action: timer.start
   mode: single
 - id: '1723251368042'
   alias: Eight Sleep
@@ -11357,35 +11379,35 @@
 - id: '1729461708922'
   alias: Blinds Control
   description: ''
-  trigger:
-  - platform: numeric_state
-    entity_id:
+  triggers:
+  - entity_id:
     - weather.dark_sky
     attribute: temperature
     above: 74
     id: hot
-  - platform: numeric_state
-    entity_id:
+    trigger: numeric_state
+  - entity_id:
     - weather.dark_sky
     attribute: temperature
     below: 75
     id: not hot
-  condition: []
-  action:
+    trigger: numeric_state
+  - trigger: state
+    entity_id:
+    - binary_sensor.anthony_home
+  - trigger: sun
+    event: sunrise
+    offset: 0
+  - trigger: state
+    entity_id:
+    - switch.bedroomtoggle
+  - trigger: state
+    entity_id:
+    - light.wled
+  conditions: []
+  actions:
   - choose:
     - conditions:
-      - condition: trigger
-        id:
-        - hot
-      sequence:
-      - action: switch.turn_off
-        target:
-          entity_id: switch.vertical_toggle_control_bedroom_shade
-        data: {}
-    - conditions:
-      - condition: trigger
-        id:
-        - not hot
       - condition: state
         entity_id: binary_sensor.anthony_home
         state: 'on'
@@ -11395,9 +11417,93 @@
       - condition: numeric_state
         entity_id: sensor.pirateweather_daytime_high_temperature_0d
         below: 80
+      - condition: state
+        entity_id: switch.bedroomtoggle
+        state: 'on'
+      - condition: numeric_state
+        entity_id: weather.dark_sky
+        attribute: temperature
+        below: 75
+      - condition: state
+        entity_id: light.wled
+        state: 'on'
       sequence:
       - action: switch.turn_on
         target:
           entity_id: switch.vertical_toggle_control_bedroom_shade
         data: {}
+    default:
+    - action: switch.turn_off
+      target:
+        entity_id: switch.vertical_toggle_control_bedroom_shade
+      data: {}
   mode: single
+- id: '1731053872497'
+  alias: New automation
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - lock.hk_lock
+  condition: []
+  action:
+  - action: lock.unlock
+    target:
+      entity_id: lock.accord_doorlock
+    data: {}
+  mode: single
+- id: '1731218859410'
+  alias: G4 Fingerprint
+  description: ''
+  triggers:
+  - trigger: webhook
+    allowed_methods:
+    - POST
+    - PUT
+    local_only: true
+    webhook_id: -iInJXGpjXApDPTD_T6ogBq8U
+  conditions: []
+  actions:
+  - action: lock.unlock
+    target:
+      entity_id: lock.front_door
+    data: {}
+  mode: single
+- id: '1732059873003'
+  alias: Sync GoXLR Music Mute with Sample
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - media_player.tc_helicon_goxlr_music
+  conditions:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: media_player.tc_helicon_goxlr_music
+      state: unavailable
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: media_player.tc_helicon_goxlr_music
+        attribute: is_volume_muted
+        state: true
+      sequence:
+      - action: media_player.volume_set
+        target:
+          entity_id: media_player.tc_helicon_goxlr_sample
+        data:
+          volume_level: 0
+    - conditions:
+      - condition: state
+        entity_id: media_player.tc_helicon_goxlr_music
+        attribute: is_volume_muted
+        state: false
+      sequence:
+      - action: media_player.volume_set
+        target:
+          entity_id: media_player.tc_helicon_goxlr_sample
+        data:
+          volume_level: 1
+  mode: restart
