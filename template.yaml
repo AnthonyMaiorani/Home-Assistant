@@ -386,3 +386,18 @@
         false
         {% endif %}
       auto_off: 5
+- trigger:
+  - platform: state
+    entity_id: input_boolean.showering
+    from: 'on'
+    to: 'off'
+  binary_sensor:
+    - name: "Recently Showered"
+      unique_id: recently_showered
+      state: >           
+        {% if trigger.platform == 'state' %}
+        true
+        {% else %}
+        false
+        {% endif %}
+      auto_off: 10

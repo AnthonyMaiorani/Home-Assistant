@@ -11404,6 +11404,9 @@
   - trigger: state
     entity_id:
     - light.wled
+  - trigger: state
+    entity_id:
+    - binary_sensor.recently_showered
   conditions: []
   actions:
   - choose:
@@ -11427,6 +11430,11 @@
       - condition: state
         entity_id: light.wled
         state: 'on'
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: binary_sensor.recently_showered
+          state: 'on'
       sequence:
       - action: switch.turn_on
         target:
