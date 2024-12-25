@@ -4,10 +4,10 @@
 # device must be set before mqtt output lines.
 # https://github.com/merbanan/rtl_433/blob/master/conf/rtl_433.example.conf
 
-output mqtt://192.168.1.11:1883,user=admin,pass=admin,retain=true
+output mqtt://192.168.1.11:1883,user=admin,pass=admin,retain=false,events=rtl_433/events[/model][/id]
 
-hop_interval  15
-frequency     915.00M
+#hop_interval  15
+#frequency     915.00M
 frequency     433.92M
 
 convert si

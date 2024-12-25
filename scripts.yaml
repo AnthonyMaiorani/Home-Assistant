@@ -204,19 +204,75 @@ color_loop:
           state: 'on'
         - condition: time
           after: '14:00:00'
+        - condition: numeric_state
+          entity_id: weather.dark_sky
+          attribute: cloud_coverage
+          below: 85
         then:
-        - action: cover.set_cover_position
-          target:
-            entity_id:
-            - cover.bedroom_blinds
-          data:
-            position: '{{ states("sensor.vertical_cover_position_bedroom_shade") }}'
+        - condition: not
+          conditions:
+          - condition: template
+            value_template: '{{ is_state_attr(''cover.bedroom_blinds'', "current_position",
+              states("vertical_cover_position_bedroom_shade"))  }}'
+        - repeat:
+            sequence:
+            - action: cover.set_cover_position
+              target:
+                entity_id:
+                - cover.bedroom_blinds
+              data:
+                position: '{{ states("sensor.vertical_cover_position_bedroom_shade")
+                  }}'
+            - wait_for_trigger:
+              - trigger: state
+                entity_id:
+                - cover.bedroom_blinds
+                attribute: current_position
+                for:
+                  hours: 0
+                  minutes: 0
+                  seconds: 3
+              timeout:
+                hours: 0
+                minutes: 1
+                seconds: 0
+                milliseconds: 0
+            until:
+            - condition: template
+              value_template: '{{ is_state_attr(''cover.bedroom_blinds'', "current_position",
+                states("vertical_cover_position_bedroom_shade"))  }}'
         else:
-        - action: cover.open_cover
-          target:
-            entity_id:
-            - cover.bedroom_blinds
-          data: {}
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: cover.bedroom_blinds
+            state: open
+        - repeat:
+            sequence:
+            - action: cover.open_cover
+              target:
+                entity_id:
+                - cover.bedroom_blinds
+              data: {}
+            - wait_for_trigger:
+              - trigger: state
+                entity_id:
+                - cover.bedroom_blinds
+                attribute: current_position
+                for:
+                  hours: 0
+                  minutes: 0
+                  seconds: 3
+              timeout:
+                hours: 0
+                minutes: 1
+                seconds: 0
+                milliseconds: 0
+            until:
+            - condition: state
+              entity_id: cover.bedroom_blinds
+              attribute: current_position
+              state: 100
     - if:
       - condition: and
         conditions:
@@ -456,12 +512,6 @@ call:
     - repeat:
         count: 250
         sequence:
-        - data: {}
-          target:
-            entity_id:
-            - light.wled
-            - light.closet_lights
-          action: light.turn_off
         - data:
             brightness: 10
           target:
@@ -505,16 +555,22 @@ call:
             - light.shapes_ee82
             - light.shapes_007f
           action: light.turn_on
+    - action: automation.trigger
+      target:
+        entity_id: automation.close_shade
+      data:
+        skip_condition: true
     - data: {}
       target:
-        entity_id: cover.bedroom_blinds
-      action: cover.close_cover
+        entity_id:
+        - light.wled
+        - light.closet_lights
+      action: light.turn_off
   mode: restart
   icon: mdi:phone
 night:
   sequence:
-  - service: script.turn_off
-    data: {}
+  - data: {}
     target:
       entity_id:
       - script.morning
@@ -522,9 +578,9 @@ night:
       - script.color_loop
       - script.fan_off
       - script.play_music
+    action: script.turn_off
   - parallel:
-    - service: light.turn_off
-      data: {}
+    - data: {}
       target:
         entity_id:
         - light.shapes_007f
@@ -536,29 +592,31 @@ night:
         - light.bed
         - light.rope
         - light.closet_lights
-    - service: cover.close_cover
-      data: {}
+      action: light.turn_off
+    - action: automation.trigger
       target:
-        entity_id: cover.bedroom_blinds
-    - service: switch.turn_off
-      data: {}
+        entity_id: automation.close_shade
+      data:
+        skip_condition: true
+    - data: {}
       target:
         entity_id:
         - switch.desktop
+      action: switch.turn_off
     - if:
       - condition: state
         state: 'on'
         entity_id: binary_sensor.bed_occupancy
       then:
-      - service: switch.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id: switch.usb_hub
+        action: switch.turn_off
       alias: turn off mouse dock
-    - service: input_boolean.turn_off
-      data: {}
+    - data: {}
       target:
         entity_id: input_boolean.bedmotion
+      action: input_boolean.turn_off
     - alias: turn off home lights if alone and night
       if:
       - condition: time
@@ -572,19 +630,19 @@ night:
         entity_id: binary_sensor.bed_occupancy
         state: 'on'
       then:
-      - service: light.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id:
           - light.kitchen_lights
           - light.living_room_lights
           - light.living_room_fan
-      - service: switch.turn_off
-        data: {}
+        action: light.turn_off
+      - data: {}
         target:
           entity_id:
           - switch.living_room_fan
           - switch.laundry_room_light
+        action: switch.turn_off
       - if:
         - condition: not
           conditions:
@@ -598,16 +656,15 @@ night:
               state: closed
           alias: garage door open
         then:
-        - service: cover.close_cover
-          metadata: {}
+        - metadata: {}
           data: {}
           target:
             entity_id: cover.garage_door
+          action: cover.close_cover
     - repeat:
         count: '120'
         sequence:
-        - service: light.turn_off
-          data: {}
+        - data: {}
           target:
             entity_id:
             - light.shapes_ee82
@@ -619,6 +676,7 @@ night:
             - light.bed
             - light.light_switch
             - light.light_switch_corner
+          action: light.turn_off
         - delay:
             hours: 0
             minutes: 0
@@ -635,10 +693,10 @@ night:
           after: '23:00:00'
           before: 06:00:00
       then:
-      - service: light.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id: light.hallway_lights
+        action: light.turn_off
       alias: hallway light
     - if:
       - condition: or
@@ -671,32 +729,32 @@ night:
             entity_id: media_player.spotify_anthony221121
             state: playing
         then:
-        - service: script.turn_on
-          data: {}
+        - data: {}
           target:
             entity_id: script.lofi
+          action: script.turn_on
         else:
-        - service: media_player.volume_set
-          data:
+        - data:
             volume_level: 0.07
           target:
             entity_id:
             - media_player.spotify_anthony221121
+          action: media_player.volume_set
         - repeat:
             count: '3'
             sequence:
-            - service: media_player.volume_set
-              data:
+            - data:
                 volume_level: 0.07
               target:
                 entity_id:
                 - media_player.owntone_output_anthony_s_desk
-            - service: media_player.volume_set
-              data:
+              action: media_player.volume_set
+            - data:
                 volume_level: 0.14
               target:
                 entity_id:
                 - media_player.owntone_output_anthony_s_nightstand
+              action: media_player.volume_set
             - delay:
                 hours: 0
                 minutes: 0
@@ -721,10 +779,10 @@ night:
         before: sunrise
         after: sunset
       then:
-      - service: switch.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: switch.acfanhigh
+        action: switch.turn_on
     - if:
       - condition: state
         entity_id: switch.acfanhigh
@@ -735,27 +793,27 @@ night:
           minutes: 0
           seconds: 5
           milliseconds: 0
-      - service: media_player.volume_set
-        data:
+      - data:
           volume_level: 0.12
         target:
           entity_id:
           - media_player.spotify_anthony221121
+        action: media_player.volume_set
       - repeat:
           count: '3'
           sequence:
-          - service: media_player.volume_set
-            data:
+          - data:
               volume_level: 0.12
             target:
               entity_id:
               - media_player.owntone_output_anthony_s_desk
-          - service: media_player.volume_set
-            data:
+            action: media_player.volume_set
+          - data:
               volume_level: 0.24
             target:
               entity_id:
               - media_player.owntone_output_anthony_s_nightstand
+            action: media_player.volume_set
           - delay:
               hours: 0
               minutes: 0
@@ -770,40 +828,40 @@ night:
       - condition: state
         entity_id: switch.acfanhigh
         state: 'on'
-      - service: media_player.volume_set
-        data:
+      - data:
           volume_level: 0.12
         target:
           entity_id:
           - media_player.spotify_anthony221121
+        action: media_player.volume_set
       - repeat:
           count: '3'
           sequence:
-          - service: media_player.volume_set
-            data:
+          - data:
               volume_level: 0.12
             target:
               entity_id:
               - media_player.owntone_output_anthony_s_desk
-          - service: media_player.volume_set
-            data:
+            action: media_player.volume_set
+          - data:
               volume_level: 0.24
             target:
               entity_id:
               - media_player.owntone_output_anthony_s_nightstand
+            action: media_player.volume_set
           - delay:
               hours: 0
               minutes: 0
               seconds: 1
               milliseconds: 0
       alias: increase volume if ac fan high
-    - service: automation.turn_off
-      data:
+    - data:
         stop_actions: true
       target:
         entity_id:
         - automation.morning_lights_on
         - automation.bathroom_music
+      action: automation.turn_off
     - if:
       - condition: template
         value_template: '{{ true }}'
@@ -813,22 +871,22 @@ night:
           minutes: 0
           seconds: 2
           milliseconds: 0
-      - service: automation.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id:
           - automation.morning_lights_on
           - automation.bathroom_music
-    - service: homeassistant.update_entity
-      data: {}
+        action: automation.turn_on
+    - data: {}
       target:
         entity_id: sensor.anthony_s_echo_show_next_alarm
-    - service: automation.turn_on
-      data: {}
+      action: homeassistant.update_entity
+    - data: {}
       target:
         entity_id:
         - automation.nanoleaf_scene_changer_and_auto_brightness
         - automation.bed_occupancy
+      action: automation.turn_on
   alias: Night
   mode: restart
   icon: mdi:weather-night
@@ -976,19 +1034,75 @@ morning:
           state: 'on'
         - condition: time
           after: '14:00:00'
+        - condition: numeric_state
+          entity_id: weather.dark_sky
+          attribute: cloud_coverage
+          below: 85
         then:
-        - action: cover.set_cover_position
-          target:
-            entity_id:
-            - cover.bedroom_blinds
-          data:
-            position: '{{ states("sensor.vertical_cover_position_bedroom_shade") }}'
+        - condition: not
+          conditions:
+          - condition: template
+            value_template: '{{ is_state_attr(''cover.bedroom_blinds'', "current_position",
+              states("vertical_cover_position_bedroom_shade"))  }}'
+        - repeat:
+            sequence:
+            - action: cover.set_cover_position
+              target:
+                entity_id:
+                - cover.bedroom_blinds
+              data:
+                position: '{{ states("sensor.vertical_cover_position_bedroom_shade")
+                  }}'
+            - wait_for_trigger:
+              - trigger: state
+                entity_id:
+                - cover.bedroom_blinds
+                attribute: current_position
+                for:
+                  hours: 0
+                  minutes: 0
+                  seconds: 3
+              timeout:
+                hours: 0
+                minutes: 1
+                seconds: 0
+                milliseconds: 0
+            until:
+            - condition: template
+              value_template: '{{ is_state_attr(''cover.bedroom_blinds'', "current_position",
+                states("vertical_cover_position_bedroom_shade"))  }}'
         else:
-        - action: cover.open_cover
-          target:
-            entity_id:
-            - cover.bedroom_blinds
-          data: {}
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: cover.bedroom_blinds
+            state: open
+        - repeat:
+            sequence:
+            - action: cover.open_cover
+              target:
+                entity_id:
+                - cover.bedroom_blinds
+              data: {}
+            - wait_for_trigger:
+              - trigger: state
+                entity_id:
+                - cover.bedroom_blinds
+                attribute: current_position
+                for:
+                  hours: 0
+                  minutes: 0
+                  seconds: 3
+              timeout:
+                hours: 0
+                minutes: 1
+                seconds: 0
+                milliseconds: 0
+            until:
+            - condition: state
+              entity_id: cover.bedroom_blinds
+              attribute: current_position
+              state: 100
     - data: {}
       target:
         entity_id: switch.acfanhigh
@@ -1456,7 +1570,7 @@ lofi:
   - continue_on_error: true
     data:
       media_content_type: playlist
-      media_content_id: https://open.spotify.com/playlist/3j3uK2xjqyD1nvAaBX5YRa
+      media_content_id: https://open.spotify.com/playlist/7qh7v7Pw1m91rnTzA74oNJ?si=afb638ac5f334052
       enqueue: play
     target:
       entity_id: media_player.spotify_anthony221121
@@ -1751,7 +1865,7 @@ lofi:
         - condition: state
           entity_id: media_player.spotify_anthony221121
           attribute: media_playlist
-          state: lofi
+          state: piano
       - condition: not
         conditions:
         - condition: state
