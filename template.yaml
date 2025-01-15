@@ -148,7 +148,7 @@
     state: >
       {% if not (states('input_select.anthony')|lower in ['just arrived', 'home'] or not states('input_select.taylor')|lower in ['just arrived', 'home']) 
       or not is_state('switch.ac', "on") %} unknown
-      {% elif is_state("input_boolean.ac_boost", "on") -%} 61 
+      {% elif is_state("switch.ac_boost", "on") -%} 61 
       {% elif is_state("binary_sensor.bedroom_door", "on") and is_state("person.riana", "home") -%} 75
       {% elif is_state("binary_sensor.bedroom_chair", "on") and not is_state("binary_sensor.bed_occupancy", "on") -%} 73
       {% elif is_state("light.fan_lights", "on") -%} 71
@@ -388,6 +388,23 @@
       auto_off: 5
 - trigger:
   - platform: state
+    entity_id: sensor.lolas_feeder_today_s_feeding_quantity
+    to: "1.0"
+  - platform: state
+    entity_id: sensor.lolas_feeder_today_s_feeding_quantity
+    to: "2.0"
+  binary_sensor:
+    - name: "Feeder Recently Dispensed"
+      unique_id: feeder_recently_dispensed
+      state: >           
+        {% if trigger.platform == 'state' %}
+        true
+        {% else %}
+        false
+        {% endif %}
+      auto_off: 15
+- trigger:
+  - platform: state
     entity_id: input_boolean.showering
     from: 'on'
     to: 'off'
@@ -401,3 +418,14 @@
         false
         {% endif %}
       auto_off: 10
+- sensor:
+    - name: "Garage Door Open Duration"
+      unique_id: "garage_door_open_duration"
+      unit_of_measurement: "minutes"
+      state: >
+        {% if is_state('binary_sensor.garage_person_detected', 'on') %}
+          0
+        {% else %}
+          {{ (as_timestamp(now()) - as_timestamp(states.cover.garage_door.last_changed)) / 60 
+              if is_state('cover.garage_door', 'open') else 0 }}
+        {% endif %}

@@ -202,12 +202,6 @@ color_loop:
         - condition: state
           entity_id: switch.vertical_toggle_control_bedroom_shade
           state: 'on'
-        - condition: time
-          after: '14:00:00'
-        - condition: numeric_state
-          entity_id: weather.dark_sky
-          attribute: cloud_coverage
-          below: 85
         then:
         - condition: not
           conditions:
@@ -773,7 +767,7 @@ night:
         entity_id: switch.ac
         state: 'on'
       - condition: state
-        entity_id: input_boolean.ac_boost
+        entity_id: switch.ac_boost
         state: 'off'
       - condition: sun
         before: sunrise
@@ -1032,12 +1026,6 @@ morning:
         - condition: state
           entity_id: switch.vertical_toggle_control_bedroom_shade
           state: 'on'
-        - condition: time
-          after: '14:00:00'
-        - condition: numeric_state
-          entity_id: weather.dark_sky
-          attribute: cloud_coverage
-          below: 85
         then:
         - condition: not
           conditions:
@@ -1227,10 +1215,11 @@ start_car:
       entity_id: person.anthony
       state: home
     then:
-    - service: input_boolean.turn_on
-      data: {}
+    - data: {}
       target:
-        entity_id: input_boolean.ac_boost
+        entity_id: switch.ac_boost
+      action: input_boolean.turn_on
+    enabled: false
   - if:
     - condition: not
       conditions:
@@ -1249,28 +1238,29 @@ start_car:
         entity_id: input_select.anthony
         state: Just Arrived
     then:
-    - service: cover.open_cover
-      data: {}
+    - data: {}
       target:
         entity_id: cover.garage_door
+      action: cover.open_cover
     - wait_for_trigger:
-      - platform: state
-        entity_id:
+      - entity_id:
         - cover.garage_door
         to: opening
+        trigger: state
       continue_on_timeout: false
       timeout: 00:01:00
-  - service: switch.turn_on
-    data: {}
+  - data: {}
     target:
-      entity_id: switch.accord_remotestart
+      entity_id:
+      - switch.accord_remotestart_switch
+    action: switch.turn_on
   - delay:
       hours: 0
       minutes: 0
       seconds: 5
       milliseconds: 0
-  - service: drone_mobile.refresh_device_status_accord
-    data: {}
+  - data: {}
+    action: drone_mobile.refresh_device_status_accord
   - delay:
       hours: 0
       minutes: 0
@@ -1283,22 +1273,22 @@ start_car:
         entity_id: sensor.accord_ignitionstatus
         state: 'on'
     then:
-    - service: switch.turn_on
-      data: {}
+    - data: {}
       target:
         entity_id: switch.accord_remotestart
+      action: switch.turn_on
   - delay:
       hours: 0
       minutes: 0
       seconds: 5
       milliseconds: 0
-  - service: drone_mobile.refresh_device_status_accord
-    data: {}
+  - data: {}
+    action: drone_mobile.refresh_device_status_accord
   - wait_for_trigger:
-    - platform: state
-      entity_id:
+    - entity_id:
       - sensor.accord_ignitionstatus
       to: 'On'
+      trigger: state
     timeout:
       hours: 0
       minutes: 0
@@ -1311,9 +1301,9 @@ start_car:
         entity_id: sensor.accord_ignitionstatus
         state: 'On'
     then:
-    - service: notify.mobile_app_iphone
-      data:
+    - data:
         message: Remote start failed
+      action: notify.mobile_app_iphone
   mode: single
   icon: mdi:car
 lofi:
@@ -1355,7 +1345,7 @@ lofi:
       state: unavailable
     then:
     - data:
-        addon: 4b3d1287_homepod_connect_dev
+        addon: 63120367_homepod_connect
       action: hassio.addon_restart
     - delay:
         hours: 0
@@ -1465,7 +1455,7 @@ lofi:
         state: Home Assistant
     then:
     - data:
-        addon: 4b3d1287_homepod_connect_dev
+        addon: 63120367_homepod_connect
       action: hassio.addon_restart
     - delay:
         hours: 0
@@ -1882,7 +1872,7 @@ lofi:
         enabled: true
     then:
     - data:
-        addon: 4b3d1287_homepod_connect_dev
+        addon: 63120367_homepod_connect
       action: hassio.addon_restart
     - delay:
         hours: 0
@@ -1952,10 +1942,10 @@ play_music:
       state: 'on'
     then:
     - wait_for_trigger:
-      - platform: state
-        entity_id:
+      - entity_id:
         - script.stop_music
         to: 'off'
+        trigger: state
       timeout:
         hours: 0
         minutes: 0
@@ -2006,11 +1996,11 @@ play_music:
           entity_id: media_player.spotify_anthony221121
         action: homeassistant.update_entity
       - wait_for_trigger:
-        - platform: state
-          entity_id:
+        - entity_id:
           - media_player.spotify_anthony221121
           attribute: source
           to: Home Assistant
+          trigger: state
         timeout:
           hours: 0
           minutes: 0
@@ -2026,7 +2016,7 @@ play_music:
         state: Home Assistant
     then:
     - data:
-        addon: 4b3d1287_homepod_connect_dev
+        addon: 63120367_homepod_connect
       action: hassio.addon_restart
     - delay:
         hours: 0
@@ -2044,10 +2034,10 @@ play_music:
         - media_player.owntone_output_anthony_s_nightstand
       action: homeassistant.reload_config_entry
     - wait_for_trigger:
-      - platform: state
-        entity_id:
+      - entity_id:
         - media_player.owntone_output_bathroom
         from: unavailable
+        trigger: state
       timeout:
         hours: 0
         minutes: 0
@@ -2105,11 +2095,11 @@ play_music:
           entity_id: media_player.spotify_anthony221121
         action: homeassistant.update_entity
       - wait_for_trigger:
-        - platform: state
-          entity_id:
+        - entity_id:
           - media_player.spotify_anthony221121
           attribute: source
           to: Home Assistant
+          trigger: state
         timeout:
           hours: 0
           minutes: 0
@@ -2351,10 +2341,10 @@ play_music:
         state: 'on'
       then:
       - wait_for_trigger:
-        - platform: state
-          entity_id:
+        - entity_id:
           - media_player.owntone_output_anthony_s_nightstand
           to: 'on'
+          trigger: state
         timeout:
           hours: 0
           minutes: 0
@@ -2442,7 +2432,7 @@ play_music:
           state: 'on'
     then:
     - data:
-        addon: 4b3d1287_homepod_connect_dev
+        addon: 63120367_homepod_connect
       action: hassio.addon_restart
     - delay:
         hours: 0
@@ -2461,10 +2451,10 @@ play_music:
         - media_player.owntone_output_soundbar
       action: homeassistant.reload_config_entry
     - wait_for_trigger:
-      - platform: state
-        entity_id:
+      - entity_id:
         - media_player.owntone_output_bathroom
         from: unavailable
+        trigger: state
       timeout:
         hours: 0
         minutes: 0
@@ -2494,22 +2484,21 @@ play_music:
 stop_music:
   alias: Stop Music
   sequence:
-  - service: script.turn_off
-    data: {}
+  - data: {}
     target:
       entity_id:
       - script.lofi
       - script.play_music
-  - service: hassio.addon_restart
-    data:
-      addon: 4b3d1287_homepod_connect_dev
+    action: script.turn_off
+  - data:
+      addon: 63120367_homepod_connect
+    action: hassio.addon_restart
   - delay:
       hours: 0
       minutes: 0
       seconds: 15
       milliseconds: 0
-  - service: homeassistant.reload_config_entry
-    data: {}
+  - data: {}
     target:
       entity_id:
       - media_player.owntone_server
@@ -2520,11 +2509,12 @@ stop_music:
       - media_player.owntone_output_anthony_s_nightstand
       - media_player.owntone_output_soundbar
       - media_player.kitchen_speakers
+    action: homeassistant.reload_config_entry
   - wait_for_trigger:
-    - platform: state
-      entity_id:
+    - entity_id:
       - media_player.owntone_output_bathroom
       from: unavailable
+      trigger: state
     timeout:
       hours: 0
       minutes: 0
@@ -2533,8 +2523,7 @@ stop_music:
   - repeat:
       count: 2
       sequence:
-      - service: media_player.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id:
           - media_player.owntone_server
@@ -2543,10 +2532,11 @@ stop_music:
           - media_player.owntone_output_kitchen_left
           - media_player.owntone_output_kitchen_right
           - media_player.owntone_output_anthony_s_nightstand
-  - service: homeassistant.reload_config_entry
-    data: {}
+        action: media_player.turn_off
+  - data: {}
     target:
       entity_id: media_player.spotify_anthony221121
+    action: homeassistant.reload_config_entry
   mode: single
   icon: mdi:stop
 power_saving:

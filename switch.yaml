@@ -61,6 +61,15 @@
   scan_interval: 5
   method: patch
   unique_id: cube
+- platform: rest
+  resource: http://192.168.1.177/json/state
+  name: Block
+  body_on: '{"on":true}'
+  body_off: '{"on":false}'
+  is_on_template: "{{ value_json.on }}"
+  scan_interval: 5
+  method: patch
+  unique_id: block
 - platform: template
   switches:
     # case_rgb:
@@ -101,15 +110,15 @@
     ac_boost:
       unique_id: ac_boost
       friendly_name: "AC Boost"
-      value_template: "{{ is_state('input_boolean.ac_boost', 'on') }}"
+      #value_template: "{{ is_state('switch.ac_boost', 'on') }}"
       turn_on:
-        - service: input_boolean.turn_on
+        - service: switch.turn_on
           target:
-              entity_id: input_boolean.ac_boost
+              entity_id: switch.ac_boost
       turn_off:
-        - service: input_boolean.turn_off
+        - service: switch.turn_off
           target:
-              entity_id: input_boolean.ac_boost
+              entity_id: switch.ac_boost
     bedroomtoggle:
       unique_id: bedroom_toggle
       value_template: "{{ is_state('light.bedroom_lights', 'on') 
@@ -165,9 +174,9 @@
       - service: climate.turn_off
         target:
           entity_id: climate.bedroom_ac
-      - service: input_boolean.turn_off
+      - service: switch.turn_off
         target:
-          entity_id: input_boolean.ac_boost
+          entity_id: switch.ac_boost
       - service: timer.cancel
         target:
           entity_id: timer.ac
@@ -182,7 +191,7 @@
     acfanhigh:
       unique_id: acfanhigh
       friendly_name: AC Fan High
-      value_template: "{{ states('climate.bedroom_ac') in ['cool', 'fan_only'] and ((is_state_attr('climate.bedroom_ac', 'fan_mode', 'high') or is_state('input_boolean.ac_boost', 'on'))) }}"
+      value_template: "{{ states('climate.bedroom_ac') in ['cool', 'fan_only'] and ((is_state_attr('climate.bedroom_ac', 'fan_mode', 'high') or is_state('switch.ac_boost', 'on'))) }}"
       turn_on:
         - service: switch.turn_on
           target:
@@ -221,7 +230,7 @@
             entity_id: climate.bedroom_ac
     guesttv:
       unique_id: guesttv
-      friendly_name: Guest TV
+      friendly_name: Samsung TV
       value_template: "{{ is_state('switch.samsung_tv', 'on') }} "
       turn_on:
         - service: switch.turn_on

@@ -166,7 +166,7 @@
   description: ''
   triggers:
   - entity_id:
-    - input_boolean.ac_boost
+    - switch.ac_boost
     id: buttonpress
     to: 'on'
     trigger: state
@@ -175,10 +175,14 @@
       entity_id: timer.ac
     trigger: event
   - entity_id:
-    - input_boolean.ac_boost
+    - switch.ac_boost
     - switch.ac
     to: 'off'
     trigger: state
+  - trigger: state
+    entity_id:
+    - timer.ac
+    from: active
   conditions:
   - condition: or
     conditions:
@@ -249,8 +253,8 @@
       else:
       - data: {}
         target:
-          entity_id: input_boolean.ac_boost
-        action: input_boolean.turn_off
+          entity_id: switch.ac_boost
+        action: switch.turn_off
       - data: {}
         target:
           entity_id: timer.ac
@@ -318,7 +322,7 @@
         entity_id: switch.ac
         state: 'on'
       - condition: state
-        entity_id: input_boolean.ac_boost
+        entity_id: switch.ac_boost
         state: 'on'
       then:
       - data:
@@ -329,8 +333,8 @@
       else:
       - data: {}
         target:
-          entity_id: input_boolean.ac_boost
-        action: input_boolean.turn_off
+          entity_id: switch.ac_boost
+        action: switch.turn_off
       - data: {}
         target:
           entity_id: timer.ac
@@ -1560,44 +1564,30 @@
 - id: '1660977660346'
   alias: Set Temperature
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - sensor.ac_thermostat_temperature
-  - platform: state
-    entity_id:
+    trigger: state
+    to:
+  - entity_id:
     - switch.ac
-    - input_boolean.ac_boost
-    to: 'on'
-  - platform: state
-    entity_id:
+    - switch.ac_boost
+    trigger: state
+    to:
+  - entity_id:
     - input_select.anthony
-  condition:
+    trigger: state
+  - event_type: automation_reloaded
+    id: reloaded
+    trigger: event
+  conditions:
   - condition: state
     entity_id: switch.ac
     state: 'on'
-  - condition: or
-    conditions:
-    - condition: template
-      value_template: "{% set trigger = 'false' %}\n{% if is_state('input_boolean.ac_boost',
-        'on') %} \n  {% set trigger = 'true' %}\n{% elif not is_state('sensor.ac_thermostat_temperature',
-        'unknown') \n  and states('sensor.ac_thermostat_temperature') is not none
-        %}\n  {% if not is_state_attr('climate.bedroom_ac', \"temperature\", \n  states('sensor.ac_thermostat_temperature')|int(61))
-        %} \n    {% set trigger = 'true' %}\n  {% endif %}\n{% endif %}\n{{ trigger
-        }}"
-    - condition: and
-      conditions:
-      - condition: state
-        entity_id: switch.ac
-        state: 'on'
-      - condition: state
-        entity_id: input_select.anthony
-        state: Away
-    enabled: false
   - condition: template
     value_template: "\n{{ not is_state('sensor.ac_thermostat_temperature', 'unknown')
       \n  and states('sensor.ac_thermostat_temperature') is not none }}\n"
-  action:
+  actions:
   - if:
     - condition: or
       conditions:
@@ -1613,38 +1603,51 @@
       - condition: state
         entity_id: input_select.taylor_presence
         state: Home
+      alias: home
     then:
-    - data:
-        hvac_mode: cool
-        temperature: '{{states(''sensor.ac_thermostat_temperature'') |int(61)}}'
-      target:
-        entity_id: climate.bedroom_ac
-      action: climate.set_temperature
-    - delay:
-        hours: 0
-        minutes: 0
-        seconds: 1
-        milliseconds: 0
+    - alias: set temp
+      repeat:
+        sequence:
+        - data:
+            hvac_mode: cool
+            temperature: '{{states(''sensor.ac_thermostat_temperature'') |int(61)}}'
+          target:
+            entity_id: climate.bedroom_ac
+          action: climate.set_temperature
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 3
+        until:
+        - condition: template
+          value_template: '{{ is_state_attr(''climate.bedroom_ac'', ''temperature'',
+            states(''sensor.ac_thermostat_temperature'')|int) }}'
     - if:
       - condition: state
-        entity_id: input_boolean.ac_boost
+        entity_id: switch.ac_boost
         state: 'on'
       then:
-      - data:
-          preset_mode: boost
-        target:
-          entity_id: climate.bedroom_ac
-        action: climate.set_preset_mode
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 2
-          milliseconds: 0
-      - data:
-          preset_mode: boost
-        target:
-          entity_id: climate.bedroom_ac
-        action: climate.set_preset_mode
+      - repeat:
+          sequence:
+          - data:
+              preset_mode: boost
+            target:
+              entity_id: climate.bedroom_ac
+            action: climate.set_preset_mode
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 3
+          until:
+          - condition: state
+            entity_id: climate.bedroom_ac
+            attribute: preset_mode
+            state: boost
+            for:
+              hours: 0
+              minutes: 0
+              seconds: 3
+        alias: set ac boost
       else:
       - data:
           preset_mode: none
@@ -1661,74 +1664,27 @@
         target:
           entity_id: climate.bedroom_ac
         action: climate.set_preset_mode
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 2
-          milliseconds: 0
-      - data:
-          preset_mode: none
-        target:
-          entity_id: climate.bedroom_ac
-        action: climate.set_preset_mode
-    - data:
-        hvac_mode: cool
-        temperature: '{{states(''sensor.ac_thermostat_temperature'') |int(61)}}'
-      target:
-        entity_id: climate.bedroom_ac
-      action: climate.set_temperature
-    - if:
-      - condition: state
-        entity_id: input_boolean.ac_boost
-        state: 'off'
-      then:
-      - action: climate.set_fan_mode
-        target:
-          entity_id:
-          - climate.bedroom_ac
-        data:
-          fan_mode: auto
-        enabled: true
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 2
-          milliseconds: 0
-        enabled: true
-      - action: climate.set_fan_mode
-        target:
-          entity_id:
-          - climate.bedroom_ac
-        data:
-          fan_mode: auto
-        enabled: true
-      else:
-      - data:
-          preset_mode: none
-        target:
-          entity_id: climate.bedroom_ac
-        action: climate.set_preset_mode
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 2
-          milliseconds: 0
-      - data:
-          preset_mode: none
-        target:
-          entity_id: climate.bedroom_ac
-        action: climate.set_preset_mode
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 2
-          milliseconds: 0
-      - data:
-          preset_mode: none
-        target:
-          entity_id: climate.bedroom_ac
-        action: climate.set_preset_mode
-      enabled: true
+      - alias: turn off ac boost
+        repeat:
+          sequence:
+          - data:
+              preset_mode: none
+            target:
+              entity_id: climate.bedroom_ac
+            action: climate.set_preset_mode
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 3
+          until:
+          - condition: state
+            entity_id: climate.bedroom_ac
+            attribute: preset_mode
+            state: none
+            for:
+              hours: 0
+              minutes: 0
+              seconds: 3
     else:
     - data: {}
       target:
@@ -2490,39 +2446,43 @@
 - id: '1665076615181'
   alias: Dog Food Reminder
   description: ''
-  trigger:
-  - platform: time
-    at: '10:30:00'
+  triggers:
+  - at: '10:30:00'
     id: Breakfast
-  - platform: time
-    at: '18:00:00'
+    trigger: time
+    enabled: false
+  - at: '18:00:00'
     id: Dinner
-  - platform: time
-    at: 03:30:01
+    trigger: time
+    enabled: false
+  - at: 03:30:01
     id: Reset
-  - platform: state
-    entity_id:
+    trigger: time
+  - entity_id:
     - binary_sensor.dog_food
     id: Feeding
     from: 'off'
     to: 'on'
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.dog_food
     from: 'on'
     to: 'off'
     id: Feeding2
-  - platform: time
-    at: '16:30:00'
+    trigger: state
+  - at: '16:30:00'
     alias: Dinner Time
     id: DinnerTime
-  - platform: state
-    entity_id:
+    trigger: time
+    enabled: false
+  - entity_id:
     - input_select.anthony
     to: Just Arrived
     id: arrived
-  condition: []
-  action:
+    trigger: state
+    enabled: true
+  conditions: []
+  actions:
   - choose:
     - conditions:
       - condition: trigger
@@ -2531,11 +2491,11 @@
         entity_id: input_boolean.breakfast
         state: 'off'
       sequence:
-      - service: notify.anthonys_devices
-        data:
+      - data:
           message: clear_notification
           data:
             tag: dog-food
+        action: notify.anthonys_devices
       - if:
         - condition: or
           conditions:
@@ -2549,8 +2509,7 @@
           entity_id: binary_sensor.home_alone
           state: 'on'
         then:
-        - service: notify.anthonys_devices
-          data:
+        - data:
             message: Lola hasn't eaten breakfast yet
             data:
               tag: dog-food
@@ -2559,6 +2518,7 @@
                   name: default
                   critical: 1
                   volume: 0.3
+          action: notify.anthonys_devices
         else:
         - condition: or
           conditions:
@@ -2571,11 +2531,11 @@
           - condition: state
             entity_id: input_select.anthony
             state: Just Arrived
-        - service: notify.anthonys_devices
-          data:
+        - data:
             message: Lola hasn't eaten breakfast yet
             data:
               tag: dog-food
+          action: notify.anthonys_devices
     - conditions:
       - condition: trigger
         id: Dinner
@@ -2583,11 +2543,11 @@
         entity_id: input_boolean.dinner
         state: 'off'
       sequence:
-      - service: notify.anthonys_devices
-        data:
+      - data:
           message: clear_notification
           data:
             tag: dog-food
+        action: notify.anthonys_devices
       - if:
         - condition: or
           conditions:
@@ -2601,8 +2561,7 @@
           entity_id: binary_sensor.home_alone
           state: 'on'
         then:
-        - service: notify.anthonys_devices
-          data:
+        - data:
             message: Lola hasn't eaten dinner yet
             data:
               tag: dog-food
@@ -2611,6 +2570,7 @@
                   name: default
                   critical: 1
                   volume: 0.3
+          action: notify.anthonys_devices
         else:
         - condition: or
           conditions:
@@ -2623,21 +2583,21 @@
           - condition: state
             entity_id: input_select.anthony
             state: Just Arrived
-        - service: notify.anthonys_devices
-          data:
+        - data:
             message: Lola hasn't eaten dinner yet
             data:
               tag: dog-food
+          action: notify.anthonys_devices
     - conditions:
       - condition: trigger
         id: Reset
       sequence:
-      - service: input_boolean.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id:
           - input_boolean.breakfast
           - input_boolean.dinner
+        action: input_boolean.turn_off
     - conditions:
       - condition: or
         conditions:
@@ -2657,13 +2617,12 @@
               entity_id: input_boolean.breakfast
               state: 'off'
             then:
-            - service: input_boolean.turn_on
-              data: {}
+            - data: {}
               target:
                 entity_id: input_boolean.breakfast
+              action: input_boolean.turn_on
             else:
-            - service: notify.anthonys_devices
-              data:
+            - data:
                 message: Lola already ate breakfast
                 data:
                   push:
@@ -2672,6 +2631,7 @@
                       critical: 1
                       volume: 0.3
               enabled: false
+              action: notify.anthonys_devices
         - conditions:
           - condition: time
             before: '23:59:59'
@@ -2682,13 +2642,12 @@
               entity_id: input_boolean.dinner
               state: 'off'
             then:
-            - service: input_boolean.turn_on
-              data: {}
+            - data: {}
               target:
                 entity_id: input_boolean.dinner
+              action: input_boolean.turn_on
             else:
-            - service: notify.anthonys_devices
-              data:
+            - data:
                 message: Lola already ate dinner
                 data:
                   push:
@@ -2697,21 +2656,22 @@
                       critical: 1
                       volume: 0.3
               enabled: false
-      - service: notify.anthonys_devices
-        data:
+              action: notify.anthonys_devices
+      - data:
           message: clear_notification
           data:
             tag: dog-food
+        action: notify.anthonys_devices
       - delay:
           hours: 0
           minutes: 2
           seconds: 0
           milliseconds: 0
-      - service: notify.anthonys_devices
-        data:
+      - data:
           message: clear_notification
           data:
             tag: dog-food
+        action: notify.anthonys_devices
     - conditions:
       - condition: trigger
         id: DinnerTime
@@ -2730,11 +2690,11 @@
         entity_id: binary_sensor.home_alone
         state: 'on'
       sequence:
-      - service: notify.anthonys_devices
-        data:
+      - data:
           message: clear_notification
           data:
             tag: dog-food
+        action: notify.anthonys_devices
       - if:
         - condition: or
           conditions:
@@ -2748,8 +2708,7 @@
           entity_id: zone.home
           below: 2
         then:
-        - service: notify.anthonys_devices
-          data:
+        - data:
             message: It's time to feed Lola dinner
             data:
               tag: dog-food
@@ -2758,6 +2717,7 @@
                   name: default
                   critical: 1
                   volume: 0.3
+          action: notify.anthonys_devices
         else:
         - condition: or
           conditions:
@@ -2770,11 +2730,11 @@
           - condition: state
             entity_id: input_select.anthony
             state: Just Arrived
-        - service: notify.anthonys_devices
-          data:
+        - data:
             message: It's time to feed Lola dinner
             data:
               tag: dog-food
+          action: notify.anthonys_devices
     - conditions:
       - condition: trigger
         id: arrived
@@ -2802,10 +2762,10 @@
         state: 'on'
       sequence:
       - wait_for_trigger:
-        - platform: state
-          entity_id:
+        - entity_id:
           - binary_sensor.entry_doors
           to: 'on'
+          trigger: state
         timeout:
           hours: 0
           minutes: 3
@@ -2821,13 +2781,12 @@
             after: '16:30:00'
           alias: Hasn't eaten dinner
         then:
-        - service: notify.anthonys_devices
-          data:
+        - data:
             message: clear_notification
             data:
               tag: dog-food
-        - service: notify.anthonys_devices
-          data:
+          action: notify.anthonys_devices
+        - data:
             message: It's time to feed Lola dinner
             data:
               tag: dog-food
@@ -2836,6 +2795,7 @@
                   name: default
                   critical: 1
                   volume: 0.3
+          action: notify.anthonys_devices
         else:
         - condition: and
           conditions:
@@ -2846,11 +2806,11 @@
             after: 08:00:00
             before: '15:00:00'
           alias: Hasn't eaten breakfast
-        - service: notify.anthonys_devices
-          data:
+        - data:
             message: clear_notification
             data:
               tag: dog-food
+          action: notify.anthonys_devices
         - condition: or
           conditions:
           - condition: numeric_state
@@ -2862,8 +2822,7 @@
           - condition: state
             entity_id: input_select.anthony
             state: Just Arrived
-        - service: notify.anthonys_devices
-          data:
+        - data:
             message: It's time to feed Lola breakfast
             data:
               tag: dog-food
@@ -2872,6 +2831,7 @@
                   name: default
                   critical: 1
                   volume: 0.3
+          action: notify.anthonys_devices
   mode: parallel
   max: 10
 - id: '1665170199807'
@@ -3138,7 +3098,7 @@
             conditions:
             - condition: template
               value_template: "{% set default_time = \"00:00:00\" %}  \n{% set time_difference_threshold
-                = 11 %}\n\n{% set morning_medicine_given = states('input_datetime.morning_medicine_given')
+                = 10 %}\n\n{% set morning_medicine_given = states('input_datetime.morning_medicine_given')
                 %}\n{% set morning_medicine_time = morning_medicine_given.split('
                 ')[-1] if morning_medicine_given != 'unknown' and morning_medicine_given
                 != 'none' else default_time %}\n\n{% set current_time = now().strftime('%H:%M:%S')
@@ -3341,7 +3301,6 @@
     - binary_sensor.entry_doors
     - binary_sensor.dining_room_occupancy
     - binary_sensor.master_hall_motion
-    - binary_sensor.lumi_lumi_motion_ac02_motion
     to: 'on'
     from: 'off'
     id: leftroom2
@@ -3423,7 +3382,7 @@
           entity_id: switch.desktop
           state: 'on'
         - condition: state
-          entity_id: input_boolean.ac_boost
+          entity_id: switch.ac_boost
           state: 'on'
       - condition: or
         conditions:
@@ -3462,8 +3421,8 @@
           action: timer.cancel
         - data: {}
           target:
-            entity_id: input_boolean.ac_boost
-          action: input_boolean.turn_off
+            entity_id: switch.ac_boost
+          action: switch.turn_off
         alias: AC
       - if:
         - condition: state
@@ -5728,6 +5687,9 @@
             - condition: state
               entity_id: binary_sensor.bedroom_door_recently_opened
               state: 'on'
+            - condition: state
+              state: home
+              entity_id: person.eli
           - condition: not
             conditions:
             - alias: Fan Lights are off
@@ -6581,12 +6543,15 @@
             - switch.dana_s_east_incandescent_rope
             - switch.dana_s_west_color_rope
             - switch.dana_s_south_color_rope
+            - switch.block
+            - switch.cube
           action: switch.turn_on
         - data: {}
           target:
             entity_id:
             - button.screenon
           action: button.press
+          enabled: false
         - if:
           - condition: or
             conditions:
@@ -6638,17 +6603,6 @@
           target:
             entity_id:
             - light.dana_s_fan_lights
-          action: light.turn_on
-        - data:
-            brightness_pct: 100
-          target:
-            entity_id:
-            - light.black_cob
-            - light.floor_lamp_2
-            - light.charger2
-            - light.cube
-            - light.floor_lamp
-          enabled: false
           action: light.turn_on
       down_lower:
       - choose:
@@ -6738,17 +6692,21 @@
             - switch.dana_s_south_incandescent_rope
             - switch.dana_s_east_incandescent_rope
             - switch.dana_s_west_color_rope
+            - switch.cube
+            - switch.block
           action: switch.turn_off
         - data: {}
           target:
             entity_id:
             - media_player.owntone_output_soundbar
           action: media_player.turn_off
+          enabled: false
         - data: {}
           target:
             entity_id:
             - button.screenoff_2
           action: button.press
+          enabled: false
         - target:
             entity_id:
             - light.dana_s_fan_lights
@@ -6770,12 +6728,15 @@
             - switch.dana_s_east_incandescent_rope
             - switch.dana_s_west_color_rope
             - switch.dana_s_south_color_rope
+            - switch.cube
+            - switch.block
           action: switch.turn_off
         - data: {}
           target:
             entity_id:
             - button.screenoff_2
           action: button.press
+          enabled: false
         - target:
             entity_id:
             - light.dana_s_fan_lights
@@ -6871,6 +6832,8 @@
             - switch.dana_s_east_incandescent_rope
             - switch.dana_s_west_color_rope
             - switch.dana_s_south_color_rope
+            - switch.cube
+            - switch.block
           action: switch.turn_on
         - data: {}
           target:
@@ -6886,11 +6849,6 @@
             - light.wyze_bulb_7
           data: {}
           action: light.turn_off
-        - target:
-            entity_id:
-            - light.smart_bulb_3
-          data: {}
-          action: light.turn_on
       top_on_release: []
       up_raise_release: []
       down_lower_release: []
@@ -6905,17 +6863,21 @@
             - switch.dana_s_west_color_rope
             - switch.dana_s_east_incandescent_rope
             - switch.dana_s_south_color_rope
+            - switch.cube
+            - switch.block
           action: switch.turn_on
         - data: {}
           target:
             entity_id:
             - media_player.danas_32_tcl_roku_tv
           action: media_player.turn_on
+          enabled: false
         - data: {}
           target:
             entity_id:
             - button.screenon
           action: button.press
+          enabled: false
         - data:
             rgb_color:
             - 255
@@ -6926,17 +6888,6 @@
             entity_id:
             - light.dana_s_fan_lights
           enabled: true
-          action: light.turn_on
-        - data:
-            brightness_pct: 100
-          target:
-            entity_id:
-            - light.black_cob
-            - light.floor_lamp_2
-            - light.charger2
-            - light.cube
-            - light.floor_lamp
-          enabled: false
           action: light.turn_on
       bottom_off_release: []
       mode_max: 15
@@ -10413,35 +10364,6 @@
       position: '{{ state_attr(''cover.bedroom_blinds'', ''current_position'') + states(''input_number.dial'')|int}}'
   mode: queued
   max: 50
-- id: '1709831743088'
-  alias: Cover Height
-  description: ''
-  use_blueprint:
-    path: langestefan/auto_sun_blind.yaml
-    input:
-      condition:
-      - condition: state
-        entity_id: cover.bedroom_blinds
-        state: open
-      - condition: numeric_state
-        entity_id: sensor.pirateweather_cloud_coverage
-        below: 60
-        enabled: false
-      - condition: numeric_state
-        entity_id: weather.dark_sky
-        attribute: temperature
-        below: 75
-        enabled: false
-      cover_entity:
-        entity_id: cover.bedroom_blinds
-      azimuth: 96
-      max_height: 1.22
-      default_height: 100
-      distance: 0.3
-      minimum_position: 50
-      condition_mode: or
-      change_threshold: 1
-      time_out: 1
 - id: '1712035442279'
   alias: Power off Razer Headphones
   description: ''
@@ -10512,8 +10434,7 @@
       auto_mode: restart
       top_on:
       - parallel:
-        - service: switch.turn_on
-          data: {}
+        - data: {}
           target:
             entity_id:
             - switch.dana_s_color_ropes
@@ -10523,16 +10444,20 @@
             - switch.dana_s_east_incandescent_rope
             - switch.dana_s_west_color_rope
             - switch.dana_s_south_color_rope
-        - service: media_player.turn_on
-          data: {}
+            - switch.block
+            - switch.cube
+          action: switch.turn_on
+        - data: {}
           target:
             entity_id:
             - media_player.hisense_tv
-        - service: button.press
-          data: {}
+          action: media_player.turn_on
+        - data: {}
           target:
             entity_id:
             - button.screenon
+          action: button.press
+          enabled: false
         - if:
           - condition: or
             conditions:
@@ -10554,8 +10479,7 @@
             entity_id: input_boolean.guest
             state: 'off'
           then:
-          - service: light.turn_on
-            data:
+          - data:
               effect: None
               xy_color:
               - 0.455
@@ -10563,9 +10487,9 @@
             target:
               entity_id:
               - light.dana_s_fan_lights
+            action: light.turn_on
           else:
-          - service: light.turn_on
-            data:
+          - data:
               rgb_color:
               - 255
               - 0
@@ -10575,9 +10499,9 @@
               entity_id:
               - light.dana_s_fan_lights
             enabled: true
+            action: light.turn_on
           enabled: false
-        - service: light.turn_on
-          data:
+        - data:
             effect: None
             xy_color:
             - 0.455
@@ -10585,17 +10509,7 @@
           target:
             entity_id:
             - light.dana_s_fan_lights
-        - service: light.turn_on
-          data:
-            brightness_pct: 100
-          target:
-            entity_id:
-            - light.black_cob
-            - light.floor_lamp_2
-            - light.charger2
-            - light.cube
-            - light.floor_lamp
-          enabled: false
+          action: light.turn_on
       down_lower:
       - choose:
         - conditions:
@@ -10608,13 +10522,13 @@
               entity_id: switch.dana_s_west_color_rope
               state: 'on'
           sequence:
-          - service: switch.turn_off
-            data: {}
+          - data: {}
             target:
               entity_id:
               - switch.dana_s_color_ropes
               - switch.dana_s_west_color_rope
               - switch.dana_s_south_color_rope
+            action: switch.turn_off
         - conditions:
           - condition: or
             conditions:
@@ -10625,13 +10539,13 @@
               entity_id: switch.dana_s_west_color_rope
               state: 'off'
           sequence:
-          - service: switch.turn_on
-            data: {}
+          - data: {}
             target:
               entity_id:
               - switch.dana_s_color_ropes
               - switch.dana_s_west_color_rope
               - switch.dana_s_south_color_rope
+            action: switch.turn_on
         enabled: false
       - choose:
         - conditions:
@@ -10647,13 +10561,13 @@
               entity_id: switch.dana_s_east_incandescent_rope
               state: 'on'
           sequence:
-          - service: switch.turn_off
-            data: {}
+          - data: {}
             target:
               entity_id:
               - switch.dana_s_north_incandescent_rope
               - switch.dana_s_south_incandescent_rope
               - switch.dana_s_east_incandescent_rope
+            action: switch.turn_off
         - conditions:
           - condition: or
             conditions:
@@ -10667,17 +10581,16 @@
               entity_id: switch.dana_s_east_incandescent_rope
               state: 'off'
           sequence:
-          - service: switch.turn_on
-            data: {}
+          - data: {}
             target:
               entity_id:
               - switch.dana_s_north_incandescent_rope
               - switch.dana_s_south_incandescent_rope
               - switch.dana_s_east_incandescent_rope
+            action: switch.turn_on
         enabled: false
       - parallel:
-        - service: switch.turn_off
-          data: {}
+        - data: {}
           target:
             entity_id:
             - switch.dana_s_incandescant_ropes
@@ -10685,29 +10598,33 @@
             - switch.dana_s_south_incandescent_rope
             - switch.dana_s_east_incandescent_rope
             - switch.dana_s_west_color_rope
-        - service: media_player.turn_off
-          data: {}
+            - switch.cube
+            - switch.block
+          action: switch.turn_off
+        - data: {}
           target:
             entity_id:
             - media_player.owntone_output_soundbar
-        - service: button.press
-          data: {}
+          action: media_player.turn_off
+          enabled: false
+        - data: {}
           target:
             entity_id:
             - button.screenoff_2
-        - service: light.turn_off
-          target:
+          action: button.press
+          enabled: false
+        - target:
             entity_id:
             - light.dana_s_fan_lights
           data: {}
-        - service: switch.turn_on
-          data: {}
+          action: light.turn_off
+        - data: {}
           target:
             entity_id: switch.dana_s_south_color_rope
+          action: switch.turn_on
       bottom_off:
       - parallel:
-        - service: switch.turn_off
-          data: {}
+        - data: {}
           target:
             entity_id:
             - switch.dana_s_color_ropes
@@ -10717,23 +10634,27 @@
             - switch.dana_s_east_incandescent_rope
             - switch.dana_s_west_color_rope
             - switch.dana_s_south_color_rope
-        - service: media_player.turn_off
-          data: {}
+            - switch.block
+            - switch.cube
+          action: switch.turn_off
+        - data: {}
           target:
             entity_id:
             - media_player.owntone_output_soundbar
             - media_player.hisense_tv
-        - service: button.press
-          data: {}
+          action: media_player.turn_off
+        - data: {}
           target:
             entity_id:
             - button.screenoff_2
-        - service: light.turn_off
-          target:
+          action: button.press
+          enabled: false
+        - target:
             entity_id:
             - light.dana_s_fan_lights
           data: {}
           enabled: true
+          action: light.turn_off
       up_raise:
       - choose:
         - conditions:
@@ -10749,13 +10670,13 @@
               entity_id: switch.dana_s_east_incandescent_rope
               state: 'on'
           sequence:
-          - service: switch.turn_off
-            data: {}
+          - data: {}
             target:
               entity_id:
               - switch.dana_s_north_incandescent_rope
               - switch.dana_s_south_incandescent_rope
               - switch.dana_s_east_incandescent_rope
+            action: switch.turn_off
         - conditions:
           - condition: or
             conditions:
@@ -10769,17 +10690,16 @@
               entity_id: switch.dana_s_east_incandescent_rope
               state: 'off'
           sequence:
-          - service: switch.turn_on
-            data: {}
+          - data: {}
             target:
               entity_id:
               - switch.dana_s_north_incandescent_rope
               - switch.dana_s_south_incandescent_rope
               - switch.dana_s_east_incandescent_rope
+            action: switch.turn_on
         enabled: false
       - parallel:
-        - service: switch.turn_off
-          data: {}
+        - data: {}
           target:
             entity_id:
             - switch.dana_s_incandescant_ropes
@@ -10787,18 +10707,18 @@
             - switch.dana_s_south_incandescent_rope
             - switch.dana_s_east_incandescent_rope
             - switch.dana_s_west_color_rope
-        - service: media_player.turn_off
-          data: {}
+          action: switch.turn_off
+        - data: {}
           target:
             entity_id:
             - media_player.owntone_output_soundbar
-        - service: button.press
-          data: {}
+          action: media_player.turn_off
+        - data: {}
           target:
             entity_id:
             - button.screenoff_2
-        - service: light.turn_off
-          target:
+          action: button.press
+        - target:
             entity_id:
             - light.black_cob
             - light.floor_lamp_2
@@ -10807,14 +10727,14 @@
             - light.floor_lamp
             - light.dana_s_fan_lights
           data: {}
-        - service: switch.turn_on
-          data: {}
+          action: light.turn_off
+        - data: {}
           target:
             entity_id: switch.dana_s_south_color_rope
+          action: switch.turn_on
         enabled: false
       - parallel:
-        - service: switch.turn_on
-          data: {}
+        - data: {}
           target:
             entity_id:
             - switch.dana_s_color_ropes
@@ -10824,38 +10744,35 @@
             - switch.dana_s_east_incandescent_rope
             - switch.dana_s_west_color_rope
             - switch.dana_s_south_color_rope
-        - service: media_player.turn_on
-          data: {}
+            - switch.block
+            - switch.cube
+          action: switch.turn_on
+        - data: {}
           target:
             entity_id:
             - media_player.hisense_tv
-        - service: button.press
-          data: {}
+          action: media_player.turn_on
+        - data: {}
           target:
             entity_id:
             - button.screenon
           enabled: false
-        - service: light.turn_off
-          target:
+          action: button.press
+        - target:
             entity_id:
             - light.wyze_bulb_4
             - light.wyze_bulb_5
             - light.wyze_bulb_6
             - light.wyze_bulb_7
           data: {}
-        - service: light.turn_on
-          target:
-            entity_id:
-            - light.smart_bulb_3
-          data: {}
+          action: light.turn_off
       top_on_release: []
       up_raise_release: []
       down_lower_release: []
       middle_stop_release: []
       middle_stop:
       - parallel:
-        - service: switch.turn_on
-          data: {}
+        - data: {}
           target:
             entity_id:
             - switch.dana_s_north_incandescent_rope
@@ -10863,18 +10780,22 @@
             - switch.dana_s_west_color_rope
             - switch.dana_s_east_incandescent_rope
             - switch.dana_s_south_color_rope
-        - service: media_player.turn_on
-          data: {}
+            - switch.cube
+            - switch.block
+          action: switch.turn_on
+        - data: {}
           target:
             entity_id:
             - media_player.danas_32_tcl_roku_tv
-        - service: button.press
-          data: {}
+          action: media_player.turn_on
+          enabled: false
+        - data: {}
           target:
             entity_id:
             - button.screenon
-        - service: light.turn_on
-          data:
+          action: button.press
+          enabled: false
+        - data:
             rgb_color:
             - 255
             - 0
@@ -10884,17 +10805,7 @@
             entity_id:
             - light.dana_s_fan_lights
           enabled: true
-        - service: light.turn_on
-          data:
-            brightness_pct: 100
-          target:
-            entity_id:
-            - light.black_cob
-            - light.floor_lamp_2
-            - light.charger2
-            - light.cube
-            - light.floor_lamp
-          enabled: false
+          action: light.turn_on
       bottom_off_release: []
       mode_max: 15
 - id: '1713299820394'
@@ -10976,7 +10887,7 @@
         - condition: state
           entity_id: sensor.steam_76561198069805211
           attribute: game
-          state: EA SPORTS™ WRC 24
+          state: EA SPORTS™ WRC
         - condition: state
           entity_id: sensor.steam_76561198069805211
           attribute: game
@@ -11027,7 +10938,7 @@
         - condition: state
           entity_id: sensor.steam_76561198069805211
           attribute: game
-          state: EA SPORTS™ WRC 24
+          state: EA SPORTS™ WRC
         - condition: state
           entity_id: sensor.steam_76561198069805211
           attribute: game
@@ -11045,7 +10956,7 @@
           attribute: game
           state: Gravel
       - target:
-          entity_id: input_boolean.ac_boost
+          entity_id: switch.ac_boost
         data: {}
         action: input_boolean.turn_on
       - delay:
@@ -11088,7 +10999,7 @@
         - condition: state
           entity_id: sensor.steam_76561198069805211
           attribute: game
-          state: EA SPORTS™ WRC 24
+          state: EA SPORTS™ WRC
         - condition: state
           entity_id: sensor.steam_76561198069805211
           attribute: game
@@ -11244,51 +11155,44 @@
 - id: '1678685123749'
   alias: Kitchen Night Light
   description: ''
-  trigger:
+  triggers:
   - device_id: 73df54d198e3ccede0b9431266ce71c6
     domain: zha
-    platform: device
     type: Enter
     subtype: sensor
     id: enter
+    trigger: device
   - device_id: 73df54d198e3ccede0b9431266ce71c6
     domain: zha
-    platform: device
     type: Leave
     subtype: sensor
     id: leave
+    trigger: device
   - type: not_opened
-    platform: device
     device_id: 40b6acb50076a1f15ff0e73120d2f04e
     entity_id: binary_sensor.bedroom_door
     domain: binary_sensor
     id: door closed
-  - platform: state
-    entity_id:
+    trigger: device
+  - entity_id:
     - binary_sensor.bed_occupancy
     to: 'on'
     id: bed
-  - platform: device
-    type: turned_on
+    trigger: state
+  - type: turned_on
     device_id: aa29287a53774cb599c5658e30e48d9d
     entity_id: light.kitchen_lights
     domain: light
     id: lights on
-  - type: motion
-    platform: device
-    device_id: 636093ce084fceeb09083a7a66a2efe6
-    entity_id: ca871a2082db2d3f829b9e50ff599285
-    domain: binary_sensor
-    id: kitchen motion
-    enabled: false
-  condition:
+    trigger: device
+  conditions:
   - condition: time
     after: '22:00:00'
     before: 08:00:00
   - condition: sun
     before: sunrise
     after: sunset
-  action:
+  actions:
   - choose:
     - conditions:
       - condition: trigger
@@ -11393,6 +11297,12 @@
   - trigger: state
     entity_id:
     - binary_sensor.recently_showered
+  - trigger: state
+    entity_id:
+    - weather.dark_sky
+    attribute: cloud_coverage
+  - trigger: time
+    at: '14:00:00'
   conditions: []
   actions:
   - choose:
@@ -11421,6 +11331,12 @@
         - condition: state
           entity_id: binary_sensor.recently_showered
           state: 'on'
+      - condition: numeric_state
+        entity_id: weather.dark_sky
+        attribute: cloud_coverage
+        below: 80
+      - condition: time
+        after: '13:00:00'
       sequence:
       - action: switch.turn_on
         target:
@@ -11470,6 +11386,7 @@
   - trigger: state
     entity_id:
     - media_player.tc_helicon_goxlr_music
+    to:
   conditions:
   - condition: not
     conditions:
@@ -11477,6 +11394,12 @@
       entity_id: media_player.tc_helicon_goxlr_music
       state: unavailable
   actions:
+  - action: homeassistant.reload_config_entry
+    metadata: {}
+    data: {}
+    target:
+      entity_id: media_player.tc_helicon_goxlr_sample
+    enabled: false
   - choose:
     - conditions:
       - condition: state
@@ -11662,3 +11585,148 @@
         target:
           entity_id: switch.guest_bedroom_light
   mode: single
+- id: '1735459739007'
+  alias: Garage Door Reminder
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - sensor.garage_door_open_duration
+    to: '15'
+    id: '15'
+  - trigger: state
+    entity_id:
+    - sensor.garage_door_open_duration
+    to: '30'
+    id: '30'
+  - trigger: state
+    entity_id:
+    - sensor.garage_door_open_duration
+    to: '45'
+    id: '45'
+  - trigger: state
+    entity_id:
+    - sensor.garage_door_open_duration
+    to: '60'
+    id: hour
+  - trigger: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: CLOSEGARAGE
+    id: event
+  conditions: []
+  actions:
+  - data:
+      message: clear_notification
+      data:
+        tag: garage
+    action: notify.anthonys_devices
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - event
+      sequence:
+      - action: cover.close_cover
+        metadata: {}
+        data: {}
+        target:
+          entity_id: cover.garage_door
+    default:
+    - action: notify.anthonys_devices
+      metadata: {}
+      data:
+        data:
+          entity_id: camera.g5_flex_high_2
+          actions:
+          - action: CLOSEGARAGE
+            title: Close Garage
+          tag: garage
+          push:
+            sound:
+              name: default
+              critical: 1
+              volume: 0.3
+        message: The garage door has been left open for {{ states("sensor.garage_door_open_duration")
+          }} minutes
+  mode: parallel
+  max: 2
+- id: '1736415340762'
+  alias: Lola's Feeder Tracker
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - sensor.lolas_feeder_today_s_feeding_times
+    to:
+    enabled: false
+  - trigger: time
+    at: 08:05:00
+    id: breakfast
+  - trigger: time
+    at: '16:05:00'
+    id: 'dinner '
+  - trigger: state
+    entity_id:
+    - binary_sensor.feeder_recently_dispensed
+    to: 'on'
+    id: fed
+  conditions: []
+  actions:
+  - if:
+    - condition: trigger
+      id:
+      - breakfast
+      - 'dinner '
+    then:
+    - action: homeassistant.reload_config_entry
+      metadata: {}
+      data: {}
+      target:
+        entity_id: sensor.lolas_feeder_today_s_feeding_quantity
+  - if:
+    - condition: trigger
+      id:
+      - fed
+    then:
+    - choose:
+      - conditions:
+        - condition: numeric_state
+          entity_id: sensor.lolas_feeder_today_s_feeding_times
+          above: 0
+        - condition: time
+          after: 07:00:00
+          before: 09:00:00
+        - condition: state
+          entity_id: input_boolean.breakfast
+          state: 'off'
+        - condition: state
+          entity_id: binary_sensor.feeder_recently_dispensed
+          state: 'on'
+        sequence:
+        - action: input_boolean.turn_on
+          metadata: {}
+          data: {}
+          target:
+            entity_id: input_boolean.breakfast
+      - conditions:
+        - condition: numeric_state
+          entity_id: sensor.lolas_feeder_today_s_feeding_times
+          above: 0
+        - condition: time
+          after: '15:00:00'
+          before: '17:00:00'
+        - condition: state
+          entity_id: input_boolean.dinner
+          state: 'off'
+        - condition: state
+          entity_id: binary_sensor.feeder_recently_dispensed
+          state: 'on'
+        sequence:
+        - action: input_boolean.turn_on
+          metadata: {}
+          data: {}
+          target:
+            entity_id: input_boolean.dinner
+  mode: parallel
+  max: 10

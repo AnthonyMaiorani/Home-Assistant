@@ -19,24 +19,40 @@ captive_portal:
 logger:
 api:
 ota:
+  platform: esphome
 
 output:
   - platform: esp8266_pwm
     id: red_output
     pin: GPIO4
+    min_power: 0.000499
+    max_power: 1
+    zero_means_zero: true
   - platform: esp8266_pwm
     id: green_output
     pin: GPIO12
+    min_power: 0.000499
+    max_power: 1
+    zero_means_zero: true
   - platform: esp8266_pwm
     id: blue_output
     pin: GPIO14
+    min_power: 0.000499
+    max_power: 1
+    zero_means_zero: true
   - platform: esp8266_pwm
     id: white_output
     pin: GPIO5
+    min_power: 0.01
+    max_power: 0.9
+    zero_means_zero: true
   - platform: esp8266_pwm
     id: ct_output
     inverted: true
     pin: GPIO13
+    min_power: 0.01
+    max_power: 0.9
+    zero_means_zero: true
 
 sensor:
   - platform: homeassistant
@@ -53,8 +69,8 @@ light:
     blue: blue_output
     white_brightness: white_output
     color_temperature: ct_output
-    cold_white_color_temperature: 153 mireds
-    warm_white_color_temperature: 500 mireds
+    cold_white_color_temperature: 6000K
+    warm_white_color_temperature: 3000K
     color_interlock: true
     effects:
       - strobe:
