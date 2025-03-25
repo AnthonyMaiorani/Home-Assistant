@@ -70,6 +70,17 @@
   scan_interval: 5
   method: patch
   unique_id: block
+- platform: rest
+  resource: http://192.168.1.105:3000/api/deviceStatus
+  name: Eight Sleep
+  body_on: '{ "left": { "targetTemperatureF": 55, "isOn": true } }'
+  body_off: '{ "left": { "isOn": false } }'
+  is_on_template: "{{ value_json.left.isOn }}"
+  unique_id: eightsleep
+  headers:
+    Content-Type: application/json
+  method: post
+  scan_interval: 5
 - platform: template
   switches:
     # case_rgb:
@@ -369,6 +380,9 @@
         - service: wake_on_lan.send_magic_packet
           data:
             mac: !secret desktop2
+        - service: wake_on_lan.send_magic_packet
+          data:
+            mac: !secret desktop3
       turn_off:
         - service: button.press
           target:

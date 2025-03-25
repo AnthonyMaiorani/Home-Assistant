@@ -195,6 +195,9 @@
     - condition: state
       entity_id: person.taylor
       state: home
+    - condition: state
+      state: home
+      entity_id: person.evan
   actions:
   - if:
     - condition: trigger
@@ -217,18 +220,15 @@
       - condition: state
         state: 'off'
         entity_id: binary_sensor.bedroom_chair
+      - condition: state
+        state: 'on'
+        entity_id: binary_sensor.anthony_home
       then:
-      - action: eight_sleep.heat_set
+      - action: switch.turn_on
         metadata: {}
-        data:
-          sleep_stage: current
-          duration: 1500
-          target: -100
+        data: {}
         target:
-          device_id:
-          - 1807d01837ccf4f85178b48dd72b10f6
-          - da76e4d329b4368e1e9c254dadfdf348
-          - da0aee03d5b8f7fc84c67cedee605139
+          entity_id: switch.eight_sleep
     else:
     - if:
       - condition: state
@@ -457,18 +457,27 @@
 - id: '1621577255605'
   alias: Left Home
   description: Turns bedroom off when leaving home, and ensures bedroom stays off
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - input_select.anthony
     from: Home
     to: Just Left
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - input_select.taylor_presence
     from: Home
     to: Just Left
-  condition:
+    trigger: state
+  - entity_id:
+    - person.evan
+    from: home
+    to: not_home
+    trigger: state
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+  conditions:
   - condition: template
     value_template: '{{states(''person.anthony'') != ''home''}}'
   - condition: not
@@ -484,7 +493,10 @@
     - condition: state
       entity_id: person.taylor
       state: home
-  action:
+    - condition: state
+      entity_id: person.evan
+      state: home
+  actions:
   - parallel:
     - data: {}
       target:
@@ -559,10 +571,11 @@
         option: away
       enabled: false
       action: select.select_option
-    - target:
-        device_id: 1807d01837ccf4f85178b48dd72b10f6
+    - action: switch.turn_off
+      metadata: {}
       data: {}
-      action: eight_sleep.side_off
+      target:
+        entity_id: switch.eight_sleep
   mode: single
 - id: '1627443167507'
   alias: Bedroom Alerts
@@ -1436,12 +1449,12 @@
 - id: '1656373322370'
   alias: Cool Room
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - input_select.anthony
     to: Just Arrived
-  condition:
+    trigger: state
+  conditions:
   - condition: or
     conditions:
     - condition: numeric_state
@@ -1451,7 +1464,7 @@
       entity_id: weather.dark_sky
       above: 68
       attribute: temperature
-  action:
+  actions:
   - delay:
       hours: 0
       minutes: 0
@@ -1461,11 +1474,11 @@
     state: Just Arrived
     entity_id: input_select.anthony
   - wait_for_trigger:
-    - platform: state
-      entity_id:
+    - entity_id:
       - binary_sensor.entry_doors
       from: 'off'
       to: 'on'
+      trigger: state
     continue_on_timeout: false
     timeout: 00:30:00
     enabled: false
@@ -1473,20 +1486,16 @@
     target:
       entity_id: switch.ac_boost
     action: switch.turn_on
-  - continue_on_error: true
+  - action: switch.turn_on
     metadata: {}
-    data:
-      sleep_stage: current
-      duration: 28800
-      target: -100
+    data: {}
     target:
-      device_id: da0aee03d5b8f7fc84c67cedee605139
-    action: eight_sleep.heat_set
+      entity_id: switch.eight_sleep
   - wait_for_trigger:
-    - platform: state
-      entity_id:
+    - entity_id:
       - input_select.anthony
       to: Just Left
+      trigger: state
     continue_on_timeout: false
     timeout: 00:25:00
   - data: {}
@@ -1497,10 +1506,11 @@
     target:
       entity_id: switch.ac_boost
     action: switch.turn_off
-  - target:
-      device_id: da0aee03d5b8f7fc84c67cedee605139
+  - action: switch.turn_off
+    metadata: {}
     data: {}
-    action: eight_sleep.side_off
+    target:
+      entity_id: switch.eight_sleep
   mode: single
 - id: '1658727301790'
   alias: USB Control
@@ -1589,7 +1599,8 @@
       \n  and states('sensor.ac_thermostat_temperature') is not none }}\n"
   actions:
   - if:
-    - condition: or
+    - alias: home
+      condition: or
       conditions:
       - condition: state
         entity_id: input_select.anthony
@@ -1603,7 +1614,9 @@
       - condition: state
         entity_id: input_select.taylor_presence
         state: Home
-      alias: home
+      - condition: state
+        state: home
+        entity_id: person.evan
     then:
     - alias: set temp
       repeat:
@@ -4433,7 +4446,13 @@
 - id: '1668535366974'
   alias: Connected to Car
   description: ''
-  triggers: []
+  triggers:
+  - trigger: state
+    entity_id:
+    - media_player.spotify_anthony221121
+    attribute: source
+    to: Tesla Media Player
+    id: tesla
   conditions: []
   actions:
   - choose:
@@ -4583,10 +4602,6 @@
       action: input_boolean.turn_on
     enabled: false
   - parallel:
-    - data: {}
-      target:
-        entity_id: button.tare
-      action: button.press
     - if:
       - condition: or
         conditions:
@@ -4705,62 +4720,92 @@
       target:
         entity_id: script.stop_music
       action: script.turn_on
-  - alias: Set Spotify Output to iPhone
-    repeat:
-      while:
+    - if:
       - condition: not
+        conditions:
+        - condition: trigger
+          id:
+          - tesla
+      then:
+      - data: {}
+        target:
+          entity_id: button.tare
+        action: button.press
+  - if:
+    - condition: not
+      conditions:
+      - condition: trigger
+        id:
+        - tesla
+    then:
+    - alias: Set Spotify Output to iPhone
+      repeat:
+        while:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: media_player.spotify_anthony221121
+            attribute: source
+            state: iPhone
+        sequence:
+        - if:
+          - condition: template
+            value_template: '{{ "iPhone" not in state_attr(''media_player.spotify_anthony221121'',
+              ''source_list'')}}'
+          then:
+          - data: {}
+            target:
+              entity_id: media_player.spotify_anthony221121
+            action: homeassistant.reload_config_entry
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 10
+              milliseconds: 0
+        - data: {}
+          target:
+            entity_id: media_player.spotify_anthony221121
+          action: homeassistant.update_entity
+        - continue_on_error: true
+          data:
+            source: iPhone
+          target:
+            entity_id: media_player.spotify_anthony221121
+          action: media_player.select_source
+        - wait_for_trigger:
+          - entity_id:
+            - media_player.spotify_anthony221121
+            attribute: source
+            to: iPhone
+            trigger: state
+          timeout:
+            hours: 0
+            minutes: 0
+            seconds: 2
+            milliseconds: 0
+  - alias: Play music
+    choose:
+    - conditions:
+      - condition: or
         conditions:
         - condition: state
           entity_id: media_player.spotify_anthony221121
           attribute: source
           state: iPhone
-      sequence:
-      - if:
-        - condition: template
-          value_template: '{{ "iPhone" not in state_attr(''media_player.spotify_anthony221121'',
-            ''source_list'')}}'
-        then:
-        - data: {}
-          target:
-            entity_id: media_player.spotify_anthony221121
-          action: homeassistant.reload_config_entry
-        - delay:
-            hours: 0
-            minutes: 0
-            seconds: 10
-            milliseconds: 0
-      - data: {}
-        target:
+        - condition: state
           entity_id: media_player.spotify_anthony221121
-        action: homeassistant.update_entity
-      - continue_on_error: true
-        data:
-          source: iPhone
-        target:
-          entity_id: media_player.spotify_anthony221121
-        action: media_player.select_source
-      - wait_for_trigger:
-        - entity_id:
-          - media_player.spotify_anthony221121
           attribute: source
-          to: iPhone
-          trigger: state
-        timeout:
-          hours: 0
-          minutes: 0
-          seconds: 2
-          milliseconds: 0
-  - alias: Play music
-    choose:
-    - conditions:
-      - condition: state
-        entity_id: media_player.spotify_anthony221121
-        attribute: source
-        state: iPhone
-      - condition: state
-        entity_id: media_player.spotify_anthony221121
-        attribute: media_playlist
-        state: lofi
+          state: Tesla Media Player
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: media_player.spotify_anthony221121
+          attribute: media_playlist
+          state: lofi
+        - condition: state
+          entity_id: media_player.spotify_anthony221121
+          attribute: media_playlist
+          state: piano
       sequence:
       - continue_on_error: true
         data:
@@ -4790,16 +4835,22 @@
         entity_id: media_player.spotify_anthony221121
         attribute: media_playlist
         state: Music
-      - condition: state
-        entity_id: media_player.spotify_anthony221121
-        attribute: source
-        state: iPhone
       - condition: not
         conditions:
         - condition: state
           entity_id: media_player.spotify_anthony221121
           state: playing
         alias: Not playing
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: media_player.spotify_anthony221121
+          attribute: source
+          state: iPhone
+        - condition: state
+          entity_id: media_player.spotify_anthony221121
+          attribute: source
+          state: Tesla Media Player
       sequence:
       - repeat:
           sequence:
@@ -5068,6 +5119,9 @@
     - condition: state
       entity_id: binary_sensor.bed_occupancy
       state: 'on'
+    - condition: state
+      entity_id: person.evan
+      state: home
   actions:
   - choose:
     - conditions:
@@ -5309,14 +5363,11 @@
                   entity_id:
                   - media_player.kitchen_speakers
                 action: media_player.turn_off
-          - action: eight_sleep.heat_set
+          - action: switch.turn_on
             metadata: {}
-            data:
-              sleep_stage: current
-              target: -100
-              duration: 28800
+            data: {}
             target:
-              device_id: da0aee03d5b8f7fc84c67cedee605139
+              entity_id: switch.eight_sleep
     - conditions:
       - condition: device
         type: is_off
@@ -5372,32 +5423,6 @@
               entity_id: media_player.spotify_anthony221121
             action: media_player.volume_set
           - parallel:
-            - if:
-              - condition: or
-                conditions:
-                - condition: numeric_state
-                  entity_id: sensor.bedroom_temperature
-                  above: 68
-                - condition: numeric_state
-                  entity_id: climate.bedroom_ac
-                  above: 68
-                  attribute: current_temperature
-                - condition: numeric_state
-                  entity_id: sensor.bedroom_humidity
-                  above: 55
-                alias: Hot
-              then:
-              - data: {}
-                target:
-                  entity_id:
-                  - switch.ac_boost
-                action: switch.turn_on
-              else:
-              - data:
-                  duration: 00:10:00
-                target:
-                  entity_id: timer.ac
-                action: timer.start
             - data: {}
               target:
                 entity_id: script.morning
@@ -5442,6 +5467,11 @@
               target:
                 entity_id: input_boolean.bedmotion
               action: input_boolean.turn_on
+            - data: {}
+              target:
+                entity_id:
+                - switch.ac_boost
+              action: switch.turn_on
     - conditions:
       - condition: trigger
         id: showering on
@@ -5702,6 +5732,9 @@
               condition: state
               entity_id: light.dana_s_fan_lights
               state: 'on'
+          - condition: time
+            after: '22:30:00'
+            before: 07:00:00
           sequence:
           - type: turn_on
             device_id: 3c08610e07933d66eb5347257aae98aa
@@ -6595,15 +6628,73 @@
             enabled: true
             action: light.turn_on
           enabled: false
-        - data:
-            effect: None
-            xy_color:
-            - 0.455
-            - 0.374
-          target:
-            entity_id:
-            - light.dana_s_fan_lights
-          action: light.turn_on
+        - if:
+          - alias: relay was turned off
+            condition: and
+            conditions:
+            - condition: state
+              entity_id: light.wyze_bulb_5
+              state: unavailable
+            - condition: state
+              entity_id: light.wyze_bulb_6
+              state: unavailable
+            - condition: state
+              entity_id: light.wyze_bulb_7
+              state: unavailable
+            - condition: state
+              entity_id: light.wyze_bulb_4
+              state: unavailable
+          then:
+          - repeat:
+              sequence:
+              - data:
+                  effect: None
+                  xy_color:
+                  - 0.455
+                  - 0.374
+                target:
+                  entity_id:
+                  - light.dana_s_fan_lights
+                action: light.turn_on
+              until:
+              - condition: state
+                entity_id: light.wyze_bulb_4
+                state: 'on'
+                for:
+                  hours: 0
+                  minutes: 0
+                  seconds: 1
+              - condition: state
+                entity_id: light.wyze_bulb_5
+                state: 'on'
+                for:
+                  hours: 0
+                  minutes: 0
+                  seconds: 1
+              - condition: state
+                entity_id: light.wyze_bulb_6
+                state: 'on'
+                for:
+                  hours: 0
+                  minutes: 0
+                  seconds: 1
+              - condition: state
+                entity_id: light.wyze_bulb_7
+                state: 'on'
+                for:
+                  hours: 0
+                  minutes: 0
+                  seconds: 1
+          else:
+          - data:
+              effect: None
+              xy_color:
+              - 0.455
+              - 0.374
+            target:
+              entity_id:
+              - light.dana_s_fan_lights
+            action: light.turn_on
       down_lower:
       - choose:
         - conditions:
@@ -6878,17 +6969,75 @@
             - button.screenon
           action: button.press
           enabled: false
-        - data:
-            rgb_color:
-            - 255
-            - 0
-            - 255
-            brightness_pct: 100
-          target:
-            entity_id:
-            - light.dana_s_fan_lights
-          enabled: true
-          action: light.turn_on
+        - if:
+          - alias: relay was turned off
+            condition: and
+            conditions:
+            - condition: state
+              entity_id: light.wyze_bulb_5
+              state: unavailable
+            - condition: state
+              entity_id: light.wyze_bulb_6
+              state: unavailable
+            - condition: state
+              entity_id: light.wyze_bulb_7
+              state: unavailable
+            - condition: state
+              entity_id: light.wyze_bulb_4
+              state: unavailable
+          then:
+          - repeat:
+              sequence:
+              - data:
+                  rgb_color:
+                  - 255
+                  - 0
+                  - 255
+                  brightness_pct: 100
+                target:
+                  entity_id:
+                  - light.dana_s_fan_lights
+                action: light.turn_on
+              until:
+              - condition: state
+                entity_id: light.wyze_bulb_4
+                state: 'on'
+                for:
+                  hours: 0
+                  minutes: 0
+                  seconds: 1
+              - condition: state
+                entity_id: light.wyze_bulb_5
+                state: 'on'
+                for:
+                  hours: 0
+                  minutes: 0
+                  seconds: 1
+              - condition: state
+                entity_id: light.wyze_bulb_6
+                state: 'on'
+                for:
+                  hours: 0
+                  minutes: 0
+                  seconds: 1
+              - condition: state
+                entity_id: light.wyze_bulb_7
+                state: 'on'
+                for:
+                  hours: 0
+                  minutes: 0
+                  seconds: 1
+          else:
+          - data:
+              rgb_color:
+              - 255
+              - 0
+              - 255
+              brightness_pct: 100
+            target:
+              entity_id:
+              - light.dana_s_fan_lights
+            action: light.turn_on
       bottom_off_release: []
       mode_max: 15
 - id: '1671606640908'
@@ -7203,20 +7352,20 @@
 - id: '1677100682580'
   alias: Auto-update
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - person.anthony
     to:
     - utd
     - raytheon
     - taylor_s_home
     - collin_frisco
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - input_select.anthony
     to: Away
-  condition:
+    trigger: state
+  conditions:
   - condition: or
     conditions:
     - condition: state
@@ -7363,7 +7512,10 @@
     - condition: state
       entity_id: input_select.taylor_presence
       state: Just Arrived
-  action:
+    - condition: state
+      entity_id: person.evan
+      state: home
+  actions:
   - data: {}
     target:
       entity_id: switch.light_switch_relay
@@ -8042,13 +8194,17 @@
 - id: '1678008305202'
   alias: Start music after shutting down computer
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - switch.desktop
     from: 'on'
     to: 'off'
-  condition:
+    trigger: state
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 5
+  conditions:
   - condition: not
     conditions:
     - condition: state
@@ -8063,7 +8219,7 @@
     - condition: state
       entity_id: input_select.anthony
       state: Home
-  action:
+  actions:
   - data: {}
     action: script.lofi
   mode: single
@@ -10501,15 +10657,73 @@
             enabled: true
             action: light.turn_on
           enabled: false
-        - data:
-            effect: None
-            xy_color:
-            - 0.455
-            - 0.374
-          target:
-            entity_id:
-            - light.dana_s_fan_lights
-          action: light.turn_on
+        - if:
+          - alias: relay was turned off
+            condition: and
+            conditions:
+            - condition: state
+              entity_id: light.wyze_bulb_5
+              state: unavailable
+            - condition: state
+              entity_id: light.wyze_bulb_6
+              state: unavailable
+            - condition: state
+              entity_id: light.wyze_bulb_7
+              state: unavailable
+            - condition: state
+              entity_id: light.wyze_bulb_4
+              state: unavailable
+          then:
+          - repeat:
+              sequence:
+              - data:
+                  effect: None
+                  xy_color:
+                  - 0.455
+                  - 0.374
+                target:
+                  entity_id:
+                  - light.dana_s_fan_lights
+                action: light.turn_on
+              until:
+              - condition: state
+                entity_id: light.wyze_bulb_4
+                state: 'on'
+                for:
+                  hours: 0
+                  minutes: 0
+                  seconds: 1
+              - condition: state
+                entity_id: light.wyze_bulb_5
+                state: 'on'
+                for:
+                  hours: 0
+                  minutes: 0
+                  seconds: 1
+              - condition: state
+                entity_id: light.wyze_bulb_6
+                state: 'on'
+                for:
+                  hours: 0
+                  minutes: 0
+                  seconds: 1
+              - condition: state
+                entity_id: light.wyze_bulb_7
+                state: 'on'
+                for:
+                  hours: 0
+                  minutes: 0
+                  seconds: 1
+          else:
+          - data:
+              effect: None
+              xy_color:
+              - 0.455
+              - 0.374
+            target:
+              entity_id:
+              - light.dana_s_fan_lights
+            action: light.turn_on
       down_lower:
       - choose:
         - conditions:
@@ -10795,17 +11009,75 @@
             - button.screenon
           action: button.press
           enabled: false
-        - data:
-            rgb_color:
-            - 255
-            - 0
-            - 255
-            brightness_pct: 100
-          target:
-            entity_id:
-            - light.dana_s_fan_lights
-          enabled: true
-          action: light.turn_on
+        - if:
+          - alias: relay was turned off
+            condition: and
+            conditions:
+            - condition: state
+              entity_id: light.wyze_bulb_5
+              state: unavailable
+            - condition: state
+              entity_id: light.wyze_bulb_6
+              state: unavailable
+            - condition: state
+              entity_id: light.wyze_bulb_7
+              state: unavailable
+            - condition: state
+              entity_id: light.wyze_bulb_4
+              state: unavailable
+          then:
+          - repeat:
+              sequence:
+              - data:
+                  rgb_color:
+                  - 255
+                  - 0
+                  - 255
+                  brightness_pct: 100
+                target:
+                  entity_id:
+                  - light.dana_s_fan_lights
+                action: light.turn_on
+              until:
+              - condition: state
+                entity_id: light.wyze_bulb_4
+                state: 'on'
+                for:
+                  hours: 0
+                  minutes: 0
+                  seconds: 1
+              - condition: state
+                entity_id: light.wyze_bulb_5
+                state: 'on'
+                for:
+                  hours: 0
+                  minutes: 0
+                  seconds: 1
+              - condition: state
+                entity_id: light.wyze_bulb_6
+                state: 'on'
+                for:
+                  hours: 0
+                  minutes: 0
+                  seconds: 1
+              - condition: state
+                entity_id: light.wyze_bulb_7
+                state: 'on'
+                for:
+                  hours: 0
+                  minutes: 0
+                  seconds: 1
+          else:
+          - data:
+              rgb_color:
+              - 255
+              - 0
+              - 255
+              brightness_pct: 100
+            target:
+              entity_id:
+              - light.dana_s_fan_lights
+            action: light.turn_on
       bottom_off_release: []
       mode_max: 15
 - id: '1713299820394'
@@ -10910,9 +11182,8 @@
       sequence:
       - delay:
           hours: 0
-          minutes: 5
+          minutes: 1
           seconds: 0
-          milliseconds: 0
       - condition: or
         conditions:
         - condition: state
@@ -11025,22 +11296,25 @@
 - id: '1723251368042'
   alias: Eight Sleep
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - binary_sensor.bed_occupancy
     for:
       hours: 0
       minutes: 0
       seconds: 0
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.bedroom_chair
     to: 'on'
     id: chair
     enabled: false
-  condition: []
-  action:
+    trigger: state
+  conditions:
+  - condition: state
+    entity_id: binary_sensor.anthony_home
+    state: 'on'
+  actions:
   - target:
       device_id: da0aee03d5b8f7fc84c67cedee605139
     data:
@@ -11379,51 +11653,6 @@
       entity_id: lock.front_door
     data: {}
   mode: single
-- id: '1732059873003'
-  alias: Sync GoXLR Music Mute with Sample
-  description: ''
-  triggers:
-  - trigger: state
-    entity_id:
-    - media_player.tc_helicon_goxlr_music
-    to:
-  conditions:
-  - condition: not
-    conditions:
-    - condition: state
-      entity_id: media_player.tc_helicon_goxlr_music
-      state: unavailable
-  actions:
-  - action: homeassistant.reload_config_entry
-    metadata: {}
-    data: {}
-    target:
-      entity_id: media_player.tc_helicon_goxlr_sample
-    enabled: false
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: media_player.tc_helicon_goxlr_music
-        attribute: is_volume_muted
-        state: true
-      sequence:
-      - action: media_player.volume_set
-        target:
-          entity_id: media_player.tc_helicon_goxlr_sample
-        data:
-          volume_level: 0
-    - conditions:
-      - condition: state
-        entity_id: media_player.tc_helicon_goxlr_music
-        attribute: is_volume_muted
-        state: false
-      sequence:
-      - action: media_player.volume_set
-        target:
-          entity_id: media_player.tc_helicon_goxlr_sample
-        data:
-          volume_level: 1
-  mode: restart
 - id: '1733618689622'
   alias: Close Shade
   description: ''
@@ -11728,5 +11957,138 @@
           data: {}
           target:
             entity_id: input_boolean.dinner
+  mode: parallel
+  max: 10
+- id: '1740613890519'
+  alias: GoXLR Buttons
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.tc_helicon_goxlr_effect_select_6_pressed
+    to: 'on'
+    id: effect 6
+    from: 'off'
+  - trigger: state
+    entity_id:
+    - switch.desktop
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    id: startup
+  - trigger: state
+    entity_id:
+    - media_player.tc_helicon_goxlr_music
+    to:
+    id: mute
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - effect 6
+      sequence:
+      - action: button.press
+        target:
+          entity_id: button.desktop_pc_satellite_fixrazer
+        data: {}
+    - conditions:
+      - condition: trigger
+        id:
+        - startup
+      sequence:
+      - action: homeassistant.reload_config_entry
+        metadata: {}
+        data: {}
+        target:
+          entity_id: media_player.tc_helicon_goxlr_sample
+    - conditions:
+      - condition: trigger
+        id:
+        - mute
+      sequence:
+      - choose:
+        - conditions:
+          - condition: state
+            entity_id: media_player.tc_helicon_goxlr_music
+            attribute: is_volume_muted
+            state: true
+          sequence:
+          - action: media_player.volume_set
+            target:
+              entity_id: media_player.tc_helicon_goxlr_sample
+            data:
+              volume_level: 0
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 0
+              milliseconds: 500
+          - if:
+            - condition: not
+              conditions:
+              - condition: state
+                entity_id: media_player.tc_helicon_goxlr_sample
+                attribute: volume_level
+                state: 0
+            then:
+            - action: homeassistant.reload_config_entry
+              metadata: {}
+              data: {}
+              target:
+                entity_id: media_player.tc_helicon_goxlr_sample
+              enabled: true
+            - delay:
+                hours: 0
+                minutes: 0
+                seconds: 0
+                milliseconds: 500
+            - action: media_player.volume_set
+              target:
+                entity_id: media_player.tc_helicon_goxlr_sample
+              data:
+                volume_level: 0
+        - conditions:
+          - condition: state
+            entity_id: media_player.tc_helicon_goxlr_music
+            attribute: is_volume_muted
+            state: false
+          sequence:
+          - action: media_player.volume_set
+            target:
+              entity_id: media_player.tc_helicon_goxlr_sample
+            data:
+              volume_level: 1
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 0
+              milliseconds: 500
+          - if:
+            - condition: not
+              conditions:
+              - condition: state
+                entity_id: media_player.tc_helicon_goxlr_sample
+                attribute: volume_level
+                state: 1
+            then:
+            - action: homeassistant.reload_config_entry
+              metadata: {}
+              data: {}
+              target:
+                entity_id: media_player.tc_helicon_goxlr_sample
+              enabled: true
+            - delay:
+                hours: 0
+                minutes: 0
+                seconds: 0
+                milliseconds: 500
+            - action: media_player.volume_set
+              target:
+                entity_id: media_player.tc_helicon_goxlr_sample
+              data:
+                volume_level: 1
   mode: parallel
   max: 10

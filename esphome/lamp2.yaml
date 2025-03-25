@@ -43,6 +43,20 @@ esp32_ble_tracker:
   scan_parameters:
     interval: 1100ms
     window: 1100ms
+  on_scan_end:
+    - then:
+      - script.execute: restart_after_delay
+
+script:
+  - id: restart_after_delay
+    mode: restart  # abort previous restart sequence on script.execute
+    then:
+      - delay: 10min
+      - button.press: restart_button
+
+button:
+  - platform: restart
+    id: restart_button
 
 logger:
 api:

@@ -146,8 +146,8 @@
   - name: "AC Thermostat Temperature"
     unique_id: ac_thermostat_temperature
     state: >
-      {% if not (states('input_select.anthony')|lower in ['just arrived', 'home'] or not states('input_select.taylor')|lower in ['just arrived', 'home']) 
-      or not is_state('switch.ac', "on") %} unknown
+      {% if not is_state('person.evan', 'home') and not (states('input_select.anthony')|lower in ['just arrived', 'home'] 
+      and not states('input_select.taylor')|lower in ['just arrived', 'home']) or not is_state('switch.ac', "on") %} unknown
       {% elif is_state("switch.ac_boost", "on") -%} 61 
       {% elif is_state("binary_sensor.bedroom_door", "on") and is_state("person.riana", "home") -%} 75
       {% elif is_state("binary_sensor.bedroom_chair", "on") and not is_state("binary_sensor.bed_occupancy", "on") -%} 73
@@ -192,7 +192,7 @@
       {% elif is_state('binary_sensor.desktop_power', 'on') and 
       is_state('light.fan_lights', 'on') -%} 153
       {# Window open #}
-      {% elif states('cover.bedroom_blinds') in ['open', 'opening', 'closing'] -%} 102
+      {# elif states('cover.bedroom_blinds') in ['open', 'opening', 'closing'] -%} 102 #}
       {# At desk with lights off #}
       {% elif is_state('binary_sensor.desktop_power', 'on') and 
       is_state('binary_sensor.bed_occupancy', 'off')-%} 102
@@ -426,6 +426,6 @@
         {% if is_state('binary_sensor.garage_person_detected', 'on') %}
           0
         {% else %}
-          {{ (as_timestamp(now()) - as_timestamp(states.cover.garage_door.last_changed)) / 60 
+          {{ ((as_timestamp(now()) - as_timestamp(states.cover.garage_door.last_changed)) / 60)|int 
               if is_state('cover.garage_door', 'open') else 0 }}
         {% endif %}
