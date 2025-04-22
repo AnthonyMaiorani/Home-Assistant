@@ -379,10 +379,19 @@
             mac: !secret desktop
         - service: wake_on_lan.send_magic_packet
           data:
+            mac: !secret desktop6
+        - service: wake_on_lan.send_magic_packet
+          data:
             mac: !secret desktop2
         - service: wake_on_lan.send_magic_packet
           data:
             mac: !secret desktop3
+        - service: wake_on_lan.send_magic_packet
+          data:
+            mac: !secret desktop4
+        - service: wake_on_lan.send_magic_packet
+          data:
+            mac: !secret desktop5
       turn_off:
         - service: button.press
           target:

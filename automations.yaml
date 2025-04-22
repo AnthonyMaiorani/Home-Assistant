@@ -8630,61 +8630,61 @@
       pico_remote: b115f9250ed77b94f398b0f409dd7f63
       auto_mode: restart
       top_on:
-      - service: switch.turn_on
-        metadata: {}
+      - metadata: {}
         data: {}
         target:
           entity_id: switch.guest_bedroom_light
+        action: switch.turn_on
       down_lower:
-      - service: switch.turn_off
-        metadata: {}
+      - metadata: {}
         data: {}
         target:
           entity_id:
           - switch.guest_bedroom_fan
+        action: switch.turn_off
       bottom_off:
-      - service: switch.turn_off
-        metadata: {}
+      - metadata: {}
         data: {}
         target:
           entity_id: switch.guest_bedroom_light
+        action: switch.turn_off
       up_raise:
-      - service: switch.turn_on
-        metadata: {}
+      - metadata: {}
         data: {}
         target:
           entity_id:
           - switch.guest_bedroom_fan
+        action: switch.turn_on
       top_on_release: []
       up_raise_release: []
       down_lower_release: []
       middle_stop_release: []
       middle_stop:
-      - service: switch.toggle
-        data: {}
+      - data: {}
         target:
           entity_id: switch.samsung_tv
-        enabled: true
+        enabled: false
+        action: switch.toggle
       - choose:
         - conditions:
           - condition: state
             entity_id: switch.samsung_tv
             state: 'on'
           sequence:
-          - service: switch.turn_off
-            target:
+          - target:
               entity_id: switch.samsung_tv
             data: {}
+            action: switch.turn_off
         - conditions:
           - condition: state
             entity_id: switch.samsung_tv
             state: 'off'
           sequence:
-          - service: switch.turn_on
-            target:
+          - target:
               entity_id: switch.samsung_tv
             data: {}
-        enabled: true
+            action: switch.turn_on
+        enabled: false
       bottom_off_release: []
 - id: '1683843733749'
   alias: Turn Off USW LEDs
@@ -11828,11 +11828,13 @@
     - sensor.garage_door_open_duration
     to: '30'
     id: '30'
+    enabled: false
   - trigger: state
     entity_id:
     - sensor.garage_door_open_duration
     to: '45'
     id: '45'
+    enabled: false
   - trigger: state
     entity_id:
     - sensor.garage_door_open_duration
@@ -11871,11 +11873,6 @@
           - action: CLOSEGARAGE
             title: Close Garage
           tag: garage
-          push:
-            sound:
-              name: default
-              critical: 1
-              volume: 0.3
         message: The garage door has been left open for {{ states("sensor.garage_door_open_duration")
           }} minutes
   mode: parallel

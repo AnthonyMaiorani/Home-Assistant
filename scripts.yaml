@@ -202,6 +202,9 @@ color_loop:
         - condition: state
           entity_id: switch.vertical_toggle_control_bedroom_shade
           state: 'on'
+        - condition: state
+          entity_id: switch.vertical_manual_override_bedroom_shade
+          state: 'off'
         then:
         - condition: not
           conditions:
@@ -1026,6 +1029,9 @@ morning:
         - condition: state
           entity_id: switch.vertical_toggle_control_bedroom_shade
           state: 'on'
+        - condition: state
+          entity_id: switch.vertical_manual_override_bedroom_shade
+          state: 'off'
         then:
         - condition: not
           conditions:

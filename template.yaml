@@ -418,6 +418,21 @@
         false
         {% endif %}
       auto_off: 10
+- trigger:
+  - platform: state
+    entity_id: input_boolean.package_recently_detected
+    from: 'off'
+    to: 'on'
+  binary_sensor:
+    - name: "Package Recently Detected"
+      unique_id: package_recently_detected
+      state: >           
+        {% if trigger.platform == 'state' %}
+        true
+        {% else %}
+        false
+        {% endif %}
+      auto_off: 120
 - sensor:
     - name: "Garage Door Open Duration"
       unique_id: "garage_door_open_duration"
