@@ -5508,6 +5508,11 @@
         target:
           entity_id: switch.light_switch_relay
         action: switch.turn_on
+      - data: {}
+        target:
+          entity_id:
+          - switch.ac_boost
+        action: switch.turn_on
   mode: queued
   max: 100
 - id: '1668919655434'
@@ -11689,6 +11694,16 @@
           seconds: 1
           milliseconds: 1
         enabled: false
+      - action: switch.turn_off
+        target:
+          entity_id:
+          - switch.vertical_toggle_control_bedroom_shade
+        data: {}
+      - action: switch.turn_on
+        target:
+          entity_id:
+          - switch.vertical_manual_override_bedroom_shade
+        data: {}
       until:
       - condition: state
         entity_id: cover.bedroom_blinds
@@ -12089,3 +12104,59 @@
                 volume_level: 1
   mode: parallel
   max: 10
+- id: '1745765702770'
+  alias: Set Living Room Camera IR Settings
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - light.living_room_hyperhdr
+    to:
+  - trigger: sun
+    event: sunset
+    offset: 0
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: light.living_room_hyperhdr
+        state: 'on'
+      - condition: sun
+        after: sunset
+      sequence:
+      - action: select.select_option
+        target:
+          entity_id: select.living_room_infrared_mode
+        data:
+          option: Always Enable
+    default:
+    - action: select.select_option
+      target:
+        entity_id: select.living_room_infrared_mode
+      data:
+        option: Auto
+  mode: single
+- id: '1746297349343'
+  alias: Turn back on eight sleep
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - switch.eight_sleep
+    to: 'off'
+    id: turned off
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.anthony_home
+        state: 'on'
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id:
+          - switch.eight_sleep_keep_temp
+        data: {}
+  mode: single

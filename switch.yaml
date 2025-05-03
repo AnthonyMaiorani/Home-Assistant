@@ -81,6 +81,17 @@
     Content-Type: application/json
   method: post
   scan_interval: 5
+- platform: rest
+  resource: http://192.168.1.105:3000/api/deviceStatus
+  name: Eight Sleep Keep Temp
+  body_on: '{ "left": { "isOn": true } }'
+  body_off: '{ "left": { "isOn": false } }'
+  is_on_template: "{{ value_json.left.isOn }}"
+  unique_id: eightsleepkeeptemp
+  headers:
+    Content-Type: application/json
+  method: post
+  scan_interval: 5
 - platform: template
   switches:
     # case_rgb:
