@@ -12153,6 +12153,9 @@
       - condition: state
         entity_id: binary_sensor.anthony_home
         state: 'on'
+      - condition: state
+        entity_id: binary_sensor.bed_occupancy
+        state: 'on'
       sequence:
       - action: switch.turn_on
         target:

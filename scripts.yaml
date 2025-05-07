@@ -246,11 +246,12 @@ color_loop:
             state: open
         - repeat:
             sequence:
-            - action: cover.open_cover
+            - action: cover.set_cover_position
               target:
                 entity_id:
                 - cover.bedroom_blinds
-              data: {}
+              data:
+                position: 99
             - wait_for_trigger:
               - trigger: state
                 entity_id:
@@ -269,7 +270,7 @@ color_loop:
             - condition: state
               entity_id: cover.bedroom_blinds
               attribute: current_position
-              state: 100
+              state: 99
     - if:
       - condition: and
         conditions:
@@ -1073,11 +1074,12 @@ morning:
             state: open
         - repeat:
             sequence:
-            - action: cover.open_cover
+            - action: cover.set_cover_position
               target:
                 entity_id:
                 - cover.bedroom_blinds
-              data: {}
+              data:
+                position: 99
             - wait_for_trigger:
               - trigger: state
                 entity_id:
@@ -1096,7 +1098,7 @@ morning:
             - condition: state
               entity_id: cover.bedroom_blinds
               attribute: current_position
-              state: 100
+              state: 99
     - data: {}
       target:
         entity_id: switch.acfanhigh
