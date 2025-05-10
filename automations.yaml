@@ -12157,9 +12157,24 @@
         entity_id: binary_sensor.bed_occupancy
         state: 'on'
       sequence:
-      - action: switch.turn_on
-        target:
-          entity_id:
-          - switch.eight_sleep_keep_temp
-        data: {}
+      - repeat:
+          sequence:
+          - action: switch.turn_on
+            target:
+              entity_id:
+              - switch.eight_sleep_keep_temp
+            data: {}
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 30
+              milliseconds: 0
+          until:
+          - condition: state
+            entity_id: switch.eight_sleep
+            state: 'on'
+            for:
+              hours: 0
+              minutes: 0
+              seconds: 10
   mode: single
