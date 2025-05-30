@@ -1,3 +1,19 @@
+- number:
+  - name: "Eight Sleep Temp"
+    unique_id: eightsleeptemp
+    step: >
+      {{ 1 }}
+    min: >
+      {{ 55 }}
+    max: >
+      {{ 110 }}
+    set_value: 
+      - action: rest_command.set_eight_sleep_temp
+        data: 
+          temp: >
+            {{ value }}
+    state: >
+      {{ states("sensor.eight_sleep_left_target_temperature") }}
 - button:
   - name: "Cancel alarms today"
     unique_id: alexa_cancel_alarms_today

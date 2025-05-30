@@ -7,4 +7,9 @@
     - 'date_time_iso'
     - 'time_date'
     - 'time_utc'
-    
+#- platform: rest
+#  unique_id: eightsleepstatus
+#  resource: http://192.168.1.105:3000/api/deviceStatus
+#  json_attributes:
+#    - left.currentTemperatureF
+#    - left.targetTemperatureF

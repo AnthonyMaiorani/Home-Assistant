@@ -914,20 +914,20 @@
   alias: Bed Occupancy Detected
   description: If motion detected in bed under certain circumstances, turn off overhead
     lights.
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - binary_sensor.bed_occupancy
     to: 'on'
     for:
       hours: 0
       minutes: 0
       seconds: 0
-  condition:
+    trigger: state
+  conditions:
   - condition: state
     entity_id: input_boolean.bedmotion
     state: 'off'
-  action:
+  actions:
   - choose:
     - conditions:
       - condition: time
@@ -956,19 +956,19 @@
           state: 'on'
         then:
         - wait_for_trigger:
-          - platform: state
-            entity_id:
+          - entity_id:
             - binary_sensor.bed_occupancy
             to: 'on'
             for:
               hours: 0
               minutes: 0
               seconds: 10
+            trigger: state
           continue_on_timeout: false
-      - service: script.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: script.call
+        action: script.turn_on
       alias: night call
     default:
     - parallel:
@@ -997,21 +997,21 @@
             attribute: temperature
             above: 65
         then:
-        - service: switch.turn_on
-          data: {}
+        - data: {}
           target:
             entity_id:
             - switch.ac
+          action: switch.turn_on
         alias: turn on ac
       - if:
         - condition: state
           entity_id: light.fan_lights
           state: 'on'
         then:
-        - service: script.turn_on
-          data: {}
+        - data: {}
           target:
             entity_id: script.fan_off
+          action: script.turn_on
         alias: Fan Lights Off
       - alias: if home alone, turn off stuff
         if:
@@ -1025,43 +1025,42 @@
             state: 'on'
           enabled: false
         then:
-        - service: light.turn_off
-          data: {}
+        - data: {}
           target:
             entity_id:
             - light.living_room_lights
             - light.bathroom_lights
             - light.hallway_lights
             - light.living_room_fan
-        - service: switch.turn_off
-          data: {}
+          action: light.turn_off
+        - data: {}
           target:
             entity_id:
             - switch.living_room_fan
             - switch.laundry_room_light
-        - service: media_player.turn_off
-          data: {}
+          action: switch.turn_off
+        - data: {}
           target:
             entity_id:
             - media_player.owntone_output_bathroom
             - media_player.kitchen_speakers
             - media_player.owntone_output_kitchen_right
             - media_player.owntone_output_kitchen_left
+          action: media_player.turn_off
         - repeat:
             until:
             - condition: state
               entity_id: media_player.kitchen_speakers
               state: 'off'
             sequence:
-            - service: media_player.turn_off
-              data: {}
+            - data: {}
               target:
                 entity_id:
                 - media_player.kitchen_speakers
                 - media_player.owntone_output_kitchen_right
                 - media_player.owntone_output_kitchen_left
-      - service: media_player.turn_off
-        data: {}
+              action: media_player.turn_off
+      - data: {}
         target:
           entity_id:
           - media_player.owntone_output_soundbar
@@ -1069,6 +1068,7 @@
           - media_player.owntone_output_kitchen_left
           - media_player.owntone_output_kitchen_right
           - media_player.owntone_output_bathroom
+        action: media_player.turn_off
       - if:
         - condition: or
           conditions:
@@ -1102,34 +1102,34 @@
             attribute: media_playlist
             state: Music
           then:
-          - service: media_player.volume_set
-            continue_on_error: true
+          - continue_on_error: true
             data:
               volume_level: 0.18
             target:
               entity_id:
               - media_player.spotify_anthony221121
+            action: media_player.volume_set
           - repeat:
               count: '5'
               sequence:
-              - service: media_player.turn_on
-                data: {}
+              - data: {}
                 target:
                   entity_id:
                   - media_player.owntone_output_anthony_s_nightstand
                   - media_player.owntone_output_anthony_s_desk
-              - service: media_player.volume_set
-                data:
+                action: media_player.turn_on
+              - data:
                   volume_level: 0.18
                 target:
                   entity_id:
                   - media_player.owntone_output_anthony_s_desk
-              - service: media_player.volume_set
-                data:
+                action: media_player.volume_set
+              - data:
                   volume_level: 0.36
                 target:
                   entity_id:
                   - media_player.owntone_output_anthony_s_nightstand
+                action: media_player.volume_set
               - delay:
                   hours: 0
                   minutes: 0
@@ -1151,28 +1151,28 @@
                   minutes: 0
                   seconds: 5
                   milliseconds: 0
-              - service: media_player.volume_set
-                continue_on_error: true
+              - continue_on_error: true
                 data:
                   volume_level: 0.12
                 target:
                   entity_id:
                   - media_player.spotify_anthony221121
+                action: media_player.volume_set
               - repeat:
                   count: '3'
                   sequence:
-                  - service: media_player.volume_set
-                    data:
+                  - data:
                       volume_level: 0.12
                     target:
                       entity_id:
                       - media_player.owntone_output_anthony_s_desk
-                  - service: media_player.volume_set
-                    data:
+                    action: media_player.volume_set
+                  - data:
                       volume_level: 0.24
                     target:
                       entity_id:
                       - media_player.owntone_output_anthony_s_nightstand
+                    action: media_player.volume_set
                   - delay:
                       hours: 0
                       minutes: 0
@@ -1187,28 +1187,28 @@
               - condition: state
                 entity_id: switch.acfanhigh
                 state: 'on'
-              - service: media_player.volume_set
-                continue_on_error: true
+              - continue_on_error: true
                 data:
                   volume_level: 0.12
                 target:
                   entity_id:
                   - media_player.spotify_anthony221121
+                action: media_player.volume_set
               - repeat:
                   count: '3'
                   sequence:
-                  - service: media_player.volume_set
-                    data:
+                  - data:
                       volume_level: 0.12
                     target:
                       entity_id:
                       - media_player.owntone_output_anthony_s_desk
-                  - service: media_player.volume_set
-                    data:
+                    action: media_player.volume_set
+                  - data:
                       volume_level: 0.24
                     target:
                       entity_id:
                       - media_player.owntone_output_anthony_s_nightstand
+                    action: media_player.volume_set
                   - delay:
                       hours: 0
                       minutes: 0
@@ -1216,28 +1216,28 @@
                       milliseconds: 0
               alias: increase volume if ac fan high
             else:
-            - service: media_player.volume_set
-              continue_on_error: true
+            - continue_on_error: true
               data:
                 volume_level: 0.13
               target:
                 entity_id:
                 - media_player.spotify_anthony221121
+              action: media_player.volume_set
             - repeat:
                 count: '5'
                 sequence:
-                - service: media_player.volume_set
-                  data:
+                - data:
                     volume_level: 0.13
                   target:
                     entity_id:
                     - media_player.owntone_output_anthony_s_desk
-                - service: media_player.volume_set
-                  data:
+                  action: media_player.volume_set
+                - data:
                     volume_level: 0.26
                   target:
                     entity_id:
                     - media_player.owntone_output_anthony_s_nightstand
+                  action: media_player.volume_set
                 - delay:
                     hours: 0
                     minutes: 0
@@ -1260,27 +1260,37 @@
             - condition: state
               entity_id: input_select.anthony
               state: Just Left
-        - service: script.turn_on
-          data: {}
+        - data: {}
           target:
             entity_id: script.lofi
+          action: script.turn_on
       - if:
         - condition: state
           entity_id: media_player.spotify_anthony221121
           attribute: media_playlist
           state: lofi
         then:
-        - service: media_player.turn_on
-          data: {}
+        - data: {}
           target:
             entity_id:
             - media_player.owntone_output_anthony_s_desk
             - media_player.owntone_output_anthony_s_nightstand
-      - service: input_boolean.turn_off
-        data: {}
+          action: media_player.turn_on
+      - data: {}
         target:
           entity_id: input_boolean.privacy
         enabled: true
+        action: input_boolean.turn_off
+      - if:
+        - condition: state
+          entity_id: switch.eight_sleep
+          state: 'off'
+        then:
+        - action: automation.trigger
+          target:
+            entity_id: automation.turn_back_on_eight_sleep
+          data:
+            skip_condition: true
   - if:
     - condition: time
       before: 05:00:00
@@ -1289,10 +1299,10 @@
       entity_id: switch.desktop
       state: 'off'
     then:
-    - service: switch.turn_off
-      data: {}
+    - data: {}
       target:
         entity_id: switch.usb_hub
+      action: switch.turn_off
     alias: turn off mouse dock
   mode: single
 - id: '1645695901319'
@@ -1711,46 +1721,45 @@
 - id: '1661502555805'
   alias: Nanoleaf Scene Changer and Auto Brightness
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - sensor.nanoleaf_scene
     - sensor.nanoleaf_auto_brightness
-  - platform: event
-    event_type: script_started
+    trigger: state
+  - event_type: script_started
     context: {}
-  - platform: event
-    event_type: event_template_reloaded
-  - platform: event
-    event_type: automation_reloaded
+    trigger: event
+  - event_type: event_template_reloaded
+    trigger: event
+  - event_type: automation_reloaded
     id: reloaded
-  - platform: state
-    entity_id:
+    trigger: event
+  - entity_id:
     - light.shapes_007f
     from: unavailable
     to: 'on'
     id: desk available
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - light.shapes_ee82
     from: unavailable
     to: 'on'
     id: vertical available
+    trigger: state
   - event_type: event_change_nanoleaf
-    platform: event
-  - platform: state
-    entity_id:
+    trigger: event
+  - entity_id:
     - switch.desktop
     from: 'on'
     to: 'off'
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - light.shapes_4948
     from: unavailable
     to: 'on'
     id: corner available
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.signalrgb_active
     for:
       hours: 0
@@ -1758,8 +1767,8 @@
       seconds: 5
     to: 'on'
     from: 'off'
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - light.shapes_ee82
     attribute: Effect
     to: '*ExtControl*'
@@ -1767,13 +1776,13 @@
       hours: 0
       minutes: 0
       seconds: 2
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - light.govee
     to: 'on'
     from: 'off'
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.signalrgb_active
     for:
       hours: 0
@@ -1781,8 +1790,8 @@
       seconds: 10
     to: 'on'
     from: 'off'
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.signalrgb_active
     for:
       hours: 0
@@ -1790,8 +1799,8 @@
       seconds: 15
     to: 'on'
     from: 'off'
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.signalrgb_active
     for:
       hours: 0
@@ -1799,16 +1808,16 @@
       seconds: 20
     to: 'on'
     from: 'off'
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - script.call
     to: 'on'
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - script.call
     to: 'off'
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - light.shapes_007f
     attribute: effect
     from: Webcam
@@ -1816,8 +1825,8 @@
       hours: 0
       minutes: 0
       seconds: 2
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - light.shapes_4948
     attribute: Effect
     to: '*ExtControl*'
@@ -1825,8 +1834,8 @@
       hours: 0
       minutes: 0
       seconds: 2
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - light.shapes_007f
     attribute: Effect
     to: '*ExtControl*'
@@ -1834,15 +1843,16 @@
       hours: 0
       minutes: 0
       seconds: 2
-  - platform: time_pattern
-    minutes: /1
-  condition:
+    trigger: state
+  - minutes: /1
+    trigger: time_pattern
+  conditions:
   - condition: not
     conditions:
     - condition: state
       entity_id: script.night
       state: 'on'
-  action:
+  actions:
   - if:
     - condition: trigger
       id:
@@ -1936,6 +1946,7 @@
                 effect: '{{ states(''sensor.nanoleaf_scene'') }}'
               action: light.turn_on
             alias: vertical shapes
+            enabled: false
           - if:
             - condition: not
               conditions:
@@ -1981,6 +1992,7 @@
                 effect: '{{ states(''sensor.nanoleaf_scene'') }}'
               action: light.turn_on
             alias: corner shapes
+            enabled: false
           - alias: desk shapes
             if:
             - condition: state
@@ -2087,6 +2099,7 @@
               data:
                 brightness: '{{ states(''sensor.nanoleaf_auto_brightness'') }}'
               action: light.turn_on
+            enabled: false
           - alias: set vertical lights brightness
             if:
             - alias: brightness incorrect
@@ -2106,6 +2119,7 @@
               data:
                 brightness: '{{ states(''sensor.nanoleaf_auto_brightness'') }}'
               action: light.turn_on
+            enabled: false
         - delay:
             hours: 0
             minutes: 0
@@ -11788,46 +11802,6 @@
         target:
           entity_id: media_player.65_onn_roku_tv
         enabled: false
-  mode: single
-- id: '1734318148934'
-  alias: Guest Bedroom Light Pico
-  description: ''
-  triggers:
-  - device_id: 28929daa383258a930d69cf2af9a4edf
-    domain: lutron_caseta
-    type: press
-    subtype: 'on'
-    trigger: device
-    id: 'on'
-  - device_id: 28929daa383258a930d69cf2af9a4edf
-    domain: lutron_caseta
-    type: press
-    subtype: 'off'
-    trigger: device
-    id: 'off'
-  conditions: []
-  actions:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id:
-        - 'on'
-      sequence:
-      - action: switch.turn_on
-        metadata: {}
-        data: {}
-        target:
-          entity_id: switch.guest_bedroom_light
-    - conditions:
-      - condition: trigger
-        id:
-        - 'off'
-      sequence:
-      - action: switch.turn_off
-        metadata: {}
-        data: {}
-        target:
-          entity_id: switch.guest_bedroom_light
   mode: single
 - id: '1735459739007'
   alias: Garage Door Reminder

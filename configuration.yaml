@@ -70,6 +70,12 @@ notify:
       - service: mobile_app_m4_pro_macbook_pro
 
 rest_command:
+  set_eight_sleep_temp:
+    url: http://192.168.1.105:3000/api/deviceStatus
+    method: post
+    payload: '{ "left": { "targetTemperatureF": {{ temp }}, "isOn": true } }'
+    headers:
+      Content-Type: application/json
   set_wled_brightness:
     url: http://192.168.1.57/win&SS=0&SB={{ states("input_number.wled_brightness") }}
   set_closet_brightness:
