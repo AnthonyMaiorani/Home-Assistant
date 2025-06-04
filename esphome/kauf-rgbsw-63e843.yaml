@@ -4,6 +4,9 @@ substitutions:
 packages:
   Kauf.RGBSw: github://KaufHA/kauf-rgb-switch/kauf-rgbs.yaml
 
+mdns:
+  disabled: True
+
 web_server:
   !remove
 

@@ -32,6 +32,10 @@ time:
     id: homeassistant_time
 
 ota:
+  platform: esphome
+
+mdns:
+  disabled: True
 
 logger:
     level: DEBUG
@@ -63,6 +67,11 @@ ethernet:
   clk_mode: GPIO0_IN
   phy_addr: 1
   power_pin: GPIO16
+  manual_ip:
+    static_ip: 192.168.1.18
+    gateway: !secret gateway
+    subnet: !secret subnet
+    dns1: !secret dns1
 
 preferences:
   flash_write_interval: 1min

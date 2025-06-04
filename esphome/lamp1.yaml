@@ -5,6 +5,9 @@ esp32:
   board: wt32-eth01
   framework:
     type: esp-idf
+    
+mdns:
+  disabled: True
 
 #wifi:
 #  ssid: !secret ssid

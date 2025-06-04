@@ -5,6 +5,9 @@ esphome:
 esp32:
   board: wt32-eth01
 
+mdns:
+  disabled: True
+
 ethernet:
   type: LAN8720
   mdc_pin: GPIO23

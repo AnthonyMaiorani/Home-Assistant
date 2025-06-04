@@ -9769,6 +9769,8 @@
         - sensor.anthonys_ipad_battery_level
         - sensor.80fd099b_9b465253_browser_battery
         - sensor.ipad_3_battery_level
+        - binary_sensor.lolas_feeder_battery_status
+        - sensor.lolas_feeder_battery_ac
       actions:
       - if:
         - condition: state
