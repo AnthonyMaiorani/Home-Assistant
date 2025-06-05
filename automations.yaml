@@ -198,6 +198,7 @@
     - condition: state
       state: home
       entity_id: person.evan
+    enabled: false
   actions:
   - if:
     - condition: trigger
@@ -1717,6 +1718,87 @@
       target:
         entity_id: switch.ac
       action: switch.turn_off
+    enabled: false
+  - alias: set temp
+    repeat:
+      sequence:
+      - data:
+          hvac_mode: cool
+          temperature: '{{states(''sensor.ac_thermostat_temperature'') |int(61)}}'
+        target:
+          entity_id: climate.bedroom_ac
+        action: climate.set_temperature
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 3
+      until:
+      - condition: template
+        value_template: '{{ is_state_attr(''climate.bedroom_ac'', ''temperature'',
+          states(''sensor.ac_thermostat_temperature'')|int) }}'
+  - if:
+    - condition: state
+      entity_id: switch.ac_boost
+      state: 'on'
+    then:
+    - repeat:
+        sequence:
+        - data:
+            preset_mode: boost
+          target:
+            entity_id: climate.bedroom_ac
+          action: climate.set_preset_mode
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 3
+        until:
+        - condition: state
+          entity_id: climate.bedroom_ac
+          attribute: preset_mode
+          state: boost
+          for:
+            hours: 0
+            minutes: 0
+            seconds: 3
+      alias: set ac boost
+    else:
+    - data:
+        preset_mode: none
+      target:
+        entity_id: climate.bedroom_ac
+      action: climate.set_preset_mode
+    - delay:
+        hours: 0
+        minutes: 0
+        seconds: 2
+        milliseconds: 0
+    - data:
+        preset_mode: none
+      target:
+        entity_id: climate.bedroom_ac
+      action: climate.set_preset_mode
+    - alias: turn off ac boost
+      repeat:
+        sequence:
+        - data:
+            preset_mode: none
+          target:
+            entity_id: climate.bedroom_ac
+          action: climate.set_preset_mode
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 3
+        until:
+        - condition: state
+          entity_id: climate.bedroom_ac
+          attribute: preset_mode
+          state: none
+          for:
+            hours: 0
+            minutes: 0
+            seconds: 3
   mode: queued
 - id: '1661502555805'
   alias: Nanoleaf Scene Changer and Auto Brightness
@@ -12153,4 +12235,42 @@
               hours: 0
               minutes: 0
               seconds: 10
+  mode: single
+- id: '1749164298369'
+  alias: Cool down room
+  description: ''
+  triggers:
+  - trigger: time
+    at: '14:30:00'
+  conditions:
+  - condition: state
+    entity_id: binary_sensor.anthony_home
+    state: 'off'
+  - condition: state
+    entity_id: person.anthony
+    state: Raytheon
+  - condition: time
+    weekday:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+  actions:
+  - action: switch.turn_on
+    data: {}
+    target:
+      entity_id:
+      - switch.ac
+      - switch.eight_sleep
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - action: switch.turn_on
+    data: {}
+    target:
+      entity_id:
+      - switch.ac_boost
   mode: single

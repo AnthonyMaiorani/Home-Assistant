@@ -162,8 +162,7 @@
   - name: "AC Thermostat Temperature"
     unique_id: ac_thermostat_temperature
     state: >
-      {% if not is_state('person.evan', 'home') and not (states('input_select.anthony')|lower in ['just arrived', 'home'] 
-      and not states('input_select.taylor')|lower in ['just arrived', 'home']) or not is_state('switch.ac', "on") %} unknown
+      {% if not is_state('switch.ac', "on") %} unknown
       {% elif is_state("switch.ac_boost", "on") -%} 61 
       {% elif is_state("binary_sensor.bedroom_door", "on") and is_state("person.riana", "home") -%} 75
       {% elif is_state("binary_sensor.bedroom_chair", "on") and not is_state("binary_sensor.bed_occupancy", "on") -%} 73

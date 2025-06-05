@@ -52,24 +52,24 @@
   scan_interval: 5
   method: patch
   unique_id: rope
-- platform: rest
-  resource: http://192.168.1.78/json/state
-  name: Cube
-  body_on: '{"on":true}'
-  body_off: '{"on":false}'
-  is_on_template: "{{ value_json.on }}"
-  scan_interval: 5
-  method: patch
-  unique_id: cube
-- platform: rest
-  resource: http://192.168.1.177/json/state
-  name: Block
-  body_on: '{"on":true}'
-  body_off: '{"on":false}'
-  is_on_template: "{{ value_json.on }}"
-  scan_interval: 5
-  method: patch
-  unique_id: block
+# - platform: rest
+#   resource: http://192.168.1.78/json/state
+#   name: Cube
+#   body_on: '{"on":true}'
+#   body_off: '{"on":false}'
+#   is_on_template: "{{ value_json.on }}"
+#   scan_interval: 5
+#   method: patch
+#   unique_id: cube
+# - platform: rest
+#   resource: http://192.168.1.177/json/state
+#   name: Block
+#   body_on: '{"on":true}'
+#   body_off: '{"on":false}'
+#   is_on_template: "{{ value_json.on }}"
+#   scan_interval: 5
+#   method: patch
+#   unique_id: block
 - platform: rest
   resource: http://192.168.1.105:3000/api/deviceStatus
   name: Eight Sleep
