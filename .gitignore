@@ -1,0 +1,46 @@
+# Example .gitignore file for your config dir.
+# An * ensures that everything will be ignored.
+*
+# You can whitelist files/folders with !, these will not be ignored.
+!*.yaml
+!.gitignore
+!*.md
+!*.jinja
+!/esphome
+!/blueprints/**
+!/blueprints/
+!packages
+!pyscript/
+!/.github
+!/.github/workflows
+!/owntone/
+!owntone.conf
+!*.py
+!/rtl_433/
+!/rtl_433/*
+!/themes/
+!/themes/ios-themes
+!/themes/ios-themes/*
+/pyscript/delete_song.py
+
+# Ignore folders.
+/custom_components
+custom_components
+/custom_components/**
+.storage
+.cloud
+node-red
+www
+tts
+custom_components/mail_and_packages/images
+/owntone/**
+/owntone/
+
+# Ensure these YAML files are ignored, otherwise your secret data/credentials will leak.
+ip_bans.yaml
+secrets.yaml
+known_devices.yaml
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]

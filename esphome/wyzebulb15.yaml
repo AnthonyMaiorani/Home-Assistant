@@ -1,0 +1,96 @@
+esphome:
+  name: ${name}
+
+substitutions:
+  name: wyzebulb15
+  friendly_name: Wyze Bulb 15
+  static_ip: 192.168.2.242
+
+esp32:
+  board: esp32doit-devkit-v1
+
+#mdns:
+#  disabled: True
+
+wifi:
+  ssid: !secret ssid
+  password: !secret password
+  #output_power: 8.5dB
+#  fast_connect: on
+#  reboot_timeout: 0s
+#  use_address: 192.168.2.242
+#  manual_ip:
+#    static_ip: ${static_ip}
+#    gateway: !secret gateway
+#    subnet: !secret subnet
+#    dns1: !secret dns1
+
+web_server:
+captive_portal:
+logger:
+api:
+ota:
+  platform: esphome
+sensor:
+  - platform: homeassistant
+    entity_id: sensor.colorloopstate
+    id: hassstate
+
+light:
+  - platform: rgbw
+    name: "${friendly_name}"
+    id: leds
+    red: output_red
+    green: output_green
+    blue: output_blue
+    white: white_output
+    restore_mode: RESTORE_DEFAULT_ON
+    effects:
+      - random:
+          name: Music
+          transition_length: .1s
+          update_interval: .2s
+      - lambda:
+          name: Color Loop
+          lambda: |-
+            static float state;
+            if (state != id(hassstate).state) {
+              state = id(hassstate).state;
+              auto call = id(leds).turn_on();
+              call.set_white(0);
+              call.set_transition_length(3000);
+              if (state == 0) {
+                call.set_rgb(0.45, 0.98, 0.39);
+              } else if (state == 1) {
+                call.set_rgb(0.45, 0.98, 0.93);
+              } else if (state == 2) {
+                call.set_rgb(0.38, 0.15, 0.96);
+              } else if (state == 3) {
+                call.set_rgb(0.5, 0.17, 0.96);
+              } else {
+                call.set_rgb(0.92, 0.2, 0.27);
+              }
+              call.perform();
+            }
+
+# Define output pins
+output:
+  - platform: ledc
+    id: output_red
+    pin: GPIO14
+    power_supply: rgb_power
+  - platform: ledc
+    id: output_green
+    pin: GPIO26
+    power_supply: rgb_power
+  - platform: ledc
+    id: output_blue
+    pin: GPIO13
+    power_supply: rgb_power
+  - platform: ledc
+    id: white_output
+    pin: GPIO15
+
+power_supply:
+  - id: rgb_power
+    pin: GPIO23

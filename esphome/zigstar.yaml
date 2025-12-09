@@ -1,0 +1,132 @@
+substitutions:
+  #Name your Gateway
+  device_name: uzg01-btproxy
+  #Home Assistant Name
+  friendly_name: UZG Gateway - BTProxy
+  #Secret YAML is used for next data:
+  #pi_pw: !secret api_password
+  #ota_pw: !secret ota_password
+
+esphome:
+  name: "${device_name}"
+  name_add_mac_suffix: false
+  project:
+    name: ZigStar.UZG01-BTProxy
+    version: "1.0"
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+    sdkconfig_options:
+      CONFIG_FREERTOS_UNICORE: y
+      CONFIG_ESP_TASK_WDT_TIMEOUT_S: "10"
+
+ethernet:
+  type: LAN8720
+  mdc_pin: GPIO23
+  mdio_pin: GPIO18
+  clk_mode: GPIO17_OUT
+  phy_addr: 0
+  power_pin: GPIO05
+
+  # Optional manual IP
+  #manual_ip:
+  #  static_ip: 192.168.1.218
+  #  gateway: 192.168.1.1
+  #  subnet: 255.255.255.0
+  #  dns1: 192.168.1.1
+
+## General ESPHome settings
+# Home Assistant API is enabled
+api:
+  #password: ${api_pw}
+  #reboot_timeout: 0s
+# Logger is enabled
+logger:
+  level: DEBUG
+# Enable OTA
+ota:
+  platform: esphome
+  #password: ${ota_pw}
+# Enable WEB
+web_server:
+  port: 80
+
+dashboard_import:
+  package_import_url: github://mercenaruss/zigstar_gateways/files/ESP-HOME/zigstar-uzg-01/uzg01-btproxy.yaml@main
+  import_full_config: true
+
+# BTProxy
+esp32_ble_tracker:
+  scan_parameters:
+    interval: 1100ms
+    window: 1100ms
+    active: true
+
+bluetooth_proxy:
+  active: true
+
+##Uptime generic sensor
+sensor:
+  - platform: uptime
+    id: uptime_sec
+    update_interval: 60s
+  - platform: template
+    id: uptime_timestamp
+    name: "$devicename Uptime"
+    device_class: timestamp
+    entity_category: diagnostic
+    accuracy_decimals: 0
+    update_interval: never
+    lambda: |-
+      static float timestamp = (
+        id(current_time).utcnow().timestamp - id(uptime_sec).state
+      );
+      return timestamp;
+
+time:
+  - platform: homeassistant
+    id: current_time
+    on_time_sync:
+      - component.update: uptime_timestamp
+
+#CONTROL SETTINGS
+
+## Buttons
+button:
+  - platform: safe_mode
+    name: Safe Mode Reboot
+    entity_category: diagnostic
+  ### ESP32 Restart
+  - platform: restart
+    name: "ESP32 - Restart"
+
+##Status of physical button - sensor
+binary_sensor:
+  - platform: gpio
+    name: "Physical button status"
+    icon: mdi:toggle-switch
+    id: gpio35btn1
+    pin:
+      number: GPIO35
+      mode:
+        input: true
+      inverted: yes
+##LEDs swithces
+switch:
+  - platform: gpio
+    name: "LED (RED)"
+    restore_mode: ALWAYS_OFF
+    icon: mdi:toggle-switch
+    id: gpio12LED1
+    pin:
+      number: GPIO12
+
+  - platform: gpio
+    name: "LED (BLUE)"
+    restore_mode: ALWAYS_ON
+    icon: mdi:toggle-switch
+    id: gpio14LED2
+    pin:
+      number: GPIO14

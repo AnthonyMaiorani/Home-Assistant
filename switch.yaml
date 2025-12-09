@@ -1,0 +1,35 @@
+- platform: wake_on_lan
+  mac: 74:56:3C:BD:CE:51
+  name: Desktop Power
+  host: 192.168.1.77
+- platform: rest
+  resource: http://192.168.1.68:3000/api/deviceStatus
+  name: "Anthony's Eight Sleep"
+  body_on: '{ "left": { "targetTemperatureF": 55, "isOn": true } }'
+  body_off: '{ "left": { "isOn": false } }'
+  is_on_template: "{{ value_json.left.isOn }}"
+  unique_id: anthony_s_eight_sleep
+  headers:
+    Content-Type: application/json
+  method: post
+  scan_interval: 5
+- platform: rest
+  resource: http://192.168.1.68:3000/api/deviceStatus
+  name: "Anthony's Eight Sleep Keep Temp"
+  body_on: '{ "left": { "isOn": true } }'
+  body_off: '{ "left": { "isOn": false } }'
+  is_on_template: "{{ value_json.left.isOn }}"
+  unique_id: anthony_s_eight_sleep_keep_temp
+  headers:
+    Content-Type: application/json
+  method: post
+  scan_interval: 5
+- platform: rest
+  resource: http://192.168.1.73/json/state
+  name: Master WLED
+  body_on: '{"on":true}'
+  body_off: '{"on":false}'
+  is_on_template: "{{ value_json.on }}"
+  scan_interval: 5
+  method: patch
+  unique_id: master_wled

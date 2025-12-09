@@ -1,0 +1,159 @@
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+v6_quietdrift:
+
+# Text to speech
+#tts:
+#  - platform: google_translate
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+template: !include template.yaml
+switch: !include switch.yaml
+
+notify:
+  - name: anthonys_devices
+    platform: group
+    services:
+      - service: mobile_app_iphone
+#      - service: mobile_app_ipad_air_m2
+#      - service: mobile_app_m4_pro_macbook_pro
+
+#smartir:
+wake_on_lan:
+
+# climate:
+#   - platform: smartir
+#     name: LG AC
+#     unique_id: lg_ac
+#     device_code: 1066
+#     controller_data: remote.living_room_remote
+#     temperature_sensor: sensor.acurite_06044m_temperature
+#     humidity_sensor: sensor.acurite_06044m_humidity
+
+zone:
+  # This will override the default home zone
+  - name: Home
+    latitude: 43.77572657908697
+    longitude: -123.0893397331238
+    radius: 566
+    icon: mdi:home
+
+sensor:
+  - platform: rest
+    name: H3 Podcast Latest VOD ID
+    scan_interval: 86400
+    resource: !secret h3
+    value_template: >
+      {% if value_json['items'] is defined and value_json['items'][0] is defined %}
+        {{ value_json['items'][0]['id']['videoId'] }}
+      {% else %}
+        unknown
+      {% endif %}
+    unique_id: h3_podcast_latest_vod_id
+
+group:
+  ha_menu:
+    name: HA Menu
+    entities:
+      - script.lights_on
+      - script.lights_off
+      - script.call
+      - script.goodnight
+      - switch.master_fan
+      - switch.blueair_switch
+      - input_boolean.anthony_bed_occupancy_bypass
+      - switch.master_bathroom_switch
+      - script.play_jazz
+      - switch.anthony_s_desktop
+      - switch.desktop
+      - script.open_curtains
+      - script.close_curtains
+      - script.close_south_curtains
+      - cover.taylor_s_garage_door
+      - cover.anthony_s_garage_door
+
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 192.168.1.8 ###(Nginx Proxy Manager IP)###
+    - 192.168.1.11 ###(Nginx Proxy Manager IP)###
+    - 192.168.1.0/24 ###(Nginx Proxy Manager IP)###
+
+command_line:
+  - switch:
+      name: USW LEDs
+      unique_id: usw_leds_1
+      command_on: !secret usw_leds_on
+      command_off: !secret usw_leds_off
+  - switch:
+      name: USW 3 LEDs
+      unique_id: usw_leds_3
+      command_on: !secret usw3_leds_on
+      command_off: !secret usw3_leds_off
+  - switch:
+      name: USW 4 LEDs
+      unique_id: usw_leds_4
+      command_on: !secret usw4_leds_on
+      command_off: !secret usw4_leds_off
+  - switch:
+      name: USW 2 LEDs
+      unique_id: usw_leds_2
+      command_on: !secret usw2_leds_on
+      command_off: !secret usw2_leds_off
+
+rest_command:
+  set_master_wled_brightness:
+    url: http://192.168.1.73/win&SS=0&SB={{ states("input_number.master_wled_brightness") }}
+  set_master_wled_preset:
+    url: http://192.168.1.73/win&LO=1&PL={{ state_attr('input_select.master_wled_preset', 'options').index(states('input_select.master_wled_preset')) + 1 }}
+  set_anthony_eight_sleep_temp:
+    url: http://192.168.1.68:3000/api/deviceStatus
+    method: post
+    payload: '{ "left": { "targetTemperatureF": {{ temp }}, "isOn": true } }'
+    headers:
+      Content-Type: application/json
+  set_taylor_eight_sleep_temp:
+    url: http://192.168.1.68:3000/api/deviceStatus
+    method: post
+    payload: '{ "right": { "targetTemperatureF": {{ temp }}, "isOn": true } }'
+    headers:
+      Content-Type: application/json
+
+light:
+  - platform: template
+    lights:
+      master_wled:
+        unique_id: master_wled
+        friendly_name: Master WLED
+        effect_list_template: "{{ state_attr('input_select.master_wled_preset', 'options') }}"
+        level_template: "{{ states('input_number.master_wled_brightness') }}"
+        value_template: "{{ is_state('switch.master_wled', 'on') }}"
+        effect_template: "{{ states('input_select.master_wled_preset') }}"
+        turn_on:
+          action: switch.turn_on
+          data:
+            entity_id: switch.master_wled
+        turn_off:
+          action: switch.turn_off
+          data:
+            entity_id: switch.master_wled
+        set_level:
+          - action: input_number.set_value
+            data:
+              value: "{{ brightness }}"
+              entity_id: input_number.master_wled_brightness
+          - action: rest_command.set_master_wled_brightness
+        set_effect:
+          - action: input_select.select_option
+            data:
+              option: "{{ effect }}"
+            target:
+              entity_id: input_select.master_wled_preset
+          - action: rest_command.set_master_wled_preset

@@ -1,0 +1,253 @@
+- switch:
+    - unique_id: master_bathroom_switch
+      turn_on:
+        - action: light.turn_on
+          data:
+            brightness_pct: 100
+          target:
+            entity_id:
+              - light.master_bathroom_vanity_lights
+              - light.master_bathroom_main_lights
+      turn_off:
+        - action: light.turn_off
+          target:
+            entity_id:
+              - light.master_bathroom_main_lights
+              - light.master_bathroom_vanity_lights
+        - action: switch.turn_off
+          target:
+            entity_id:
+              - switch.master_closet_main_lights
+      name: Master Bathroom Lights
+      state:
+        "{{ is_state('light.master_bathroom_main_lights', 'on') or is_state('light.master_bathroom_vanity_lights',
+        'on') or is_state('switch.master_closet_main_lights', 'on')}}"
+    - unique_id: blueair_switch
+      turn_on:
+        - action: fan.set_percentage
+          target:
+            entity_id:
+              - fan.bedroom_fan
+          data:
+            percentage: 50
+      turn_off:
+        - action: fan.turn_off
+          target:
+            entity_id:
+              - fan.bedroom_fan
+      name: BlueAir Switch
+      state: "{{ is_state('fan.bedroom_fan', 'on') }}"
+    - unique_id: master_fan
+      turn_on:
+        - action: fan.set_percentage
+          target:
+            entity_id:
+              - fan.master_bedroom_ceiling_fan
+          data:
+            percentage: 100
+      turn_off:
+        - action: fan.turn_off
+          target:
+            entity_id:
+              - fan.master_bedroom_ceiling_fan
+      name: Master Fan Switch
+      state: "{{ is_state('fan.master_bedroom_ceiling_fan', 'on') }}"
+    - unique_id: lr_tv
+      turn_on:
+        - action: media_player.turn_on
+          target:
+            entity_id:
+              - media_player.living_room_hisense
+              - media_player.living_room_apple_tv
+      turn_off:
+        - action: media_player.turn_off
+          target:
+            entity_id:
+              - media_player.living_room_hisense
+              - media_player.living_room_apple_tv
+      name: Living Room TV
+      state: "{{ is_state('media_player.living_room_hisense', 'on') }}"
+    - unique_id: lg_tv
+      turn_on:
+        - action: media_player.turn_on
+          target:
+            entity_id:
+              - media_player.lg_tv
+              - media_player.living_room_lg
+      turn_off:
+        - action: media_player.turn_off
+          target:
+            entity_id:
+              - media_player.lg_tv
+              - media_player.living_room_lg
+      name: Living Room LG
+      state: "{{ is_state('media_player.lg_tv', 'on') }}"
+    - unique_id: master_tv
+      turn_on:
+        - action: media_player.turn_on
+          target:
+            entity_id:
+              - media_player.smarttv_4k_ffm_television
+              - media_player.master_bedroom_apple_tv
+      turn_off:
+        - action: media_player.turn_off
+          target:
+            entity_id:
+              - media_player.smarttv_4k_ffm_television
+              - media_player.master_bedroom_apple_tv
+      name: Master Bedoom TV
+      state: "{{ is_state('media_player.smarttv_4k_ffm_television', 'on') }}"
+    - unique_id: desktop
+      turn_on:
+        - action: switch.turn_on
+          target:
+            entity_id:
+              - switch.desktop_power
+      turn_off:
+        - action: switch.turn_off
+          target:
+            entity_id:
+              - switch.desktop_power
+      name: Desktop
+      state: "{{ is_state('binary_sensor.desktop_ping', 'on') }}"
+    - unique_id: anthony_s_desktop
+      turn_on:
+        - action: wake_on_lan.send_magic_packet
+          data:
+            mac: 78-20-51-0E-0F-8B
+        - action: wake_on_lan.send_magic_packet
+          data:
+            mac: 5C-E9-31-A2-5B-EE
+        - action: wake_on_lan.send_magic_packet
+          data:
+            mac: 00-23-A4-0D-2C-C7
+        - action: wake_on_lan.send_magic_packet
+          data:
+            mac: A8-A1-59-EF-CC-30
+        - action: wake_on_lan.send_magic_packet
+          data:
+            mac: 8C-1F-64-49-F2-87
+        - action: wake_on_lan.send_magic_packet
+          data:
+            mac: 8C-3B-4A-62-C8-86
+        - action: wake_on_lan.send_magic_packet
+          data:
+            mac: C0-33-5E-74-2A-11
+      turn_off:
+        - action: button.press
+          target:
+            entity_id:
+              - button.desktop_pc_satellite_shutdown
+      name: Anthony's Desktop
+      state:
+        "{{ not is_state('button.desktop_pc_satellite_shutdown', 'unavailable')
+        }}"
+- light:
+    - unique_id: master_wled
+      turn_on:
+        - action: switch.turn_on
+          data:
+            entity_id: switch.master_wled
+      turn_off:
+        - action: switch.turn_off
+          data:
+            entity_id: switch.master_wled
+      set_level:
+        - action: input_number.set_value
+          data:
+            value: "{{ brightness }}"
+            entity_id: input_number.master_wled_brightness
+        - action: rest_command.set_master_wled_brightness
+      set_effect:
+        - action: input_select.select_option
+          data:
+            option: "{{ effect }}"
+          target:
+            entity_id:
+              - input_select.master_wled_preset
+        - action: rest_command.set_master_wled_preset
+      default_entity_id: light.master_wled
+      name: Master WLED
+      effect_list: "{{ state_attr('input_select.master_wled_preset', 'options')
+        }}"
+      effect: "{{ states('input_select.master_wled_preset') }}"
+      level: "{{ states('input_number.master_wled_brightness') }}"
+      state: "{{ is_state('switch.master_wled', 'on') }}"
+- sensor:
+    - name: "Sun Azimuth"
+      unit_of_measurement: "°"
+      state: "{{ state_attr('sun.sun', 'azimuth') }}"
+      unique_id: sun_azimuth
+    - name: "Sun Elevation"
+      unit_of_measurement: "°"
+      state: "{{ state_attr('sun.sun', 'elevation') }}"
+      unique_id: sun_elevation
+    - name: "Taylor's Garage Open Duration"
+      unique_id: "taylor_s_garage_open_duration"
+      unit_of_measurement: "minutes"
+      state: >
+        {% if is_state('binary_sensor.garage_g4_person_detected', 'on') %}
+          0
+        {% else %}
+          {{ ((as_timestamp(now()) - as_timestamp(states.cover.taylor_s_garage_door.last_changed)) / 60)|int 
+              if is_state('cover.taylor_s_garage_door', 'open') else 0 }}
+        {% endif %}
+    - name: "Anthony's Garage Open Duration"
+      unique_id: "anthony_s_garage_open_duration"
+      unit_of_measurement: "minutes"
+      state: >
+        {% if is_state('binary_sensor.garage_g4_person_detected', 'on') %}
+          0
+        {% else %}
+          {{ ((as_timestamp(now()) - as_timestamp(states.cover.anthony_s_garage_door.last_changed)) / 60)|int 
+              if is_state('cover.anthony_s_garage_door', 'open') else 0 }}
+        {% endif %}
+- binary_sensor:
+    - name: "Anthony Home"
+      state: >
+        {{ is_state('input_select.anthony', 'Home') or 
+        is_state('input_select.anthony', 'Just Arrived') }}
+      unique_id: anthony_home
+    - name: "Taylor Home"
+      state: >
+        {{ is_state('input_select.taylor', 'Home') or 
+        is_state('input_select.taylor', 'Just Arrived') }}
+      unique_id: taylor_home
+    - name: "Either Home"
+      state: >
+        {{ is_state('input_select.taylor', 'Home') or 
+        is_state('input_select.taylor', 'Just Arrived') or
+        is_state('input_select.anthony', 'Home') or 
+        is_state('input_select.anthony', 'Just Arrived') }}
+      unique_id: either_home
+- number:
+    - name: "Anthony's Eight Sleep Temp"
+      unique_id: anthony_s_eight_sleep_temp
+      step: >
+        {{ 1 }}
+      min: >
+        {{ 55 }}
+      max: >
+        {{ 110 }}
+      set_value:
+        - action: rest_command.set_anthony_eight_sleep_temp
+          data:
+            temp: >
+              {{ value }}
+      state: >
+        {{ states("sensor.eight_sleep_left_target_temperature") }}
+    - name: "Taylor's Eight Sleep Temp"
+      unique_id: taylor_s_eight_sleep_temp
+      step: >
+        {{ 1 }}
+      min: >
+        {{ 55 }}
+      max: >
+        {{ 110 }}
+      set_value:
+        - action: rest_command.set_taylor_eight_sleep_temp
+          data:
+            temp: >
+              {{ value }}
+      state: >
+        {{ states("sensor.eight_sleep_right_target_temperature") }}

@@ -1,0 +1,1136 @@
+lights_on:
+  alias: Lights On
+  sequence:
+  - data: {}
+    target:
+      entity_id:
+      - script.call
+      - script.gaming
+      - script.lights_off
+    action: script.turn_off
+  - action: switch.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - switch.master_bedroom_hue_led_device
+  - parallel:
+    - action: automation.trigger
+      metadata: {}
+      data:
+        skip_condition: false
+      target:
+        entity_id: automation.lower_purifier_volume_while_watching_tv
+    - action: light.turn_on
+      metadata: {}
+      data:
+        brightness_pct: 100
+      target:
+        entity_id: light.guest_bedroom_fox
+      enabled: false
+    - action: input_select.select_first
+      metadata: {}
+      data: {}
+      target:
+        entity_id: input_select.guest_bedroom_hue_scenes
+    - action: scene.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id:
+        - scene.master_bedroom_on_with_lily
+  - action: homeassistant.reload_config_entry
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - switch.master_bedroom_hue_led_device
+      - switch.phillips_component_led_device
+      - switch.bedroom_pc_component_led_device
+  mode: single
+  icon: mdi:weather-sunny
+lights_off:
+  alias: Lights Off
+  sequence:
+  - action: switch.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - switch.master_bedroom_hue_led_device
+  - if:
+    - condition: sun
+      before: sunrise
+      after: sunset
+    then:
+    - action: switch.turn_off
+      metadata: {}
+      data: {}
+      target:
+        entity_id:
+        - switch.85_hisense_backlight_led_device
+        - switch.bedroom_pc_component_forwarder
+  - action: scene.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: scene.master_bedroom_off
+  - parallel:
+    - data: {}
+      target:
+        entity_id:
+        - switch.straightener
+        - switch.usw_leds
+        - switch.usw_2_leds
+        - switch.master_bedroom_hue_led_device
+        - switch.usw_3_leds
+        - switch.usw_4_leds
+      action: switch.turn_off
+    - data: {}
+      target:
+        entity_id:
+        - script.lights_on
+        - script.gaming
+        - script.movie
+        - script.call
+      action: script.turn_off
+    - action: automation.trigger
+      metadata: {}
+      data:
+        skip_condition: false
+      target:
+        entity_id: automation.lower_purifier_volume_while_watching_tv
+    - action: input_select.select_first
+      metadata: {}
+      data: {}
+      target:
+        entity_id: input_select.guest_bedroom_hue_scenes
+    - if:
+      - condition: state
+        entity_id: media_player.smarttv_4k_ffm_television
+        attribute: source
+        state: Apple TV
+      then:
+      - action: media_player.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: media_player.master_bedroom_apple_tv
+    - if:
+      - condition: state
+        entity_id: input_boolean.guest
+        state: 'off'
+      then:
+      - action: script.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - script.goodnight
+      - action: switch.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - switch.first_led_instance_component_led_device
+          - switch.master_bedroom_hue_led_device
+    - if:
+      - condition: state
+        entity_id: binary_sensor.anthony_home
+        state: 'on'
+      - condition: state
+        entity_id: fan.master_bedroom_ceiling_fan
+        state: 'off'
+      then:
+      - action: fan.set_percentage
+        metadata: {}
+        data:
+          percentage: 25
+        target:
+          entity_id: fan.master_bedroom_ceiling_fan
+    - action: light.turn_off
+      metadata: {}
+      data: {}
+      target:
+        entity_id: light.master_wled
+  - action: switch.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - switch.master_bedroom_hue_led_device
+  - if:
+    - condition: sun
+      before: sunrise
+      after: sunset
+    then:
+    - action: switch.turn_off
+      metadata: {}
+      data: {}
+      target:
+        entity_id:
+        - switch.85_hisense_backlight_led_device
+        - switch.bedroom_pc_component_forwarder
+  mode: single
+  icon: mdi:weather-night
+  description: ''
+call:
+  alias: Call
+  sequence:
+  - if:
+    - condition: state
+      entity_id: input_boolean.guest
+      state: 'off'
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: light.master_bedroom_ceiling_lights
+        state: 'off'
+      - condition: state
+        entity_id: binary_sensor.bed_both_occupied
+        state:
+        - 'on'
+      - condition: state
+        entity_id: zone.home
+        state:
+        - '1'
+    then:
+    - action: script.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id:
+        - script.goodnight
+    - action: switch.turn_off
+      metadata: {}
+      data: {}
+      target:
+        entity_id:
+        - switch.first_led_instance_component_led_device
+        - switch.master_bedroom_hue_led_device
+  - parallel:
+    - data: {}
+      target:
+        entity_id:
+        - script.lights_on
+        - script.lights_off
+        - script.gaming
+        - script.movie
+        - script.goodnight
+        - script.living_room_off
+        - script.living_room_white
+      action: script.turn_off
+      enabled: false
+    - data: {}
+      target:
+        entity_id:
+        - switch.straightener
+        - switch.master_bedroom_hue_led_device
+      action: switch.turn_off
+    - action: automation.trigger
+      metadata: {}
+      data:
+        skip_condition: false
+      target:
+        entity_id: automation.lower_purifier_volume_while_watching_tv
+      enabled: true
+    - if:
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: light.hue_twilight_2
+          attribute: dynamics
+          state: false
+        - condition: state
+          entity_id: light.hue_twilight_1
+          attribute: dynamics
+          state: false
+        - condition: state
+          entity_id: light.hue_twilight_1_2
+          attribute: dynamics
+          state: false
+        - condition: state
+          entity_id: light.hue_twilight_2_2
+          attribute: dynamics
+          state: false
+        - condition: state
+          entity_id: light.hue_twilight_2
+          state: 'off'
+        - condition: state
+          entity_id: light.hue_twilight_2_2
+          state: 'off'
+        - condition: state
+          entity_id: light.hue_twilight_1_2
+          state: 'off'
+        - condition: state
+          entity_id: light.hue_twilight_1
+          state: 'off'
+      then:
+      - action: input_select.select_first
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_select.guest_bedroom_hue_scenes
+        enabled: false
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: scene.master_bedroom_{{states('input_select.guest_bedroom_hue_scenes')}}
+      - action: input_select.select_next
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_select.guest_bedroom_hue_scenes
+      else:
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: scene.master_bedroom_{{states('input_select.guest_bedroom_hue_scenes')}}
+      - action: input_select.select_next
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_select.guest_bedroom_hue_scenes
+    - repeat:
+        count: 5
+        sequence:
+        - action: light.turn_off
+          metadata: {}
+          data: {}
+          target:
+            entity_id: light.master_bedroom_ceiling_lights
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 0
+            milliseconds: 250
+      enabled: false
+  - if:
+    - condition: state
+      entity_id: media_player.smarttv_4k_ffm_television
+      state: 'on'
+    then:
+    - action: light.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: light.master_wled
+  - if:
+    - condition: state
+      entity_id: light.master_bedroom_ceiling_lights
+      state: 'on'
+    - condition: state
+      entity_id: light.hue_color_downlight_1
+      attribute: dynamics
+      state: dynamic_palette
+    - condition: state
+      entity_id: input_select.guest_bedroom_hue_scenes
+      state: toil
+    - condition: state
+      entity_id: media_player.smarttv_4k_ffm_television
+      state: 'on'
+    then:
+    - action: light.turn_on
+      metadata: {}
+      data:
+        effect: Halloween
+      target:
+        entity_id: light.master_wled
+  mode: restart
+  icon: mdi:phone
+gaming:
+  alias: Gaming
+  sequence:
+  - parallel:
+    - repeat:
+        count: '5'
+        sequence:
+        - service: light.turn_on
+          data:
+            rgb_color:
+            - 255
+            - 190
+            - 203
+            brightness_pct: 100
+          target:
+            entity_id:
+            - light.bedroom_lights
+            - light.bathroom_lights
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 1
+            milliseconds: 0
+      enabled: false
+    - repeat:
+        count: '5'
+        sequence:
+        - service: light.turn_on
+          data:
+            rgb_color:
+            - 255
+            - 70
+            - 189
+            brightness_pct: 100
+          target:
+            entity_id:
+            - light.entryway_2
+            - light.kitchen_oven
+            - light.living_room_lamp
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 1
+            milliseconds: 0
+      enabled: false
+    - repeat:
+        count: '5'
+        sequence:
+        - service: light.turn_on
+          data:
+            rgb_color:
+            - 255
+            - 70
+            - 189
+            brightness_pct: 100
+          target:
+            entity_id:
+            - light.dining_room_1
+            - light.living_room_1
+            - light.stove_light_2
+            - light.armchair
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 1
+            milliseconds: 0
+      enabled: false
+    - repeat:
+        count: '5'
+        sequence:
+        - service: light.turn_on
+          data:
+            rgb_color:
+            - 145
+            - 31
+            - 255
+            brightness_pct: 100
+          target:
+            entity_id:
+            - light.desk
+            - light.dining_room_2
+            - light.entryway_1
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 1
+            milliseconds: 0
+      enabled: false
+    - service: script.turn_off
+      data: {}
+      target:
+        entity_id:
+        - script.lights_off
+        - script.lights_on
+        - script.call
+    - service: switch.turn_off
+      data: {}
+      target:
+        entity_id: switch.straightener
+    - service: fan.turn_on
+      data:
+        preset_mode: Fan
+        percentage: 100
+      target:
+        entity_id: fan.air_purifier
+    - service: light.turn_on
+      data: {}
+      target:
+        entity_id: light.shapes_e9e6
+    - repeat:
+        count: '5'
+        sequence:
+        - service: light.turn_on
+          data:
+            rgb_color:
+            - 145
+            - 31
+            - 255
+            brightness_pct: 100
+          target:
+            entity_id:
+            - light.desk
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 1
+            milliseconds: 0
+  mode: single
+  icon: mdi:controller
+movie:
+  alias: Movie
+  sequence:
+  - parallel:
+    - repeat:
+        count: '5'
+        sequence:
+        - service: light.turn_on
+          data:
+            rgb_color:
+            - 255
+            - 190
+            - 203
+            brightness_pct: 100
+          target:
+            entity_id:
+            - light.bathroom_lights
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 1
+            milliseconds: 0
+    - repeat:
+        count: '5'
+        sequence:
+        - service: light.turn_on
+          data:
+            rgb_color:
+            - 141
+            - 31
+            - 255
+            brightness_pct: 50
+          target:
+            entity_id:
+            - light.entryway_2
+            - light.kitchen_oven
+            - light.living_room_lamp
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 1
+            milliseconds: 0
+    - repeat:
+        count: '5'
+        sequence:
+        - service: light.turn_on
+          data:
+            rgb_color:
+            - 5
+            - 71
+            - 255
+            brightness_pct: 50
+          target:
+            entity_id:
+            - light.dining_room_1
+            - light.living_room_1
+            - light.stove_light_2
+            - light.armchair
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 1
+            milliseconds: 0
+    - repeat:
+        count: '5'
+        sequence:
+        - service: light.turn_on
+          data:
+            rgb_color:
+            - 0
+            - 102
+            - 255
+            brightness_pct: 50
+          target:
+            entity_id:
+            - light.dining_room_2
+            - light.entryway_1
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 1
+            milliseconds: 0
+    - service: script.turn_off
+      data: {}
+      target:
+        entity_id:
+        - script.lights_off
+        - script.lights_on
+        - script.call
+        - script.gaming
+    - repeat:
+        count: '5'
+        sequence:
+        - service: light.turn_off
+          data: {}
+          target:
+            entity_id:
+            - light.desk
+            - light.bedroom_lights
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 1
+            milliseconds: 0
+    - service: media_player.media_pause
+      data: {}
+      target:
+        entity_id: media_player.bathroom
+    - service: switch.turn_off
+      data: {}
+      target:
+        entity_id: switch.straightener
+  mode: single
+  icon: mdi:movie
+play_latest_h3_vod:
+  alias: Play latest H3 VOD
+  sequence:
+  - service: homeassistant.update_entity
+    data: {}
+    target:
+      entity_id: sensor.h3_podcast_latest_vod_id
+  - repeat:
+      sequence:
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id: switch.lr_tv
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 1
+          milliseconds: 0
+      until:
+      - condition: state
+        entity_id: binary_sensor.kauf_plug_device_in_use
+        state: 'on'
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 1
+  - service: media_player.turn_on
+    data: {}
+    target:
+      entity_id: media_player.taylor_s_living_room_tv
+  - service: media_player.select_source
+    data:
+      source: YouTube
+    target:
+      entity_id: media_player.taylor_s_living_room_tv
+    enabled: false
+  - service: media_player.play_media
+    data:
+      media_content_type: url
+      media_content_id: youtube://www.youtube.com/watch?v={{ states('sensor.h3_podcast_latest_vod_id')
+        }}
+    target:
+      entity_id: media_player.taylor_s_living_room_tv
+  - service: input_boolean.turn_on
+    data: {}
+    target:
+      entity_id: input_boolean.podcast_started_today
+  mode: single
+  icon: mdi:youtube
+living_room_white:
+  sequence:
+  - if:
+    - condition: state
+      entity_id: switch.phillips_component_led_device
+      state: 'on'
+    then:
+    - action: switch.turn_off
+      metadata: {}
+      data: {}
+      target:
+        entity_id: switch.phillips_component_usb_capture
+      enabled: false
+    - repeat:
+        sequence:
+        - action: light.turn_off
+          metadata: {}
+          data: {}
+          target:
+            entity_id: light.phillips
+          enabled: false
+        - action: switch.turn_off
+          metadata: {}
+          data: {}
+          target:
+            entity_id: switch.phillips_component_led_device
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 0
+            milliseconds: 200
+        until:
+        - condition: state
+          entity_id: switch.phillips_component_led_device
+          state: 'off'
+          for:
+            hours: 0
+            minutes: 0
+            seconds: 1
+  - repeat:
+      sequence:
+      - action: light.turn_on
+        target:
+          entity_id:
+          - light.living_room
+        data:
+          color_temp_kelvin: 3500
+          brightness_pct: 100
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 0
+          milliseconds: 250
+      until:
+      - condition: state
+        entity_id: light.living_room
+        state: 'on'
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 1
+  - action: homeassistant.reload_config_entry
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - switch.master_bedroom_hue_led_device
+      - switch.phillips_component_led_device
+      - switch.bedroom_pc_component_led_device
+  alias: Living Room White
+  description: ''
+  mode: restart
+play_jazz:
+  sequence:
+  - action: music_assistant.play_media
+    metadata: {}
+    data:
+      media_id: https://open.spotify.com/playlist/37i9dQZF1DWV7EzJMK2FUI?si=f178a812f15d448c
+      media_type: album
+      enqueue: replace_next
+    target:
+      entity_id:
+      - media_player.kitchen_ceiling
+  - action: media_player.volume_set
+    metadata: {}
+    data:
+      volume_level: 0.3
+    target:
+      entity_id:
+      - media_player.kitchen_ceiling
+  - action: media_player.shuffle_set
+    metadata: {}
+    data:
+      shuffle: true
+    target:
+      entity_id: media_player.kitchen_ceiling
+  - action: media_player.media_next_track
+    metadata: {}
+    data: {}
+    target:
+      entity_id: media_player.kitchen_ceiling
+  - action: media_player.media_play
+    metadata: {}
+    data: {}
+    target:
+      entity_id: media_player.kitchen_ceiling
+  alias: Play Jazz
+  description: ''
+  mode: restart
+open_curtains:
+  sequence:
+  - action: script.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - script.close_curtains
+      - script.close_south_curtains
+      - script.toggle_east_curtains
+  - action: v6_quietdrift.set_switchbot_curtain_position
+    continue_on_error: true
+    metadata: {}
+    data:
+      entity_id:
+      - cover.curtain_3_ad63
+      - cover.curtain_3_68c3
+      - cover.curtain_3_2e8d
+      - cover.curtain_3_adf5
+      position: 100
+      speed: 255
+  - action: v6_quietdrift.set_switchbot_curtain_position
+    continue_on_error: true
+    metadata: {}
+    data:
+      entity_id:
+      - cover.curtain_3_ad63
+      - cover.curtain_3_68c3
+      - cover.curtain_3_2e8d
+      position: 100
+      speed: 255
+    enabled: false
+  - action: v6_quietdrift.set_switchbot_curtain_position
+    continue_on_error: true
+    metadata: {}
+    data:
+      entity_id:
+      - cover.curtain_3_e6a2
+      speed: 255
+      position: 60
+    enabled: false
+  - action: v6_quietdrift.set_switchbot_curtain_position
+    continue_on_error: true
+    metadata: {}
+    data:
+      entity_id:
+      - cover.curtain_3_adf5
+      speed: 255
+      position: 80
+    enabled: false
+  alias: Open Curtains
+  description: ''
+close_south_curtains:
+  sequence:
+  - if:
+    - condition: or
+      conditions:
+      - condition: numeric_state
+        entity_id: cover.curtain_3_e6a2
+        attribute: current_position
+        below: 20
+      - condition: numeric_state
+        entity_id: cover.curtain_3_0ced
+        attribute: current_position
+        below: 20
+      - condition: numeric_state
+        entity_id: cover.curtain_3_2e8d
+        attribute: current_position
+        below: 20
+      - condition: numeric_state
+        entity_id: cover.curtain_3_68c3
+        attribute: current_position
+        below: 20
+    then:
+    - action: v6_quietdrift.set_switchbot_curtain_position
+      continue_on_error: true
+      metadata: {}
+      data:
+        entity_id:
+        - cover.curtain_3_68c3
+        - cover.curtain_3_2e8d
+        - cover.curtain_3_e6a2
+        position: 100
+        speed: 255
+    - action: v6_quietdrift.set_switchbot_curtain_position
+      continue_on_error: true
+      metadata: {}
+      data:
+        entity_id:
+        - cover.curtain_3_68c3
+        - cover.curtain_3_2e8d
+        position: 100
+        speed: 255
+      enabled: false
+    - action: v6_quietdrift.set_switchbot_curtain_position
+      continue_on_error: true
+      metadata: {}
+      data:
+        entity_id:
+        - cover.curtain_3_e6a2
+        speed: 255
+        position: 60
+      enabled: false
+    else:
+    - action: v6_quietdrift.set_switchbot_curtain_position
+      continue_on_error: true
+      metadata: {}
+      data:
+        entity_id:
+        - cover.curtain_3_68c3
+        - cover.curtain_3_2e8d
+        - cover.living_room_south_right
+        position: 0
+        speed: 255
+  alias: Toggle South Curtains
+  description: ''
+close_curtains:
+  sequence:
+  - action: script.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - script.toggle_east_curtains
+      - script.close_south_curtains
+      - script.open_curtains
+  - action: v6_quietdrift.set_switchbot_curtain_position
+    continue_on_error: true
+    metadata: {}
+    data:
+      entity_id:
+      - cover.curtain_3_ad63
+      - cover.curtain_3_adf5
+      - cover.curtain_3_68c3
+      - cover.curtain_3_2e8d
+      - cover.curtain_3_0ced
+      position: 0
+      speed: 255
+  - action: input_boolean.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: input_boolean.living_room_curtains_previously_open
+  alias: Close Curtains
+  description: ''
+goodnight:
+  sequence:
+  - parallel:
+    - action: scene.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id:
+        - scene.living_room_off
+        - scene.office_off
+    - action: light.turn_off
+      metadata: {}
+      data: {}
+      target:
+        entity_id:
+        - light.kitchen_island_lights
+        - light.back_porch_lights
+        - light.living_room
+        - light.front_entry_hall_main_lights
+        - light.master_hallway_main_lights
+        - light.kitchen_sink_light
+        - light.guest_hallway_main_lights
+        - light.kitchen_back_lights
+        - light.front_porch_overhead_light
+        - light.shapes_e9e6
+        - light.guest_bedroom_fox
+    - action: switch.turn_off
+      metadata: {}
+      data: {}
+      target:
+        entity_id:
+        - switch.dining_room_table_lights
+        - switch.kitchen_tubes
+        - switch.phillips_component_led_device
+        - switch.first_led_instance_component_led_device
+        - switch.kitchen_back_tubes
+        - switch.garage_wall_lights
+        - switch.usw_2_leds
+        - switch.usw_3_leds
+        - switch.usw_leds
+        - switch.usw_4_leds
+    - action: media_player.turn_off
+      metadata: {}
+      data: {}
+      target:
+        entity_id:
+        - media_player.living_room_apple_tv
+        - media_player.lg_webos_tv_d741
+        - media_player.living_room_lg
+        - media_player.guest_room
+        - media_player.living_room_hisense
+        - media_player.living_room_tv_2
+    - action: fan.turn_off
+      metadata: {}
+      data: {}
+      target:
+        entity_id: fan.living_room_ceiling_fan
+    - action: media_player.media_stop
+      metadata: {}
+      data: {}
+      target:
+        entity_id:
+        - media_player.kitchen_ceiling
+        - media_player.ceiling_but_works_airplay
+  - action: scene.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - scene.living_room_off
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 1
+      milliseconds: 0
+  - repeat:
+      sequence:
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - light.living_room
+      until:
+      - condition: state
+        entity_id: light.living_room
+        state: 'off'
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 1
+  - if:
+    - condition: or
+      conditions:
+      - condition: sun
+        after: sunset
+      - condition: state
+        entity_id: zone.home
+        state:
+        - '0'
+    then:
+    - action: script.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: script.close_curtains
+  - action: homeassistant.reload_config_entry
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - switch.master_bedroom_hue_led_device
+      - switch.phillips_component_led_device
+      - switch.bedroom_pc_component_led_device
+  alias: Goodnight
+  description: ''
+living_room_off:
+  sequence:
+  - action: light.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - light.living_room
+  - action: switch.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: switch.phillips_component_led_device
+  - if:
+    - condition: state
+      entity_id: input_boolean.guest
+      state: 'off'
+    then:
+    - parallel:
+      - action: switch.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - switch.first_led_instance_component_led_device
+      - action: media_player.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - media_player.living_room_apple_tv
+      - action: fan.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: fan.living_room_ceiling_fan
+      - action: script.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: script.close_curtains
+      - action: media_player.media_stop
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - media_player.kitchen_ceiling
+          - media_player.ceiling_but_works_airplay
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 1
+      milliseconds: 0
+  - repeat:
+      sequence:
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - light.living_room
+      until:
+      - condition: state
+        entity_id: light.living_room
+        state: 'off'
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 1
+  - action: homeassistant.reload_config_entry
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - switch.master_bedroom_hue_led_device
+      - switch.phillips_component_led_device
+      - switch.bedroom_pc_component_led_device
+  alias: Living Room Off
+  description: ''
+toggle_east_curtains:
+  sequence:
+  - if:
+    - condition: or
+      conditions:
+      - condition: numeric_state
+        entity_id: cover.curtain_3_ad63
+        attribute: current_position
+        below: 20
+      - condition: numeric_state
+        entity_id: cover.curtain_3_adf5
+        attribute: current_position
+        below: 20
+    then:
+    - action: v6_quietdrift.set_switchbot_curtain_position
+      continue_on_error: true
+      metadata: {}
+      data:
+        entity_id:
+        - cover.curtain_3_ad63
+        - cover.living_room_east_right
+        position: 100
+        speed: 255
+    - action: v6_quietdrift.set_switchbot_curtain_position
+      continue_on_error: true
+      metadata: {}
+      data:
+        entity_id:
+        - cover.curtain_3_ad63
+        position: 100
+        speed: 255
+      enabled: false
+    - action: v6_quietdrift.set_switchbot_curtain_position
+      continue_on_error: true
+      metadata: {}
+      data:
+        entity_id:
+        - cover.curtain_3_adf5
+        speed: 255
+        position: 80
+      enabled: false
+    else:
+    - action: v6_quietdrift.set_switchbot_curtain_position
+      continue_on_error: true
+      metadata: {}
+      data:
+        entity_id:
+        - cover.curtain_3_ad63
+        - cover.curtain_3_adf5
+        position: 0
+        speed: 255
+  alias: Toggle East Curtains
+  description: ''

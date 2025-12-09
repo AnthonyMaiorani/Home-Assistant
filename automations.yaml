@@ -1,0 +1,5702 @@
+- id: '1685756724080'
+  alias: Nanoleaf Power
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - light.entryway_1
+    - light.entryway_2
+    - light.armchair
+    - light.desk
+    - light.dining_room_1
+    - light.dining_room_2
+    - light.kitchen_oven
+    - light.living_room_1
+    - light.stove_light_2
+    - light.living_room_lamp
+  condition: []
+  action:
+  - if:
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: light.desk_lights
+        state: 'on'
+      - condition: state
+        entity_id: light.dining_room_lights
+        state: 'on'
+      - condition: state
+        entity_id: light.kitchen_lights
+        state: 'on'
+    then:
+    - service: light.turn_on
+      data: {}
+      target:
+        entity_id: light.shapes_e9e6
+    else:
+    - service: light.turn_off
+      data: {}
+      target:
+        entity_id: light.shapes_e9e6
+  mode: single
+- id: '1685757515212'
+  alias: Master Bedroom Pico
+  description: ''
+  use_blueprint:
+    path: stephack/core-pico.yaml
+    input:
+      pico_remote: 707daee095342f1e96a0d2b10012a2ad
+      top_on:
+      - data: {}
+        target:
+          entity_id: script.lights_on
+        action: script.turn_on
+        enabled: true
+      - metadata: {}
+        data:
+          option: Home
+        target:
+          entity_id: input_select.taylor
+        action: input_select.select_option
+        enabled: false
+      bottom_off:
+      - data: {}
+        target:
+          entity_id:
+          - script.lights_off
+        action: script.turn_on
+      - metadata: {}
+        data:
+          option: Home
+        target:
+          entity_id: input_select.taylor
+        action: input_select.select_option
+        enabled: false
+      middle_stop:
+      - data: {}
+        target:
+          entity_id: script.call
+        action: script.turn_on
+      - metadata: {}
+        data:
+          option: Home
+        target:
+          entity_id: input_select.taylor
+        action: input_select.select_option
+        enabled: false
+      bottom_off_release: []
+      middle_stop_release: []
+      top_on_release: []
+      down_lower:
+      - data: {}
+        target:
+          entity_id:
+          - fan.bedroom_fan
+        action: fan.toggle
+      - metadata: {}
+        data:
+          option: Home
+        target:
+          entity_id: input_select.taylor
+        action: input_select.select_option
+        enabled: false
+      auto_mode: restart
+- id: '1685871258415'
+  alias: Bathroom Lights
+  description: ''
+  triggers:
+  - entity_id:
+    - light.bathroom_lights
+    to: 'on'
+    from: unavailable
+    id: 'on'
+    trigger: state
+  - entity_id:
+    - light.bathroom_lights
+    to: unavailable
+    from: 'on'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+    id: 'off'
+    trigger: state
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: 'on'
+      sequence:
+      - if:
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: light.kitchen_lights
+            state: 'off'
+          - condition: state
+            entity_id: light.living_room_lights
+            state: 'off'
+          - condition: state
+            entity_id: light.dining_room_lights
+            state: 'off'
+          - condition: state
+            entity_id: light.desk_lights
+            state: 'off'
+          alias: all lights are off
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: input_select.taylor
+            state: Home
+          - condition: state
+            entity_id: input_select.taylor
+            state: Just Arrived
+          alias: home
+        - condition: or
+          conditions:
+          - condition: and
+            conditions:
+            - condition: time
+              after: 05:00:00
+              before: '18:00:00'
+            - condition: state
+              entity_id: binary_sensor.workday_sensor
+              state: 'on'
+            alias: workday
+          - condition: and
+            conditions:
+            - condition: time
+              after: 08:00:00
+              before: '18:00:00'
+            - condition: state
+              entity_id: binary_sensor.workday_sensor
+              state: 'off'
+            alias: not workday
+          alias: check time
+        then:
+        - data: {}
+          target:
+            entity_id: script.lights_on
+          action: script.turn_on
+        - if:
+          - condition: time
+            weekday:
+            - mon
+            - tue
+            - wed
+            - thu
+            before: '12:00:00'
+            after: 00:00:00
+          - condition: state
+            entity_id: input_boolean.podcast_started_today
+            state: 'off'
+          then:
+          - data: {}
+            target:
+              entity_id: script.play_latest_h3_vod
+            action: script.turn_on
+          enabled: false
+        - if:
+          - condition: time
+            weekday:
+            - sat
+            - sun
+          then:
+          - action: cover.open_cover
+            target:
+              entity_id:
+              - cover.curtain_3_02bd
+              - cover.curtain_3_adf5
+            data: {}
+        else:
+        - repeat:
+            count: '4'
+            sequence:
+            - data:
+                rgb_color:
+                - 255
+                - 190
+                - 203
+                brightness_pct: 100
+              target:
+                entity_id: light.bathroom_lights
+              action: light.turn_on
+            - delay:
+                hours: 0
+                minutes: 0
+                seconds: 0
+                milliseconds: 500
+          alias: turn on bathroom lights
+    - conditions:
+      - condition: trigger
+        id: 'off'
+      sequence:
+      - data: {}
+        target:
+          entity_id: switch.straightener
+        action: switch.turn_off
+      - data: {}
+        target:
+          entity_id:
+          - media_player.bathroom_2
+          - media_player.bathroom_2_2
+        action: media_player.media_pause
+  mode: single
+- id: '1686208852049'
+  alias: Gaming
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.desktop_ping
+    from: 'off'
+    to: 'on'
+    id: 'on'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 15
+  - platform: state
+    entity_id:
+    - binary_sensor.desktop_ping
+    from: 'on'
+    to: 'off'
+    id: 'off'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 15
+  - platform: state
+    entity_id:
+    - sensor.steam_76561198240863812
+    to: online
+    id: steamonline
+  condition: []
+  action:
+  - if:
+    - condition: template
+      value_template: "{{ not (is_state_attr('light.armchair', 'rgb_color', (255,
+        0, 207)) or \nis_state_attr('light.dining_room_1', 'rgb_color', (255, 0, 207))
+        or \nis_state_attr('light.stove_light_2', 'rgb_color', (255, 0, 207)) or \nis_state_attr('light.living_room_1',
+        'rgb_color', (255, 0, 207)) or \nis_state_attr('light.desk', 'rgb_color',
+        (255, 0, 207)) or \nis_state_attr('light.dining_room_2', 'rgb_color', (255,
+        0, 207)) or \nis_state_attr('light.entryway_1', 'rgb_color', (255, 0, 207))
+        or \nis_state_attr('light.entryway_2', 'rgb_color', (255, 0, 207)) or \nis_state_attr('light.kitchen_oven',
+        'rgb_color', (255, 0, 207)) or \nis_state_attr('light.living_room_lamp', 'rgb_color',
+        (255, 0, 207))  )\n}}"
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: input_select.taylor
+        state: Home
+      - condition: state
+        entity_id: input_select.taylor
+        state: Just Arrived
+    - condition: state
+      entity_id: binary_sensor.desktop_ping
+      state: 'on'
+    - condition: or
+      conditions:
+      - condition: trigger
+        id: 'on'
+      - condition: trigger
+        id: steamonline
+    - condition: state
+      entity_id: sensor.steam_76561198240863812
+      state: online
+    then:
+    - service: script.turn_on
+      data: {}
+      target:
+        entity_id: script.gaming
+    else:
+    - condition: and
+      conditions:
+      - condition: trigger
+        id: 'off'
+      - condition: template
+        value_template: "{{ is_state('light.armchair', 'on') or \nis_state('light.dining_room_1',
+          'on') or \nis_state('light.stove_light_2', 'on') or \nis_state('light.living_room_1',
+          'on') or \nis_state('light.desk', 'on') or \nis_state('light.dining_room_2',
+          'on') or \nis_state('light.entryway_1', 'on') or \nis_state('light.entryway_2',
+          'on') or \nis_state('light.kitchen_oven', 'on') or \nis_state('light.living_room_lamp',
+          'on') \n}}"
+      - condition: template
+        value_template: '{{ not is_state_attr(''light.my_bed'', ''rgb_color'', (255,
+          0, 207)) }}'
+        alias: not call
+    - service: script.turn_on
+      data: {}
+      target:
+        entity_id: script.lights_on
+  mode: single
+- id: '1686211440593'
+  alias: Presence Detection
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_select.taylor
+    to: Just Arrived
+    for:
+      hours: 0
+      minutes: 40
+      seconds: 0
+    id: Home
+  - platform: state
+    entity_id: input_select.taylor
+    id: Away
+    to: Just Left
+    for: 00:10:00
+  - platform: state
+    entity_id:
+    - person.taylor
+    to: home
+    id: Just Arrived
+  - platform: state
+    entity_id:
+    - person.taylor
+    from: home
+    id: Just Left
+  condition:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: person.taylor
+      state: unavailable
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: person.taylor
+      state: unknown
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: Home
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.taylor
+        data:
+          option: Home
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: Away
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.taylor
+        data:
+          option: Away
+    - conditions:
+      - condition: trigger
+        id: Just Arrived
+      sequence:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.taylor
+          state: Home
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.taylor
+        data:
+          option: Just Arrived
+    - conditions:
+      - condition: trigger
+        id: Just Left
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.taylor
+        data:
+          option: Just Left
+    default: []
+  mode: single
+- id: '1686372988265'
+  alias: Call Light off in Morning
+  description: ''
+  trigger:
+  - platform: sun
+    event: sunrise
+    enabled: false
+  - platform: time
+    at: 05:30:00
+  condition:
+  - condition: state
+    entity_id: binary_sensor.workday_sensor
+    state: 'off'
+    enabled: false
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: light.kitchen_lights
+      state: 'on'
+    - condition: state
+      entity_id: light.dining_room_lights
+      state: 'on'
+    - condition: state
+      entity_id: light.living_room_lights
+      state: 'on'
+  - condition: numeric_state
+    entity_id: light.my_bed
+    attribute: brightness
+    below: 52
+    above: 50
+  - condition: time
+    weekday:
+    - sat
+    - sun
+  action:
+  - repeat:
+      count: '4'
+      sequence:
+      - service: light.turn_off
+        data: {}
+        target:
+          entity_id: light.my_bed
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 0
+          milliseconds: 500
+  mode: single
+- id: '1686373192624'
+  alias: all my homies hate glare
+  description: ''
+  triggers:
+  - entity_id:
+    - media_player.taylor_s_living_room_tv
+    to: playing
+    id: playing
+    trigger: state
+  - entity_id:
+    - media_player.taylor_s_living_room_tv
+    to:
+    - 'off'
+    - idle
+    - paused
+    - standby
+    id: paused
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    trigger: state
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - playing
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: light.desk
+          state: 'on'
+        - condition: state
+          entity_id: light.armchair
+          state: 'on'
+      - condition: state
+        entity_id: binary_sensor.desktop_ping
+        state: 'off'
+      sequence:
+      - repeat:
+          count: '4'
+          sequence:
+          - data: {}
+            target:
+              entity_id:
+              - light.desk
+            action: light.turn_off
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 0
+              milliseconds: 500
+    - conditions:
+      - condition: state
+        entity_id: light.living_room_lights
+        state: 'on'
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: light.desk
+          state: 'off'
+        - condition: state
+          entity_id: light.armchair
+          state: 'off'
+      - condition: trigger
+        id:
+        - paused
+      sequence:
+      - repeat:
+          count: '4'
+          sequence:
+          - data: {}
+            target:
+              entity_id:
+              - light.desk
+            action: light.turn_on
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 0
+              milliseconds: 500
+  mode: single
+- id: '1687143714442'
+  alias: Left Home
+  description: ''
+  triggers:
+  - entity_id:
+    - input_select.taylor
+    to: Just Left
+    trigger: state
+  conditions: []
+  actions:
+  - parallel:
+    - metadata: {}
+      data: {}
+      target:
+        entity_id:
+        - media_player.taylor_s_living_room_tv
+        - media_player.taylor_s_bedroom
+      action: media_player.turn_off
+      enabled: false
+    - if:
+      - condition: not
+        conditions:
+        - condition: state
+          state: closed
+          entity_id: cover.taylor_s_garage_door
+        - condition: state
+          entity_id: cover.taylor_s_garage_door
+          state: unavailable
+        - condition: state
+          entity_id: cover.taylor_s_garage_door
+          state: unknown
+      then:
+      - action: cover.close_cover
+        target:
+          entity_id:
+          - cover.taylor_s_garage_door
+        data: {}
+    - action: cover.close_cover
+      metadata: {}
+      data: {}
+      target:
+        entity_id: cover.taylor_s_garage_door
+  - delay:
+      hours: 0
+      minutes: 10
+      seconds: 0
+      milliseconds: 0
+  - if:
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: input_select.anthony
+        state: Home
+      - condition: state
+        entity_id: input_select.anthony
+        state: Just Arrived
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: input_select.taylor
+        state: Just Left
+      - condition: state
+        entity_id: input_select.taylor
+        state: Away
+    then:
+    - action: fan.turn_off
+      target:
+        entity_id: fan.bedroom_fan
+      data: {}
+  mode: single
+- id: '1688161591505'
+  alias: Master Bedroom AC Pico
+  description: ''
+  use_blueprint:
+    path: stephack/core-pico.yaml
+    input:
+      pico_remote: a4c0b5d7787a4b9ed498ec1f9541c3c2
+      top_on:
+      - data:
+          hvac_mode: cool
+        target:
+          entity_id: climate.bedroom_ac
+        action: climate.set_hvac_mode
+      bottom_off:
+      - data:
+          hvac_mode: 'off'
+        target:
+          entity_id: climate.bedroom_ac
+        action: climate.set_hvac_mode
+      middle_stop:
+      - data:
+          hvac_mode: cool
+          temperature: 69
+        target:
+          entity_id: climate.bedroom_ac
+        action: climate.set_temperature
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 1
+          milliseconds: 0
+      - data:
+          preset_mode: 'Off'
+        target:
+          entity_id: climate.bedroom_ac
+        action: climate.set_preset_mode
+      auto_mode: queued
+      down_lower:
+      - data:
+          hvac_mode: cool
+          temperature: '{{ state_attr("climate.bedroom_ac", "temperature") - 1}}
+
+            '
+        target:
+          entity_id: climate.bedroom_ac
+        action: climate.set_temperature
+      mode_max: 15
+      up_raise:
+      - data:
+          hvac_mode: cool
+          temperature: '{{ state_attr("climate.bedroom_ac", "temperature") + 1}}
+
+            '
+        target:
+          entity_id: climate.bedroom_ac
+        action: climate.set_temperature
+- id: '1688377291751'
+  alias: Turn off Eco mode
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - climate.bedroom_ac
+    from: 'off'
+    to: cool
+  condition: []
+  action:
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: climate.set_preset_mode
+    data:
+      preset_mode: none
+    target:
+      entity_id: climate.bedroom_ac
+  mode: single
+- id: '1689369694260'
+  alias: Taylor Arrive Home
+  description: ''
+  triggers:
+  - entity_id:
+    - input_select.taylor
+    to: Just Arrived
+    trigger: state
+  conditions: []
+  actions:
+  - parallel:
+    - data: {}
+      target:
+        entity_id: script.lights_on
+      action: script.turn_on
+      enabled: false
+    - data: {}
+      target:
+        entity_id: vacuum.roomba
+      action: vacuum.return_to_base
+      enabled: false
+    - metadata: {}
+      data: {}
+      target:
+        entity_id:
+        - switch.table_cam_power
+        - switch.living_room_cam_power
+        - switch.kitchen_cam_power_2
+      action: switch.turn_off
+      enabled: false
+    - action: automation.trigger
+      metadata: {}
+      data:
+        skip_condition: false
+      target:
+        entity_id: automation.lower_purifier_volume_while_watching_tv
+    - action: light.turn_on
+      metadata: {}
+      data:
+        brightness_pct: 50
+      target:
+        entity_id: light.master_hallway_main_lights
+  - wait_for_trigger:
+    - trigger: state
+      entity_id:
+      - cover.taylor_s_garage_door
+      to: open
+    continue_on_timeout: false
+  - action: lock.unlock
+    metadata: {}
+    data: {}
+    target:
+      entity_id: lock.garage_lock
+  mode: single
+- id: '1693121532416'
+  alias: Update Wyze
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - update.docker_wyze_bridge_update
+    to: 'on'
+  condition: []
+  action:
+  - service: update.install
+    data: {}
+    target:
+      entity_id: update.docker_wyze_bridge_update
+  mode: single
+- id: '1696074136254'
+  alias: Turn off purifier while raining
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - weather.pirateweather
+    to:
+    - lightning-rainy
+    - pouring
+    - rainy
+    id: raining
+  - platform: state
+    entity_id:
+    - weather.pirateweather
+    to:
+    - clear-night
+    - cloudy
+    - exceptional
+    - fog
+    - hail
+    - lightning
+    - partlycloudy
+    - snowy
+    - snowing-rainy
+    - sunny
+    - windy-variant
+    - windy
+    id: notraining
+  - platform: state
+    entity_id:
+    - weather.pirateweather
+    to: pouring
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: input_select.taylor
+          state: Home
+        - condition: state
+          entity_id: input_select.taylor
+          state: Just Arrived
+      - condition: time
+        after: '21:00:00'
+        before: 09:00:00
+      - condition: state
+        entity_id: fan.air_purifier
+        state: 'on'
+      - condition: trigger
+        id:
+        - raining
+      sequence:
+      - repeat:
+          sequence:
+          - service: fan.turn_off
+            data: {}
+            target:
+              entity_id: fan.air_purifier
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 2
+              milliseconds: 0
+          until:
+          - condition: state
+            entity_id: fan.air_purifier
+            state: 'off'
+    - conditions:
+      - condition: state
+        entity_id: fan.air_purifier
+        state: 'off'
+      - condition: trigger
+        id:
+        - notraining
+      sequence:
+      - service: fan.turn_on
+        data: {}
+        target:
+          entity_id: fan.air_purifier
+  mode: restart
+- id: '1696999629316'
+  alias: Connected to Car
+  description: ''
+  trigger: []
+  condition: []
+  action:
+  - if:
+    - condition: state
+      entity_id: switch.lr_tv
+      state: 'on'
+    - condition: state
+      entity_id: media_player.taylor_s_living_room_tv
+      attribute: app_name
+      state: YouTube
+    - condition: state
+      entity_id: media_player.taylor_s_living_room_tv
+      state: playing
+    - condition: state
+      entity_id: media_player.taylor_s_living_room_tv
+      attribute: media_artist
+      state: H3 Podcast
+    then:
+    - service: media_player.media_pause
+      data: {}
+      target:
+        entity_id: media_player.taylor_s_living_room_tv
+    - condition: numeric_state
+      entity_id: media_player.taylor_s_living_room_tv
+      attribute: media_position
+      above: 120
+    - service: media_player.media_seek
+      data:
+        seek_position: '{{ state_attr(''media_player.taylor_s_living_room_tv'', ''media_position'')
+          - 120 }}
+
+          '
+      target:
+        entity_id: media_player.taylor_s_living_room_tv
+  - service: script.turn_on
+    data: {}
+    target:
+      entity_id: script.lights_off
+  mode: single
+- id: '1697003747229'
+  alias: Set Temperature
+  description: ''
+  triggers:
+  - at: '22:30:00'
+    id: lower temp
+    trigger: time
+  - at: 05:00:00
+    id: raise temp
+    trigger: time
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - lower temp
+      sequence:
+      - data:
+          hvac_mode: heat_cool
+          temperature: 68
+        target:
+          entity_id: climate.lg_ac
+        action: climate.set_temperature
+    - conditions:
+      - condition: trigger
+        id:
+        - raise temp
+      sequence:
+      - data:
+          hvac_mode: heat_cool
+          temperature: 70
+        target:
+          entity_id: climate.lg_ac
+        action: climate.set_temperature
+  mode: single
+- id: '1699597512208'
+  alias: Reset Boolean
+  description: ''
+  trigger:
+  - platform: time
+    at: 00:00:00
+    id: reset1
+  - platform: time
+    at: 02:00:00
+    id: reset2
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - reset1
+        - reset2
+      sequence:
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id: input_boolean.podcast_started_today
+  mode: single
+- id: '1699598324561'
+  alias: Light on for Roomba
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - vacuum.roomba
+    - vacuum.moppy
+    to:
+    - cleaning
+    - returning
+    - paused
+    - error
+    id: 'on'
+  - platform: state
+    entity_id:
+    - vacuum.roomba
+    - vacuum.moppy
+    to:
+    - docked
+    - idle
+    id: 'off'
+  - platform: state
+    entity_id:
+    - light.kitchen_lights
+    - light.living_room_lights
+    - light.dining_room_lights
+    to: 'off'
+    id: lighton
+  - platform: state
+    entity_id:
+    - input_select.taylor
+    to:
+    - Just Arrived
+    - Home
+    id: arrived
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id:
+          - 'on'
+        - condition: and
+          conditions:
+          - condition: trigger
+            id:
+            - lighton
+          - condition: state
+            entity_id: input_boolean.light_on_for_vacuum
+            state: 'on'
+          alias: light turned off
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.taylor
+          state: Home
+        - condition: state
+          entity_id: input_select.taylor
+          state: Just Arrived
+      sequence:
+      - alias: turn lights on
+        repeat:
+          count: 20
+          sequence:
+          - service: script.turn_off
+            data: {}
+            target:
+              entity_id: script.lights_off
+          - service: light.turn_on
+            data:
+              rgb_color:
+              - 255
+              - 190
+              - 203
+              brightness_pct: 100
+            target:
+              entity_id:
+              - light.dining_room_lights
+              - light.living_room_lights
+              - light.kitchen_lights
+              - light.bathroom_lights
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id: input_boolean.light_on_for_vacuum
+    - conditions:
+      - condition: trigger
+        id:
+        - 'off'
+      - condition: state
+        entity_id: vacuum.moppy
+        state: docked
+      - condition: state
+        entity_id: vacuum.roomba
+        state: docked
+      sequence:
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id: input_boolean.light_on_for_vacuum
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: input_select.taylor
+            state: Home
+          - condition: state
+            entity_id: input_select.taylor
+            state: Just Arrived
+        then:
+        - service: script.turn_on
+          data: {}
+          target:
+            entity_id: script.lights_off
+    - conditions:
+      - condition: trigger
+        id:
+        - arrived
+      sequence:
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id: input_boolean.light_on_for_vacuum
+  mode: restart
+- id: '1713809069142'
+  alias: Start Moppy after Roomba
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - vacuum.roomba
+    to: docked
+    from: returning
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_select.taylor
+      state: Just Left
+    - condition: state
+      entity_id: input_select.taylor
+      state: Away
+    alias: not home
+  - condition: time
+    weekday:
+    - wed
+  action:
+  - service: vacuum.start
+    target:
+      entity_id: vacuum.moppy
+    data: {}
+  mode: single
+- id: '1714622899204'
+  alias: Startup Actions
+  description: ''
+  triggers:
+  - event: start
+    trigger: homeassistant
+  conditions: []
+  actions:
+  - parallel:
+    - if:
+      - condition: state
+        entity_id: binary_sensor.desktop_ping
+        state: 'off'
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: input_select.taylor
+          state: Home
+        - condition: state
+          entity_id: input_select.taylor
+          state: Just Arrived
+      then:
+      - target:
+          entity_id: fan.air_purifier
+        data:
+          preset_mode: Favorite
+        action: fan.set_preset_mode
+    - if:
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: input_select.taylor
+          state: Home
+        - condition: state
+          entity_id: input_select.taylor
+          state: Just Arrived
+      then:
+      - metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - switch.wyze_cam_test_2_power
+          - switch.wyze_table_cam_power
+          - switch.table_cam_power
+          - switch.living_room_cam_power
+        action: switch.turn_off
+      enabled: false
+    - action: automation.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: automation.if_modem_turned_off_turn_back_on
+  mode: single
+- id: '1716762540244'
+  alias: Turn off Apple TV with Living Room TV
+  description: ''
+  triggers:
+  - entity_id:
+    - binary_sensor.kauf_plug_device_in_use
+    from: 'on'
+    to: 'off'
+    trigger: state
+  conditions: []
+  actions:
+  - target:
+      entity_id:
+      - media_player.taylor_s_living_room_tv
+    data: {}
+    action: media_player.turn_off
+  mode: single
+- id: '1718424866681'
+  alias: Left Work
+  description: ''
+  trigger:
+  - platform: zone
+    entity_id: person.taylor
+    zone: zone.work
+    event: leave
+  condition:
+  - condition: state
+    entity_id: binary_sensor.workday_sensor
+    state: 'on'
+  - condition: numeric_state
+    entity_id: climate.bedroom_ac
+    above: 74
+    attribute: current_temperature
+  action:
+  - service: climate.turn_on
+    target:
+      entity_id:
+      - climate.bedroom_ac
+    data: {}
+  mode: single
+- id: '1719185254340'
+  alias: Turn on AC if home and above 75
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id:
+    - climate.bedroom_ac
+    attribute: current_temperature
+    above: 74
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_select.taylor
+      state: Home
+    - condition: state
+      entity_id: input_select.taylor
+      state: Just Arrived
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: climate.bedroom_ac
+      state: cool
+  action:
+  - service: climate.turn_on
+    target:
+      entity_id:
+      - climate.bedroom_ac
+    data: {}
+  mode: single
+- id: '1732340375396'
+  alias: Lower Purifier Volume While Watching TV
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - media_player.master_bedroom_apple_tv
+    to: playing
+  - trigger: state
+    entity_id:
+    - media_player.master_bedroom_apple_tv
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 5
+    from: playing
+  - trigger: state
+    entity_id:
+    - media_player.master_bedroom_apple_tv
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+    from: playing
+  - trigger: state
+    entity_id:
+    - media_player.smarttv_4k_ffm_television
+    attribute: source
+    to: HDMI 3
+  - trigger: state
+    entity_id:
+    - media_player.smarttv_4k_ffm_television
+    to:
+    - 'off'
+    id: 'off'
+  - trigger: state
+    entity_id:
+    - light.master_bedroom_ceiling_lights
+    - light.master_bedroom_lamps
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        state: 'on'
+        entity_id: fan.bedroom_fan
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: media_player.master_bedroom_apple_tv
+          state: playing
+        - condition: and
+          conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: light.master_bedroom_lamps
+              state: 'on'
+            - condition: state
+              entity_id: light.master_bedroom_ceiling_lights
+              state: 'on'
+          - condition: state
+            entity_id: media_player.smarttv_4k_ffm_television
+            attribute: source
+            state: HDMI 3
+          enabled: true
+      sequence:
+      - action: fan.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: fan.bedroom_fan
+    - conditions:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.master_bedroom_apple_tv
+          state: playing
+        - condition: and
+          conditions:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: light.master_bedroom_lamps
+              state: 'on'
+            - condition: state
+              entity_id: light.master_bedroom_ceiling_lights
+              state: 'on'
+          - condition: state
+            entity_id: media_player.smarttv_4k_ffm_television
+            attribute: source
+            state: HDMI 3
+          enabled: true
+      sequence:
+      - action: fan.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: fan.bedroom_fan
+      - action: fan.set_percentage
+        metadata: {}
+        data:
+          percentage: 46
+        target:
+          entity_id: fan.bedroom_fan
+      - action: humidifier.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: humidifier.bedroom_humidifier
+  - action: light.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: light.bedroom_led_light
+  mode: restart
+- id: '1732938583047'
+  alias: Update Curtain State
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - cover.curtain_3_02bd
+    - cover.curtain_3_adf5
+  conditions: []
+  actions:
+  - repeat:
+      sequence:
+      - action: homeassistant.update_entity
+        data:
+          entity_id:
+          - cover.curtain_3_02bd
+          - cover.curtain_3_adf5
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 3
+          milliseconds: 0
+      until:
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: cover.curtain_3_02bd
+          state: closed
+        - condition: state
+          entity_id: cover.curtain_3_02bd
+          state: open
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: cover.curtain_3_adf5
+          state: closed
+        - condition: state
+          entity_id: cover.curtain_3_adf5
+          state: open
+  mode: single
+- id: '1733005955096'
+  alias: Close Bedroom Curtains
+  description: ''
+  triggers:
+  - trigger: time
+    at: '19:00:00'
+  conditions: []
+  actions:
+  - action: cover.close_cover
+    target:
+      entity_id:
+      - cover.curtain_3_02bd
+      - cover.curtain_3_adf5
+    data: {}
+  mode: single
+- id: '1733377973069'
+  alias: Set Temperature (Winter)
+  description: ''
+  triggers:
+  - at: '22:30:00'
+    id: lower temp
+    trigger: time
+  - at: 03:30:00
+    id: raise temp
+    trigger: time
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - lower temp
+      sequence:
+      - data:
+          hvac_mode: heat_cool
+          temperature: 72
+        target:
+          entity_id: climate.lg_ac
+        action: climate.set_temperature
+    - conditions:
+      - condition: trigger
+        id:
+        - raise temp
+      sequence:
+      - data:
+          hvac_mode: heat_cool
+          temperature: 74
+        target:
+          entity_id: climate.lg_ac
+        action: climate.set_temperature
+  mode: single
+- id: '1740607422335'
+  alias: If modem turned off, turn back on
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - switch.smartpower_plug_outlet_1
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+  conditions: []
+  actions:
+  - action: switch.turn_on
+    target:
+      entity_id: switch.smartpower_plug_outlet_1
+    data: {}
+  mode: single
+- id: '1741161411974'
+  alias: Open and close curtains
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - sun.sun
+    to: below_horizon
+    id: night
+    for:
+      hours: 0
+      minutes: 25
+      seconds: 0
+  - trigger: time
+    at: 06:00:00
+    id: morning
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - morning
+      - condition: numeric_state
+        entity_id: sensor.pirateweather_daytime_high_temperature_0d
+        below: 82
+      - condition: state
+        entity_id: binary_sensor.either_home
+        state: 'on'
+      sequence:
+      - action: cover.open_cover
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - cover.curtain_3_ad63
+          - cover.curtain_3_b6c7
+          - cover.curtain_3_02bd
+          - cover.curtain_3_adf5
+          - cover.curtain_3_e6a2
+          - cover.curtain_3_68c3
+          - cover.curtain_3_2e8d
+          - cover.curtain_3_0ced
+        enabled: false
+      - action: v6_quietdrift.set_switchbot_curtain_position
+        continue_on_error: true
+        metadata: {}
+        data:
+          entity_id:
+          - cover.curtain_3_ad63
+          - cover.curtain_3_68c3
+          - cover.curtain_3_2e8d
+          position: 100
+          speed: 1
+        enabled: false
+      - action: v6_quietdrift.set_switchbot_curtain_position
+        continue_on_error: true
+        metadata: {}
+        data:
+          entity_id:
+          - cover.curtain_3_e6a2
+          speed: 1
+          position: 60
+        enabled: false
+      - action: v6_quietdrift.set_switchbot_curtain_position
+        continue_on_error: true
+        metadata: {}
+        data:
+          entity_id:
+          - cover.curtain_3_adf5
+          speed: 1
+          position: 80
+        enabled: false
+      - action: script.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: script.open_curtains
+    - conditions:
+      - condition: trigger
+        id:
+        - night
+      sequence:
+      - action: cover.close_cover
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - cover.curtain_3_ad63
+          - cover.curtain_3_b6c7
+          - cover.curtain_3_e6a2
+          - cover.curtain_3_68c3
+          - cover.curtain_3_2e8d
+          - cover.curtain_3_0ced
+          - cover.curtain_3_02bd
+          - cover.curtain_3_adf5
+        enabled: false
+      - action: v6_quietdrift.set_switchbot_curtain_position
+        continue_on_error: true
+        metadata: {}
+        data:
+          entity_id:
+          - cover.curtain_3_ad63
+          - cover.curtain_3_adf5
+          - cover.curtain_3_68c3
+          - cover.curtain_3_2e8d
+          - cover.living_room_south_right
+          position: 0
+          speed: 1
+        enabled: false
+      - action: script.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: script.close_curtains
+  mode: single
+- id: '1748249575670'
+  alias: Restart/Restart Modem
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - sensor.trunnell_home_state
+    attribute: ip
+    to: 192.168.8.125
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+  conditions: []
+  actions:
+  - action: automation.turn_off
+    target:
+      entity_id: automation.if_modem_turned_off_turn_back_on
+    data:
+      stop_actions: true
+  - action: button.press
+    target:
+      entity_id: button.smartpower_plug_restart
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 5
+      seconds: 0
+      milliseconds: 0
+  - action: automation.turn_on
+    target:
+      entity_id: automation.if_modem_turned_off_turn_back_on
+    data:
+      stop_actions: true
+  mode: single
+- id: '1751985193604'
+  alias: Anthony Presence
+  description: ''
+  triggers:
+  - entity_id:
+    - input_select.anthony
+    to: Just Arrived
+    for:
+      hours: 0
+      minutes: 40
+      seconds: 0
+    id: Home
+    trigger: state
+  - entity_id:
+    - input_select.anthony
+    id: Away
+    to: Just Left
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+    trigger: state
+  - entity_id:
+    - person.anthony
+    to: home
+    id: Just Arrived
+    trigger: state
+  - entity_id:
+    - person.anthony
+    from: home
+    id: Just Left
+    trigger: state
+  conditions:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: person.anthony
+      state: unavailable
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: person.anthony
+      state: unknown
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: Home
+      sequence:
+      - target:
+          entity_id: input_select.anthony
+        data:
+          option: Home
+        action: input_select.select_option
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: Away
+      sequence:
+      - target:
+          entity_id: input_select.anthony
+        data:
+          option: Away
+        action: input_select.select_option
+    - conditions:
+      - condition: trigger
+        id: Just Arrived
+      sequence:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: input_select.anthony
+          state: Home
+      - target:
+          entity_id: input_select.anthony
+        data:
+          option: Just Arrived
+        action: input_select.select_option
+    - conditions:
+      - condition: trigger
+        id: Just Left
+      sequence:
+      - target:
+          entity_id: input_select.anthony
+        data:
+          option: Just Left
+        action: input_select.select_option
+    default: []
+  mode: single
+- id: '1752024200644'
+  alias: other master bedroom pico
+  description: ''
+  use_blueprint:
+    path: stephack/core-pico.yaml
+    input:
+      pico_remote: d70c3a683e525457772795c086f4e077
+      top_on:
+      - data: {}
+        target:
+          entity_id: script.lights_on
+        action: script.turn_on
+        enabled: true
+      bottom_off:
+      - data: {}
+        target:
+          entity_id:
+          - script.lights_off
+        action: script.turn_on
+      middle_stop:
+      - data: {}
+        target:
+          entity_id: script.call
+        action: script.turn_on
+      bottom_off_release: []
+      middle_stop_release: []
+      top_on_release: []
+      down_lower:
+      - data: {}
+        target:
+          entity_id:
+          - fan.bedroom_fan
+        action: fan.toggle
+      auto_mode: queued
+- id: '1752029987586'
+  alias: Living Room Left Light Pico
+  description: ''
+  use_blueprint:
+    path: stephack/core-pico.yaml
+    input:
+      pico_remote: fa68ef31ef55ae8a104882c33ca295e6
+      auto_mode: queued
+      top_on:
+      - action: script.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: script.living_room_white
+      bottom_off:
+      - action: switch.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.phillips_component_usb_capture
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - light.living_room
+      middle_stop:
+      - action: automation.trigger
+        metadata: {}
+        data:
+          skip_condition: true
+        target:
+          entity_id: automation.living_room_hue_sync_toggle
+      up_raise:
+      - action: light.turn_on
+        target:
+          entity_id:
+          - light.living_room
+        data:
+          brightness_step_pct: 10
+          color_temp_kelvin: 3500
+      down_lower:
+      - action: light.turn_on
+        target:
+          entity_id:
+          - light.living_room
+        data:
+          brightness_step_pct: -10
+          color_temp_kelvin: 3500
+- id: '1752032008785'
+  alias: Living Room Right Light Pico
+  description: ''
+  use_blueprint:
+    path: stephack/core-pico.yaml
+    input:
+      pico_remote: af3fdad2602b411dfb1b64f178b947ac
+      auto_mode: queued
+      top_on:
+      - action: script.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: script.living_room_white
+      bottom_off:
+      - action: switch.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.phillips_component_usb_capture
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - light.living_room
+      middle_stop:
+      - action: automation.trigger
+        metadata: {}
+        data:
+          skip_condition: true
+        target:
+          entity_id: automation.living_room_hue_sync_toggle
+      up_raise:
+      - action: light.turn_on
+        target:
+          entity_id:
+          - light.living_room
+        data:
+          brightness_step_pct: 10
+          color_temp_kelvin: 3500
+      down_lower:
+      - action: light.turn_on
+        target:
+          entity_id:
+          - light.living_room
+        data:
+          brightness_step_pct: -10
+          color_temp_kelvin: 3500
+- id: '1752366685713'
+  alias: Guest Bathroom Exhaust Fan
+  description: ''
+  triggers:
+  - alias: When timer finishes
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.guest_exhaust
+    id: done
+    trigger: event
+  - event: start
+    id: restart
+    trigger: homeassistant
+  - event_type: automation_reloaded
+    alias: reload
+    id: reload
+    trigger: event
+  - value_template: "{% if states.switch.exhaust_fan.last_changed is defined %}\n
+      \ {% if as_timestamp(states.switch.exhaust_fan.last_changed)|timestamp_local
+      is defined %}\n    {{ is_state('switch.exhaust_fan', 'on') and is_state('light.bathroom_lights',
+      'on') and\n       as_timestamp(states.switch.exhaust_fan.last_changed) > as_timestamp(now())
+      - (3600) }}\n  {%endif%}\n{%endif%}"
+    alias: turn off
+    id: turn off
+    enabled: false
+    trigger: template
+  - type: turned_on
+    device_id: c7f6b6b68ac5ae9942ec7715b46b9b26
+    entity_id: f0ce6cd5b0ca12e7abe56869c1db5f7d
+    domain: switch
+    id: turned on
+    trigger: device
+  - type: turned_off
+    device_id: c7f6b6b68ac5ae9942ec7715b46b9b26
+    entity_id: f0ce6cd5b0ca12e7abe56869c1db5f7d
+    domain: switch
+    id: turned off
+    trigger: device
+  - trigger: state
+    entity_id:
+    - light.guest_bathroom_vanity_lights
+    to: 'off'
+    from: 'on'
+    id: lights turned off
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: device
+        type: is_on
+        device_id: c7f6b6b68ac5ae9942ec7715b46b9b26
+        entity_id: f0ce6cd5b0ca12e7abe56869c1db5f7d
+        domain: switch
+      - condition: device
+        type: is_off
+        device_id: a3863f650d8acf7df4f7ab0393b0b595
+        entity_id: light.guest_bathroom_vanity_lights
+        domain: light
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: lights turned off
+        - condition: trigger
+          id: turned on
+      - condition: or
+        conditions:
+        - alias: Timer not active
+          condition: not
+          conditions:
+          - condition: state
+            entity_id: timer.guest_exhaust
+            state: active
+      sequence:
+      - data:
+          duration: 00:15:00
+        target:
+          entity_id:
+          - timer.guest_exhaust
+        action: timer.start
+    - conditions:
+      - condition: trigger
+        id: done
+      sequence:
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 1
+          milliseconds: 0
+      - alias: Confirm fan is off, shower is off, timer is off
+        condition: not
+        conditions:
+        - condition: state
+          entity_id: timer.guest_exhaust
+          state: active
+        - condition: state
+          entity_id: switch.guest_bathroom_exhaust_fan
+          state: 'off'
+        - condition: state
+          entity_id: binary_sensor.guest_bathroom_occupancy
+          state: 'on'
+          enabled: true
+      - data: {}
+        target:
+          entity_id:
+          - switch.guest_bathroom_exhaust_fan
+        action: switch.turn_off
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: restart
+        - condition: trigger
+          id: reload
+        alias: restart/reload
+      - condition: state
+        entity_id: switch.guest_bathroom_exhaust_fan
+        state: 'on'
+      sequence:
+      - if:
+        - condition: state
+          entity_id: light.guest_bathroom_vanity_lights
+          state: 'off'
+        then:
+        - data: {}
+          target:
+            entity_id:
+            - timer.guest_exhaust
+          action: timer.cancel
+        - data: {}
+          target:
+            entity_id:
+            - switch.guest_bathroom_exhaust_fan
+          action: switch.turn_off
+        else:
+        - condition: state
+          entity_id: timer.guest_exhaust
+          state: idle
+        - condition: device
+          type: is_off
+          device_id: a3863f650d8acf7df4f7ab0393b0b595
+          entity_id: light.guest_bathroom_vanity_lights
+          domain: light
+        - data: {}
+          target:
+            entity_id:
+            - timer.guest_exhaust
+          action: timer.start
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id:
+          - turn off
+        - condition: trigger
+          id: turned off
+      sequence:
+      - data: {}
+        target:
+          entity_id:
+          - switch.guest_bathroom_exhaust_fan
+        action: switch.turn_off
+      - data: {}
+        target:
+          entity_id:
+          - timer.guest_exhaust
+        action: timer.cancel
+  mode: queued
+  max: 10
+- id: '1752377403444'
+  alias: Ice Plus
+  description: ''
+  triggers:
+  - trigger: homeassistant
+    event: start
+  - trigger: state
+    entity_id:
+    - switch.refrigerator_express_mode
+    to: 'off'
+  conditions: []
+  actions:
+  - action: switch.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: switch.refrigerator_express_mode
+  mode: single
+- id: '1752386133896'
+  alias: Guest Bathroom Lights
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.guest_bathroom_occupancy
+    from: 'off'
+    to: 'on'
+    id: detected
+  - trigger: state
+    entity_id:
+    - binary_sensor.guest_bathroom_occupancy
+    from: 'on'
+    to: 'off'
+    id: clear
+  - trigger: state
+    entity_id:
+    - light.guest_bathroom_vanity_lights
+    from: 'off'
+    to: 'on'
+    alias: turned on
+    id: turned on
+  - trigger: state
+    entity_id:
+    - switch.guest_bathroom_exhaust_fan
+    to: 'on'
+    id: 'fan on '
+  - trigger: state
+    entity_id:
+    - light.guest_bathroom_vanity_lights
+    from: 'on'
+    to: 'off'
+    id: lights turned off
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: sun
+        after: sunrise
+      - condition: trigger
+        id:
+        - detected
+      - condition: state
+        entity_id: binary_sensor.taylor_home
+        state: 'on'
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: light.hue_twilight_2
+          state: 'on'
+        - condition: state
+          entity_id: light.hue_twilight_2_2
+          state: 'on'
+        - condition: state
+          entity_id: light.hue_twilight_1_2
+          state: 'on'
+        - condition: state
+          entity_id: light.hue_twilight_1
+          state: 'on'
+        - condition: state
+          entity_id: light.guest_bedroom_ceiling_lights
+          state: 'on'
+        - condition: state
+          entity_id: media_player.living_room_tv
+          state: 'on'
+        - condition: state
+          entity_id: light.living_room
+          state: 'on'
+      - condition: or
+        conditions:
+        - condition: time
+          weekday:
+          - sun
+          - sat
+          before: '12:00:00'
+        - condition: time
+          weekday:
+          - mon
+          - tue
+          - wed
+          - thu
+          - fri
+          before: '12:00:00'
+          after: 06:30:00
+      sequence:
+      - stop: ''
+    - conditions:
+      - condition: state
+        entity_id: switch.guest_bathroom_exhaust_fan
+        state: 'off'
+      - condition: state
+        entity_id: light.guest_hallway_main_lights
+        state: 'off'
+      - condition: trigger
+        id:
+        - detected
+        - turned on
+      - condition: not
+        conditions:
+        - condition: state
+          state: 'on'
+          entity_id: light.hue_twilight_1_2
+        - condition: state
+          entity_id: light.hue_twilight_1
+          state: 'on'
+        - condition: state
+          entity_id: light.hue_twilight_2
+          state: 'on'
+        - condition: state
+          entity_id: light.hue_twilight_2_2
+          state: 'on'
+      - condition: state
+        entity_id: light.living_room
+        state: 'off'
+      - condition: state
+        entity_id: switch.dining_room_table_lights
+        state: 'off'
+      - condition: sun
+        after: sunset
+        before: sunrise
+      - condition: or
+        conditions:
+        - condition: sun
+          after: sunset
+          before: sunrise
+        - condition: time
+          after: '20:00:00'
+          before: 05:00:00
+      sequence:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_pct: 1
+        target:
+          entity_id: light.guest_bathroom_vanity_lights
+    - conditions:
+      - condition: trigger
+        id:
+        - detected
+      sequence:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_pct: 100
+        target:
+          entity_id: light.guest_bathroom_vanity_lights
+    - conditions:
+      - condition: trigger
+        id:
+        - clear
+      sequence:
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: light.guest_bathroom_vanity_lights
+    - conditions:
+      - condition: trigger
+        id:
+        - 'fan on '
+      - condition: state
+        entity_id: light.guest_bathroom_vanity_lights
+        state: 255
+        attribute: brightness
+      sequence:
+      - action: switch.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.guest_bathroom_exhaust_fan_light
+    - conditions:
+      - condition: trigger
+        id:
+        - lights turned off
+      - condition: state
+        entity_id: switch.guest_bathroom_exhaust_fan_light
+        state: 'on'
+      sequence:
+      - action: switch.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.guest_bathroom_exhaust_fan_light
+    - conditions:
+      - condition: trigger
+        id:
+        - turned on
+      - condition: state
+        entity_id: light.guest_bathroom_vanity_lights
+        attribute: brightness
+        state: 255
+      - condition: state
+        entity_id: switch.guest_bathroom_exhaust_fan
+        state: 'on'
+      sequence:
+      - action: switch.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.guest_bathroom_exhaust_fan_light
+  mode: queued
+  max: 10
+- id: '1752509896219'
+  alias: Set Wyze Bulb Color
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - light.wyzebulb10_wyze_bulb_10
+    - light.wyzebulb6_wyze_bulb_6
+    from: unavailable
+    to: 'on'
+  conditions: []
+  actions:
+  - action: light.turn_on
+    metadata: {}
+    data:
+      xy_color:
+      - 0.389
+      - 0.211
+    target:
+      entity_id:
+      - light.wyzebulb10_wyze_bulb_10
+      - light.wyzebulb6_wyze_bulb_6
+  mode: restart
+- id: '1752704050641'
+  alias: Living Room Wall Pico (old)
+  description: ''
+  use_blueprint:
+    path: stephack/core-pico.yaml
+    input:
+      pico_remote: 002d52e1e2b08182ec5c8574f4d96586
+      auto_mode: queued
+      top_on:
+      - action: script.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: script.living_room_white
+      - action: media_player.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - media_player.living_room_tv
+          - media_player.living_room_apple_tv
+      bottom_off:
+      - action: script.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: script.goodnight
+      middle_stop:
+      - action: automation.trigger
+        metadata: {}
+        data:
+          skip_condition: true
+        target:
+          entity_id: automation.living_room_hue_sync_toggle
+      up_raise:
+      - action: light.turn_on
+        target:
+          entity_id:
+          - light.living_room
+        data:
+          brightness_step_pct: 10
+          color_temp_kelvin: 3500
+      down_lower:
+      - action: light.turn_on
+        target:
+          entity_id:
+          - light.living_room
+        data:
+          brightness_step_pct: -10
+          color_temp_kelvin: 3500
+- id: '1752890212327'
+  alias: Taylor's Garage Door Reminder
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - sensor.taylor_s_garage_open_duration
+    to: '15'
+    id: '15'
+  - trigger: state
+    entity_id:
+    - sensor.taylor_s_garage_open_duration
+    to: '30'
+    id: '30'
+    enabled: false
+  - trigger: state
+    entity_id:
+    - sensor.taylor_s_garage_open_duration
+    to: '45'
+    id: '45'
+    enabled: false
+  - trigger: state
+    entity_id:
+    - sensor.taylor_s_garage_open_duration
+    to: '60'
+    id: hour
+  - trigger: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: CLOSEGARAGE
+    id: event
+  conditions: []
+  actions:
+  - data:
+      message: clear_notification
+      data:
+        tag: taylors_garage
+    action: notify.anthonys_devices
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - event
+      sequence:
+      - action: cover.close_cover
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - cover.taylor_s_garage_door
+    default:
+    - action: notify.anthonys_devices
+      metadata: {}
+      data:
+        data:
+          entity_id: camera.garage_medium_resolution_channel
+          actions:
+          - action: CLOSEGARAGE
+            title: Close Garage
+          tag: taylors_garage
+        message: Taylor's garage door has been left open for {{ states("sensor.taylor_s_garage_open_duration")
+          }} minutes
+  mode: parallel
+  max: 2
+- id: '1752932454343'
+  alias: Turn back on eight sleep
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - switch.anthony_s_eight_sleep_keep_temp
+    to: 'off'
+    id: turned off
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.anthony_home
+        state: 'on'
+      sequence:
+      - repeat:
+          sequence:
+          - action: switch.turn_on
+            target:
+              entity_id:
+              - switch.anthony_s_eight_sleep_keep_temp
+            data: {}
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 30
+              milliseconds: 0
+          until:
+          - condition: state
+            entity_id: switch.anthony_s_eight_sleep_keep_temp
+            state: 'on'
+            for:
+              hours: 0
+              minutes: 0
+              seconds: 10
+- id: '1753070012476'
+  alias: Anthony's Garage Door Reminder
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - sensor.anthony_s_garage_open_duration
+    to: '15'
+    id: '15'
+  - trigger: state
+    entity_id:
+    - sensor.anthony_s_garage_open_duration
+    to: '30'
+    id: '30'
+    enabled: false
+  - trigger: state
+    entity_id:
+    - sensor.anthony_s_garage_open_duration
+    to: '45'
+    id: '45'
+    enabled: false
+  - trigger: state
+    entity_id:
+    - sensor.anthony_s_garage_open_duration
+    to: '60'
+    id: hour
+  - trigger: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: CLOSEGARAGE
+    id: event
+  conditions: []
+  actions:
+  - data:
+      message: clear_notification
+      data:
+        tag: anthonys_garage
+    action: notify.anthonys_devices
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - event
+      sequence:
+      - action: cover.close_cover
+        metadata: {}
+        data: {}
+        target:
+          entity_id: cover.anthony_s_garage_door
+    default:
+    - action: notify.anthonys_devices
+      metadata: {}
+      data:
+        data:
+          entity_id: camera.garage_medium_resolution_channel
+          actions:
+          - action: CLOSEGARAGE
+            title: Close Garage
+          tag: anthonys_garage
+        message: Anthony's garage door has been left open for {{ states("sensor.anthony_s_garage_open_duration")
+          }} minutes
+  mode: parallel
+  max: 2
+- id: '1753564089628'
+  alias: Garage Motion
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.garage_occupancy
+    to:
+    from:
+  - trigger: homeassistant
+    event: start
+  - event_type: automation_reloaded
+    alias: reload
+    id: reload
+    trigger: event
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.garage_occupancy
+        state: 'on'
+      sequence:
+      - action: light.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - light.ratgdov25i_e08f77_light
+          - light.taylor_s_garage_door
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.garage_occupancy
+        state: 'off'
+      sequence:
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - light.ratgdov25i_e08f77_light
+          - light.taylor_s_garage_door
+  mode: single
+- id: '1753717801877'
+  alias: Both Left Home
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.either_home
+    to: 'off'
+  conditions: []
+  actions:
+  - action: automation.turn_off
+    metadata: {}
+    data:
+      stop_actions: true
+    target:
+      entity_id: automation.left_home
+  - action: automation.turn_on
+    metadata: {}
+    target:
+      entity_id: automation.left_home
+    data: {}
+  - action: cover.close_cover
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - cover.anthony_s_garage_door
+      - cover.taylor_s_garage_door
+  - if:
+    - condition: state
+      entity_id: fan.bedroom_fan
+      state: 'on'
+    then:
+    - action: fan.turn_off
+      target:
+        entity_id: fan.bedroom_fan
+      data: {}
+    - delay:
+        hours: 0
+        minutes: 0
+        seconds: 5
+        milliseconds: 0
+    - action: fan.turn_on
+      target:
+        entity_id: fan.bedroom_fan
+      data:
+        percentage: 90
+    else:
+    - action: fan.turn_on
+      target:
+        entity_id: fan.bedroom_fan
+      data:
+        percentage: 90
+  - if:
+    - condition: state
+      entity_id: input_boolean.guest
+      state: 'on'
+    then:
+    - stop: ''
+  - action: media_player.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - media_player.smarttv_4k_ffm_television
+      - media_player.living_room_tv
+      - media_player.guest_room
+      - media_player.living_room_apple_tv
+      - media_player.living_room_hisense
+      - media_player.master_bedroom_apple_tv
+  - action: media_player.media_stop
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - media_player.ceiling_but_works_airplay
+      - media_player.kitchen_ceiling
+      - media_player.master_bathroom
+  - action: script.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - script.goodnight
+      - script.lights_off
+  - action: fan.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: fan.master_bedroom_ceiling_fan
+  mode: single
+- id: '1753834572273'
+  alias: Guest Bedroom Wall Pico
+  description: ''
+  triggers:
+  - device_id: b8b311342102499ff150bbc9272ffc29
+    domain: lutron_caseta
+    type: press
+    subtype: 'on'
+    trigger: device
+    id: 'on'
+  - device_id: b8b311342102499ff150bbc9272ffc29
+    domain: lutron_caseta
+    type: press
+    subtype: 'off'
+    trigger: device
+    id: 'off'
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - 'on'
+      sequence:
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: scene.guest_bedroom_lily
+        enabled: false
+      - repeat:
+          sequence:
+          - action: light.turn_on
+            metadata: {}
+            data:
+              brightness_pct: 100
+              color_temp_kelvin: 3500
+            target:
+              entity_id:
+              - light.guest_bedroom_ceiling_lights
+          count: 50
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 0
+          milliseconds: 200
+        enabled: false
+      - action: number.set_value
+        metadata: {}
+        data:
+          value: '55'
+        target:
+          entity_id: number.anthony_s_eight_sleep_temp
+        enabled: false
+      - action: automation.trigger
+        metadata: {}
+        data:
+          skip_condition: true
+        target:
+          entity_id: automation.lower_purifier_volume_while_watching_tv
+        enabled: false
+    - conditions:
+      - condition: trigger
+        id:
+        - 'off'
+      sequence:
+      - repeat:
+          sequence:
+          - action: light.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id:
+              - light.guest_bedroom_ceiling_lights
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 0
+              milliseconds: 250
+          count: 50
+  mode: restart
+- id: '1753835308287'
+  alias: Master Bedroom Wall Pico
+  description: ''
+  triggers:
+  - device_id: 70ff82a8ebb308a36497f3e1e5777c25
+    domain: lutron_caseta
+    type: press
+    subtype: 'on'
+    trigger: device
+    id: 'on'
+  - device_id: 70ff82a8ebb308a36497f3e1e5777c25
+    domain: lutron_caseta
+    type: press
+    subtype: 'off'
+    trigger: device
+    id: 'off'
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - 'on'
+      sequence:
+      - action: script.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: script.lights_on
+        enabled: false
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: scene.master_bedroom_on_with_lily
+      - repeat:
+          count: 50
+          sequence:
+          - action: light.turn_on
+            metadata: {}
+            data:
+              brightness_pct: 100
+              color_temp_kelvin: 3500
+            target:
+              entity_id:
+              - light.master_bedroom_ceiling_lights
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 0
+              milliseconds: 250
+        enabled: false
+      - action: number.set_value
+        metadata: {}
+        data:
+          value: '55'
+        target:
+          entity_id: number.anthony_s_eight_sleep_temp
+        enabled: true
+    - conditions:
+      - condition: trigger
+        id:
+        - 'off'
+      sequence:
+      - repeat:
+          count: 30
+          sequence:
+          - action: light.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id:
+              - light.master_bedroom_ceiling_lights
+              - light.master_bathroom_vanity_lights
+              - light.master_bathroom_main_lights
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 0
+              milliseconds: 250
+        enabled: false
+      - action: script.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: script.lights_off
+        enabled: false
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: scene.master_bedroom_off
+  mode: restart
+- id: '1753842862678'
+  alias: Guest Bedroom Motion
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.guest_bedroom_occupancy
+    to: 'off'
+    from: 'on'
+  conditions: []
+  actions:
+  - action: light.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: light.guest_bedroom_ceiling_lights
+  mode: single
+- id: '1754424126719'
+  alias: Kitchen Audio Pico
+  description: ''
+  use_blueprint:
+    path: stephack/core-pico.yaml
+    input:
+      pico_remote: 28c15e302ca05d97a42c07445a3817c2
+      middle_stop:
+      - action: script.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: script.play_jazz
+      up_raise_release:
+      - if:
+        - condition: state
+          state: playing
+          entity_id: media_player.kitchen_ceiling
+        then:
+        - action: media_player.volume_up
+          metadata: {}
+          data: {}
+          target:
+            entity_id:
+            - media_player.kitchen_ceiling
+        else:
+        - action: media_player.volume_up
+          metadata: {}
+          data: {}
+          target:
+            entity_id:
+            - media_player.living_room_apple_tv
+      down_lower:
+      - if:
+        - condition: state
+          state: playing
+          entity_id: media_player.kitchen_ceiling
+        then:
+        - action: media_player.volume_down
+          metadata: {}
+          data: {}
+          target:
+            entity_id:
+            - media_player.kitchen_ceiling
+        else:
+        - action: media_player.volume_down
+          metadata: {}
+          data: {}
+          target:
+            entity_id:
+            - media_player.living_room_apple_tv
+      bottom_off:
+      - if:
+        - condition: state
+          state: idle
+          entity_id: media_player.kitchen_ceiling
+        then:
+        - action: script.turn_on
+          metadata: {}
+          data: {}
+          target:
+            entity_id: script.play_jazz
+        else:
+        - action: media_player.media_next_track
+          metadata: {}
+          data: {}
+          target:
+            entity_id:
+            - media_player.kitchen_ceiling
+      top_on:
+      - if:
+        - condition: state
+          entity_id: media_player.kitchen_ceiling
+          state: idle
+        then:
+        - action: script.turn_on
+          metadata: {}
+          data: {}
+          target:
+            entity_id: script.play_jazz
+        else:
+        - action: media_player.media_play_pause
+          metadata: {}
+          data: {}
+          target:
+            entity_id:
+            - media_player.kitchen_ceiling
+      auto_mode: parallel
+- id: '1754450888779'
+  alias: Dining Room Audio Pico
+  description: ''
+  use_blueprint:
+    path: stephack/core-pico.yaml
+    input:
+      pico_remote: 55646f1427b5116679c131825436258f
+      middle_stop:
+      - action: script.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: script.play_jazz
+      up_raise_release:
+      - if:
+        - condition: state
+          state: playing
+          entity_id: media_player.kitchen_ceiling
+        then:
+        - action: media_player.volume_up
+          metadata: {}
+          data: {}
+          target:
+            entity_id:
+            - media_player.kitchen_ceiling
+        else:
+        - action: media_player.volume_up
+          metadata: {}
+          data: {}
+          target:
+            entity_id:
+            - media_player.living_room_apple_tv
+      down_lower:
+      - if:
+        - condition: state
+          state: playing
+          entity_id: media_player.kitchen_ceiling
+        then:
+        - action: media_player.volume_down
+          metadata: {}
+          data: {}
+          target:
+            entity_id:
+            - media_player.kitchen_ceiling
+        else:
+        - action: media_player.volume_down
+          metadata: {}
+          data: {}
+          target:
+            entity_id:
+            - media_player.living_room_apple_tv
+      bottom_off:
+      - if:
+        - condition: state
+          state: idle
+          entity_id: media_player.kitchen_ceiling
+        then:
+        - action: script.turn_on
+          metadata: {}
+          data: {}
+          target:
+            entity_id: script.play_jazz
+        else:
+        - action: media_player.media_next_track
+          metadata: {}
+          data: {}
+          target:
+            entity_id:
+            - media_player.kitchen_ceiling
+      top_on:
+      - if:
+        - condition: state
+          state: idle
+          entity_id: media_player.kitchen_ceiling
+        then:
+        - action: script.turn_on
+          metadata: {}
+          data: {}
+          target:
+            entity_id: script.play_jazz
+        else:
+        - action: media_player.media_play_pause
+          metadata: {}
+          data: {}
+          target:
+            entity_id:
+            - media_player.kitchen_ceiling
+      auto_mode: parallel
+- id: '1755118589282'
+  alias: Living Room Hue Sync Toggle
+  description: ''
+  triggers: []
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: switch.phillips_component_led_device
+          state: 'off'
+        - condition: state
+          entity_id: light.phillips
+          state: 'off'
+      sequence:
+      - action: switch.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - switch.phillips_component_usb_capture
+          - switch.phillips_component_led_device
+        enabled: true
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: light.phillips
+        enabled: false
+      - action: light.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: light.phillips
+        enabled: false
+      - if:
+        - condition: state
+          entity_id: media_player.living_room_hisense
+          attribute: source
+          state: Apple TV
+        then:
+        - action: switch.turn_on
+          metadata: {}
+          data: {}
+          target:
+            entity_id: switch.phillips_component_usb_capture
+      - action: switch.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - switch.phillips_component_led_device
+        enabled: true
+    default:
+    - if:
+      - condition: state
+        entity_id: switch.phillips_component_led_device
+        state: 'on'
+      then:
+      - action: switch.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - switch.phillips_component_led_device
+          - switch.phillips_component_usb_capture
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: light.phillips
+        enabled: false
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 0
+          milliseconds: 300
+    - action: scene.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: scene.living_room_tyrell
+  mode: single
+- id: '1755134386494'
+  alias: Anthony Arrive Home
+  description: ''
+  triggers:
+  - entity_id:
+    - input_select.anthony
+    to: Just Arrived
+    trigger: state
+  conditions: []
+  actions:
+  - parallel:
+    - action: number.set_value
+      metadata: {}
+      data:
+        value: '55'
+      target:
+        entity_id: number.anthony_s_eight_sleep_temp
+  - wait_for_trigger:
+    - trigger: state
+      entity_id:
+      - cover.anthony_s_garage_door
+      to: open
+    continue_on_timeout: false
+  - action: lock.unlock
+    metadata: {}
+    data: {}
+    target:
+      entity_id: lock.garage_lock
+  mode: single
+- id: '1756169151458'
+  alias: Sync Bedroom HyperHDR to TV State
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - media_player.smarttv_4k_ffm_television
+  - trigger: state
+    entity_id:
+    - switch.85_hisense_backlight_led_device
+    from: unavailable
+    enabled: false
+  - trigger: state
+    entity_id:
+    - media_player.master_bedroom_apple_tv
+    to:
+    from:
+  conditions: []
+  actions:
+  - alias: Set Power
+    choose:
+    - conditions:
+      - condition: state
+        entity_id: media_player.smarttv_4k_ffm_television
+        state: 'off'
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: switch.85_hisense_backlight_led_device
+          state: 'on'
+        - condition: state
+          entity_id: switch.bedroom_pc_component_led_device
+          state: 'on'
+          enabled: false
+        - condition: state
+          entity_id: switch.master_bedroom_hue_led_device
+          state: 'on'
+        - condition: state
+          entity_id: switch.bedroom_pc_philips_component_led_device
+          state: 'on'
+          enabled: false
+      sequence:
+      - action: switch.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - switch.85_hisense_backlight_led_device
+          - switch.master_bedroom_hue_led_device
+      - stop: done
+    - conditions:
+      - condition: state
+        entity_id: media_player.smarttv_4k_ffm_television
+        state: 'on'
+      sequence:
+      - choose:
+        - conditions:
+          - condition: state
+            entity_id: media_player.smarttv_4k_ffm_television
+            attribute: source
+            state: Apple TV
+          sequence:
+          - action: switch.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id:
+              - switch.master_bedroom_hue_led_device
+              - switch.bedroom_pc_component_forwarder
+          - action: switch.turn_on
+            metadata: {}
+            data: {}
+            target:
+              entity_id:
+              - switch.85_hisense_backlight_led_device
+        - conditions:
+          - condition: state
+            entity_id: media_player.smarttv_4k_ffm_television
+            attribute: source
+            state: HDMI 3
+          sequence:
+          - action: switch.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id:
+              - switch.master_bedroom_hue_led_device
+          - action: switch.turn_on
+            metadata: {}
+            data: {}
+            target:
+              entity_id:
+              - switch.85_hisense_backlight_led_device
+              - switch.bedroom_pc_component_forwarder
+              - switch.desktop_component_forwarder
+          - action: switch.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: switch.master_bedroom_hue_led_device
+  - alias: Set Source
+    choose:
+    - conditions:
+      - condition: state
+        entity_id: media_player.smarttv_4k_ffm_television
+        state: 'on'
+      - condition: state
+        entity_id: media_player.smarttv_4k_ffm_television
+        state: Apple TV
+        attribute: source
+      sequence:
+      - action: switch.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - switch.bedroom_pc_component_forwarder
+          - switch.desktop_component_forwarder
+    - conditions:
+      - condition: state
+        entity_id: media_player.smarttv_4k_ffm_television
+        state: 'on'
+      - condition: state
+        entity_id: media_player.smarttv_4k_ffm_television
+        state: HDMI 3
+        attribute: source
+      sequence:
+      - action: switch.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - switch.bedroom_pc_component_forwarder
+          - switch.bedroom_pc_screen_capture
+          - switch.desktop_component_forwarder
+    enabled: false
+  mode: queued
+  max: 10
+- id: '1756450245807'
+  alias: Turn On Living Room TV With Controller
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - sensor.mediapc_satellite_controllerconnected
+    from: 'False'
+    to: 'True'
+  conditions: []
+  actions:
+  - if:
+    - condition: state
+      entity_id: switch.lr_tv
+      state: 'off'
+    then:
+    - action: media_player.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: media_player.smarttv_4k_ffm_television
+  - action: media_player.select_source
+    metadata: {}
+    data:
+      source: HDMI 4
+    target:
+      entity_id:
+      - media_player.living_room_hisense
+  mode: single
+- id: '1756506224707'
+  alias: Pause Music
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - media_player.living_room_apple_tv
+    - media_player.master_bedroom_apple_tv
+    - media_player.guest_room
+    to: playing
+  conditions: []
+  actions:
+  - action: media_player.media_pause
+    metadata: {}
+    data: {}
+    target:
+      entity_id: media_player.kitchen_ceiling
+  mode: single
+- id: '1756633209373'
+  alias: Turn off USW LEDs
+  description: ''
+  triggers:
+  - trigger: time_pattern
+    minutes: /5
+  conditions: []
+  actions:
+  - action: switch.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - switch.usw_leds
+      - switch.usw_2_leds
+      - switch.usw_3_leds
+      - switch.usw_4_leds
+  mode: single
+- id: '1756870919383'
+  alias: Turn on Bedroom TV with Controller
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - sensor.bedroompc_satellite_controllerconnected
+    from: 'False'
+    to: 'True'
+  conditions: []
+  actions:
+  - if:
+    - condition: state
+      entity_id: media_player.smarttv_4k_ffm_television
+      state: 'off'
+    then:
+    - action: media_player.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: media_player.smarttv_4k_ffm_television
+  - action: media_player.select_source
+    metadata: {}
+    data:
+      source: HDMI 3
+    target:
+      entity_id: media_player.smarttv_4k_ffm_television
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 3
+      milliseconds: 0
+  - action: media_player.select_source
+    metadata: {}
+    data:
+      source: HDMI 3
+    target:
+      entity_id: media_player.smarttv_4k_ffm_television
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - action: media_player.select_source
+    metadata: {}
+    data:
+      source: HDMI 3
+    target:
+      entity_id: media_player.smarttv_4k_ffm_television
+  mode: single
+- id: '1756927179929'
+  alias: Sync Living Room HyperHDR to TV State
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - media_player.living_room_hisense
+  - trigger: state
+    entity_id:
+    - switch.first_led_instance_component_led_device
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    to:
+    enabled: false
+  conditions: []
+  actions:
+  - alias: Set Power
+    choose:
+    - conditions:
+      - condition: state
+        entity_id: media_player.living_room_hisense
+        state: 'off'
+      - condition: state
+        state: 'on'
+        entity_id: switch.first_led_instance_component_led_device
+      sequence:
+      - action: switch.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.first_led_instance_component_led_device
+      - stop: done
+    - conditions:
+      - condition: state
+        entity_id: media_player.living_room_hisense
+        state: 'on'
+      - condition: state
+        entity_id: switch.first_led_instance_component_led_device
+        state: 'off'
+      sequence:
+      - action: switch.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.first_led_instance_component_led_device
+  - alias: Set Source
+    choose:
+    - conditions:
+      - condition: state
+        entity_id: media_player.living_room_hisense
+        state: 'on'
+      - condition: state
+        entity_id: media_player.living_room_hisense
+        state: Apple TV
+        attribute: source
+      sequence:
+      - action: switch.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.living_room_pc_forwarder
+    - conditions:
+      - condition: state
+        entity_id: media_player.living_room_hisense
+        state: 'on'
+      - condition: state
+        entity_id: media_player.living_room_hisense
+        state: HDMI 4
+        attribute: source
+      sequence:
+      - action: switch.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.living_room_pc_forwarder
+      - action: switch.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.phillips_component_led_device
+  mode: queued
+  max: 10
+- id: '1757302507086'
+  alias: Living Room Wall Pico
+  description: ''
+  triggers:
+  - device_id: 17d911a1a0e143a4740af78d6263668e
+    domain: lutron_caseta
+    type: press
+    subtype: 'on'
+    trigger: device
+    id: 'on'
+  - device_id: 17d911a1a0e143a4740af78d6263668e
+    domain: lutron_caseta
+    type: press
+    subtype: 'off'
+    trigger: device
+    id: 'off'
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - 'on'
+      sequence:
+      - action: script.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: script.living_room_white
+      - if:
+        - condition: state
+          entity_id: input_boolean.guest
+          state: 'off'
+        then:
+        - action: media_player.turn_on
+          metadata: {}
+          data: {}
+          target:
+            entity_id:
+            - media_player.living_room_apple_tv
+            - media_player.living_room_tv_2
+    - conditions:
+      - condition: trigger
+        id:
+        - 'off'
+      sequence:
+      - action: script.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - script.living_room_off
+  mode: single
+- id: '1757743077723'
+  alias: Master Bathroom Lights
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.master_bathroom_occupancy
+    from: 'off'
+    to: 'on'
+    id: detected
+  - trigger: state
+    entity_id:
+    - binary_sensor.master_bathroom_occupancy
+    from: 'on'
+    to: 'off'
+    id: clear
+  - alias: turned on
+    trigger: state
+    entity_id:
+    - light.master_bathroom_vanity_lights
+    from: 'off'
+    to: 'on'
+    id: turned on
+  - trigger: state
+    entity_id:
+    - light.master_bathroom_vanity_lights
+    from: 'on'
+    to: 'off'
+    id: lights turned off
+  - trigger: state
+    entity_id:
+    - light.master_bathroom_vanity_lights
+    to:
+    - 'on'
+    id: lights turned on for 5 minutes
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: sun
+        after: sunrise
+      - condition: trigger
+        id:
+        - detected
+      - condition: state
+        entity_id: binary_sensor.taylor_home
+        state: 'on'
+        enabled: false
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: light.hue_twilight_2
+          state: 'on'
+        - condition: state
+          entity_id: light.hue_twilight_2_2
+          state: 'on'
+        - condition: state
+          entity_id: light.hue_twilight_1_2
+          state: 'on'
+        - condition: state
+          entity_id: light.hue_twilight_1
+          state: 'on'
+        - condition: state
+          entity_id: light.master_bedroom_ceiling_lights
+          state: 'on'
+        - condition: state
+          entity_id: media_player.smarttv_4k_ffm_television
+          state: 'on'
+        - condition: state
+          entity_id: light.living_room
+          state: 'on'
+      - condition: or
+        conditions:
+        - condition: time
+          weekday:
+          - sun
+          - sat
+          before: '12:00:00'
+        - condition: time
+          weekday:
+          - mon
+          - tue
+          - wed
+          - thu
+          - fri
+          before: '12:00:00'
+          after: 06:30:00
+      sequence:
+      - stop: ''
+    - conditions:
+      - condition: trigger
+        id:
+        - detected
+        - turned on
+      - condition: not
+        conditions:
+        - condition: state
+          state: 'on'
+          entity_id: light.hue_twilight_1_2
+        - condition: state
+          entity_id: light.hue_twilight_1
+          state: 'on'
+        - condition: state
+          entity_id: light.hue_twilight_2
+          state: 'on'
+        - condition: state
+          entity_id: light.hue_twilight_2_2
+          state: 'on'
+      - condition: state
+        entity_id: light.living_room
+        state: 'off'
+      - condition: state
+        entity_id: switch.dining_room_table_lights
+        state: 'off'
+      - condition: sun
+        after: sunset
+        before: sunrise
+      - condition: or
+        conditions:
+        - condition: sun
+          after: sunset
+          before: sunrise
+        - condition: time
+          after: '20:00:00'
+          before: 05:00:00
+      sequence:
+      - stop: ''
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_pct: 1
+        target:
+          entity_id:
+          - light.master_bathroom_vanity_lights
+    - conditions:
+      - condition: trigger
+        id:
+        - detected
+      - condition: time
+        before: '21:00:00'
+        after: 06:00:00
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: binary_sensor.taylor_home
+          state: 'on'
+        - condition: and
+          conditions:
+          - condition: state
+            entity_id: binary_sensor.anthony_home
+            state: 'on'
+          - condition: state
+            entity_id: binary_sensor.anthony_bed_presence
+            state: 'off'
+      - condition: state
+        entity_id: binary_sensor.bed_both_occupied
+        state: 'off'
+      sequence:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_pct: 100
+        target:
+          entity_id:
+          - light.master_bathroom_vanity_lights
+    - conditions:
+      - condition: trigger
+        id:
+        - clear
+        - lights turned on for 5 minutes
+      - condition: state
+        entity_id: binary_sensor.master_bathroom_occupancy
+        state:
+        - 'off'
+      - condition: state
+        entity_id: light.master_bathroom_vanity_lights
+        state:
+        - 'on'
+      sequence:
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - light.master_bathroom_vanity_lights
+  mode: queued
+  max: 10
+- id: '1757743653355'
+  alias: Master Shower Lights
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.master_shower_occupancy
+    from: 'off'
+    to: 'on'
+    id: detected
+  - trigger: state
+    entity_id:
+    - binary_sensor.master_shower_occupancy
+    from: 'on'
+    to: 'off'
+    id: clear
+  - trigger: state
+    entity_id:
+    - light.master_bathroom_main_lights
+    from: 'off'
+    to: 'on'
+    alias: turned on
+    id: turned on
+  - trigger: state
+    entity_id:
+    - switch.guest_bedroom_main_lights
+    to: 'on'
+    id: 'fan on '
+  - trigger: state
+    entity_id:
+    - light.master_bathroom_main_lights
+    from: 'on'
+    to: 'off'
+    id: lights turned off
+  - trigger: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.master_shower_lights
+    id: timer finished
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: sun
+        after: sunrise
+      - condition: trigger
+        id:
+        - detected
+      - condition: state
+        entity_id: binary_sensor.taylor_home
+        state: 'on'
+        enabled: false
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: light.hue_twilight_2
+          state: 'on'
+        - condition: state
+          entity_id: light.hue_twilight_2_2
+          state: 'on'
+        - condition: state
+          entity_id: light.hue_twilight_1_2
+          state: 'on'
+        - condition: state
+          entity_id: light.hue_twilight_1
+          state: 'on'
+        - condition: state
+          entity_id: light.master_bedroom_ceiling_lights
+          state: 'on'
+        - condition: state
+          entity_id: media_player.smarttv_4k_ffm_television
+          state: 'on'
+        - condition: state
+          entity_id: light.living_room
+          state: 'on'
+      - condition: or
+        conditions:
+        - condition: time
+          weekday:
+          - sun
+          - sat
+          before: '12:00:00'
+        - condition: time
+          weekday:
+          - mon
+          - tue
+          - wed
+          - thu
+          - fri
+          before: '12:00:00'
+          after: 06:30:00
+      sequence:
+      - stop: ''
+    - conditions:
+      - condition: trigger
+        id:
+        - detected
+        - turned on
+      - condition: not
+        conditions:
+        - condition: state
+          state: 'on'
+          entity_id: light.hue_twilight_1_2
+        - condition: state
+          entity_id: light.hue_twilight_1
+          state: 'on'
+        - condition: state
+          entity_id: light.hue_twilight_2
+          state: 'on'
+        - condition: state
+          entity_id: light.hue_twilight_2_2
+          state: 'on'
+        - condition: state
+          entity_id: light.master_bedroom_ceiling_lights
+          state: 'on'
+        - condition: state
+          entity_id: light.living_room
+          state: 'on'
+        - condition: state
+          entity_id: switch.dining_room_table_lights
+          state: 'on'
+      - condition: or
+        conditions:
+        - condition: sun
+          after: sunset
+          before: sunrise
+        - condition: time
+          after: '20:00:00'
+          before: 05:00:00
+      - condition: state
+        entity_id: binary_sensor.bed_both_occupied
+        state: 'off'
+      sequence:
+      - if:
+        - condition: state
+          entity_id: light.master_bathroom
+          state: 'off'
+        then:
+        - action: scene.turn_on
+          metadata: {}
+          data: {}
+          target:
+            entity_id: scene.master_bathroom_dim
+      - action: timer.cancel
+        metadata: {}
+        data: {}
+        target:
+          entity_id: timer.master_shower_lights
+    - conditions:
+      - condition: trigger
+        id:
+        - detected
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: binary_sensor.taylor_home
+          state: 'on'
+        - condition: and
+          conditions:
+          - condition: state
+            entity_id: binary_sensor.anthony_home
+            state: 'on'
+          - condition: state
+            entity_id: binary_sensor.anthony_bed_presence
+            state: 'off'
+      - condition: state
+        entity_id: binary_sensor.bed_both_occupied
+        state: 'off'
+      sequence:
+      - if:
+        - condition: time
+          before: '21:00:00'
+          after: 06:00:00
+        - condition: state
+          entity_id: light.master_bathroom
+          state: 'off'
+        then:
+        - action: scene.turn_on
+          metadata: {}
+          data: {}
+          target:
+            entity_id: scene.master_bathroom_on
+      - action: timer.cancel
+        metadata: {}
+        data: {}
+        target:
+          entity_id: timer.master_shower_lights
+    - conditions:
+      - condition: trigger
+        id:
+        - clear
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: light.hue_color_downlight_6
+          state: 'on'
+        - condition: state
+          entity_id: light.hue_color_downlight_5
+          state: 'on'
+      sequence:
+      - action: timer.start
+        metadata: {}
+        data:
+          duration: 00:05:00
+        target:
+          entity_id: timer.master_shower_lights
+    - conditions:
+      - condition: trigger
+        id:
+        - timer finished
+      - condition: state
+        entity_id: binary_sensor.master_shower_occupancy
+        state: 'off'
+      sequence:
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: scene.master_bathroom_off
+  mode: queued
+  max: 10
+- id: '1757782644809'
+  alias: Master Closet Lights
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.master_closet_occupancy
+    from: 'off'
+    to: 'on'
+    id: detected
+  - trigger: state
+    entity_id:
+    - binary_sensor.master_closet_occupancy
+    - binary_sensor.master_bathroom_occupancy
+    from: 'on'
+    to: 'off'
+    id: clear
+  - trigger: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.master_closet
+    id: timer finished
+  - trigger: state
+    entity_id:
+    - switch.master_closet_light
+    id: light turned off
+    to: 'off'
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: sun
+        after: sunrise
+      - condition: trigger
+        id:
+        - detected
+      - condition: state
+        entity_id: binary_sensor.taylor_home
+        state: 'on'
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: light.hue_twilight_2
+          state: 'on'
+        - condition: state
+          entity_id: light.hue_twilight_2_2
+          state: 'on'
+        - condition: state
+          entity_id: light.hue_twilight_1_2
+          state: 'on'
+        - condition: state
+          entity_id: light.hue_twilight_1
+          state: 'on'
+        - condition: state
+          entity_id: light.master_bedroom_ceiling_lights
+          state: 'on'
+        - condition: state
+          entity_id: media_player.smarttv_4k_ffm_television
+          state: 'on'
+        - condition: state
+          entity_id: light.living_room
+          state: 'on'
+      - condition: or
+        conditions:
+        - condition: time
+          weekday:
+          - sun
+          - sat
+          before: '12:00:00'
+        - condition: time
+          weekday:
+          - mon
+          - tue
+          - wed
+          - thu
+          - fri
+          before: '12:00:00'
+          after: 06:30:00
+      sequence:
+      - stop: ''
+    - conditions:
+      - condition: trigger
+        id:
+        - detected
+      - condition: time
+        before: '21:00:00'
+        after: 09:00:00
+      - condition: state
+        entity_id: binary_sensor.taylor_home
+        state: 'on'
+      - condition: state
+        entity_id: binary_sensor.bed_both_occupied
+        state: 'off'
+      sequence:
+      - action: switch.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.master_closet_light
+      - action: timer.cancel
+        metadata: {}
+        data: {}
+        target:
+          entity_id: timer.master_closet
+    - conditions:
+      - condition: trigger
+        id:
+        - clear
+      - condition: state
+        entity_id: binary_sensor.master_bathroom_occupancy
+        state: 'off'
+      - condition: state
+        entity_id: binary_sensor.master_closet_occupancy
+        state: 'off'
+      sequence:
+      - action: timer.start
+        metadata: {}
+        data:
+          duration: 00:05:00
+        target:
+          entity_id: timer.master_closet
+    - conditions:
+      - condition: trigger
+        id:
+        - timer finished
+      - condition: state
+        entity_id: binary_sensor.master_bathroom_occupancy
+        state: 'off'
+      - condition: state
+        entity_id: binary_sensor.master_closet_occupancy
+        state: 'off'
+      sequence:
+      - action: switch.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.master_closet_light
+    - conditions:
+      - condition: trigger
+        id:
+        - light turned off
+      sequence:
+      - action: timer.cancel
+        metadata: {}
+        data: {}
+        target:
+          entity_id: timer.master_closet
+  mode: queued
+  max: 10
+- id: '1757783375428'
+  alias: Guest Hallway Lights
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.guest_hall_occupancy_2
+    to: 'off'
+    from: 'on'
+    id: clear
+  - trigger: state
+    entity_id:
+    - binary_sensor.guest_hall_occupancy_2
+    to: 'on'
+    from: 'off'
+    id: detected
+  - trigger: state
+    entity_id:
+    - light.guest_hallway_main_lights
+    to:
+    - 'on'
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+    id: on for 5 mins
+  conditions: []
+  actions:
+  - if:
+    - condition: state
+      entity_id: input_boolean.guest
+      state: 'on'
+    then:
+    - stop: ''
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - detected
+      - condition: state
+        entity_id: light.guest_hallway_main_lights
+        state: 'off'
+      - condition: time
+        after: '10:30:00'
+        before: '20:45:00'
+      - condition: state
+        entity_id: binary_sensor.either_home
+        state: 'on'
+      sequence:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_pct: 30
+        target:
+          entity_id:
+          - light.guest_hallway_main_lights
+    - conditions:
+      - condition: trigger
+        id:
+        - clear
+        - on for 5 mins
+      - condition: state
+        entity_id: light.guest_hallway_main_lights
+        state: 'on'
+      - condition: state
+        entity_id: binary_sensor.guest_hall_occupancy_2
+        state:
+        - 'off'
+      sequence:
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - light.guest_hallway_main_lights
+  mode: single
+- id: '1757783734850'
+  alias: Master Hallway Light
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.master_hall_occupancy
+    - binary_sensor.kitchen_occupancy
+    - binary_sensor.front_hall_occupancy
+    to: 'off'
+    from: 'on'
+    id: clear
+  - trigger: state
+    entity_id:
+    - binary_sensor.master_hall_occupancy
+    to: 'on'
+    from: 'off'
+    id: detected
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - detected
+      - condition: state
+        entity_id: light.master_hallway_main_lights
+        state: 'off'
+      - condition: time
+        after: 08:00:00
+        before: '21:00:00'
+      - condition: state
+        entity_id: binary_sensor.bed_both_occupied
+        state: 'off'
+      - condition: state
+        entity_id: binary_sensor.either_home
+        state: 'on'
+      - condition: and
+        conditions:
+        - condition: state
+          entity_id: binary_sensor.anthony_bed_presence
+          state: 'off'
+        - condition: and
+          conditions:
+          - condition: state
+            entity_id: binary_sensor.taylor_home
+            state: 'off'
+          - condition: state
+            entity_id: binary_sensor.anthony_home
+            state: 'on'
+        enabled: false
+      sequence:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_pct: 35
+        target:
+          entity_id:
+          - light.master_hallway_main_lights
+    - conditions:
+      - condition: trigger
+        id:
+        - clear
+      - condition: state
+        entity_id: light.master_hallway_main_lights
+        state: 'on'
+      - condition: state
+        entity_id: binary_sensor.kitchen_occupancy
+        state: 'off'
+      - condition: state
+        entity_id: binary_sensor.front_hall_occupancy
+        state: 'off'
+      sequence:
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - light.master_hallway_main_lights
+  mode: single
+- id: '1757784209477'
+  alias: Kitchen Lights
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.kitchen_occupancy
+    to: 'off'
+    from: 'on'
+    id: clear
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+  - trigger: state
+    entity_id:
+    - binary_sensor.kitchen_occupancy
+    to: 'on'
+    from: 'off'
+    id: detected
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+  - trigger: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.kitchen_light_timer
+    id: timer finished
+  - trigger: state
+    entity_id:
+    - light.kitchen_back_lights
+    - light.kitchen_island_lights
+    - switch.dining_room_table_lights
+    - switch.kitchen_tubes
+    - switch.kitchen_back_tubes
+    to: 'on'
+    id: turned on
+  conditions: []
+  actions:
+  - if:
+    - condition: state
+      entity_id: input_boolean.guest
+      state: 'on'
+    then:
+    - stop: ''
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - detected
+        - turned on
+      sequence:
+      - action: timer.cancel
+        metadata: {}
+        data: {}
+        target:
+          entity_id: timer.kitchen_light_timer
+    - conditions:
+      - condition: trigger
+        id:
+        - clear
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: switch.dining_room_table_lights
+          state: 'on'
+        - condition: state
+          entity_id: switch.kitchen_tubes
+          state: 'on'
+        - condition: state
+          entity_id: light.kitchen_sink_light
+          state: 'on'
+        - condition: state
+          entity_id: switch.kitchen_back_tubes
+          state: 'on'
+        - condition: state
+          entity_id: light.kitchen_island_lights
+          state: 'on'
+        - condition: state
+          entity_id: light.kitchen_back_lights
+          state: 'on'
+      sequence:
+      - action: timer.start
+        metadata: {}
+        data:
+          duration: 00:10:00
+        target:
+          entity_id: timer.kitchen_light_timer
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: switch.dining_room_table_lights
+          state: 'on'
+        - condition: state
+          entity_id: switch.kitchen_tubes
+          state: 'on'
+        - condition: state
+          entity_id: light.kitchen_sink_light
+          state: 'on'
+        - condition: state
+          entity_id: switch.kitchen_back_tubes
+          state: 'on'
+        - condition: state
+          entity_id: light.kitchen_island_lights
+          state: 'on'
+        - condition: state
+          entity_id: light.kitchen_back_lights
+          state: 'on'
+      - condition: trigger
+        id:
+        - timer finished
+      sequence:
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - light.kitchen_island_lights
+          - light.kitchen_sink_light
+          - light.kitchen_back_lights
+      - action: switch.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - switch.dining_room_table_lights
+          - switch.kitchen_tubes
+          - switch.kitchen_back_tubes
+  mode: queued
+  max: 10
+- id: '1757788519212'
+  alias: Living Room Other Left Light Pico
+  description: ''
+  use_blueprint:
+    path: stephack/core-pico.yaml
+    input:
+      pico_remote: 9626b368e1659d01b5c0fbbf34fbb1c1
+      auto_mode: queued
+      top_on:
+      - action: script.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: script.living_room_white
+      bottom_off:
+      - action: switch.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.phillips_component_usb_capture
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - light.living_room
+      middle_stop:
+      - action: automation.trigger
+        metadata: {}
+        data:
+          skip_condition: true
+        target:
+          entity_id: automation.living_room_hue_sync_toggle
+      up_raise:
+      - action: light.turn_on
+        target:
+          entity_id:
+          - light.living_room
+        data:
+          brightness_step_pct: 10
+          color_temp_kelvin: 3500
+      down_lower:
+      - action: light.turn_on
+        target:
+          entity_id:
+          - light.living_room
+        data:
+          brightness_step_pct: -10
+          color_temp_kelvin: 3500
+- id: '1758040893125'
+  alias: Bed Presence / Bed Occupancy
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.anthony_bed_presence
+    to: 'on'
+    from: 'off'
+    id: anthony detected
+  - trigger: state
+    entity_id:
+    - binary_sensor.bed_both_occupied
+    from: 'off'
+    to: 'on'
+    id: both detected
+  - trigger: state
+    entity_id:
+    - input_select.taylor
+    id: taylor home
+    to: Just Arrived
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - anthony detected
+      - condition: state
+        entity_id: binary_sensor.anthony_home
+        state: 'on'
+      - condition: state
+        entity_id: binary_sensor.taylor_home
+        state: 'off'
+      - condition: state
+        entity_id: input_boolean.anthony_bed_occupancy_bypass
+        state: 'off'
+      sequence:
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - scene.master_bedroom_off
+          - scene.master_bathroom_off
+      - if:
+        - condition: state
+          entity_id: input_boolean.guest
+          state: 'on'
+        then:
+        - stop: ''
+      - parallel:
+        - action: light.turn_off
+          metadata: {}
+          data: {}
+          target:
+            entity_id:
+            - light.master_bathroom_vanity_lights
+            - light.master_hallway_main_lights
+        - action: switch.turn_off
+          metadata: {}
+          data: {}
+          target:
+            entity_id:
+            - switch.master_closet_main_lights
+            - switch.master_closet_light
+        - action: fan.turn_off
+          metadata: {}
+          data: {}
+          target:
+            entity_id: fan.bedroom_fan
+    - conditions:
+      - condition: trigger
+        id:
+        - both detected
+      sequence:
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: light.master_hallway_main_lights
+    - conditions:
+      - condition: trigger
+        id:
+        - taylor home
+      sequence:
+      - action: input_boolean.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.anthony_bed_occupancy_bypass
+  mode: single
+- id: '1758164413959'
+  alias: Lock Front Door
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.front_door
+    to: 'off'
+    from: 'on'
+    for:
+      hours: 0
+      minutes: 15
+      seconds: 0
+  conditions:
+  - condition: state
+    entity_id: binary_sensor.front_door
+    state: 'off'
+  - condition: state
+    entity_id: input_boolean.guest
+    state: 'off'
+  actions:
+  - action: lock.lock
+    metadata: {}
+    data: {}
+    target:
+      entity_id: lock.aqara_smart_lock_u100
+  mode: single
+- id: '1758655204093'
+  alias: Master Bathroom Wall Pico
+  description: ''
+  triggers:
+  - device_id: b39afd60f0aedb64e8ffc9e9491ca5ba
+    domain: lutron_caseta
+    type: press
+    subtype: 'on'
+    trigger: device
+    id: 'on'
+  - device_id: b39afd60f0aedb64e8ffc9e9491ca5ba
+    domain: lutron_caseta
+    type: press
+    subtype: 'off'
+    trigger: device
+    id: 'off'
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - 'on'
+      sequence:
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: scene.master_bathroom_on
+    - conditions:
+      - condition: trigger
+        id:
+        - 'off'
+      sequence:
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: scene.master_bathroom_off
+  mode: restart
+- id: '1758923916849'
+  alias: Master Bathroom Hue Bloom
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - light.master_bathroom_main_lights
+    to: 'on'
+    id: closet on
+  - trigger: state
+    entity_id:
+    - binary_sensor.master_bathroom_occupancy
+    to: 'off'
+    id: clear
+  - trigger: state
+    entity_id:
+    - binary_sensor.master_bathroom_occupancy
+    to: 'on'
+    id: occupied
+  - trigger: state
+    entity_id:
+    - light.master_bathroom_vanity_lights
+    to: 'off'
+    id: vanity off
+  - trigger: state
+    entity_id:
+    - light.master_bathroom_vanity_lights
+    to: 'on'
+    id: vanity on
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - occupied
+      - condition: sun
+        after: sunset
+        before: sunrise
+      - condition: not
+        conditions:
+        - condition: state
+          state: 'on'
+          entity_id: light.hue_twilight_1_2
+        - condition: state
+          entity_id: light.hue_twilight_1
+          state: 'on'
+        - condition: state
+          entity_id: light.hue_twilight_2
+          state: 'on'
+        - condition: state
+          entity_id: light.hue_twilight_2_2
+          state: 'on'
+        - condition: state
+          entity_id: switch.85_hisense_backlight_led_device
+          state: 'on'
+        - condition: state
+          entity_id: light.master_bathroom_main_lights
+          state: 'on'
+        - condition: state
+          entity_id: light.master_bathroom_vanity_lights
+          state: 'on'
+        alias: dark
+      sequence:
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - scene.master_vanity_dim
+    - conditions:
+      - condition: trigger
+        id:
+        - vanity on
+        - closet on
+      - condition: state
+        entity_id: binary_sensor.anthony_home
+        state: 'on'
+      sequence:
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - scene.master_vanity_arctic_aurora
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.anthony_home
+        state: 'on'
+      - condition: trigger
+        id:
+        - occupied
+      sequence:
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: scene.master_vanity_arctic_aurora_2
+    - conditions:
+      - condition: trigger
+        id:
+        - clear
+        - vanity off
+      sequence:
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: scene.master_vanity_off
+  mode: single
+- id: '1759401151511'
+  alias: Hisense Canvas
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.kitchen_occupancy
+    - binary_sensor.front_hall_occupancy
+    to: 'on'
+    id: detected
+  - trigger: state
+    entity_id:
+    - switch.dining_room_table_lights
+    to: 'on'
+    from: 'off'
+    id: lights on
+  - trigger: state
+    entity_id:
+    - switch.dining_room_table_lights
+    to: 'off'
+    from: 'on'
+    id: lights off
+  - trigger: sun
+    event: sunset
+    offset: 0
+    id: sun set
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: media_player.hisense_canvas
+        state: 'off'
+      - condition: state
+        entity_id: binary_sensor.either_home
+        state: 'on'
+      - condition: or
+        conditions:
+        - condition: sun
+          before: sunset
+          after: sunrise
+        - condition: state
+          entity_id: switch.dining_room_table_lights
+          state: 'on'
+      - condition: trigger
+        id:
+        - detected
+        - lights on
+      - condition: state
+        entity_id: binary_sensor.bed_both_occupied
+        state: 'off'
+      sequence:
+      - action: media_player.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - media_player.hisense_canvas
+      - action: media_player.play_media
+        metadata: {}
+        data:
+          media:
+            media_content_id: com.vt.arttv.artmode
+            media_content_type: app
+            metadata:
+              title: Art Mode
+              thumbnail: ''
+              media_class: app
+              children_media_class:
+              navigateIds:
+              - {}
+              browse_entity_id: media_player.hisense_canvas
+        target:
+          entity_id: media_player.hisense_canvas
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 5
+          milliseconds: 0
+      - repeat:
+          until:
+          - condition: state
+            entity_id: media_player.hisense_canvas
+            attribute: app_name
+            state: Art Mode
+          sequence:
+          - action: media_player.turn_on
+            metadata: {}
+            data: {}
+            target:
+              entity_id:
+              - media_player.hisense_canvas
+          - action: media_player.play_media
+            metadata: {}
+            data:
+              media:
+                media_content_id: com.vt.arttv.artmode
+                media_content_type: app
+                metadata:
+                  title: Art Mode
+                  thumbnail: ''
+                  media_class: app
+                  children_media_class:
+                  navigateIds:
+                  - {}
+                  browse_entity_id: media_player.hisense_canvas
+            target:
+              entity_id: media_player.hisense_canvas
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 5
+              milliseconds: 0
+      - action: media_player.play_media
+        metadata: {}
+        data:
+          media:
+            media_content_id: com.vt.arttv.artmode
+            media_content_type: app
+            metadata:
+              title: Art Mode
+              thumbnail: ''
+              media_class: app
+              children_media_class:
+              navigateIds:
+              - {}
+              browse_entity_id: media_player.hisense_canvas
+        target:
+          entity_id: media_player.hisense_canvas
+    - conditions:
+      - condition: trigger
+        id:
+        - lights off
+        - sun set
+      - condition: sun
+        after: sunset
+        before: sunrise
+      - condition: state
+        entity_id: switch.dining_room_table_lights
+        state: 'off'
+      - condition: state
+        entity_id: binary_sensor.kitchen_occupancy
+        state: 'off'
+        enabled: false
+      sequence:
+      - action: media_player.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: media_player.hisense_canvas
+        enabled: false
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 1
+          milliseconds: 0
+        enabled: false
+      - action: media_player.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: media_player.hisense_canvas
+        enabled: false
+      - repeat:
+          until:
+          - condition: state
+            entity_id: media_player.hisense_canvas
+            state:
+            - 'off'
+            for:
+              hours: 0
+              minutes: 0
+              seconds: 10
+          sequence:
+          - action: media_player.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: media_player.hisense_canvas
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 11
+              milliseconds: 0
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 30
+          milliseconds: 0
+        enabled: true
+      - repeat:
+          until:
+          - condition: state
+            entity_id: media_player.hisense_canvas
+            state:
+            - 'off'
+            for:
+              hours: 0
+              minutes: 0
+              seconds: 10
+          sequence:
+          - action: media_player.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: media_player.hisense_canvas
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 11
+              milliseconds: 0
+  mode: single
+- id: '1759866579197'
+  alias: Master Bedroom Other Wall Pico
+  description: ''
+  triggers:
+  - device_id: bf52fda140ab3e91e5880945e01f4dce
+    domain: lutron_caseta
+    type: press
+    subtype: 'on'
+    trigger: device
+    id: 'on'
+  - device_id: bf52fda140ab3e91e5880945e01f4dce
+    domain: lutron_caseta
+    type: press
+    subtype: 'off'
+    trigger: device
+    id: 'off'
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - 'on'
+      sequence:
+      - action: script.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: script.lights_on
+        enabled: false
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: scene.master_bedroom_on_with_lily
+      - repeat:
+          count: 50
+          sequence:
+          - action: light.turn_on
+            metadata: {}
+            data:
+              brightness_pct: 100
+              color_temp_kelvin: 3500
+            target:
+              entity_id:
+              - light.master_bedroom_ceiling_lights
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 0
+              milliseconds: 250
+        enabled: false
+      - action: number.set_value
+        metadata: {}
+        data:
+          value: '55'
+        target:
+          entity_id: number.anthony_s_eight_sleep_temp
+        enabled: true
+    - conditions:
+      - condition: trigger
+        id:
+        - 'off'
+      sequence:
+      - repeat:
+          count: 30
+          sequence:
+          - action: light.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id:
+              - light.master_bedroom_ceiling_lights
+              - light.master_bathroom_vanity_lights
+              - light.master_bathroom_main_lights
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 0
+              milliseconds: 250
+        enabled: false
+      - action: script.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: script.lights_off
+        enabled: false
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: scene.master_bedroom_off
+  mode: restart
+- id: '1760741115578'
+  alias: Front Entry Hall Lights
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.front_hall_occupancy
+    to: 'off'
+    from: 'on'
+    id: clear
+  - trigger: state
+    entity_id:
+    - binary_sensor.front_hall_occupancy
+    to: 'on'
+    from: 'off'
+    id: detected
+  conditions: []
+  actions:
+  - if:
+    - condition: state
+      entity_id: input_boolean.guest
+      state: 'on'
+    then:
+    - stop: ''
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - detected
+      - condition: state
+        entity_id: light.front_entry_hall_main_lights
+        state: 'off'
+      - condition: time
+        after: '10:30:00'
+        before: '20:45:00'
+      - condition: state
+        entity_id: binary_sensor.either_home
+        state: 'on'
+      sequence:
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_pct: 30
+        target:
+          entity_id:
+          - light.front_entry_hall_main_lights
+    - conditions:
+      - condition: trigger
+        id:
+        - clear
+      - condition: state
+        entity_id: light.front_entry_hall_main_lights
+        state: 'on'
+      sequence:
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - light.front_entry_hall_main_lights
+  mode: single
+- id: '1760741698263'
+  alias: Master Exhaust Fan
+  description: ''
+  triggers:
+  - alias: When timer finishes
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.master_exhaust
+    id: done
+    trigger: event
+  - event: start
+    id: restart
+    trigger: homeassistant
+  - event_type: automation_reloaded
+    alias: reload
+    id: reload
+    trigger: event
+  - value_template: "{% if states.switch.exhaust_fan.last_changed is defined %}\n
+      \ {% if as_timestamp(states.switch.exhaust_fan.last_changed)|timestamp_local
+      is defined %}\n    {{ is_state('switch.exhaust_fan', 'on') and is_state('light.bathroom_lights',
+      'on') and\n       as_timestamp(states.switch.exhaust_fan.last_changed) > as_timestamp(now())
+      - (3600) }}\n  {%endif%}\n{%endif%}"
+    alias: turn off
+    id: turn off
+    enabled: false
+    trigger: template
+  - type: turned_on
+    device_id: dc1c0a8633f4830ae2a7c79f7e46c6a5
+    entity_id: dc551326604608a23af7a60cb9500462
+    domain: switch
+    trigger: device
+    id: turned on
+  - type: turned_off
+    device_id: dc1c0a8633f4830ae2a7c79f7e46c6a5
+    entity_id: dc551326604608a23af7a60cb9500462
+    domain: switch
+    trigger: device
+    id: turned off
+  - trigger: state
+    entity_id:
+    - light.master_bathroom
+    to: 'off'
+    from: 'on'
+    id: lights turned off
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: device
+        type: is_on
+        device_id: dc1c0a8633f4830ae2a7c79f7e46c6a5
+        entity_id: dc551326604608a23af7a60cb9500462
+        domain: switch
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: lights turned off
+        - condition: trigger
+          id: turned on
+      - condition: or
+        conditions:
+        - alias: Timer not active
+          condition: not
+          conditions:
+          - condition: state
+            entity_id: timer.master_exhaust
+            state: active
+      - condition: state
+        entity_id: light.master_bathroom
+        state: 'off'
+      sequence:
+      - data:
+          duration: '1:00:00'
+        target:
+          entity_id:
+          - timer.master_exhaust
+        action: timer.start
+    - conditions:
+      - condition: trigger
+        id: done
+      sequence:
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 1
+          milliseconds: 0
+      - alias: Confirm fan is off, shower is off, timer is off
+        condition: not
+        conditions:
+        - condition: state
+          entity_id: timer.master_exhaust
+          state: active
+        - condition: state
+          entity_id: switch.guest_bedroom_main_lights
+          state: 'off'
+        - condition: state
+          entity_id: binary_sensor.master_shower_occupancy
+          state: 'on'
+          enabled: true
+      - data: {}
+        target:
+          entity_id:
+          - switch.guest_bedroom_main_lights
+        action: switch.turn_off
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: restart
+        - condition: trigger
+          id: reload
+        alias: restart/reload
+      - condition: state
+        entity_id: switch.guest_bedroom_main_lights
+        state: 'on'
+      sequence:
+      - if:
+        - condition: state
+          entity_id: light.master_bathroom
+          state: 'off'
+        then:
+        - data: {}
+          target:
+            entity_id:
+            - timer.master_exhaust
+          action: timer.cancel
+        - data: {}
+          target:
+            entity_id:
+            - switch.guest_bedroom_main_lights
+          action: switch.turn_off
+        else:
+        - condition: state
+          entity_id: timer.master_exhaust
+          state: idle
+        - condition: state
+          entity_id: light.master_bathroom
+          state: 'off'
+        - data:
+            duration: '1:00:00'
+          target:
+            entity_id:
+            - timer.master_exhaust
+          action: timer.start
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id:
+          - turn off
+        - condition: trigger
+          id: turned off
+      sequence:
+      - data: {}
+        target:
+          entity_id:
+          - switch.guest_bedroom_main_lights
+        action: switch.turn_off
+      - data: {}
+        target:
+          entity_id:
+          - timer.master_exhaust
+        action: timer.cancel
+  mode: queued
+  max: 10
+- id: '1761206106248'
+  alias: Refresh Accord Status
+  description: ''
+  triggers:
+  - trigger: time_pattern
+    hours: /23
+  conditions: []
+  actions:
+  - action: drone_mobile.refresh_device_status_accord
+    metadata: {}
+    data: {}
+  mode: single
+- id: '1761261294938'
+  alias: Office Wall Pico
+  description: ''
+  triggers:
+  - device_id: 32c8bfa4105de53ddb149b8b6b4ec42b
+    domain: lutron_caseta
+    type: press
+    subtype: 'on'
+    trigger: device
+    id: 'on'
+  - device_id: 32c8bfa4105de53ddb149b8b6b4ec42b
+    domain: lutron_caseta
+    type: press
+    subtype: 'off'
+    trigger: device
+    id: 'off'
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - 'on'
+      sequence:
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - scene.office_on
+    - conditions:
+      - condition: trigger
+        id:
+        - 'off'
+      sequence:
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - scene.office_off
+  mode: restart
+- id: '1761262559575'
+  alias: Office Anthony's Pico
+  description: ''
+  use_blueprint:
+    path: stephack/core-pico.yaml
+    input:
+      pico_remote: 5c58770abdd62949394c003d76bfc6d1
+      auto_mode: parallel
+      top_on:
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: scene.office_on
+      bottom_off:
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: scene.office_off
+      middle_stop:
+      - action: switch.toggle
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.anthony_s_desktop
+- id: '1761305484840'
+  alias: Close Curtains if direct sunlight
+  description: ''
+  triggers:
+  - trigger: numeric_state
+    entity_id:
+    - sensor.sun_azimuth
+    above: 160
+    id: sunlight
+  - trigger: numeric_state
+    entity_id:
+    - sensor.sun_azimuth
+    id: sunlight gone
+    above: 225
+  - trigger: time
+    at: 03:00:00
+    id: reset
+  - trigger: sun
+    event: sunrise
+    offset: 0
+    id: reset2
+  - trigger: sun
+    event: sunset
+    offset: 0
+    id: reset3
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: sun
+        after: sunrise
+        before: sunset
+      - condition: time
+        after: '10:00:00'
+        before: '16:00:00'
+      - condition: not
+        conditions:
+        - condition: or
+          conditions:
+          - condition: numeric_state
+            entity_id: cover.curtain_3_e6a2
+            attribute: current_position
+            below: 20
+          - condition: numeric_state
+            entity_id: cover.curtain_3_0ced
+            attribute: current_position
+            below: 20
+          - condition: numeric_state
+            entity_id: cover.curtain_3_2e8d
+            attribute: current_position
+            below: 20
+          - condition: numeric_state
+            entity_id: cover.curtain_3_68c3
+            attribute: current_position
+            below: 20
+          alias: curtains open
+        alias: If curtains are open
+      - condition: trigger
+        id:
+        - sunlight
+      - condition: numeric_state
+        entity_id: sensor.pirateweather_cloud_coverage
+        below: 80
+      - condition: numeric_state
+        entity_id: sensor.pirateweather_cloud_coverage_0d
+        below: 80
+      sequence:
+      - action: input_boolean.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.living_room_curtains_previously_open
+      - action: v6_quietdrift.set_switchbot_curtain_position
+        continue_on_error: true
+        metadata: {}
+        data:
+          entity_id:
+          - cover.curtain_3_68c3
+          - cover.curtain_3_2e8d
+          - cover.living_room_south_right
+          position: 0
+          speed: 1
+    - conditions:
+      - condition: trigger
+        id:
+        - sunlight gone
+      - condition: state
+        entity_id: binary_sensor.either_home
+        state: 'on'
+      - condition: state
+        entity_id: input_boolean.living_room_curtains_previously_open
+        state: 'on'
+      - alias: If East Curtains Open
+        condition: not
+        conditions:
+        - condition: or
+          conditions:
+          - condition: numeric_state
+            entity_id: cover.curtain_3_ad63
+            attribute: current_position
+            below: 20
+          - condition: numeric_state
+            entity_id: cover.living_room_east_right
+            attribute: current_position
+            below: 20
+      sequence:
+      - action: v6_quietdrift.set_switchbot_curtain_position
+        continue_on_error: true
+        metadata: {}
+        data:
+          entity_id:
+          - cover.curtain_3_68c3
+          - cover.curtain_3_2e8d
+          position: 100
+          speed: 1
+      - action: v6_quietdrift.set_switchbot_curtain_position
+        continue_on_error: true
+        metadata: {}
+        data:
+          entity_id:
+          - cover.curtain_3_e6a2
+          speed: 1
+          position: 60
+    - conditions:
+      - condition: trigger
+        id:
+        - reset
+        - reset2
+        - reset3
+      - condition: state
+        entity_id: input_boolean.living_room_curtains_previously_open
+        state: 'on'
+      sequence:
+      - action: input_boolean.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.living_room_curtains_previously_open
+  mode: single
+- id: '1761329577197'
+  alias: Anthony Left Home
+  description: ''
+  triggers:
+  - entity_id:
+    - input_select.anthony
+    to: Just Left
+    trigger: state
+  conditions: []
+  actions:
+  - parallel:
+    - action: switch.turn_off
+      metadata: {}
+      data: {}
+      target:
+        entity_id: switch.anthony_s_eight_sleep
+    - action: input_boolean.turn_off
+      metadata: {}
+      data: {}
+      target:
+        entity_id: input_boolean.anthony_bed_occupancy_bypass
+  mode: single
+- id: '1762248902784'
+  alias: Car battery alert
+  description: ''
+  triggers:
+  - trigger: numeric_state
+    entity_id:
+    - sensor.accord_battery
+    below: 12
+    above: 11
+  conditions:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: sensor.accord_enginestatus
+      state: Running
+  actions:
+  - action: notify.anthonys_devices
+    metadata: {}
+    data:
+      data:
+        tag: car_battery
+      message: Car battery has dropped to {{ states("sensor.accord_battery") }} V
+  mode: single
+- id: '1762375468047'
+  alias: Office Lights
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.motionaware_area
+    to: 'on'
+    id: detected
+    enabled: false
+  - trigger: state
+    entity_id:
+    - binary_sensor.motionaware_area
+    to: 'off'
+    id: clear
+    for:
+      hours: 0
+      minutes: 30
+      seconds: 0
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.either_home
+        state: 'on'
+      - condition: trigger
+        id:
+        - detected
+      - condition: state
+        entity_id: light.office
+        state: 'off'
+      - condition: state
+        entity_id: binary_sensor.bed_both_occupied
+        state: 'off'
+      sequence:
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: scene.office_on
+    - conditions:
+      - condition: trigger
+        id:
+        - clear
+      - condition: state
+        entity_id: switch.desktop
+        state: 'off'
+      - condition: state
+        entity_id: switch.anthony_s_desktop
+        state: 'off'
+      sequence:
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: scene.office_off
+  mode: single
+- id: '1763602426645'
+  alias: Driveway Lights
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - cover.anthony_s_garage_door
+    - cover.taylor_s_garage_door
+    to: open
+    id: open
+  - trigger: state
+    entity_id:
+    - cover.anthony_s_garage_door
+    - cover.taylor_s_garage_door
+    to: opening
+    id: opening
+  - trigger: state
+    entity_id:
+    - cover.anthony_s_garage_door
+    - cover.taylor_s_garage_door
+    to: closed
+    id: closed
+  - trigger: state
+    entity_id:
+    - input_select.anthony
+    - input_select.taylor
+    to: Just Arrived
+    id: just arrived
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - open
+        - opening
+        - just arrived
+      - condition: sun
+        before: sunrise
+        after: sunset
+      sequence:
+      - action: switch.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.garage_wall_lights
+    - conditions:
+      - condition: trigger
+        id:
+        - closed
+      - condition: state
+        entity_id: cover.taylor_s_garage_door
+        state: closed
+      - condition: state
+        entity_id: cover.anthony_s_garage_door
+        state: closed
+      sequence:
+      - action: switch.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.garage_wall_lights
+  mode: single
+- id: '1764814197333'
+  alias: Right Curtain Pico
+  description: ''
+  triggers:
+  - device_id: 4290a280cd0ddff9b43708a53cb99c8a
+    domain: lutron_caseta
+    type: press
+    subtype: 'on'
+    trigger: device
+    id: left curtains
+  - device_id: 4290a280cd0ddff9b43708a53cb99c8a
+    domain: lutron_caseta
+    type: press
+    subtype: raise
+    trigger: device
+    id: right curtains
+  - device_id: 4290a280cd0ddff9b43708a53cb99c8a
+    domain: lutron_caseta
+    type: press
+    subtype: lower
+    trigger: device
+    id: open all
+  - device_id: 4290a280cd0ddff9b43708a53cb99c8a
+    domain: lutron_caseta
+    type: press
+    subtype: 'off'
+    trigger: device
+    id: close all
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - left curtains
+      sequence:
+      - action: script.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: script.toggle_east_curtains
+    - conditions:
+      - condition: trigger
+        id:
+        - right curtains
+      sequence:
+      - action: script.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - script.close_south_curtains
+    - conditions:
+      - condition: trigger
+        id:
+        - open all
+      sequence:
+      - action: script.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - script.open_curtains
+    - conditions:
+      - condition: trigger
+        id:
+        - close all
+      sequence:
+      - action: script.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - script.close_curtains
+  mode: queued
+  max: 10
+- id: '1764814286724'
+  alias: Left Curtain Pico
+  description: ''
+  triggers:
+  - device_id: 88f17f5646f5e98971e9c64781cdd84b
+    domain: lutron_caseta
+    type: press
+    subtype: 'on'
+    trigger: device
+    id: left curtains
+  - device_id: 88f17f5646f5e98971e9c64781cdd84b
+    domain: lutron_caseta
+    type: press
+    subtype: raise
+    trigger: device
+    id: right curtains
+  - device_id: 88f17f5646f5e98971e9c64781cdd84b
+    domain: lutron_caseta
+    type: press
+    subtype: lower
+    trigger: device
+    id: open all
+  - device_id: 88f17f5646f5e98971e9c64781cdd84b
+    domain: lutron_caseta
+    type: press
+    subtype: 'off'
+    trigger: device
+    id: close all
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - left curtains
+      sequence:
+      - action: script.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: script.toggle_east_curtains
+    - conditions:
+      - condition: trigger
+        id:
+        - right curtains
+      sequence:
+      - action: script.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - script.close_south_curtains
+    - conditions:
+      - condition: trigger
+        id:
+        - open all
+      sequence:
+      - action: script.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - script.open_curtains
+    - conditions:
+      - condition: trigger
+        id:
+        - close all
+      sequence:
+      - action: script.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - script.close_curtains
+  mode: queued
+  max: 10
