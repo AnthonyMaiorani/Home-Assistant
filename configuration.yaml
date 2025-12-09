@@ -125,35 +125,3 @@ rest_command:
     payload: '{ "right": { "targetTemperatureF": {{ temp }}, "isOn": true } }'
     headers:
       Content-Type: application/json
-
-light:
-  - platform: template
-    lights:
-      master_wled:
-        unique_id: master_wled
-        friendly_name: Master WLED
-        effect_list_template: "{{ state_attr('input_select.master_wled_preset', 'options') }}"
-        level_template: "{{ states('input_number.master_wled_brightness') }}"
-        value_template: "{{ is_state('switch.master_wled', 'on') }}"
-        effect_template: "{{ states('input_select.master_wled_preset') }}"
-        turn_on:
-          action: switch.turn_on
-          data:
-            entity_id: switch.master_wled
-        turn_off:
-          action: switch.turn_off
-          data:
-            entity_id: switch.master_wled
-        set_level:
-          - action: input_number.set_value
-            data:
-              value: "{{ brightness }}"
-              entity_id: input_number.master_wled_brightness
-          - action: rest_command.set_master_wled_brightness
-        set_effect:
-          - action: input_select.select_option
-            data:
-              option: "{{ effect }}"
-            target:
-              entity_id: input_select.master_wled_preset
-          - action: rest_command.set_master_wled_preset
