@@ -97,6 +97,37 @@
               - media_player.master_bedroom_apple_tv
       name: Master Bedoom TV
       state: "{{ is_state('media_player.smarttv_4k_ffm_television', 'on') }}"
+    - unique_id: canvas_tv
+      turn_on:
+        - action: media_player.turn_on
+          target:
+            entity_id:
+              - media_player.hisense_canvas_tv
+        - delay:
+            seconds: 1
+        - action: media_player.play_media
+          metadata: {}
+          data:
+            media:
+              media_content_id: com.vt.arttv.artmode
+              media_content_type: app
+              metadata:
+                title: Art Mode
+                thumbnail: ""
+                media_class: app
+                children_media_class: null
+                navigateIds:
+                  - {}
+                browse_entity_id: media_player.hisense_canvas
+          target:
+            entity_id: media_player.hisense_canvas
+      turn_off:
+        - action: media_player.turn_off
+          target:
+            entity_id:
+              - media_player.hisense_canvas_tv
+      name: Dining Room TV
+      state: "{{ is_state('media_player.hisense_canvas_tv', 'on') }}"
     - unique_id: desktop
       turn_on:
         - action: switch.turn_on

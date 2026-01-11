@@ -8,12 +8,39 @@ lights_on:
       - script.gaming
       - script.lights_off
     action: script.turn_off
-  - action: switch.turn_off
-    metadata: {}
-    data: {}
-    target:
-      entity_id:
-      - switch.master_bedroom_hue_led_device
+  - if:
+    - condition: state
+      entity_id: switch.master_bedroom_hue_led_device
+      state:
+      - 'on'
+    then:
+    - repeat:
+        sequence:
+        - action: switch.turn_off
+          metadata: {}
+          data: {}
+          target:
+            entity_id:
+            - switch.master_bedroom_hue_led_device
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 0
+            milliseconds: 200
+        until:
+        - condition: state
+          entity_id: switch.master_bedroom_hue_led_device
+          state:
+          - 'off'
+          for:
+            hours: 0
+            minutes: 0
+            seconds: 1
+    - action: hue.activate_scene
+      metadata: {}
+      target:
+        entity_id: scene.master_bedroom_on_with_lily
+      data: {}
   - parallel:
     - action: automation.trigger
       metadata: {}
@@ -950,6 +977,24 @@ goodnight:
         entity_id:
         - media_player.kitchen_ceiling
         - media_player.ceiling_but_works_airplay
+  - if:
+    - condition: not
+      conditions:
+      - condition: time
+        after: 07:00:00
+        before: '18:00:00'
+        weekday:
+        - mon
+        - tue
+        - wed
+        - thu
+        - fri
+    then:
+    - action: light.turn_off
+      metadata: {}
+      target:
+        entity_id: light.back_office_lights
+      data: {}
   - action: scene.turn_on
     metadata: {}
     data: {}
@@ -991,7 +1036,8 @@ goodnight:
       metadata: {}
       data: {}
       target:
-        entity_id: script.close_curtains
+        entity_id:
+        - script.close_curtains_slower
   - action: homeassistant.reload_config_entry
     metadata: {}
     data: {}
@@ -1133,4 +1179,33 @@ toggle_east_curtains:
         position: 0
         speed: 255
   alias: Toggle East Curtains
+  description: ''
+close_curtains_slower:
+  sequence:
+  - action: script.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - script.toggle_east_curtains
+      - script.close_south_curtains
+      - script.open_curtains
+  - action: v6_quietdrift.set_switchbot_curtain_position
+    continue_on_error: true
+    metadata: {}
+    data:
+      entity_id:
+      - cover.curtain_3_ad63
+      - cover.curtain_3_adf5
+      - cover.curtain_3_68c3
+      - cover.curtain_3_2e8d
+      - cover.curtain_3_0ced
+      position: 0
+      speed: 1
+  - action: input_boolean.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: input_boolean.living_room_curtains_previously_open
+  alias: Close Curtains Slower
   description: ''

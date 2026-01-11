@@ -1296,10 +1296,17 @@
             - condition: state
               entity_id: light.master_bedroom_ceiling_lights
               state: 'on'
-          - condition: state
-            entity_id: media_player.smarttv_4k_ffm_television
-            attribute: source
-            state: HDMI 3
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: media_player.smarttv_4k_ffm_television
+              attribute: source
+              state:
+              - Apple TV
+            - condition: state
+              entity_id: media_player.smarttv_4k_ffm_television
+              attribute: source
+              state: HDMI 3
           enabled: true
       sequence:
       - action: fan.turn_off
@@ -1323,10 +1330,17 @@
             - condition: state
               entity_id: light.master_bedroom_ceiling_lights
               state: 'on'
-          - condition: state
-            entity_id: media_player.smarttv_4k_ffm_television
-            attribute: source
-            state: HDMI 3
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: media_player.smarttv_4k_ffm_television
+              attribute: source
+              state: HDMI 3
+            - condition: state
+              entity_id: media_player.smarttv_4k_ffm_television
+              attribute: source
+              state:
+              - Apple TV
           enabled: true
       sequence:
       - action: fan.turn_on
@@ -1575,7 +1589,8 @@
         metadata: {}
         data: {}
         target:
-          entity_id: script.close_curtains
+          entity_id:
+          - script.close_curtains_slower
   mode: single
 - id: '1748249575670'
   alias: Restart/Restart Modem
@@ -3510,6 +3525,7 @@
     - conditions:
       - condition: sun
         after: sunrise
+        before_offset: 00:30:00
       - condition: trigger
         id:
         - detected
@@ -3626,6 +3642,7 @@
       - condition: state
         entity_id: binary_sensor.bed_both_occupied
         state: 'off'
+        enabled: true
       sequence:
       - action: light.turn_on
         metadata: {}
@@ -3654,6 +3671,19 @@
         target:
           entity_id:
           - light.master_bathroom_vanity_lights
+    - conditions:
+      - condition: trigger
+        id:
+        - detected
+      - condition: sun
+        after: sunset
+        before: sunrise
+      sequence:
+      - action: hue.activate_scene
+        metadata: {}
+        target:
+          entity_id: scene.master_bathroom_on_dim
+        data: {}
   mode: queued
   max: 10
 - id: '1757743653355'
@@ -3829,6 +3859,7 @@
         - condition: time
           before: '21:00:00'
           after: 06:00:00
+          enabled: false
         - condition: state
           entity_id: light.master_bathroom
           state: 'off'
@@ -4709,7 +4740,7 @@
       - delay:
           hours: 0
           minutes: 0
-          seconds: 5
+          seconds: 15
           milliseconds: 0
       - repeat:
           until:
@@ -4743,8 +4774,9 @@
           - delay:
               hours: 0
               minutes: 0
-              seconds: 5
+              seconds: 15
               milliseconds: 0
+        enabled: false
       - action: media_player.play_media
         metadata: {}
         data:
@@ -4782,45 +4814,18 @@
         data: {}
         target:
           entity_id: media_player.hisense_canvas
-        enabled: false
+        enabled: true
       - delay:
           hours: 0
           minutes: 0
-          seconds: 1
+          seconds: 15
           milliseconds: 0
-        enabled: false
+        enabled: true
       - action: media_player.turn_off
         metadata: {}
         data: {}
         target:
           entity_id: media_player.hisense_canvas
-        enabled: false
-      - repeat:
-          until:
-          - condition: state
-            entity_id: media_player.hisense_canvas
-            state:
-            - 'off'
-            for:
-              hours: 0
-              minutes: 0
-              seconds: 10
-          sequence:
-          - action: media_player.turn_off
-            metadata: {}
-            data: {}
-            target:
-              entity_id: media_player.hisense_canvas
-          - delay:
-              hours: 0
-              minutes: 0
-              seconds: 11
-              milliseconds: 0
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 30
-          milliseconds: 0
         enabled: true
       - repeat:
           until:
@@ -4843,6 +4848,35 @@
               minutes: 0
               seconds: 11
               milliseconds: 0
+        enabled: false
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 1
+          milliseconds: 0
+        enabled: false
+      - repeat:
+          until:
+          - condition: state
+            entity_id: media_player.hisense_canvas
+            state:
+            - 'off'
+            for:
+              hours: 0
+              minutes: 0
+              seconds: 10
+          sequence:
+          - action: media_player.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: media_player.hisense_canvas
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 11
+              milliseconds: 0
+        enabled: false
   mode: single
 - id: '1759866579197'
   alias: Master Bedroom Other Wall Pico
@@ -5513,6 +5547,26 @@
     - input_select.taylor
     to: Just Arrived
     id: just arrived
+  - trigger: state
+    entity_id:
+    - binary_sensor.fr_nw_driveway_person_detected
+    - binary_sensor.fr_sw_driveway_person_detected
+    - binary_sensor.deck_person_detected
+    to:
+    - 'on'
+    id: detected
+  - trigger: state
+    entity_id:
+    - binary_sensor.fr_nw_driveway_person_detected
+    - binary_sensor.fr_sw_driveway_person_detected
+    - binary_sensor.deck_person_detected
+    to:
+    - 'off'
+    id: not detected
+    for:
+      hours: 0
+      minutes: 20
+      seconds: 0
   conditions: []
   actions:
   - choose:
@@ -5522,9 +5576,11 @@
         - open
         - opening
         - just arrived
+        - detected
       - condition: sun
         before: sunrise
         after: sunset
+        before_offset: 00:30:00
       sequence:
       - action: switch.turn_on
         metadata: {}
@@ -5535,12 +5591,41 @@
       - condition: trigger
         id:
         - closed
+        - not detected
       - condition: state
         entity_id: cover.taylor_s_garage_door
         state: closed
       - condition: state
         entity_id: cover.anthony_s_garage_door
         state: closed
+      - condition: state
+        entity_id: input_boolean.guest
+        state:
+        - 'off'
+      - condition: state
+        entity_id: binary_sensor.deck_person_detected
+        state:
+        - 'off'
+        for:
+          hours: 0
+          minutes: 20
+          seconds: 0
+      - condition: state
+        entity_id: binary_sensor.fr_sw_driveway_person_detected
+        state:
+        - 'off'
+        for:
+          hours: 0
+          minutes: 20
+          seconds: 0
+      - condition: state
+        entity_id: binary_sensor.fr_nw_driveway_person_detected
+        state:
+        - 'off'
+        for:
+          hours: 0
+          minutes: 20
+          seconds: 0
       sequence:
       - action: switch.turn_off
         metadata: {}
@@ -5700,3 +5785,135 @@
           - script.close_curtains
   mode: queued
   max: 10
+- id: '1765535295905'
+  alias: Front Porch Lights
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - lock.aqara_smart_lock_u100
+    to:
+    - unlocking
+    - unlocked
+    id: unlocking
+  - trigger: state
+    entity_id:
+    - lock.aqara_smart_lock_u100
+    to:
+    - locked
+    id: locked
+    for:
+      hours: 0
+      minutes: 15
+      seconds: 0
+  - trigger: state
+    entity_id:
+    - binary_sensor.doorbell_person_detected
+    to:
+    - 'on'
+    id: detected
+  - trigger: state
+    entity_id:
+    - binary_sensor.doorbell_person_detected
+    to:
+    - 'off'
+    id: not detected
+    for:
+      hours: 0
+      minutes: 20
+      seconds: 0
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - unlocking
+        - detected
+      - condition: sun
+        before: sunrise
+        after: sunset
+      sequence:
+      - action: light.turn_on
+        metadata: {}
+        target:
+          entity_id: light.front_porch_overhead_light
+        data:
+          brightness_pct: 100
+    - conditions:
+      - condition: trigger
+        id:
+        - locked
+        - not detected
+      - condition: state
+        entity_id: input_boolean.guest
+        state:
+        - 'off'
+      - condition: state
+        entity_id: binary_sensor.doorbell_person_detected
+        state:
+        - 'off'
+        for:
+          hours: 0
+          minutes: 20
+          seconds: 0
+      sequence:
+      - action: light.turn_off
+        metadata: {}
+        target:
+          entity_id: light.front_porch_overhead_light
+        data: {}
+  mode: single
+- id: '1765941268442'
+  alias: Deck Lights
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.deck_person_detected
+    to:
+    - 'on'
+    id: person detected
+  - trigger: state
+    entity_id:
+    - binary_sensor.deck_person_detected
+    to:
+    - 'off'
+    id: clear
+    for:
+      hours: 0
+      minutes: 20
+      seconds: 0
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: sun
+        before: sunrise
+        after: sunset
+        before_offset: 00:30:00
+      - condition: trigger
+        id:
+        - person detected
+      - condition: state
+        entity_id: light.back_porch_lights
+        state:
+        - 'off'
+      sequence:
+      - action: light.turn_on
+        metadata: {}
+        target:
+          entity_id: light.back_porch_lights
+        data:
+          brightness_pct: 100
+    - conditions:
+      - condition: trigger
+        id:
+        - clear
+      sequence:
+      - action: light.turn_off
+        metadata: {}
+        target:
+          entity_id: light.back_porch_lights
+        data: {}
+  mode: single
