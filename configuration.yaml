@@ -17,6 +17,16 @@ scene: !include scenes.yaml
 template: !include template.yaml
 switch: !include switch.yaml
 
+#camera:
+#  - platform: proxy
+#    name: Cat Food Crop
+#    entity_id: camera.g4_instant_high_resolution_channel
+#    mode: crop
+#    image_top: 1300
+#    image_left: 0
+#    max_image_width: 1504
+#    max_image_height: 1388
+
 notify:
   - name: anthonys_devices
     platform: group
@@ -102,6 +112,11 @@ command_line:
       unique_id: usw_leds_4
       command_on: !secret usw4_leds_on
       command_off: !secret usw4_leds_off
+  - switch:
+      name: USW 5 LEDs
+      unique_id: usw_leds_5
+      command_on: !secret usw5_leds_on
+      command_off: !secret usw5_leds_off
   - switch:
       name: USW 2 LEDs
       unique_id: usw_leds_2

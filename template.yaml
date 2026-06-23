@@ -97,6 +97,37 @@
               - media_player.master_bedroom_apple_tv
       name: Master Bedoom TV
       state: "{{ is_state('media_player.smarttv_4k_ffm_television', 'on') }}"
+    - unique_id: canvas_tv
+      turn_on:
+        - action: media_player.turn_on
+          target:
+            entity_id:
+              - media_player.hisense_canvas_tv
+        - delay:
+            seconds: 1
+        - action: media_player.play_media
+          metadata: {}
+          data:
+            media:
+              media_content_id: com.vt.arttv.artmode
+              media_content_type: app
+              metadata:
+                title: Art Mode
+                thumbnail: ""
+                media_class: app
+                children_media_class: null
+                navigateIds:
+                  - {}
+                browse_entity_id: media_player.hisense_canvas
+          target:
+            entity_id: media_player.hisense_canvas
+      turn_off:
+        - action: media_player.turn_off
+          target:
+            entity_id:
+              - media_player.hisense_canvas_tv
+      name: Dining Room TV
+      state: "{{ is_state('media_player.hisense_canvas_tv', 'on') }}"
     - unique_id: desktop
       turn_on:
         - action: switch.turn_on
@@ -202,6 +233,47 @@
           {{ ((as_timestamp(now()) - as_timestamp(states.cover.anthony_s_garage_door.last_changed)) / 60)|int 
               if is_state('cover.anthony_s_garage_door', 'open') else 0 }}
         {% endif %}
+    - name: "Koi Effective Temperature"
+      unique_id: koi_effective_temperature
+      unit_of_measurement: "°F"
+      state: >-
+        {% set pond = states('sensor.koi_pond_temperature') %}
+        {% set high = states('sensor.pirateweather_daytime_high_temperature_0d') | float(0) %}
+        {% set low = states('sensor.pirateweather_overnight_low_temperature_0d') | float(0) %}
+        {% set pond_age = (as_timestamp(now()) - as_timestamp(states.sensor.koi_pond_temperature.last_updated, 0)) | int %}
+
+        {% if pond in ['unknown', 'unavailable', 'none', '']
+              or pond | float(-999) < 32
+              or pond | float(-999) > 100
+              or pond_age > 21600 %}
+          {{ (((high + low) / 2) - 4) | round(0) | int }}
+        {% else %}
+          {{ pond | float | round(0) | int }}
+        {% endif %}
+
+      attributes:
+        source: >-
+          {% set pond = states('sensor.koi_pond_temperature') %}
+          {% set pond_age = (as_timestamp(now()) - as_timestamp(states.sensor.koi_pond_temperature.last_updated, 0)) | int %}
+
+          {% if pond in ['unknown', 'unavailable', 'none', '']
+                or pond | float(-999) < 32
+                or pond | float(-999) > 100
+                or pond_age > 21600 %}
+            fallback_weather_estimate
+          {% else %}
+            pond_sensor
+          {% endif %}
+
+        fallback_formula: >-
+          ((daytime_high + overnight_low) / 2) - 4
+    - name: "Koi Temperature Estimate"
+      unique_id: koi_temperature_estimate
+      unit_of_measurement: "°F"
+      state: >-
+        {% set high = states('sensor.pirateweather_daytime_high_temperature_0d') | float(0) %}
+        {% set low = states('sensor.pirateweather_overnight_low_temperature_0d') | float(0) %}
+        {{ (((high + low) / 2) - 4) | round(0) | int }}
 - binary_sensor:
     - name: "Anthony Home"
       state: >

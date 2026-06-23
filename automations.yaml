@@ -744,6 +744,11 @@
       entity_id:
       - cover.taylor_s_garage_door
       to: open
+    - trigger: state
+      entity_id:
+      - cover.anthony_s_garage_door
+      to:
+      - open
     continue_on_timeout: false
   - action: lock.unlock
     metadata: {}
@@ -1251,6 +1256,7 @@
       minutes: 0
       seconds: 5
     from: playing
+    enabled: false
   - trigger: state
     entity_id:
     - media_player.master_bedroom_apple_tv
@@ -1259,6 +1265,7 @@
       minutes: 0
       seconds: 10
     from: playing
+    enabled: false
   - trigger: state
     entity_id:
     - media_player.smarttv_4k_ffm_television
@@ -1274,6 +1281,15 @@
     entity_id:
     - light.master_bedroom_ceiling_lights
     - light.master_bedroom_lamps
+    to:
+    - 'on'
+    - 'off'
+  - trigger: state
+    entity_id:
+    - fan.bedroom_fan
+    from:
+    - unknown
+    - unavailable
   conditions: []
   actions:
   - choose:
@@ -1286,6 +1302,7 @@
         - condition: state
           entity_id: media_player.master_bedroom_apple_tv
           state: playing
+          enabled: true
         - condition: and
           conditions:
           - condition: or
@@ -1296,10 +1313,17 @@
             - condition: state
               entity_id: light.master_bedroom_ceiling_lights
               state: 'on'
-          - condition: state
-            entity_id: media_player.smarttv_4k_ffm_television
-            attribute: source
-            state: HDMI 3
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: media_player.smarttv_4k_ffm_television
+              attribute: source
+              state:
+              - Apple TV
+            - condition: state
+              entity_id: media_player.smarttv_4k_ffm_television
+              attribute: source
+              state: HDMI 3
           enabled: true
       sequence:
       - action: fan.turn_off
@@ -1313,6 +1337,7 @@
         - condition: state
           entity_id: media_player.master_bedroom_apple_tv
           state: playing
+          enabled: false
         - condition: and
           conditions:
           - condition: or
@@ -1323,12 +1348,30 @@
             - condition: state
               entity_id: light.master_bedroom_ceiling_lights
               state: 'on'
-          - condition: state
-            entity_id: media_player.smarttv_4k_ffm_television
-            attribute: source
-            state: HDMI 3
+            - condition: sun
+              before: sunset
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: media_player.smarttv_4k_ffm_television
+              attribute: source
+              state: HDMI 3
+            - condition: state
+              entity_id: media_player.smarttv_4k_ffm_television
+              attribute: source
+              state:
+              - Apple TV
           enabled: true
+      - condition: state
+        entity_id: binary_sensor.taylor_home
+        state:
+        - 'on'
       sequence:
+      - action: switch.turn_on
+        metadata: {}
+        target:
+          entity_id: switch.purifier_smart_plug
+        data: {}
       - action: fan.turn_on
         metadata: {}
         data: {}
@@ -1575,7 +1618,8 @@
         metadata: {}
         data: {}
         target:
-          entity_id: script.close_curtains
+          entity_id:
+          - script.close_curtains_slower
   mode: single
 - id: '1748249575670'
   alias: Restart/Restart Modem
@@ -1743,7 +1787,7 @@
     path: stephack/core-pico.yaml
     input:
       pico_remote: fa68ef31ef55ae8a104882c33ca295e6
-      auto_mode: queued
+      auto_mode: parallel
       top_on:
       - action: script.turn_on
         metadata: {}
@@ -1792,7 +1836,7 @@
     path: stephack/core-pico.yaml
     input:
       pico_remote: af3fdad2602b411dfb1b64f178b947ac
-      auto_mode: queued
+      auto_mode: parallel
       top_on:
       - action: script.turn_on
         metadata: {}
@@ -1908,7 +1952,7 @@
             state: active
       sequence:
       - data:
-          duration: 00:15:00
+          duration: 00:30:00
         target:
           entity_id:
           - timer.guest_exhaust
@@ -2058,56 +2102,6 @@
   actions:
   - choose:
     - conditions:
-      - condition: sun
-        after: sunrise
-      - condition: trigger
-        id:
-        - detected
-      - condition: state
-        entity_id: binary_sensor.taylor_home
-        state: 'on'
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: light.hue_twilight_2
-          state: 'on'
-        - condition: state
-          entity_id: light.hue_twilight_2_2
-          state: 'on'
-        - condition: state
-          entity_id: light.hue_twilight_1_2
-          state: 'on'
-        - condition: state
-          entity_id: light.hue_twilight_1
-          state: 'on'
-        - condition: state
-          entity_id: light.guest_bedroom_ceiling_lights
-          state: 'on'
-        - condition: state
-          entity_id: media_player.living_room_tv
-          state: 'on'
-        - condition: state
-          entity_id: light.living_room
-          state: 'on'
-      - condition: or
-        conditions:
-        - condition: time
-          weekday:
-          - sun
-          - sat
-          before: '12:00:00'
-        - condition: time
-          weekday:
-          - mon
-          - tue
-          - wed
-          - thu
-          - fri
-          before: '12:00:00'
-          after: 06:30:00
-      sequence:
-      - stop: ''
-    - conditions:
       - condition: state
         entity_id: switch.guest_bathroom_exhaust_fan
         state: 'off'
@@ -2118,26 +2112,10 @@
         id:
         - detected
         - turned on
-      - condition: not
-        conditions:
-        - condition: state
-          state: 'on'
-          entity_id: light.hue_twilight_1_2
-        - condition: state
-          entity_id: light.hue_twilight_1
-          state: 'on'
-        - condition: state
-          entity_id: light.hue_twilight_2
-          state: 'on'
-        - condition: state
-          entity_id: light.hue_twilight_2_2
-          state: 'on'
       - condition: state
-        entity_id: light.living_room
-        state: 'off'
-      - condition: state
-        entity_id: switch.dining_room_table_lights
-        state: 'off'
+        entity_id: light.guest_bedroom
+        state:
+        - 'off'
       - condition: sun
         after: sunset
         before: sunrise
@@ -2302,6 +2280,13 @@
   triggers:
   - trigger: state
     entity_id:
+    - cover.taylor_s_garage_door
+    id: closed
+    to:
+    - closing
+    - closed
+  - trigger: state
+    entity_id:
     - sensor.taylor_s_garage_open_duration
     to: '15'
     id: '15'
@@ -2346,18 +2331,23 @@
         target:
           entity_id:
           - cover.taylor_s_garage_door
-    default:
-    - action: notify.anthonys_devices
-      metadata: {}
-      data:
+    - conditions:
+      - condition: state
+        entity_id: cover.taylor_s_garage_door
+        state:
+        - open
+      sequence:
+      - action: notify.anthonys_devices
+        metadata: {}
         data:
-          entity_id: camera.garage_medium_resolution_channel
-          actions:
-          - action: CLOSEGARAGE
-            title: Close Garage
-          tag: taylors_garage
-        message: Taylor's garage door has been left open for {{ states("sensor.taylor_s_garage_open_duration")
-          }} minutes
+          data:
+            entity_id: camera.garage_medium_resolution_channel
+            actions:
+            - action: CLOSEGARAGE
+              title: Close Garage
+            tag: taylors_garage
+          message: Taylor's garage door has been left open for {{ states("sensor.taylor_s_garage_open_duration")
+            }} minutes
   mode: parallel
   max: 2
 - id: '1752932454343'
@@ -2408,6 +2398,13 @@
     id: '15'
   - trigger: state
     entity_id:
+    - cover.anthony_s_garage_door
+    id: closed
+    to:
+    - closing
+    - closed
+  - trigger: state
+    entity_id:
     - sensor.anthony_s_garage_open_duration
     to: '30'
     id: '30'
@@ -2446,18 +2443,23 @@
         data: {}
         target:
           entity_id: cover.anthony_s_garage_door
-    default:
-    - action: notify.anthonys_devices
-      metadata: {}
-      data:
+    - conditions:
+      - condition: state
+        entity_id: cover.anthony_s_garage_door
+        state:
+        - open
+      sequence:
+      - action: notify.anthonys_devices
+        metadata: {}
         data:
-          entity_id: camera.garage_medium_resolution_channel
-          actions:
-          - action: CLOSEGARAGE
-            title: Close Garage
-          tag: anthonys_garage
-        message: Anthony's garage door has been left open for {{ states("sensor.anthony_s_garage_open_duration")
-          }} minutes
+          data:
+            entity_id: camera.garage_medium_resolution_channel
+            actions:
+            - action: CLOSEGARAGE
+              title: Close Garage
+            tag: anthonys_garage
+          message: Anthony's garage door has been left open for {{ states("sensor.anthony_s_garage_open_duration")
+            }} minutes
   mode: parallel
   max: 2
 - id: '1753564089628'
@@ -2524,13 +2526,6 @@
     target:
       entity_id: automation.left_home
     data: {}
-  - action: cover.close_cover
-    metadata: {}
-    data: {}
-    target:
-      entity_id:
-      - cover.anthony_s_garage_door
-      - cover.taylor_s_garage_door
   - if:
     - condition: state
       entity_id: fan.bedroom_fan
@@ -2562,6 +2557,13 @@
       state: 'on'
     then:
     - stop: ''
+  - action: cover.close_cover
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - cover.anthony_s_garage_door
+      - cover.taylor_s_garage_door
   - action: media_player.turn_off
     metadata: {}
     data: {}
@@ -2581,6 +2583,7 @@
       - media_player.ceiling_but_works_airplay
       - media_player.kitchen_ceiling
       - media_player.master_bathroom
+    enabled: false
   - action: script.turn_on
     metadata: {}
     data: {}
@@ -2622,8 +2625,9 @@
         metadata: {}
         data: {}
         target:
-          entity_id: scene.guest_bedroom_lily
-        enabled: false
+          entity_id:
+          - scene.guest_bedroom_on
+        enabled: true
       - repeat:
           sequence:
           - action: light.turn_on
@@ -2635,6 +2639,7 @@
               entity_id:
               - light.guest_bedroom_ceiling_lights
           count: 50
+        enabled: false
       - delay:
           hours: 0
           minutes: 0
@@ -2674,6 +2679,12 @@
               seconds: 0
               milliseconds: 250
           count: 50
+        enabled: false
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: scene.guest_bedroom_off
   mode: restart
 - id: '1753835308287'
   alias: Master Bedroom Wall Pico
@@ -2785,94 +2796,6 @@
     target:
       entity_id: light.guest_bedroom_ceiling_lights
   mode: single
-- id: '1754424126719'
-  alias: Kitchen Audio Pico
-  description: ''
-  use_blueprint:
-    path: stephack/core-pico.yaml
-    input:
-      pico_remote: 28c15e302ca05d97a42c07445a3817c2
-      middle_stop:
-      - action: script.turn_on
-        metadata: {}
-        data: {}
-        target:
-          entity_id: script.play_jazz
-      up_raise_release:
-      - if:
-        - condition: state
-          state: playing
-          entity_id: media_player.kitchen_ceiling
-        then:
-        - action: media_player.volume_up
-          metadata: {}
-          data: {}
-          target:
-            entity_id:
-            - media_player.kitchen_ceiling
-        else:
-        - action: media_player.volume_up
-          metadata: {}
-          data: {}
-          target:
-            entity_id:
-            - media_player.living_room_apple_tv
-      down_lower:
-      - if:
-        - condition: state
-          state: playing
-          entity_id: media_player.kitchen_ceiling
-        then:
-        - action: media_player.volume_down
-          metadata: {}
-          data: {}
-          target:
-            entity_id:
-            - media_player.kitchen_ceiling
-        else:
-        - action: media_player.volume_down
-          metadata: {}
-          data: {}
-          target:
-            entity_id:
-            - media_player.living_room_apple_tv
-      bottom_off:
-      - if:
-        - condition: state
-          state: idle
-          entity_id: media_player.kitchen_ceiling
-        then:
-        - action: script.turn_on
-          metadata: {}
-          data: {}
-          target:
-            entity_id: script.play_jazz
-        else:
-        - action: media_player.media_next_track
-          metadata: {}
-          data: {}
-          target:
-            entity_id:
-            - media_player.kitchen_ceiling
-      top_on:
-      - if:
-        - condition: state
-          entity_id: media_player.kitchen_ceiling
-          state: idle
-        then:
-        - action: script.turn_on
-          metadata: {}
-          data: {}
-          target:
-            entity_id: script.play_jazz
-        else:
-        - action: media_player.media_play_pause
-          metadata: {}
-          data: {}
-          target:
-            entity_id:
-            - media_player.kitchen_ceiling
-      auto_mode: parallel
 - id: '1754450888779'
   alias: Dining Room Audio Pico
   description: ''
@@ -2881,85 +2804,127 @@
     input:
       pico_remote: 55646f1427b5116679c131825436258f
       middle_stop:
-      - action: script.turn_on
+      - action: wiim.play_preset
         metadata: {}
-        data: {}
         target:
-          entity_id: script.play_jazz
+          entity_id: media_player.kitchen
+        data:
+          preset: 3
+      - wait_for_trigger:
+        - trigger: state
+          entity_id:
+          - media_player.kitchen
+          to:
+          - playing
+        continue_on_timeout: true
+        timeout:
+          hours: 0
+          minutes: 0
+          seconds: 3
+          milliseconds: 0
+      - action: media_player.media_next_track
+        metadata: {}
+        target:
+          entity_id: media_player.kitchen
+        data: {}
       up_raise_release:
       - if:
         - condition: state
-          state: playing
-          entity_id: media_player.kitchen_ceiling
+          state:
+          - playing
+          entity_id: media_player.kitchen
         then:
         - action: media_player.volume_up
           metadata: {}
           data: {}
           target:
             entity_id:
-            - media_player.kitchen_ceiling
-        else:
-        - action: media_player.volume_up
-          metadata: {}
-          data: {}
-          target:
-            entity_id:
-            - media_player.living_room_apple_tv
+            - media_player.kitchen
       down_lower:
       - if:
         - condition: state
           state: playing
-          entity_id: media_player.kitchen_ceiling
+          entity_id: media_player.kitchen
         then:
         - action: media_player.volume_down
           metadata: {}
           data: {}
           target:
             entity_id:
-            - media_player.kitchen_ceiling
-        else:
-        - action: media_player.volume_down
-          metadata: {}
-          data: {}
-          target:
-            entity_id:
-            - media_player.living_room_apple_tv
+            - media_player.kitchen
       bottom_off:
       - if:
         - condition: state
-          state: idle
-          entity_id: media_player.kitchen_ceiling
+          state:
+          - idle
+          entity_id: media_player.spotify_anthony
         then:
-        - action: script.turn_on
+        - action: wiim.play_preset
           metadata: {}
-          data: {}
           target:
-            entity_id: script.play_jazz
+            entity_id: media_player.kitchen
+          data:
+            preset: 2
+        - wait_for_trigger:
+          - trigger: state
+            entity_id:
+            - media_player.kitchen
+            to:
+            - playing
+          continue_on_timeout: true
+          timeout:
+            hours: 0
+            minutes: 0
+            seconds: 3
+            milliseconds: 0
+        - action: media_player.media_next_track
+          metadata: {}
+          target:
+            entity_id: media_player.kitchen
+          data: {}
         else:
         - action: media_player.media_next_track
           metadata: {}
           data: {}
           target:
             entity_id:
-            - media_player.kitchen_ceiling
+            - media_player.kitchen
       top_on:
       - if:
         - condition: state
-          state: idle
-          entity_id: media_player.kitchen_ceiling
+          state:
+          - idle
+          entity_id: media_player.spotify_anthony
         then:
-        - action: script.turn_on
+        - action: wiim.play_preset
           metadata: {}
-          data: {}
           target:
-            entity_id: script.play_jazz
+            entity_id: media_player.kitchen
+          data:
+            preset: 1
+        - wait_for_trigger:
+          - trigger: state
+            entity_id:
+            - media_player.kitchen
+            to:
+            - playing
+          continue_on_timeout: true
+          timeout:
+            hours: 0
+            minutes: 0
+            seconds: 3
+            milliseconds: 0
+        - action: media_player.media_next_track
+          metadata: {}
+          target:
+            entity_id: media_player.kitchen
+          data: {}
         else:
         - action: media_player.media_play_pause
           metadata: {}
           data: {}
           target:
-            entity_id:
-            - media_player.kitchen_ceiling
+            entity_id: media_player.kitchen
       auto_mode: parallel
 - id: '1755118589282'
   alias: Living Room Hue Sync Toggle
@@ -3068,6 +3033,11 @@
       entity_id:
       - cover.anthony_s_garage_door
       to: open
+    - trigger: state
+      entity_id:
+      - cover.taylor_s_garage_door
+      to:
+      - open
     continue_on_timeout: false
   - action: lock.unlock
     metadata: {}
@@ -3233,7 +3203,7 @@
       metadata: {}
       data: {}
       target:
-        entity_id: media_player.smarttv_4k_ffm_television
+        entity_id: media_player.living_room_hisense
   - action: media_player.select_source
     metadata: {}
     data:
@@ -3252,13 +3222,18 @@
     - media_player.master_bedroom_apple_tv
     - media_player.guest_room
     to: playing
-  conditions: []
+  conditions:
+  - condition: state
+    entity_id: media_player.kitchen
+    state:
+    - playing
   actions:
   - action: media_player.media_pause
     metadata: {}
     data: {}
     target:
-      entity_id: media_player.kitchen_ceiling
+      entity_id:
+      - media_player.kitchen
   mode: single
 - id: '1756633209373'
   alias: Turn off USW LEDs
@@ -3277,6 +3252,7 @@
       - switch.usw_2_leds
       - switch.usw_3_leds
       - switch.usw_4_leds
+      - switch.usw_5_leds
   mode: single
 - id: '1756870919383'
   alias: Turn on Bedroom TV with Controller
@@ -3375,6 +3351,7 @@
         data: {}
         target:
           entity_id: switch.first_led_instance_component_led_device
+        enabled: true
   - alias: Set Source
     choose:
     - conditions:
@@ -3510,6 +3487,7 @@
     - conditions:
       - condition: sun
         after: sunrise
+        before_offset: 00:30:00
       - condition: trigger
         id:
         - detected
@@ -3626,6 +3604,7 @@
       - condition: state
         entity_id: binary_sensor.bed_both_occupied
         state: 'off'
+        enabled: true
       sequence:
       - action: light.turn_on
         metadata: {}
@@ -3774,6 +3753,7 @@
         - condition: state
           entity_id: light.living_room
           state: 'on'
+          enabled: false
         - condition: state
           entity_id: switch.dining_room_table_lights
           state: 'on'
@@ -3829,6 +3809,7 @@
         - condition: time
           before: '21:00:00'
           after: 06:00:00
+          enabled: false
         - condition: state
           entity_id: light.master_bathroom
           state: 'off'
@@ -3856,12 +3837,24 @@
           entity_id: light.hue_color_downlight_5
           state: 'on'
       sequence:
-      - action: timer.start
-        metadata: {}
-        data:
-          duration: 00:05:00
-        target:
-          entity_id: timer.master_shower_lights
+      - if:
+        - condition: state
+          entity_id: binary_sensor.bed_both_occupied
+          state:
+          - 'on'
+        then:
+        - action: scene.turn_on
+          metadata: {}
+          target:
+            entity_id: scene.master_bathroom_off
+          data: {}
+        else:
+        - action: timer.start
+          metadata: {}
+          data:
+            duration: 00:05:00
+          target:
+            entity_id: timer.master_shower_lights
     - conditions:
       - condition: trigger
         id:
@@ -4321,7 +4314,7 @@
     path: stephack/core-pico.yaml
     input:
       pico_remote: 9626b368e1659d01b5c0fbbf34fbb1c1
-      auto_mode: queued
+      auto_mode: parallel
       top_on:
       - action: script.turn_on
         metadata: {}
@@ -4709,7 +4702,7 @@
       - delay:
           hours: 0
           minutes: 0
-          seconds: 5
+          seconds: 15
           milliseconds: 0
       - repeat:
           until:
@@ -4743,8 +4736,9 @@
           - delay:
               hours: 0
               minutes: 0
-              seconds: 5
+              seconds: 15
               milliseconds: 0
+        enabled: false
       - action: media_player.play_media
         metadata: {}
         data:
@@ -4782,45 +4776,18 @@
         data: {}
         target:
           entity_id: media_player.hisense_canvas
-        enabled: false
+        enabled: true
       - delay:
           hours: 0
           minutes: 0
-          seconds: 1
+          seconds: 15
           milliseconds: 0
-        enabled: false
+        enabled: true
       - action: media_player.turn_off
         metadata: {}
         data: {}
         target:
           entity_id: media_player.hisense_canvas
-        enabled: false
-      - repeat:
-          until:
-          - condition: state
-            entity_id: media_player.hisense_canvas
-            state:
-            - 'off'
-            for:
-              hours: 0
-              minutes: 0
-              seconds: 10
-          sequence:
-          - action: media_player.turn_off
-            metadata: {}
-            data: {}
-            target:
-              entity_id: media_player.hisense_canvas
-          - delay:
-              hours: 0
-              minutes: 0
-              seconds: 11
-              milliseconds: 0
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 30
-          milliseconds: 0
         enabled: true
       - repeat:
           until:
@@ -4843,6 +4810,35 @@
               minutes: 0
               seconds: 11
               milliseconds: 0
+        enabled: false
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 1
+          milliseconds: 0
+        enabled: false
+      - repeat:
+          until:
+          - condition: state
+            entity_id: media_player.hisense_canvas
+            state:
+            - 'off'
+            for:
+              hours: 0
+              minutes: 0
+              seconds: 10
+          sequence:
+          - action: media_player.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: media_player.hisense_canvas
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 11
+              milliseconds: 0
+        enabled: false
   mode: single
 - id: '1759866579197'
   alias: Master Bedroom Other Wall Pico
@@ -5256,7 +5252,7 @@
     entity_id:
     - sensor.sun_azimuth
     id: sunlight gone
-    above: 225
+    above: 268
   - trigger: time
     at: 03:00:00
     id: reset
@@ -5324,7 +5320,7 @@
           - cover.curtain_3_2e8d
           - cover.living_room_south_right
           position: 0
-          speed: 1
+          speed: 6
     - conditions:
       - condition: trigger
         id:
@@ -5348,6 +5344,10 @@
             entity_id: cover.living_room_east_right
             attribute: current_position
             below: 20
+      - condition: state
+        entity_id: switch.lr_tv
+        state:
+        - 'off'
       sequence:
       - action: v6_quietdrift.set_switchbot_curtain_position
         continue_on_error: true
@@ -5357,15 +5357,15 @@
           - cover.curtain_3_68c3
           - cover.curtain_3_2e8d
           position: 100
-          speed: 1
+          speed: 6
       - action: v6_quietdrift.set_switchbot_curtain_position
         continue_on_error: true
         metadata: {}
         data:
           entity_id:
           - cover.curtain_3_e6a2
-          speed: 1
           position: 60
+          speed: 6
     - conditions:
       - condition: trigger
         id:
@@ -5419,6 +5419,21 @@
     - condition: state
       entity_id: sensor.accord_enginestatus
       state: Running
+    - condition: state
+      entity_id: cover.anthony_s_garage_door
+      state:
+      - open
+      - opening
+    - condition: state
+      entity_id: cover.taylor_s_garage_door
+      state:
+      - open
+      - opening
+    - condition: state
+      entity_id: device_tracker.life360_anthony_maiorani
+      state:
+      - true
+      attribute: driving
   actions:
   - action: notify.anthonys_devices
     metadata: {}
@@ -5513,6 +5528,28 @@
     - input_select.taylor
     to: Just Arrived
     id: just arrived
+  - trigger: state
+    entity_id:
+    - binary_sensor.fr_nw_driveway_person_detected
+    - binary_sensor.fr_sw_driveway_person_detected
+    - binary_sensor.deck_person_detected
+    - binary_sensor.g6_turret_person_detected_2
+    to:
+    - 'on'
+    id: detected
+  - trigger: state
+    entity_id:
+    - binary_sensor.fr_nw_driveway_person_detected
+    - binary_sensor.fr_sw_driveway_person_detected
+    - binary_sensor.deck_person_detected
+    - binary_sensor.g6_turret_person_detected_2
+    to:
+    - 'off'
+    id: not detected
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
   conditions: []
   actions:
   - choose:
@@ -5522,9 +5559,11 @@
         - open
         - opening
         - just arrived
+        - detected
       - condition: sun
         before: sunrise
         after: sunset
+        before_offset: 00:30:00
       sequence:
       - action: switch.turn_on
         metadata: {}
@@ -5535,12 +5574,49 @@
       - condition: trigger
         id:
         - closed
+        - not detected
       - condition: state
         entity_id: cover.taylor_s_garage_door
         state: closed
       - condition: state
         entity_id: cover.anthony_s_garage_door
         state: closed
+      - condition: state
+        entity_id: input_boolean.guest
+        state:
+        - 'off'
+      - condition: state
+        entity_id: binary_sensor.deck_person_detected
+        state:
+        - 'off'
+        for:
+          hours: 0
+          minutes: 10
+          seconds: 0
+      - condition: state
+        entity_id: binary_sensor.fr_sw_driveway_person_detected
+        state:
+        - 'off'
+        for:
+          hours: 0
+          minutes: 10
+          seconds: 0
+      - condition: state
+        entity_id: binary_sensor.fr_nw_driveway_person_detected
+        state:
+        - 'off'
+        for:
+          hours: 0
+          minutes: 10
+          seconds: 0
+      - condition: state
+        entity_id: binary_sensor.g6_turret_person_detected_2
+        state:
+        - 'off'
+        for:
+          hours: 0
+          minutes: 10
+          seconds: 0
       sequence:
       - action: switch.turn_off
         metadata: {}
@@ -5700,3 +5776,1084 @@
           - script.close_curtains
   mode: queued
   max: 10
+- id: '1765535295905'
+  alias: Front Porch Lights
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - lock.aqara_smart_lock_u100
+    to:
+    - unlocking
+    - unlocked
+    id: unlocking
+  - trigger: state
+    entity_id:
+    - lock.aqara_smart_lock_u100
+    to:
+    - locked
+    id: locked
+    for:
+      hours: 0
+      minutes: 15
+      seconds: 0
+  - trigger: state
+    entity_id:
+    - binary_sensor.doorbell_person_detected
+    to:
+    - 'on'
+    id: detected
+  - trigger: state
+    entity_id:
+    - binary_sensor.doorbell_person_detected
+    to:
+    - 'off'
+    id: not detected
+    for:
+      hours: 0
+      minutes: 20
+      seconds: 0
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - unlocking
+        - detected
+      - condition: sun
+        before: sunrise
+        after: sunset
+      sequence:
+      - action: light.turn_on
+        metadata: {}
+        target:
+          entity_id: light.front_porch_overhead_light
+        data:
+          brightness_pct: 100
+    - conditions:
+      - condition: trigger
+        id:
+        - locked
+        - not detected
+      - condition: state
+        entity_id: input_boolean.guest
+        state:
+        - 'off'
+      - condition: state
+        entity_id: binary_sensor.doorbell_person_detected
+        state:
+        - 'off'
+        for:
+          hours: 0
+          minutes: 20
+          seconds: 0
+      sequence:
+      - action: light.turn_off
+        metadata: {}
+        target:
+          entity_id: light.front_porch_overhead_light
+        data: {}
+  mode: single
+- id: '1765941268442'
+  alias: Deck Lights
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.deck_person_detected
+    to:
+    - 'on'
+    id: person detected
+  - trigger: state
+    entity_id:
+    - binary_sensor.deck_person_detected
+    to:
+    - 'off'
+    id: clear
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: sun
+        before: sunrise
+        after: sunset
+        before_offset: 00:30:00
+      - condition: trigger
+        id:
+        - person detected
+      - condition: state
+        entity_id: light.back_porch_lights
+        state:
+        - 'off'
+      sequence:
+      - action: light.turn_on
+        metadata: {}
+        target:
+          entity_id: light.back_porch_lights
+        data:
+          brightness_pct: 100
+    - conditions:
+      - condition: trigger
+        id:
+        - clear
+      sequence:
+      - action: light.turn_off
+        metadata: {}
+        target:
+          entity_id: light.back_porch_lights
+        data: {}
+  mode: single
+- id: '1769493734572'
+  alias: Guest Bedroom Table Pico
+  description: ''
+  triggers:
+  - device_id: 25a66ac970f2ac4fedb0184c3bcac3e7
+    domain: lutron_caseta
+    type: press
+    subtype: 'on'
+    trigger: device
+    id: 'on'
+  - device_id: 25a66ac970f2ac4fedb0184c3bcac3e7
+    domain: lutron_caseta
+    type: press
+    subtype: 'off'
+    trigger: device
+    id: 'off'
+  - device_id: 25a66ac970f2ac4fedb0184c3bcac3e7
+    domain: lutron_caseta
+    type: press
+    subtype: stop
+    trigger: device
+    id: middle
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - 'on'
+      sequence:
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - scene.guest_bedroom_on
+        enabled: true
+      - repeat:
+          sequence:
+          - action: light.turn_on
+            metadata: {}
+            data:
+              brightness_pct: 100
+              color_temp_kelvin: 3500
+            target:
+              entity_id:
+              - light.guest_bedroom_ceiling_lights
+          count: 50
+        enabled: false
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 0
+          milliseconds: 200
+        enabled: false
+      - action: number.set_value
+        metadata: {}
+        data:
+          value: '55'
+        target:
+          entity_id: number.anthony_s_eight_sleep_temp
+        enabled: false
+      - action: automation.trigger
+        metadata: {}
+        data:
+          skip_condition: true
+        target:
+          entity_id: automation.lower_purifier_volume_while_watching_tv
+        enabled: false
+    - conditions:
+      - condition: trigger
+        id:
+        - 'off'
+      sequence:
+      - repeat:
+          sequence:
+          - action: light.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id:
+              - light.guest_bedroom_ceiling_lights
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 0
+              milliseconds: 250
+          count: 50
+        enabled: false
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: scene.guest_bedroom_off
+    - conditions:
+      - condition: trigger
+        id:
+        - 'off'
+        - middle
+      sequence:
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: scene.guest_bedroom_lamps_on
+  mode: restart
+- id: '1774919539519'
+  alias: Gaming QoS
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - switch.anthony_s_desktop
+    - switch.desktop
+    id: 'on'
+    to:
+  - trigger: homeassistant
+    event: start
+  - event_type: automation_reloaded
+    alias: reload
+    id: reload
+    trigger: event
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: switch.desktop
+          state:
+          - 'on'
+        - condition: state
+          entity_id: switch.anthony_s_desktop
+          state:
+          - 'on'
+      sequence:
+      - action: switch.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.unr_oon_policy_upload_hog_limiter
+    - conditions:
+      - condition: state
+        entity_id: switch.anthony_s_desktop
+        state:
+        - 'off'
+      - condition: state
+        entity_id: switch.desktop
+        state:
+        - 'off'
+      sequence:
+      - action: switch.turn_off
+        metadata: {}
+        target:
+          entity_id: switch.unr_oon_policy_upload_hog_limiter
+        data: {}
+  mode: single
+- id: '1776064027184'
+  alias: Taylor Eight Sleep
+  description: ''
+  triggers:
+  - trigger: time
+    at: '22:00:00'
+  - trigger: state
+    entity_id:
+    - binary_sensor.taylor_home
+    to:
+    - 'on'
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.taylor_home
+        state:
+        - 'on'
+      - condition: time
+        after: '21:59:59'
+      sequence:
+      - repeat:
+          sequence:
+          - action: switch.turn_on
+            target:
+              entity_id:
+              - switch.taylor_s_eight_sleep
+            data: {}
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 30
+              milliseconds: 0
+          until:
+          - condition: state
+            entity_id: switch.taylor_s_eight_sleep
+            state:
+            - 'on'
+            for:
+              hours: 0
+              minutes: 0
+              seconds: 10
+  mode: single
+- id: '1776192993206'
+  alias: Lower Living Room Purifier Volume While Watching TV
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - media_player.guest_room
+    to:
+    - playing
+  - trigger: state
+    entity_id:
+    - media_player.guest_room
+    - media_player.living_room_apple_tv
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 5
+    from:
+    - playing
+  - trigger: state
+    entity_id:
+    - media_player.guest_room
+    - media_player.living_room_apple_tv
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+    from:
+    - playing
+  - trigger: state
+    entity_id:
+    - media_player.hisense_canvas_tv
+    to:
+    - HDMI 3
+    attribute: source
+  - trigger: state
+    entity_id:
+    - switch.dining_room_tv
+    - switch.lr_tv
+    to:
+    - 'off'
+    - 'on'
+    id: 'off'
+  - trigger: state
+    entity_id:
+    - fan.xiaomi_purifier
+    from:
+    - unknown
+    - unavailable
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        state:
+        - 'on'
+        entity_id: fan.xiaomi_purifier
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: media_player.guest_room
+          state:
+          - playing
+        - condition: state
+          entity_id: media_player.living_room_apple_tv
+          state:
+          - playing
+        - condition: state
+          entity_id: media_player.hisense_canvas
+          state:
+          - Apple TV
+        - condition: state
+          entity_id: media_player.living_room_hisense
+          state:
+          - 'on'
+        - condition: state
+          entity_id: light.living_room
+          state:
+          - 'on'
+      sequence:
+      - action: fan.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - fan.xiaomi_purifier
+    - conditions:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.living_room_apple_tv
+          state:
+          - playing
+        - condition: state
+          entity_id: light.living_room
+          state:
+          - 'on'
+        - condition: state
+          entity_id: media_player.living_room_hisense
+          state:
+          - 'on'
+        - condition: state
+          entity_id: media_player.guest_room
+          state:
+          - playing
+        - condition: state
+          entity_id: media_player.living_room_hisense
+          state:
+          - Apple TV
+        - condition: state
+          entity_id: media_player.hisense_canvas
+          state:
+          - Apple TV
+      sequence:
+      - action: fan.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - fan.xiaomi_purifier
+  mode: restart
+- id: '1777438806219'
+  alias: Turn off Taylor's Office Light after work
+  description: ''
+  triggers:
+  - trigger: time
+    at: '18:00:00'
+    weekday:
+    - mon
+    - tue
+    - thu
+    - wed
+    - fri
+  conditions:
+  - condition: state
+    entity_id: light.back_office_lights
+    state:
+    - 'on'
+  actions:
+  - action: light.turn_off
+    metadata: {}
+    target:
+      entity_id: light.back_office_lights
+    data: {}
+  mode: single
+- id: '1777653297585'
+  alias: Turn off purifier in the morning
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - light.back_office_lights
+    to:
+    - 'on'
+  conditions:
+  - condition: time
+    weekday:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    after: 07:00:00
+    before: '11:00:00'
+  actions:
+  - action: fan.turn_off
+    metadata: {}
+    target:
+      entity_id:
+      - fan.bedroom_fan
+      - fan.master_bedroom_ceiling_fan
+    data: {}
+  mode: single
+- id: koi_pond_daily_feeding
+  alias: Koi Pond Daily Feeding
+  description: Feed koi based on effective pond temperature, with seasonal feeding
+    logic, notifications, and camera snapshot confirmation.
+  triggers:
+  - at: '11:59:45'
+    trigger: time
+  - event_type: mobile_app_notification_action
+    event_data:
+      action: FEED_KOI_ANYWAY
+    trigger: event
+    id: manual_feed
+  actions:
+  - action: notify.anthonys_devices
+    data:
+      message: clear_notification
+      data:
+        tag: koi
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - manual_feed
+      sequence:
+      - action: switch.turn_on
+        metadata: {}
+        target:
+          entity_id: switch.front_porch_koi_feeder
+        data: {}
+      - action: input_datetime.set_datetime
+        target:
+          entity_id: input_datetime.koi_last_fed
+        data:
+          datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 15
+          milliseconds: 0
+      - action: camera.snapshot
+        target:
+          entity_id:
+          - camera.g5_flex_high_resolution_channel_2
+        data:
+          filename: /media/pond.jpg
+        enabled: true
+      - action: notify.anthonys_devices
+        data:
+          message: Koi fed manually. Pond is {{ states('sensor.koi_effective_temperature')
+            | int }}°F.
+          data:
+            image: /media/local/pond.jpg
+            tag: koi
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.koi_effective_temperature
+        above: 54
+        below: 85
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.front_porch_koi_feeder
+      - action: input_datetime.set_datetime
+        target:
+          entity_id: input_datetime.koi_last_fed
+        data:
+          datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 15
+          milliseconds: 0
+      - action: camera.snapshot
+        target:
+          entity_id:
+          - camera.g5_flex_high_resolution_channel_2
+        data:
+          filename: /media/pond.jpg
+        enabled: true
+      - action: notify.anthonys_devices
+        data:
+          message: "  {% set temp = states('sensor.koi_effective_temperature') | int
+            %}\n  {% if state_attr('sensor.koi_effective_temperature', 'source') ==
+            'fallback_weather_estimate' %}\n    Koi fed using fallback temperature
+            estimate ({{ temp }}°F). Pond sensor needs attention.\n  {% else %}\n
+            \   Koi fed. Pond is {{ temp }}°F.\n  {% endif %}"
+          data:
+            image: /media/local/pond.jpg
+            tag: koi
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.koi_effective_temperature
+        above: 49
+        below: 55
+      - condition: template
+        value_template: '{{ ((as_timestamp(now()) - as_timestamp(states(''input_datetime.koi_last_fed'')))
+          / 86400) | int >= 3 }}'
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.front_porch_koi_feeder
+      - action: input_datetime.set_datetime
+        target:
+          entity_id: input_datetime.koi_last_fed
+        data:
+          datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 15
+          milliseconds: 0
+      - action: camera.snapshot
+        target:
+          entity_id:
+          - camera.g5_flex_high_resolution_channel_2
+        data:
+          filename: /media/pond.jpg
+        enabled: true
+      - action: notify.anthonys_devices
+        data:
+          message: "  {% set temp = states('sensor.koi_effective_temperature') | int
+            %}\n  {% if state_attr('sensor.koi_effective_temperature', 'source') ==
+            'fallback_weather_estimate' %}\n    Koi fed (cool-weather schedule) using
+            fallback estimate ({{ temp }}°F). Pond sensor needs attention.\n  {% else
+            %}\n    Koi fed (cool-weather schedule). Pond is {{ temp }}°F.\n  {% endif
+            %}"
+          data:
+            image: /media/local/pond.jpg
+            tag: koi
+    default:
+    - action: camera.snapshot
+      target:
+        entity_id:
+        - camera.g5_flex_high_resolution_channel_2
+      data:
+        filename: /media/pond.jpg
+      enabled: true
+    - action: notify.anthonys_devices
+      data:
+        message: "  {% set temp = states('sensor.koi_effective_temperature') | int
+          %}\n  {% set days = ((as_timestamp(now()) - as_timestamp(states('input_datetime.koi_last_fed')))
+          / 86400) | int %}\n  {% set remaining = [3 - days, 0] | max %}\n  {% set
+          fallback = state_attr('sensor.koi_effective_temperature', 'source') == 'fallback_weather_estimate'
+          %}\n\n  {% if temp < 50 %}\n    Koi feeding skipped, pond ({{ temp }}°F){%
+          if fallback %} estimated from weather{% endif %} is too cold.{% if fallback
+          %} Pond sensor may need attention.{% endif %}\n  {% elif temp > 85 %}\n
+          \   Koi feeding skipped, pond ({{ temp }}°F){% if fallback %} estimated
+          from weather{% endif %} is too hot.{% if fallback %} Pond sensor may need
+          attention.{% endif %}\n  {% elif temp >= 50 and temp <= 54 %}\n    Koi feeding
+          skipped. Pond is {{ temp }}°F{% if fallback %} (estimated){% endif %}. Feeding
+          in {{ remaining }} day(s).{% if fallback %} Pond sensor may need attention.{%
+          endif %}\n  {% else %}\n    Koi feeding skipped due to unknown conditions.{%
+          if fallback %} Pond sensor may need attention.{% endif %}\n  {% endif %}"
+        data:
+          tag: koi
+          image: /media/local/pond.jpg
+          actions:
+          - action: FEED_KOI_ANYWAY
+            title: Feed Anyway
+- id: '1778912766656'
+  alias: Humidifier Refill Notification
+  description: ''
+  triggers:
+  - trigger: numeric_state
+    entity_id:
+    - sensor.2_in_1_water_level
+    below: 1
+    id: empty
+  - trigger: numeric_state
+    entity_id:
+    - sensor.2_in_1_water_level
+    above: 0
+    id: filled
+  conditions: []
+  actions:
+  - data:
+      message: clear_notification
+      data:
+        tag: humidifier
+    action: notify.anthonys_devices
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - empty
+      sequence:
+      - action: notify.anthonys_devices
+        metadata: {}
+        data:
+          data:
+            tag: humidifier
+          message: Bedroom Humidifier water tank is empty
+    enabled: true
+  mode: parallel
+  max: 2
+- id: '1779054412696'
+  alias: Cat Water Management
+  description: Keeps the plug turned on and sends low water notifications.
+  triggers:
+  - trigger: homeassistant
+    event: start
+    id: keep_on
+  - trigger: state
+    entity_id: switch.cat_water_plug
+    to: 'off'
+    id: keep_on
+  - trigger: event
+    event_type: automation_reloaded
+    id: keep_on
+  - trigger: numeric_state
+    entity_id: sensor.cat_water_plug_cat_water_average_wattage
+    below: 0.42
+    for:
+      minutes: 3
+    id: low_water
+  - trigger: numeric_state
+    entity_id:
+    - sensor.cat_water_plug_cat_water_average_wattage
+    id: clear
+    above: 0.48
+  - trigger: state
+    entity_id:
+    - switch.cat_water_plug
+    to:
+    - unavailable
+    - unknown
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    id: unavailable
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: keep_on
+      sequence:
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: switch.cat_water_plug
+            state:
+            - 'on'
+        then:
+        - repeat:
+            until:
+            - condition: state
+              entity_id: switch.cat_water_plug
+              state: 'on'
+            sequence:
+            - action: switch.turn_on
+              target:
+                entity_id: switch.cat_water_plug
+              data: {}
+            - delay:
+                seconds: 5
+    - conditions:
+      - condition: trigger
+        id: low_water
+      sequence:
+      - condition: template
+        value_template: "              {% set last = states('input_datetime.cat_water_last_low_notification')
+          %}\n              {% if last in ['unknown', 'unavailable', ''] %}\n                true\n
+          \             {% else %}\n                {{ (now() - as_local(as_datetime(last))).total_seconds()
+          > 7200 }}\n              {% endif %}"
+      - action: input_datetime.set_datetime
+        target:
+          entity_id: input_datetime.cat_water_last_low_notification
+        data:
+          datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+      - data:
+          message: clear_notification
+          data:
+            tag: cat_water
+        action: notify.anthonys_devices
+      - action: notify.anthonys_devices
+        data:
+          title: Cat Water Bowl Empty
+          message: The cat water bowl is empty
+          data:
+            entity_id: camera.g6_instant_medium_resolution_channel
+            tag: cat_water
+    - conditions:
+      - condition: trigger
+        id:
+        - clear
+      sequence:
+      - data:
+          message: clear_notification
+          data:
+            tag: cat_water
+        action: notify.anthonys_devices
+    - conditions:
+      - condition: trigger
+        id:
+        - unavailable
+      sequence:
+      - data:
+          message: clear_notification
+          data:
+            tag: cat_water
+        action: notify.anthonys_devices
+      - action: notify.anthonys_devices
+        data:
+          title: Cat Water Bowl Offline
+          message: The cat water bowl is offline
+          data:
+            entity_id: camera.g6_instant_medium_resolution_channel
+            tag: cat_water
+  mode: parallel
+  max: 10
+- id: '1779937814611'
+  alias: Cat Food Reminder
+  description: ''
+  triggers:
+  - trigger: time
+    at: '13:00:00'
+    weekday:
+    - sun
+    - mon
+    - tue
+    - wed
+    - fri
+    - thu
+    - sat
+  conditions: []
+  actions:
+  - data:
+      message: clear_notification
+      data:
+        tag: cat_food
+    action: notify.anthonys_devices
+  - action: notify.anthonys_devices
+    data:
+      data:
+        entity_id: camera.g4_instant_high_resolution_channel
+        tag: cat_food
+      message: Check cat food
+  mode: parallel
+  max: 10
+- id: '1780100757280'
+  alias: Lock doors nightly
+  description: ''
+  triggers:
+  - trigger: time
+    at: '22:00:00'
+  conditions: []
+  actions:
+  - action: notify.anthonys_devices
+    data:
+      message: clear_notification
+      data:
+        tag: doors
+  - if:
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: lock.deck_lock
+        state: locked
+    then:
+    - action: lock.lock
+      target:
+        entity_id: lock.deck_lock
+  - if:
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: lock.aqara_smart_lock_u100
+        state: locked
+    then:
+    - action: lock.lock
+      target:
+        entity_id: lock.aqara_smart_lock_u100
+  - if:
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: lock.garage_lock
+        state: locked
+    then:
+    - action: lock.lock
+      target:
+        entity_id: lock.garage_lock
+  - if:
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: lock.master_bedroom_lock
+        state: locked
+    then:
+    - action: lock.lock
+      target:
+        entity_id: lock.master_bedroom_lock
+  - delay: 00:00:10
+  - if:
+    - condition: or
+      conditions:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: lock.deck_lock
+          state: locked
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: lock.aqara_smart_lock_u100
+          state: locked
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: lock.garage_lock
+          state: locked
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: lock.master_bedroom_lock
+          state: locked
+    then:
+    - action: notify.anthonys_devices
+      data:
+        title: Nightly Door Check
+        message: '{% if states(''lock.deck_lock'') != ''locked'' %} Deck Door: {{
+          states(''lock.deck_lock'') }} {% endif %}
+
+          {% if states(''lock.aqara_smart_lock_u100'') != ''locked'' %} Front Door:
+          {{ states(''lock.aqara_smart_lock_u100'') }} {% endif %}
+
+          {% if states(''lock.garage_lock'') != ''locked'' %} Garage Door: {{ states(''lock.garage_lock'')
+          }} {% endif %}
+
+          {% if states(''lock.master_bedroom_lock'') != ''locked'' %} Master Bedroom:
+          {{ states(''lock.master_bedroom_lock'') }} {% endif %}
+
+          '
+        data:
+          tag: doors
+  mode: single
+- id: '1780964583560'
+  alias: Kitchen Audio Pico
+  description: ''
+  use_blueprint:
+    path: stephack/core-pico.yaml
+    input:
+      pico_remote: 28c15e302ca05d97a42c07445a3817c2
+      middle_stop:
+      - action: wiim.play_preset
+        metadata: {}
+        target:
+          entity_id: media_player.kitchen
+        data:
+          preset: 3
+      - wait_for_trigger:
+        - trigger: state
+          entity_id:
+          - media_player.kitchen
+          to:
+          - playing
+        continue_on_timeout: true
+        timeout:
+          hours: 0
+          minutes: 0
+          seconds: 3
+          milliseconds: 0
+      - action: media_player.media_next_track
+        metadata: {}
+        target:
+          entity_id: media_player.kitchen
+        data: {}
+      up_raise_release:
+      - if:
+        - condition: state
+          state:
+          - playing
+          entity_id: media_player.kitchen
+        then:
+        - action: media_player.volume_up
+          metadata: {}
+          data: {}
+          target:
+            entity_id:
+            - media_player.kitchen
+      down_lower:
+      - if:
+        - condition: state
+          state: playing
+          entity_id: media_player.kitchen
+        then:
+        - action: media_player.volume_down
+          metadata: {}
+          data: {}
+          target:
+            entity_id:
+            - media_player.kitchen
+      bottom_off:
+      - if:
+        - condition: state
+          state:
+          - idle
+          entity_id: media_player.spotify_anthony
+        then:
+        - action: wiim.play_preset
+          metadata: {}
+          target:
+            entity_id: media_player.kitchen
+          data:
+            preset: 2
+        - wait_for_trigger:
+          - trigger: state
+            entity_id:
+            - media_player.kitchen
+            to:
+            - playing
+          continue_on_timeout: true
+          timeout:
+            hours: 0
+            minutes: 0
+            seconds: 3
+            milliseconds: 0
+        - action: media_player.media_next_track
+          metadata: {}
+          target:
+            entity_id: media_player.kitchen
+          data: {}
+        else:
+        - action: media_player.media_next_track
+          metadata: {}
+          data: {}
+          target:
+            entity_id:
+            - media_player.kitchen
+      top_on:
+      - if:
+        - condition: state
+          state:
+          - idle
+          entity_id: media_player.spotify_anthony
+        then:
+        - action: wiim.play_preset
+          metadata: {}
+          target:
+            entity_id: media_player.kitchen
+          data:
+            preset: 1
+        - wait_for_trigger:
+          - trigger: state
+            entity_id:
+            - media_player.kitchen
+            to:
+            - playing
+          continue_on_timeout: true
+          timeout:
+            hours: 0
+            minutes: 0
+            seconds: 3
+            milliseconds: 0
+        - action: media_player.media_next_track
+          metadata: {}
+          target:
+            entity_id: media_player.kitchen
+          data: {}
+        else:
+        - action: media_player.media_play_pause
+          metadata: {}
+          data: {}
+          target:
+            entity_id: media_player.kitchen
+      auto_mode: parallel

@@ -8,12 +8,39 @@ lights_on:
       - script.gaming
       - script.lights_off
     action: script.turn_off
-  - action: switch.turn_off
-    metadata: {}
-    data: {}
-    target:
-      entity_id:
-      - switch.master_bedroom_hue_led_device
+  - if:
+    - condition: state
+      entity_id: switch.master_bedroom_hue_led_device
+      state:
+      - 'on'
+    then:
+    - repeat:
+        sequence:
+        - action: switch.turn_off
+          metadata: {}
+          data: {}
+          target:
+            entity_id:
+            - switch.master_bedroom_hue_led_device
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 0
+            milliseconds: 200
+        until:
+        - condition: state
+          entity_id: switch.master_bedroom_hue_led_device
+          state:
+          - 'off'
+          for:
+            hours: 0
+            minutes: 0
+            seconds: 1
+    - action: hue.activate_scene
+      metadata: {}
+      target:
+        entity_id: scene.master_bedroom_on_with_lily
+      data: {}
   - parallel:
     - action: automation.trigger
       metadata: {}
@@ -120,6 +147,10 @@ lights_off:
       - condition: state
         entity_id: input_boolean.guest
         state: 'off'
+      - condition: state
+        entity_id: device_tracker.iphone_15
+        state:
+        - not_home
       then:
       - action: script.turn_on
         metadata: {}
@@ -181,11 +212,19 @@ call:
     - condition: state
       entity_id: input_boolean.guest
       state: 'off'
+    - condition: state
+      entity_id: device_tracker.iphone_15
+      state:
+      - not_home
+    - condition: state
+      entity_id: light.master_bedroom_ceiling_lights
+      state: 'off'
+    - condition: state
+      entity_id: light.master_bedroom_lamps
+      state:
+      - 'on'
     - condition: or
       conditions:
-      - condition: state
-        entity_id: light.master_bedroom_ceiling_lights
-        state: 'off'
       - condition: state
         entity_id: binary_sensor.bed_both_occupied
         state:
@@ -194,6 +233,12 @@ call:
         entity_id: zone.home
         state:
         - '1'
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: switch.anthony_s_desktop
+        state:
+        - 'on'
     then:
     - action: script.turn_on
       metadata: {}
@@ -706,38 +751,67 @@ living_room_white:
   mode: restart
 play_jazz:
   sequence:
-  - action: music_assistant.play_media
+  - action: media_player.select_source
     metadata: {}
-    data:
-      media_id: https://open.spotify.com/playlist/37i9dQZF1DWV7EzJMK2FUI?si=f178a812f15d448c
-      media_type: album
-      enqueue: replace_next
     target:
-      entity_id:
-      - media_player.kitchen_ceiling
+      entity_id: media_player.spotify_anthony
+    data:
+      source: Kitchen
+    continue_on_error: true
+    enabled: false
   - action: media_player.volume_set
     metadata: {}
     data:
       volume_level: 0.3
     target:
       entity_id:
-      - media_player.kitchen_ceiling
+      - media_player.kitchen
+      - media_player.spotify_anthony
+    continue_on_error: true
+    enabled: false
   - action: media_player.shuffle_set
     metadata: {}
     data:
       shuffle: true
     target:
-      entity_id: media_player.kitchen_ceiling
+      entity_id:
+      - media_player.kitchen
+      - media_player.spotify_anthony
+    continue_on_error: true
+    enabled: false
+  - action: media_player.play_media
+    metadata: {}
+    target:
+      entity_id: media_player.spotify_anthony
+    data:
+      media:
+        media_content_id: https://open.spotify.com/playlist/37i9dQZF1DWV7EzJMK2FUI?si=f178a812f15d448c
+        media_content_type: playlist
+    continue_on_error: true
+    enabled: false
   - action: media_player.media_next_track
     metadata: {}
     data: {}
     target:
-      entity_id: media_player.kitchen_ceiling
-  - action: media_player.media_play
+      entity_id: media_player.spotify_anthony
+    continue_on_error: true
+    enabled: false
+  - action: media_player.volume_set
     metadata: {}
-    data: {}
+    data:
+      volume_level: 0.3
     target:
-      entity_id: media_player.kitchen_ceiling
+      entity_id:
+      - media_player.kitchen
+      - media_player.spotify_anthony
+    continue_on_error: true
+    enabled: false
+  - action: wiim.play_preset
+    metadata: {}
+    target:
+      entity_id: media_player.kitchen
+    data:
+      preset: 1
   alias: Play Jazz
   description: ''
   mode: restart
@@ -761,7 +835,7 @@ open_curtains:
       - cover.curtain_3_2e8d
       - cover.curtain_3_adf5
       position: 100
-      speed: 255
+      speed: 6
   - action: v6_quietdrift.set_switchbot_curtain_position
     continue_on_error: true
     metadata: {}
@@ -824,7 +898,7 @@ close_south_curtains:
         - cover.curtain_3_2e8d
         - cover.curtain_3_e6a2
         position: 100
-        speed: 255
+        speed: 6
     - action: v6_quietdrift.set_switchbot_curtain_position
       continue_on_error: true
       metadata: {}
@@ -854,7 +928,7 @@ close_south_curtains:
         - cover.curtain_3_2e8d
         - cover.living_room_south_right
         position: 0
-        speed: 255
+        speed: 6
   alias: Toggle South Curtains
   description: ''
 close_curtains:
@@ -895,7 +969,6 @@ goodnight:
       target:
         entity_id:
         - scene.living_room_off
-        - scene.office_off
     - action: light.turn_off
       metadata: {}
       data: {}
@@ -950,6 +1023,25 @@ goodnight:
         entity_id:
         - media_player.kitchen_ceiling
         - media_player.ceiling_but_works_airplay
+      enabled: false
+  - if:
+    - condition: not
+      conditions:
+      - condition: time
+        after: 07:00:00
+        before: '18:00:00'
+        weekday:
+        - mon
+        - tue
+        - wed
+        - thu
+        - fri
+    then:
+    - action: light.turn_off
+      metadata: {}
+      target:
+        entity_id: light.back_office_lights
+      data: {}
   - action: scene.turn_on
     metadata: {}
     data: {}
@@ -991,7 +1083,8 @@ goodnight:
       metadata: {}
       data: {}
       target:
-        entity_id: script.close_curtains
+        entity_id:
+        - script.close_curtains_slower
   - action: homeassistant.reload_config_entry
     metadata: {}
     data: {}
@@ -1000,6 +1093,21 @@ goodnight:
       - switch.master_bedroom_hue_led_device
       - switch.phillips_component_led_device
       - switch.bedroom_pc_component_led_device
+  - if:
+    - condition: state
+      entity_id: switch.anthony_s_desktop
+      state:
+      - 'off'
+    - condition: state
+      entity_id: switch.desktop
+      state:
+      - 'off'
+    then:
+    - action: scene.turn_on
+      metadata: {}
+      target:
+        entity_id: scene.office_off
+      data: {}
   alias: Goodnight
   description: ''
 living_room_off:
@@ -1103,7 +1211,7 @@ toggle_east_curtains:
         - cover.curtain_3_ad63
         - cover.living_room_east_right
         position: 100
-        speed: 255
+        speed: 6
     - action: v6_quietdrift.set_switchbot_curtain_position
       continue_on_error: true
       metadata: {}
@@ -1131,6 +1239,35 @@ toggle_east_curtains:
         - cover.curtain_3_ad63
         - cover.curtain_3_adf5
         position: 0
-        speed: 255
+        speed: 6
   alias: Toggle East Curtains
+  description: ''
+close_curtains_slower:
+  sequence:
+  - action: script.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - script.toggle_east_curtains
+      - script.close_south_curtains
+      - script.open_curtains
+  - action: v6_quietdrift.set_switchbot_curtain_position
+    continue_on_error: true
+    metadata: {}
+    data:
+      entity_id:
+      - cover.curtain_3_ad63
+      - cover.curtain_3_adf5
+      - cover.curtain_3_68c3
+      - cover.curtain_3_2e8d
+      - cover.curtain_3_0ced
+      position: 0
+      speed: 6
+  - action: input_boolean.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: input_boolean.living_room_curtains_previously_open
+  alias: Close Curtains Slower
   description: ''

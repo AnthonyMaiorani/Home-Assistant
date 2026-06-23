@@ -25,6 +25,28 @@
   method: post
   scan_interval: 5
 - platform: rest
+  resource: http://192.168.1.68:3000/api/deviceStatus
+  name: "Taylor's Eight Sleep"
+  body_on: '{ "right": { "targetTemperatureF": 84, "isOn": true } }'
+  body_off: '{ "right": { "isOn": false } }'
+  is_on_template: "{{ value_json.right.isOn }}"
+  unique_id: taylor_s_eight_sleep
+  headers:
+    Content-Type: application/json
+  method: post
+  scan_interval: 5
+- platform: rest
+  resource: http://192.168.1.68:3000/api/deviceStatus
+  name: "Taylor's Eight Sleep Keep Temp"
+  body_on: '{ "right": { "isOn": true } }'
+  body_off: '{ "right": { "isOn": false } }'
+  is_on_template: "{{ value_json.right.isOn }}"
+  unique_id: right_s_eight_sleep_keep_temp
+  headers:
+    Content-Type: application/json
+  method: post
+  scan_interval: 5
+- platform: rest
   resource: http://192.168.1.73/json/state
   name: Master WLED
   body_on: '{"on":true}'
