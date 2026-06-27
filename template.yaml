@@ -274,6 +274,19 @@
         {% set high = states('sensor.pirateweather_daytime_high_temperature_0d') | float(0) %}
         {% set low = states('sensor.pirateweather_overnight_low_temperature_0d') | float(0) %}
         {{ (((high + low) / 2) - 4) | round(0) | int }}
+    - name: "Koi Food Remaining"
+      unique_id: koi_food_remaining
+      unit_of_measurement: "%"
+      state: >-
+        {% set capacity = 30 %}
+        {% set used = states('input_number.koi_feed_portions_since_refill') | float(0) %}
+        {{ ([100 - ((used / capacity) * 100), 0] | max) | round(0) }}
+    - name: "Koi Feed Portions Remaining"
+      unique_id: koi_feed_portions_remaining
+      state: >-
+        {% set capacity = 30 %}
+        {% set used = states('input_number.koi_feed_portions_since_refill') | float(0) %}
+        {{ ([capacity - used, 0] | max) | round(1) }}
 - binary_sensor:
     - name: "Anthony Home"
       state: >

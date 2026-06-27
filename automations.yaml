@@ -6317,6 +6317,15 @@
       - action: switch.turn_on
         target:
           entity_id: switch.front_porch_koi_feeder
+      - action: counter.increment
+        target:
+          entity_id: counter.koi_feedings_since_refill
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.koi_feed_portions_since_refill
+        data:
+          value: '{{ states(''input_number.koi_feed_portions_since_refill'') | float(0)
+            + 1 }}'
       - action: input_datetime.set_datetime
         target:
           entity_id: input_datetime.koi_last_fed
@@ -6333,8 +6342,10 @@
           filename: /media/pond.jpg
       - action: notify.anthonys_devices
         data:
-          message: Koi fed manually. Pond is {{ states('sensor.koi_effective_temperature')
-            | int }}°F.
+          message: '{%- set temp = states(''sensor.koi_effective_temperature'') |
+            int -%} {%- set portions_left = states(''sensor.koi_feed_portions_remaining'')
+            | float(0) | round(0) | int -%} Koi fed manually. Pond is {{ temp }}°F,
+            about {{ portions_left }} portions left.'
           data:
             image: /media/local/pond.jpg
             tag: koi
@@ -6351,6 +6362,15 @@
       - action: switch.turn_on
         target:
           entity_id: switch.front_porch_koi_feeder
+      - action: counter.increment
+        target:
+          entity_id: counter.koi_feedings_since_refill
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.koi_feed_portions_since_refill
+        data:
+          value: '{{ states(''input_number.koi_feed_portions_since_refill'') | float(0)
+            + 0.67 }}'
       - action: input_datetime.set_datetime
         target:
           entity_id: input_datetime.koi_last_fed
@@ -6375,13 +6395,15 @@
           filename: /media/pond.jpg
       - action: notify.anthonys_devices
         data:
-          message: "{% set temp = states('sensor.koi_effective_temperature') | int
-            %}\n{% set fallback = (state_attr('sensor.koi_effective_temperature',
-            'source') | default('', true) | trim) == 'fallback_weather_estimate' %}\n{%
-            if fallback %}\n  Koi got a warm-weather extra feeding using fallback
-            temperature estimate ({{ temp }}°F). Pond sensor needs attention.\n{%
-            else %}\n  Koi got a warm-weather extra feeding. Pond is {{ temp }}°F.\n{%
-            endif %}"
+          message: "{%- set temp = states('sensor.koi_effective_temperature') | int
+            -%} {%- set fallback = (state_attr('sensor.koi_effective_temperature',
+            'source') | default('', true) | trim) == 'fallback_weather_estimate' -%}
+            {%- set portions_left = states('sensor.koi_feed_portions_remaining') |
+            float(0) | round(0) | int -%} {%- if fallback -%}\n  Koi got extra feeding
+            using fallback temp estimate. Pond is {{ temp }}°F, sensor needs attention,
+            about {{ portions_left }} portions left.\n{%- else -%}\n  Koi got extra
+            feeding. Pond is {{ temp }}°F, about {{ portions_left }} portions left.\n{%-
+            endif -%}"
           data:
             image: /media/local/pond.jpg
             tag: koi
@@ -6405,6 +6427,15 @@
       - action: switch.turn_on
         target:
           entity_id: switch.front_porch_koi_feeder
+      - action: counter.increment
+        target:
+          entity_id: counter.koi_feedings_since_refill
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.koi_feed_portions_since_refill
+        data:
+          value: '{{ states(''input_number.koi_feed_portions_since_refill'') | float(0)
+            + 1 }}'
       - action: input_datetime.set_datetime
         target:
           entity_id: input_datetime.koi_last_fed
@@ -6421,12 +6452,14 @@
           filename: /media/pond.jpg
       - action: notify.anthonys_devices
         data:
-          message: "{% set temp = states('sensor.koi_effective_temperature') | int
-            %}\n{% set fallback = (state_attr('sensor.koi_effective_temperature',
-            'source') | default('', true) | trim) == 'fallback_weather_estimate' %}\n{%
-            if fallback %}\n  Koi fed using fallback temperature estimate ({{ temp
-            }}°F). Pond sensor needs attention.\n{% else %}\n  Koi fed. Pond is {{
-            temp }}°F.\n{% endif %}"
+          message: "{%- set temp = states('sensor.koi_effective_temperature') | int
+            -%} {%- set fallback = (state_attr('sensor.koi_effective_temperature',
+            'source') | default('', true) | trim) == 'fallback_weather_estimate' -%}
+            {%- set portions_left = states('sensor.koi_feed_portions_remaining') |
+            float(0) | round(0) | int -%} {%- if fallback -%}\n  Koi fed using fallback
+            temp estimate. Pond is {{ temp }}°F, sensor needs attention, about {{
+            portions_left }} portions left.\n{%- else -%}\n  Koi fed. Pond is {{ temp
+            }}°F, about {{ portions_left }} portions left.\n{%- endif -%}"
           data:
             image: /media/local/pond.jpg
             tag: koi
@@ -6446,6 +6479,15 @@
       - action: switch.turn_on
         target:
           entity_id: switch.front_porch_koi_feeder
+      - action: counter.increment
+        target:
+          entity_id: counter.koi_feedings_since_refill
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.koi_feed_portions_since_refill
+        data:
+          value: '{{ states(''input_number.koi_feed_portions_since_refill'') | float(0)
+            + 1 }}'
       - action: input_datetime.set_datetime
         target:
           entity_id: input_datetime.koi_last_fed
@@ -6462,12 +6504,15 @@
           filename: /media/pond.jpg
       - action: notify.anthonys_devices
         data:
-          message: "{% set temp = states('sensor.koi_effective_temperature') | int
-            %}\n{% set fallback = (state_attr('sensor.koi_effective_temperature',
-            'source') | default('', true) | trim) == 'fallback_weather_estimate' %}\n{%
-            if fallback %}\n  Koi fed on cool-weather schedule using fallback temperature
-            estimate ({{ temp }}°F). Pond sensor needs attention.\n{% else %}\n  Koi
-            fed on cool-weather schedule. Pond is {{ temp }}°F.\n{% endif %}"
+          message: "{%- set temp = states('sensor.koi_effective_temperature') | int
+            -%} {%- set fallback = (state_attr('sensor.koi_effective_temperature',
+            'source') | default('', true) | trim) == 'fallback_weather_estimate' -%}
+            {%- set portions_left = states('sensor.koi_feed_portions_remaining') |
+            float(0) | round(0) | int -%} {%- if fallback -%}\n  Koi fed on cool schedule
+            using fallback temp estimate. Pond is {{ temp }}°F, sensor needs attention,
+            about {{ portions_left }} portions left.\n{%- else -%}\n  Koi fed on cool
+            schedule. Pond is {{ temp }}°F, about {{ portions_left }} portions left.\n{%-
+            endif -%}"
           data:
             image: /media/local/pond.jpg
             tag: koi
@@ -6481,11 +6526,11 @@
         filename: /media/pond.jpg
     - action: notify.anthonys_devices
       data:
-        message: "{% set temp = states('sensor.koi_effective_temperature') | int %}\n{%
-          set last = as_timestamp(states('input_datetime.koi_last_fed'), 0) %}\n{%
-          set days = ((as_timestamp(now()) - last) / 86400) | int %}\n{% set remaining
-          = [3 - days, 0] | max %}\n{% set fallback = (state_attr('sensor.koi_effective_temperature',
-          'source') | default('', true) | trim) == 'fallback_weather_estimate' %}\n\n{%
+        message: "{% set temp = states('sensor.koi_effective_temperature') | int %}
+          {% set last = as_timestamp(states('input_datetime.koi_last_fed'), 0) %}
+          {% set days = ((as_timestamp(now()) - last) / 86400) | int %} {% set remaining
+          = [3 - days, 0] | max %} {% set fallback = (state_attr('sensor.koi_effective_temperature',
+          'source') | default('', true) | trim) == 'fallback_weather_estimate' %}\n{%
           if temp < 50 %}\n  Koi feeding skipped, pond ({{ temp }}°F){% if fallback
           %} estimated from weather{% endif %} is too cold.{% if fallback %} Pond
           sensor may need attention.{% endif %}\n{% elif temp >= 85 %}\n  Koi feeding
@@ -6547,7 +6592,7 @@
   max: 2
 - id: '1779054412696'
   alias: Cat Water Management
-  description: Keeps the plug turned on and sends low water notifications.
+  description: Keeps the plug turned on and sends cat water notifications.
   triggers:
   - trigger: homeassistant
     event: start
@@ -6560,26 +6605,25 @@
     event_type: automation_reloaded
     id: keep_on
   - trigger: numeric_state
-    entity_id: sensor.cat_water_plug_cat_water_average_wattage
-    below: 0.42
-    for:
-      minutes: 3
-    id: low_water
-  - trigger: numeric_state
     entity_id:
     - sensor.cat_water_plug_cat_water_average_wattage
+    below: 0.48
+    for:
+      seconds: 30
+    id: low_water
+  - trigger: numeric_state
+    entity_id: sensor.cat_water_plug_cat_water_average_wattage
+    above: 0.6
+    for:
+      minutes: 2
     id: clear
-    above: 0.48
   - trigger: state
-    entity_id:
-    - switch.cat_water_plug
+    entity_id: switch.cat_water_plug
     to:
     - unavailable
     - unknown
     for:
-      hours: 0
       minutes: 2
-      seconds: 0
     id: unavailable
   conditions: []
   actions:
@@ -6593,8 +6637,7 @@
           conditions:
           - condition: state
             entity_id: switch.cat_water_plug
-            state:
-            - 'on'
+            state: 'on'
         then:
         - repeat:
             until:
@@ -6605,59 +6648,53 @@
             - action: switch.turn_on
               target:
                 entity_id: switch.cat_water_plug
-              data: {}
             - delay:
                 seconds: 5
     - conditions:
       - condition: trigger
         id: low_water
+      - condition: state
+        entity_id: input_boolean.cat_water_alert_active
+        state: 'off'
       sequence:
-      - condition: template
-        value_template: "              {% set last = states('input_datetime.cat_water_last_low_notification')
-          %}\n              {% if last in ['unknown', 'unavailable', ''] %}\n                true\n
-          \             {% else %}\n                {{ (now() - as_local(as_datetime(last))).total_seconds()
-          > 7200 }}\n              {% endif %}"
-      - action: input_datetime.set_datetime
+      - action: input_boolean.turn_on
         target:
-          entity_id: input_datetime.cat_water_last_low_notification
-        data:
-          datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
-      - data:
-          message: clear_notification
-          data:
-            tag: cat_water
-        action: notify.anthonys_devices
+          entity_id: input_boolean.cat_water_alert_active
       - action: notify.anthonys_devices
         data:
-          title: Cat Water Bowl Empty
-          message: The cat water bowl is empty
+          title: Cat Water Bowl Low
+          message: The cat water bowl is low.
           data:
             entity_id: camera.g6_instant_medium_resolution_channel
             tag: cat_water
     - conditions:
       - condition: trigger
-        id:
-        - clear
+        id: clear
+      - condition: state
+        entity_id: input_boolean.cat_water_alert_active
+        state: 'on'
       sequence:
-      - data:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.cat_water_alert_active
+      - action: notify.anthonys_devices
+        data:
           message: clear_notification
           data:
             tag: cat_water
-        action: notify.anthonys_devices
     - conditions:
       - condition: trigger
-        id:
-        - unavailable
+        id: unavailable
       sequence:
-      - data:
+      - action: notify.anthonys_devices
+        data:
           message: clear_notification
           data:
             tag: cat_water
-        action: notify.anthonys_devices
       - action: notify.anthonys_devices
         data:
           title: Cat Water Bowl Offline
-          message: The cat water bowl is offline
+          message: The cat water bowl is offline.
           data:
             entity_id: camera.g6_instant_medium_resolution_channel
             tag: cat_water
