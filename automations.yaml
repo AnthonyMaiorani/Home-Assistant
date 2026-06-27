@@ -3525,15 +3525,18 @@
           - sun
           - sat
           before: '12:00:00'
-        - condition: time
-          weekday:
-          - mon
-          - tue
-          - wed
-          - thu
-          - fri
-          before: '12:00:00'
-          after: 06:30:00
+        - condition: and
+          conditions:
+          - condition: time
+            weekday:
+            - mon
+            - tue
+            - wed
+            - thu
+            - fri
+            before: '12:00:00'
+          - condition: sun
+            after: sunrise
       sequence:
       - stop: ''
     - conditions:
@@ -3717,15 +3720,18 @@
           - sun
           - sat
           before: '12:00:00'
-        - condition: time
-          weekday:
-          - mon
-          - tue
-          - wed
-          - thu
-          - fri
-          before: '12:00:00'
-          after: 06:30:00
+        - condition: and
+          conditions:
+          - condition: time
+            weekday:
+            - mon
+            - tue
+            - wed
+            - thu
+            - fri
+            before: '12:00:00'
+          - condition: sun
+            after: sunrise
       sequence:
       - stop: ''
     - conditions:
@@ -6286,32 +6292,65 @@
 - id: koi_pond_daily_feeding
   alias: Koi Pond Daily Feeding
   description: Feed koi based on effective pond temperature, with seasonal feeding
-    logic, notifications, and camera snapshot confirmation.
+    logic, optional warm-weather extra feeding, notifications, and camera snapshot
+    confirmation.
   triggers:
   - at: '11:59:45'
     trigger: time
+    id: daily_feed
+  - at: '14:29:50'
+    trigger: time
+    id: warm_extra_feed
   - event_type: mobile_app_notification_action
     event_data:
       action: FEED_KOI_ANYWAY
     trigger: event
     id: manual_feed
   actions:
-  - action: notify.anthonys_devices
-    data:
-      message: clear_notification
-      data:
-        tag: koi
   - choose:
-    - conditions:
+    - alias: Manual feed anyway
+      conditions:
       - condition: trigger
         id:
         - manual_feed
       sequence:
       - action: switch.turn_on
-        metadata: {}
         target:
           entity_id: switch.front_porch_koi_feeder
-        data: {}
+      - action: input_datetime.set_datetime
+        target:
+          entity_id: input_datetime.koi_last_fed
+        data:
+          datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+      - delay:
+          seconds: 15
+      - action: camera.snapshot
+        continue_on_error: true
+        target:
+          entity_id:
+          - camera.g5_flex_high_resolution_channel_2
+        data:
+          filename: /media/pond.jpg
+      - action: notify.anthonys_devices
+        data:
+          message: Koi fed manually. Pond is {{ states('sensor.koi_effective_temperature')
+            | int }}°F.
+          data:
+            image: /media/local/pond.jpg
+            tag: koi
+    - alias: Warm-weather extra feeding
+      conditions:
+      - condition: trigger
+        id:
+        - warm_extra_feed
+      - condition: numeric_state
+        entity_id: sensor.koi_effective_temperature
+        above: 69
+        below: 83
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.front_porch_koi_feeder
       - action: input_datetime.set_datetime
         target:
           entity_id: input_datetime.koi_last_fed
@@ -6320,23 +6359,44 @@
       - delay:
           hours: 0
           minutes: 0
-          seconds: 15
+          seconds: 10
           milliseconds: 0
+      - action: switch.turn_off
+        metadata: {}
+        target:
+          entity_id: switch.front_porch_koi_feeder
+        data: {}
       - action: camera.snapshot
+        continue_on_error: true
         target:
           entity_id:
           - camera.g5_flex_high_resolution_channel_2
         data:
           filename: /media/pond.jpg
-        enabled: true
       - action: notify.anthonys_devices
         data:
-          message: Koi fed manually. Pond is {{ states('sensor.koi_effective_temperature')
-            | int }}°F.
+          message: "{% set temp = states('sensor.koi_effective_temperature') | int
+            %}\n{% set fallback = (state_attr('sensor.koi_effective_temperature',
+            'source') | default('', true) | trim) == 'fallback_weather_estimate' %}\n{%
+            if fallback %}\n  Koi got a warm-weather extra feeding using fallback
+            temperature estimate ({{ temp }}°F). Pond sensor needs attention.\n{%
+            else %}\n  Koi got a warm-weather extra feeding. Pond is {{ temp }}°F.\n{%
+            endif %}"
           data:
             image: /media/local/pond.jpg
             tag: koi
-    - conditions:
+    - alias: Silently skip warm-weather extra feeding
+      conditions:
+      - condition: trigger
+        id:
+        - warm_extra_feed
+      sequence:
+      - stop: Warm-weather extra feeding skipped silently.
+    - alias: Normal daily feeding
+      conditions:
+      - condition: trigger
+        id:
+        - daily_feed
       - condition: numeric_state
         entity_id: sensor.koi_effective_temperature
         above: 54
@@ -6351,35 +6411,37 @@
         data:
           datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
       - delay:
-          hours: 0
-          minutes: 0
           seconds: 15
-          milliseconds: 0
       - action: camera.snapshot
+        continue_on_error: true
         target:
           entity_id:
           - camera.g5_flex_high_resolution_channel_2
         data:
           filename: /media/pond.jpg
-        enabled: true
       - action: notify.anthonys_devices
         data:
-          message: "  {% set temp = states('sensor.koi_effective_temperature') | int
-            %}\n  {% if state_attr('sensor.koi_effective_temperature', 'source') ==
-            'fallback_weather_estimate' %}\n    Koi fed using fallback temperature
-            estimate ({{ temp }}°F). Pond sensor needs attention.\n  {% else %}\n
-            \   Koi fed. Pond is {{ temp }}°F.\n  {% endif %}"
+          message: "{% set temp = states('sensor.koi_effective_temperature') | int
+            %}\n{% set fallback = (state_attr('sensor.koi_effective_temperature',
+            'source') | default('', true) | trim) == 'fallback_weather_estimate' %}\n{%
+            if fallback %}\n  Koi fed using fallback temperature estimate ({{ temp
+            }}°F). Pond sensor needs attention.\n{% else %}\n  Koi fed. Pond is {{
+            temp }}°F.\n{% endif %}"
           data:
             image: /media/local/pond.jpg
             tag: koi
-    - conditions:
+    - alias: Cool-weather feeding every 3 days
+      conditions:
+      - condition: trigger
+        id:
+        - daily_feed
       - condition: numeric_state
         entity_id: sensor.koi_effective_temperature
         above: 49
         below: 55
       - condition: template
-        value_template: '{{ ((as_timestamp(now()) - as_timestamp(states(''input_datetime.koi_last_fed'')))
-          / 86400) | int >= 3 }}'
+        value_template: '{% set last = as_timestamp(states(''input_datetime.koi_last_fed''),
+          0) %} {{ (as_timestamp(now()) - last) >= 259200 }}'
       sequence:
       - action: switch.turn_on
         target:
@@ -6390,58 +6452,58 @@
         data:
           datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
       - delay:
-          hours: 0
-          minutes: 0
           seconds: 15
-          milliseconds: 0
       - action: camera.snapshot
+        continue_on_error: true
         target:
           entity_id:
           - camera.g5_flex_high_resolution_channel_2
         data:
           filename: /media/pond.jpg
-        enabled: true
       - action: notify.anthonys_devices
         data:
-          message: "  {% set temp = states('sensor.koi_effective_temperature') | int
-            %}\n  {% if state_attr('sensor.koi_effective_temperature', 'source') ==
-            'fallback_weather_estimate' %}\n    Koi fed (cool-weather schedule) using
-            fallback estimate ({{ temp }}°F). Pond sensor needs attention.\n  {% else
-            %}\n    Koi fed (cool-weather schedule). Pond is {{ temp }}°F.\n  {% endif
-            %}"
+          message: "{% set temp = states('sensor.koi_effective_temperature') | int
+            %}\n{% set fallback = (state_attr('sensor.koi_effective_temperature',
+            'source') | default('', true) | trim) == 'fallback_weather_estimate' %}\n{%
+            if fallback %}\n  Koi fed on cool-weather schedule using fallback temperature
+            estimate ({{ temp }}°F). Pond sensor needs attention.\n{% else %}\n  Koi
+            fed on cool-weather schedule. Pond is {{ temp }}°F.\n{% endif %}"
           data:
             image: /media/local/pond.jpg
             tag: koi
     default:
     - action: camera.snapshot
+      continue_on_error: true
       target:
         entity_id:
         - camera.g5_flex_high_resolution_channel_2
       data:
         filename: /media/pond.jpg
-      enabled: true
     - action: notify.anthonys_devices
       data:
-        message: "  {% set temp = states('sensor.koi_effective_temperature') | int
-          %}\n  {% set days = ((as_timestamp(now()) - as_timestamp(states('input_datetime.koi_last_fed')))
-          / 86400) | int %}\n  {% set remaining = [3 - days, 0] | max %}\n  {% set
-          fallback = state_attr('sensor.koi_effective_temperature', 'source') == 'fallback_weather_estimate'
-          %}\n\n  {% if temp < 50 %}\n    Koi feeding skipped, pond ({{ temp }}°F){%
-          if fallback %} estimated from weather{% endif %} is too cold.{% if fallback
-          %} Pond sensor may need attention.{% endif %}\n  {% elif temp > 85 %}\n
-          \   Koi feeding skipped, pond ({{ temp }}°F){% if fallback %} estimated
-          from weather{% endif %} is too hot.{% if fallback %} Pond sensor may need
-          attention.{% endif %}\n  {% elif temp >= 50 and temp <= 54 %}\n    Koi feeding
-          skipped. Pond is {{ temp }}°F{% if fallback %} (estimated){% endif %}. Feeding
+        message: "{% set temp = states('sensor.koi_effective_temperature') | int %}\n{%
+          set last = as_timestamp(states('input_datetime.koi_last_fed'), 0) %}\n{%
+          set days = ((as_timestamp(now()) - last) / 86400) | int %}\n{% set remaining
+          = [3 - days, 0] | max %}\n{% set fallback = (state_attr('sensor.koi_effective_temperature',
+          'source') | default('', true) | trim) == 'fallback_weather_estimate' %}\n\n{%
+          if temp < 50 %}\n  Koi feeding skipped, pond ({{ temp }}°F){% if fallback
+          %} estimated from weather{% endif %} is too cold.{% if fallback %} Pond
+          sensor may need attention.{% endif %}\n{% elif temp >= 85 %}\n  Koi feeding
+          skipped, pond ({{ temp }}°F){% if fallback %} estimated from weather{% endif
+          %} is too hot.{% if fallback %} Pond sensor may need attention.{% endif
+          %}\n{% elif temp >= 50 and temp <= 54 %}\n  Koi feeding skipped. Pond is
+          {{ temp }}°F{% if fallback %} estimated from weather{% endif %}. Feeding
           in {{ remaining }} day(s).{% if fallback %} Pond sensor may need attention.{%
-          endif %}\n  {% else %}\n    Koi feeding skipped due to unknown conditions.{%
-          if fallback %} Pond sensor may need attention.{% endif %}\n  {% endif %}"
+          endif %}\n{% else %}\n  Koi feeding skipped due to unknown conditions.{%
+          if fallback %} Pond sensor may need attention.{% endif %}\n{% endif %}"
         data:
           tag: koi
           image: /media/local/pond.jpg
           actions:
           - action: FEED_KOI_ANYWAY
             title: Feed Anyway
+  mode: single
+  max_exceeded: silent
 - id: '1778912766656'
   alias: Humidifier Refill Notification
   description: ''
@@ -6857,3 +6919,70 @@
           target:
             entity_id: media_player.kitchen
       auto_mode: parallel
+- id: '1782427447066'
+  alias: Bed Presence Sensors Unavailable
+  triggers:
+  - event: start
+    id: startup
+    trigger: homeassistant
+  - entity_id:
+    - binary_sensor.anthony_bed_presence
+    - binary_sensor.taylor_bed_presence
+    to: unavailable
+    for: 00:10:00
+    id: unavailable
+    trigger: state
+  - entity_id:
+    - binary_sensor.anthony_bed_presence
+    - binary_sensor.taylor_bed_presence
+    from: unavailable
+    id: resolved
+    trigger: state
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: startup
+      sequence:
+      - delay: 00:10:00
+      - condition: template
+        value_template: "{{ is_state('binary_sensor.anthony_bed_presence', 'unavailable')\n
+          \  or is_state('binary_sensor.taylor_bed_presence', 'unavailable') }}\n"
+      - data:
+          title: Bed presence sensor unavailable
+          message: "{% set sensors = expand(\n  'binary_sensor.anthony_bed_presence',\n
+            \ 'binary_sensor.taylor_bed_presence'\n) | selectattr('state', 'eq', 'unavailable')\n
+            \ | map(attribute='name') | list %}\n\n{{ sensors | join(', ') }} {{ 'has'
+            if sensors | count == 1 else 'have' }} been unavailable for 10 minutes.\n"
+          data:
+            tag: bed_presence_unavailable
+            group: bed_presence
+        action: notify.anthonys_devices
+    - conditions:
+      - condition: trigger
+        id: unavailable
+      sequence:
+      - data:
+          title: Bed presence sensor unavailable
+          message: "{% set sensors = expand(\n  'binary_sensor.anthony_bed_presence',\n
+            \ 'binary_sensor.taylor_bed_presence'\n) | selectattr('state', 'eq', 'unavailable')\n
+            \ | map(attribute='name') | list %}\n\n{{ sensors | join(', ') }} {{ 'has'
+            if sensors | count == 1 else 'have' }} been unavailable for 10 minutes.\n"
+          data:
+            tag: bed_presence_unavailable
+            group: bed_presence
+        action: notify.anthonys_devices
+    - conditions:
+      - condition: trigger
+        id: resolved
+      - condition: template
+        value_template: "{{ not is_state('binary_sensor.anthony_bed_presence', 'unavailable')\n
+          \  and not is_state('binary_sensor.taylor_bed_presence', 'unavailable')
+          }}\n"
+      sequence:
+      - data:
+          message: clear_notification
+          data:
+            tag: bed_presence_unavailable
+        action: notify.anthonys_devices
+  mode: restart
